@@ -17,5 +17,8 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "iconLibrary": "phosphor"
+  "iconLibrary": "phosphor",
+  "registries": {
+    "@shark": "https://shark.vini.one/r/{name}.json"
+  }
 }
