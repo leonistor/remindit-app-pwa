@@ -1,6 +1,18 @@
 {
   "version": 1,
   "skills": {
+    "nanostores": {
+      "source": "terminalskills/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nanostores/SKILL.md",
+      "computedHash": "02c2164a3215beebad6b3fb31f3c14a89226b734e3a30fcf087592d8a45d6e4d"
+    },
+    "phosphor-icons": {
+      "source": "lasaths/phosphor-icons",
+      "sourceType": "github",
+      "skillPath": "skills/phosphor-icons/SKILL.md",
+      "computedHash": "008d48e4e60d22332a76d898e492e08305af212401335dcdc7585db33f43e5bc"
+    },
     "rsbuild-best-practices": {
       "source": "rstackjs/agent-skills",
       "sourceType": "github",
@@ -12,6 +24,12 @@
       "sourceType": "github",
       "skillPath": "skills/rstest-best-practices/SKILL.md",
       "computedHash": "589016fc3deccd3244d40b113f897f2af83ef75022dff5cece7f90682c566e00"
+    },
+    "shark-ui": {
+      "source": "sharkui-inc/shark-ui",
+      "sourceType": "github",
+      "skillPath": "skills/shark-ui/SKILL.md",
+      "computedHash": "a64e44b218843413d9ef1ea1514dd0941e631defe04eedabf72f125f2e36a99f"
     },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",
