@@ -1,0 +1,36 @@
+{
+  "name": "remindit-app-pwa",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rsbuild build",
+    "check": "biome check --write",
+    "dev": "rsbuild",
+    "format": "biome format --write",
+    "preview": "rsbuild preview",
+    "test": "rstest",
+    "test:watch": "rstest --watch"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.3",
+    "@rsbuild/core": "^2.1.13",
+    "@rsbuild/plugin-react": "^2.1.0",
+    "@rsbuild/plugin-tailwindcss": "^2.0.3",
+    "@rstest/adapter-rsbuild": "^0.11.6",
+    "@rstest/core": "^0.11.6",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "happy-dom": "^20.11.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3"
+  }
+}
