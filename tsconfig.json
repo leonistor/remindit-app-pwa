@@ -1,23 +1,24 @@
 {
   "compilerOptions": {
-    "lib": ["DOM", "ES2020"],
-    "jsx": "react-jsx",
-    "target": "ES2020",
-    "noEmit": true,
-    "skipLibCheck": true,
-    "types": ["@rsbuild/core/types", "node"],
+    "target": "ES2022",
     "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "module": "ESNext",
+    "skipLibCheck": true,
 
-    /* modules */
-    "moduleDetection": "force",
+    /* Bundler mode */
     "moduleResolution": "bundler",
-    "verbatimModuleSyntax": true,
-    "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
 
-    /* type checking */
-    "noUnusedLocals": true,
-    "noUnusedParameters": true
+    /* Path Aliases */
+    // "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src"]
 }
