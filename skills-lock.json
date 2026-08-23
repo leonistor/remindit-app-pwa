@@ -25,6 +25,12 @@
       "skillPath": "skills/rstest-best-practices/SKILL.md",
       "computedHash": "589016fc3deccd3244d40b113f897f2af83ef75022dff5cece7f90682c566e00"
     },
+    "rstest-debugging": {
+      "source": "rstackjs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/rstest-debugging/SKILL.md",
+      "computedHash": "bec81411f39686af87897453929a4c050724ef50b9fa88222a40ec80cf5fd54f"
+    },
     "shark-ui": {
       "source": "sharkui-inc/shark-ui",
       "sourceType": "github",
