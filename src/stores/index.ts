@@ -2,7 +2,7 @@
 // run, assigns random user defaults, and (dev-only) attaches the logger.
 
 import { logger } from "@nanostores/logger"
-import seedRows from "../../docs/samples/items_categories.json"
+import seedRows from "../../seed/items_categories.json"
 import { $catalog } from "./catalog"
 import { $categories, ensureUncategorizedExists } from "./categories"
 import { $history } from "./history"

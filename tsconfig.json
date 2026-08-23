@@ -19,8 +19,10 @@
     /* Path Aliases */
     // "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "seed": ["./seed"],
+      "seed/*": ["./seed/*"]
     }
   },
-  "include": ["src", "src/styles"]
+  "include": ["src", "src/styles", "seed"]
 }

@@ -6,6 +6,11 @@
 //   same category/item IDs that `generateShoppingHistory` produced. This is
 //   deliberate: the app's own seeder (`src/stores/index.ts`) uses
 //   `crypto.randomUUID()`, which would make cross-store assertions flaky.
+// - The category/item id scheme and the sample rows now come from the shared
+//   `seed` loader (`seed/index.ts`): the duplicated FNV-1a `hashId` and the
+//   per-row `categoryIdFor`/`itemIdFor` helpers previously lived here and have
+//   been removed. `hashId` is byte-identical to the old local helper, so the
+//   generated ids are unchanged.
 // - Event generation is seeded (mulberry32), so a given {days, seed, count}
 //   always yields the same add/remove structure and ordering. Absolute
 //   timestamps are anchored to `Date.now()` (history is "the past N days"),
@@ -17,35 +22,11 @@ import type {
   HistoryAction,
   HistoryEvent,
 } from "@/stores/types"
-import rawSample from "../../docs/samples/items_categories.json"
+import { rawItems, categories, catalog, hashId, type RawSeedItem } from "seed"
 
 const DAY_MS = 86_400_000
 
-interface SampleRow {
-  category_name: string
-  name: string
-}
-
-const sampleItems = rawSample as SampleRow[]
-
-// FNV-1a 32-bit hash → zero-padded 8-char hex string. Stable across runs,
-// deterministic, and collision-resistant enough for fixture identifiers.
-function hashId(input: string): string {
-  let h = 0x811c9dc5
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i)
-    h = Math.imul(h, 0x01000193)
-  }
-  return (h >>> 0).toString(16).padStart(8, "0")
-}
-
-function categoryIdFor(row: SampleRow): string {
-  return hashId(`cat::${row.category_name}`)
-}
-
-function itemIdFor(row: SampleRow): string {
-  return hashId(`item::${row.category_name}::${row.name}`)
-}
+const sampleItems = rawItems as RawSeedItem[]
 
 interface ResolvedItem {
   itemId: string
@@ -53,11 +34,13 @@ interface ResolvedItem {
   categoryId: string
 }
 
-function resolveRow(row: SampleRow): ResolvedItem {
+// Map a raw seed row to its deterministic fixture ids using the shared
+// `hashId` from the seed loader (byte-identical to the old local helper).
+function resolveRow(row: RawSeedItem): ResolvedItem {
   return {
-    itemId: itemIdFor(row),
+    itemId: hashId(`item::${row.category_name}::${row.name}`),
     itemName: row.name,
-    categoryId: categoryIdFor(row),
+    categoryId: hashId(`cat::${row.category_name}`),
   }
 }
 
@@ -148,34 +131,17 @@ export const shoppingHistory3mo = generateShoppingHistory({
 
 export default shoppingHistory3mo
 
-// Builds a consistent {categories, catalog, history} trio from the sample JSON.
-// IDs match those used by `generateShoppingHistory`, so a test can populate the
-// stores with `buildSeedData()` and then assert against the same history.
+// Builds a consistent {categories, catalog, history} trio from the shared seed
+// loader. IDs match those used by `generateShoppingHistory`, so a test can
+// populate the stores with `buildSeedData()` and then assert against the same
+// history.
 export function buildSeedData(): {
   categories: Category[]
   catalog: CatalogItem[]
   history: HistoryEvent[]
 } {
-  const categoryById = new Map<string, Category>()
-  const catalog: CatalogItem[] = []
-
-  for (const row of sampleItems) {
-    const categoryId = categoryIdFor(row)
-    if (!categoryById.has(row.category_name)) {
-      categoryById.set(row.category_name, {
-        id: categoryId,
-        name: row.category_name,
-      })
-    }
-    catalog.push({
-      id: itemIdFor(row),
-      name: row.name,
-      categoryId,
-    })
-  }
-
   return {
-    categories: [...categoryById.values()],
+    categories,
     catalog,
     history: generateShoppingHistory({ days: 90, seed: 1 }),
   }

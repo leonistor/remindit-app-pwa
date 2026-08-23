@@ -37,7 +37,7 @@ Import everything from the barrel: `import { $list, addToList } from "@/stores"`
 
 ### Seeding
 
-On first run, `initStores()` (called automatically when `src/stores/index.ts` is imported) seeds `$categories` and `$catalog` from `docs/samples/items_categories.json` if the catalog is empty, and assigns a random `$user` if no name is set. Re-running is a no-op once populated.
+On first run, `initStores()` (called automatically when `src/stores/index.ts` is imported) seeds `$categories` and `$catalog` from `seed/items_categories.json` (relocated to the repo-root `seed/` directory; a typed, deterministic-id loader lives at `seed/index.ts`) if the catalog is empty, and assigns a random `$user` if no name is set. Re-running is a no-op once populated.
 
 ### Dev tooling
 
