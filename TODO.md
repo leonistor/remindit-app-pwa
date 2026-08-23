@@ -1,0 +1,4 @@
+# Tasks
+
+- [ ] PWA setup
+- [ ] License
