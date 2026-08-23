@@ -14,7 +14,7 @@ import {
 
 const GroupingListExample = () => (
   <Item className="w-full max-w-64 p-1" variant="outline">
-    <Listbox collection={collection}>
+    <Listbox collection={collection} selectionMode="multiple">
       <ListboxContent>
         {collection.group().map(([region, items]) => (
           <ListboxItemGroup key={region}>

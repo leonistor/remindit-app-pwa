@@ -1,14 +1,15 @@
 import { AppWindowIcon } from "@phosphor-icons/react"
 import { Separator } from "@/components/ui/separator"
 import { ThemeToggle } from "./components/theme-toggle"
-import GroupingListExample from "./examples/GroupingList"
+// import GroupingListExample from "./examples/GroupingList"
+import ResizableExample from "./examples/Resizable"
 
 const App = () => {
   return (
-    <div className="container mx-auto min-h-screen">
-      <div className="flex flex-col gap-4">
+    <div className="container mx-auto h-screen">
+      <div className="flex h-full w-full flex-col gap-4">
         {/*menu*/}
-        <div className="flex h-16 flex-1 flex-row items-center gap-1">
+        <div className="flex h-16 flex-row items-stretch gap-1 space-x-2 bg-accent py-2">
           <span>
             <AppWindowIcon size={32} />
           </span>
@@ -20,9 +21,8 @@ const App = () => {
           </span>
         </div>
         {/*content*/}
-        <div className="grow">
-          <p>Content here</p>
-          <GroupingListExample />
+        <div className="min-h-0 grow">
+          <ResizableExample />
         </div>
       </div>
     </div>
