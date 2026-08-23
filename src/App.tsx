@@ -1,12 +1,27 @@
-import { Button } from "@/components/ui/button"
+import { AppWindowIcon } from "@phosphor-icons/react"
+import { Separator } from "@/components/ui/separator"
+import { ModeToggle } from "./elements/theme/mode-toggle"
+import { ThemeProvider } from "./elements/theme/theme-provider"
+import GroupingListExample from "./examples/GroupingList"
+import TransferListExample from "./examples/TransferList"
 
 const App = () => {
   return (
-    <div className="">
-      <h1>Rsbuild with React</h1>
-      <p>Start building amazing things with Rsbuild.</p>
-      <Button>hello</Button>
-    </div>
+    <ThemeProvider defaultTheme="dark" storageKey="remindit-ui-theme">
+      <div className="container mx-auto min-h-screen">
+        <div className="flex flex-col gap-4">
+          <div className="h-16 flex-row gap-1">
+            <AppWindowIcon size={32} />
+            <Separator />
+            <ModeToggle />
+          </div>
+          <div className="flex-1">
+            <GroupingListExample />
+            <TransferListExample />
+          </div>
+        </div>
+      </div>
+    </ThemeProvider>
   )
 }
 

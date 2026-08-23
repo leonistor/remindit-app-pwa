@@ -22,10 +22,10 @@
       "type": "local",
       "command": ["crawlberg", "mcp"]
     },
-    "dembrandt": {
+    "ark-ui": {
       "enabled": true,
       "type": "local",
-      "command": ["bunx", "-y", "--package", "dembrandt", "dembrandt-mcp"]
+      "command": ["bunx", "-y", "@ark-ui/mcp"]
     }
   }
 }
