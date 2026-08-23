@@ -1,11 +1,12 @@
 // Component render test for ThemeToggle (src/components/theme-toggle).
 //
-// ThemeToggle is a controlled Ark UI ToggleGroup bound to `themeStore`. We only
-// assert it renders the three mode options (Light / Dark / System) and reflects
-// the store value when changed — using standard matchers only (no jest-dom).
+// ThemeToggle is now a single ghost icon button showing the active theme's
+// icon; clicking it cycles light -> dark -> system -> light through
+// `themeStore`. We assert it renders one button reflecting the store value and
+// that clicking advances the mode — using standard matchers only (no jest-dom).
 
 import { describe, expect, it, beforeEach, afterEach } from "@rstest/core"
-import { render, screen, cleanup } from "@testing-library/react"
+import { render, screen, cleanup, fireEvent } from "@testing-library/react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { themeStore, type ThemeMode } from "@/stores/theme"
 
@@ -21,22 +22,22 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe("ThemeToggle", () => {
-  it("renders the three mode options", () => {
-    render(<ThemeToggle />)
-
-    // getByLabelText throws if missing, so a returned node proves presence.
-    expect(screen.getByLabelText("Theme")).toBeDefined()
-    expect(screen.getByLabelText("Light")).toBeDefined()
-    expect(screen.getByLabelText("Dark")).toBeDefined()
-    expect(screen.getByLabelText("System")).toBeDefined()
-  })
-
-  it("reflects the active mode from the store", () => {
+  it("renders a single button reflecting the active theme", () => {
     setMode("dark")
     render(<ThemeToggle />)
 
-    // The active item is exposed via `data-state="on"` by Ark UI.
-    const dark = screen.getByLabelText("Dark")
-    expect(dark.getAttribute("data-state")).toBe("on")
+    const button = screen.getByRole("button", { name: /Theme/ })
+    expect(button).toBeDefined()
+    expect(button.getAttribute("aria-label")).toContain("Dark")
+  })
+
+  it("cycles to the next theme when clicked", () => {
+    setMode("light")
+    render(<ThemeToggle />)
+
+    const button = screen.getByRole("button", { name: /Theme/ })
+    fireEvent.click(button)
+
+    expect(themeStore.get()).toBe("dark")
   })
 })

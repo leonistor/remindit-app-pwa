@@ -7,35 +7,35 @@ import {
   MoonIcon,
   SunIcon,
 } from "@phosphor-icons/react"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { Button } from "@/components/ui/button"
 import { type ThemeMode, themeStore } from "@/stores/theme"
 
-const OPTIONS: { value: ThemeMode; label: string; Icon: Icon }[] = [
-  { value: "light", label: "Light", Icon: SunIcon },
-  { value: "dark", label: "Dark", Icon: MoonIcon },
-  { value: "system", label: "System", Icon: MonitorIcon },
-]
+const OPTIONS: Record<ThemeMode, { label: string; Icon: Icon }> = {
+  light: { label: "Light", Icon: SunIcon },
+  dark: { label: "Dark", Icon: MoonIcon },
+  system: { label: "System", Icon: MonitorIcon },
+}
+
+// Cycle order when clicking the toggle.
+const ORDER: ThemeMode[] = ["light", "dark", "system"]
 
 export function ThemeToggle() {
   const mode = useStore(themeStore)
+  const { label, Icon } = OPTIONS[mode]
+
+  const cycle = () => {
+    const next = ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length]
+    themeStore.set(next)
+  }
 
   return (
-    <ToggleGroup
-      multiple={false}
-      deselectable={false}
-      value={[mode]}
-      aria-label="Theme"
-      size="sm"
-      onValueChange={(details) => {
-        const next = details.value[0]
-        if (next) themeStore.set(next as ThemeMode)
-      }}
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      aria-label={`Theme: ${label}. Click to change.`}
+      onClick={cycle}
     >
-      {OPTIONS.map(({ value, label, Icon }) => (
-        <ToggleGroupItem key={value} value={value} aria-label={label}>
-          <Icon size={16} aria-hidden />
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
+      <Icon size={16} aria-hidden />
+    </Button>
   )
 }
