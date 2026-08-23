@@ -1,0 +1,91 @@
+/**
+ * Generate all PWA favicon assets using the `favicons` library.
+ *
+ * Design notes:
+ * - Two master sources: the normal icon (public/remindit-icon.svg) for standard
+ *   icons, and the maskable-safe icon (public/remindit-icon-maskable.svg) which
+ *   keeps the artwork inside the safe zone and has a full-bleed opaque background.
+ * - `manifestMaskable` makes favicons emit a second set of android-chrome PNGs
+ *   (purpose "maskable") alongside the standard set (purpose "any").
+ * - We intentionally DO NOT emit favicons' own manifest.webmanifest: rsbuild-plugin-pwa
+ *   generates dist/manifest.webmanifest from rsbuild.config.ts. If we also wrote one
+ *   into public/ it would be copied verbatim to dist/ and conflict with the
+ *   plugin-generated manifest. So we filter the manifest.webmanifest out of `files`.
+ * - The generated PNGs (and browserconfig.xml / yandex manifest) are written into
+ *   public/; rsbuild copies public/* to the dist root, so they become available at
+ *   `/<name>`.
+ * - The `html` array contains <link>/<meta> tags (minus the manifest link) which we
+ *   print so they can be pasted into public/index.html.
+ */
+import favicons from "favicons"
+import { mkdir, writeFile } from "node:fs/promises"
+import { join } from "node:path"
+
+const PUBLIC_DIR = "public"
+const NORMAL_SOURCE = "public/remindit-icon.svg"
+const MASKABLE_SOURCE = "public/remindit-icon-maskable.svg"
+
+const configuration = {
+  path: "/", // base path used in the generated html tags / manifest references
+  appName: "Remindit",
+  appShortName: "Remindit",
+  appDescription: "Local-first reminders that work offline.",
+  theme_color: "#863bff",
+  background: "#ffffff",
+  // Only run the platforms we actually need. android produces the 18 PNGs we put in
+  // the web manifest; appleIcon/windows/yandex produce icons referenced from HTML.
+  icons: {
+    android: true,
+    appleIcon: true,
+    appleStartup: false,
+    favicons: true,
+    windows: true,
+    yandex: true,
+  },
+  // Generate image files + html tags; files include manifest.webmanifest (skipped)
+  // and browserconfig.xml / yandex-browser-manifest.json (kept).
+  output: { images: true, files: true, html: true },
+  // Use the maskable-safe master for the maskable icon set.
+  manifestMaskable: MASKABLE_SOURCE,
+  // Avoid favicons trying to load an external manifest.
+  loadManifestWithCredentials: false,
+} as const
+
+async function main() {
+  const { images, files, html } = await favicons(NORMAL_SOURCE, configuration)
+
+  await mkdir(PUBLIC_DIR, { recursive: true })
+
+  // Write all generated raster images into public/.
+  for (const image of images) {
+    const out = join(PUBLIC_DIR, image.name)
+    await writeFile(out, image.contents)
+    console.log(`wrote image: ${out} (${image.contents.byteLength} bytes)`)
+  }
+
+  // Write files, but skip favicons' own manifest.webmanifest (rsbuild owns that).
+  for (const file of files) {
+    if (file.name === "manifest.webmanifest") {
+      console.log(`skipped file (rsbuild owns it): ${file.name}`)
+      continue
+    }
+    const out = join(PUBLIC_DIR, file.name)
+    await writeFile(out, file.contents)
+    console.log(`wrote file: ${out}`)
+  }
+
+  // Print the <link>/<meta> tags, dropping any manifest link so we don't double-declare.
+  const tags = html.filter((tag) => !/rel=["']manifest["']/.test(tag))
+  console.log(
+    "\n--- FAVICON HTML TAGS (paste into public/index.html <head>) ---"
+  )
+  for (const tag of tags) {
+    console.log(tag)
+  }
+  console.log("--- END FAVICON HTML TAGS ---")
+}
+
+main().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})

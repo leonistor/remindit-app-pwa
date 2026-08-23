@@ -48,6 +48,7 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
+    "favicons": "^7.3.1",
     "happy-dom": "^20.11.2",
     "qrcode": "^1.5.4",
     "rsbuild-plugin-pwa": "^2.10.0",
