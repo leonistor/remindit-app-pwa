@@ -42,6 +42,16 @@ function buildSeed(): { categories: Category[]; items: CatalogItem[] } {
 
   for (const row of rows) {
     const categoryName = row.category_name.trim()
+    // Items without a category go straight to the uncategorized sentinel; no
+    // empty-named category is ever created.
+    if (!categoryName) {
+      items.push({
+        id: crypto.randomUUID(),
+        name: row.name.trim(),
+        categoryId: UNCATEGORIZED_ID,
+      })
+      continue
+    }
     let categoryId = categoryIdByName.get(categoryName)
     if (!categoryId) {
       categoryId = crypto.randomUUID()

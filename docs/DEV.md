@@ -54,7 +54,19 @@ Each category carries a `frequency` (`CategoryFrequency`, exported from `types.t
 
 ### Seeding
 
-On first run, `initStores()` (called automatically when `src/stores/index.ts` is imported) seeds `$categories` and `$catalog` from `seed/items_categories.json` (relocated to the repo-root `seed/` directory; a typed, deterministic-id loader lives at `seed/index.ts`) if the catalog is empty, and assigns a random `$user` if no name is set. Re-running is a no-op once populated.
+On first run, `initStores()` (called automatically when `src/stores/index.ts` is imported) seeds `$categories` and `$catalog` from the **default** dataset (`DEFAULT_DATASET_ID` = `items_categories`) if the catalog is empty, and assigns a random `$user` if no name is set. Re-running is a no-op once populated.
+
+#### Seed datasets
+
+The repo-root `seed/` directory is a tracked, extensible registry of sample catalogs (`seed/index.ts`):
+
+- `DATASETS: DatasetMeta[]` — each entry is `{ id, name, file }` (stable key, human label, seed-relative filename).
+- `DEFAULT_DATASET_ID` — which dataset `initStores()` seeds from.
+- `getDataset(id)` — returns `{ rawItems, categories, catalog }` for any registered dataset.
+
+**Add a dataset:** drop its JSON into `seed/` and append a `DatasetMeta` to `DATASETS`. The loader normalizes it automatically (deterministic ids via the same FNV-1a scheme used by the history fixture).
+
+**Items without a category:** any row whose `category_name` is empty/whitespace is assigned to the `uncategorized` sentinel (`id: "uncategorized"`) and **no empty-named category is created** — consistent with how `removeCategory` already reassigns orphans to `uncategorized`. Curated `frequency` values live in `FREQUENCY_BY_CATEGORY` (English set only); other datasets fall back to `"unknown"`.
 
 ### Dev tooling
 
