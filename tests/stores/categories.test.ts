@@ -13,6 +13,7 @@ import {
   renameCategory,
   removeCategory,
 } from "@/stores/categories"
+import type { CategoryFrequency } from "@/stores/types"
 import { $catalog, addCatalogItem } from "@/stores/catalog"
 import { $history } from "@/stores/history"
 import { UNCATEGORIZED_ID } from "@/stores/types"
@@ -32,6 +33,25 @@ describe("categories store", () => {
     expect(category.id.length).toBeGreaterThan(0)
   })
 
+  test("addCategory defaults frequency to 'unknown' when omitted", () => {
+    const category = addCategory("Produce")
+    expect(category.frequency).toBe("unknown")
+  })
+
+  test.each<CategoryFrequency>([
+    "daily",
+    "every-2-3-days",
+    "weekly",
+    "every-2-weeks",
+    "monthly",
+    "every-3-months",
+    "seldom",
+    "unknown",
+  ])("addCategory honors an explicit frequency '%s'", (frequency) => {
+    const category = addCategory("Produce", frequency)
+    expect(category.frequency).toBe(frequency)
+  })
+
   test("renameCategory updates the category name", () => {
     const category = addCategory("Produce")
     renameCategory(category.id, "Vegetables")
@@ -42,7 +62,9 @@ describe("categories store", () => {
 
   test("renameCategory is a no-op for UNCATEGORIZED_ID", () => {
     // Seed the sentinel so the no-op is observable.
-    $categories.set([{ id: UNCATEGORIZED_ID, name: "Uncategorized" }])
+    $categories.set([
+      { id: UNCATEGORIZED_ID, name: "Uncategorized", frequency: "unknown" },
+    ])
 
     renameCategory(UNCATEGORIZED_ID, "Renamed")
 
@@ -72,8 +94,8 @@ describe("categories store", () => {
 
   test("removing UNCATEGORIZED_ID is a no-op (sentinel stays present)", () => {
     $categories.set([
-      { id: UNCATEGORIZED_ID, name: "Uncategorized" },
-      { id: "cat-produce", name: "Produce" },
+      { id: UNCATEGORIZED_ID, name: "Uncategorized", frequency: "unknown" },
+      { id: "cat-produce", name: "Produce", frequency: "unknown" },
     ])
 
     removeCategory(UNCATEGORIZED_ID)

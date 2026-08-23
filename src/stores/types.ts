@@ -2,9 +2,35 @@
 // Framework-agnostic: this module has no React/UI dependencies so the same
 // store layer can back a React, Vue, or vanilla front-end.
 
+// How often items in a category are typically purchased. Stored as a slug so it
+// is key/URL-safe and stable across the app and fixtures.
+export type CategoryFrequency =
+  | "daily"
+  | "every-2-3-days"
+  | "weekly"
+  | "every-2-weeks"
+  | "monthly"
+  | "every-3-months"
+  | "seldom"
+  | "unknown"
+
+// Ordered list of allowed frequencies (e.g. for building a picker or labels).
+export const CATEGORY_FREQUENCIES: readonly CategoryFrequency[] = [
+  "daily",
+  "every-2-3-days",
+  "weekly",
+  "every-2-weeks",
+  "monthly",
+  "every-3-months",
+  "seldom",
+  "unknown",
+] as const
+
 export interface Category {
   id: string
   name: string
+  /** How often items in this category are typically bought. */
+  frequency: CategoryFrequency
 }
 
 export interface CatalogItem {

@@ -34,6 +34,7 @@ const categoryNames = [...new Set(rawItems.map((row) => row.category_name))]
 export const categories: Category[] = categoryNames.map((name) => ({
   id: hashId(`cat::${name}`),
   name,
+  frequency: "unknown",
 }))
 
 // Precomputed map so every catalog row resolves its category id cheaply and to

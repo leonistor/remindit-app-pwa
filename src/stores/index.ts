@@ -4,7 +4,11 @@
 import { logger } from "@nanostores/logger"
 import seedRows from "../../seed/items_categories.json"
 import { $catalog } from "./catalog"
-import { $categories, ensureUncategorizedExists } from "./categories"
+import {
+  $categories,
+  ensureUncategorizedExists,
+  normalizeCategoryFrequencies,
+} from "./categories"
 import { $history } from "./history"
 import { $list } from "./list"
 import type { CatalogItem, Category } from "./types"
@@ -41,7 +45,11 @@ function buildSeed(): { categories: Category[]; items: CatalogItem[] } {
     if (!categoryId) {
       categoryId = crypto.randomUUID()
       categoryIdByName.set(categoryName, categoryId)
-      categories.push({ id: categoryId, name: categoryName })
+      categories.push({
+        id: categoryId,
+        name: categoryName,
+        frequency: "unknown",
+      })
     }
     items.push({
       id: crypto.randomUUID(),
@@ -60,13 +68,19 @@ export function initStores(): void {
     const { categories, items } = buildSeed()
     if ($categories.get().length === 0) {
       $categories.set([
-        { id: UNCATEGORIZED_ID, name: UNCATEGORIZED_NAME },
+        {
+          id: UNCATEGORIZED_ID,
+          name: UNCATEGORIZED_NAME,
+          frequency: "unknown",
+        },
         ...categories,
       ])
     }
     $catalog.set(items)
   }
   ensureUncategorizedExists()
+  // Backfill `frequency` onto any category persisted before this field existed.
+  normalizeCategoryFrequencies()
 
   const user = $user.get()
   if (!user.name) $user.set(randomUser())

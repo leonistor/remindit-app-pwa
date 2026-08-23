@@ -25,8 +25,8 @@ import { resetStores } from "../fixtures/reset"
 // whose `categoryId` decides which group it lands in.
 function seed(): void {
   $categories.set([
-    { id: "b", name: "B" },
-    { id: "a", name: "A" },
+    { id: "b", name: "B", frequency: "unknown" },
+    { id: "a", name: "A", frequency: "unknown" },
   ])
   $catalog.set([
     { id: "i1", name: "Item1", categoryId: "b" },

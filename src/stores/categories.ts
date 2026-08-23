@@ -4,8 +4,12 @@
 
 import { persistentJSON } from "@nanostores/persistent"
 import { $catalog } from "./catalog"
-import type { Category } from "./types"
-import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
+import type { Category, CategoryFrequency } from "./types"
+import {
+  CATEGORY_FREQUENCIES,
+  UNCATEGORIZED_ID,
+  UNCATEGORIZED_NAME,
+} from "./types"
 
 const $categories = persistentJSON<Category[]>("remindit:categories", [])
 
@@ -13,13 +17,33 @@ export function getCategory(id: string): Category | undefined {
   return $categories.get().find((c) => c.id === id)
 }
 
-export function addCategory(name: string): Category {
+export function addCategory(
+  name: string,
+  frequency: CategoryFrequency = "unknown"
+): Category {
   const category: Category = {
     id: crypto.randomUUID(),
     name: name.trim(),
+    frequency,
   }
   $categories.set([...$categories.get(), category])
   return category
+}
+
+// Backfills a valid `frequency` onto any category that is missing one or carries
+// a value outside `CATEGORY_FREQUENCIES` (e.g. data persisted before this field
+// existed). Safe to call repeatedly; only writes when something changed.
+export function normalizeCategoryFrequencies(): void {
+  const categories = $categories.get()
+  let changed = false
+  const next = categories.map((category) => {
+    if (!CATEGORY_FREQUENCIES.includes(category.frequency)) {
+      changed = true
+      return { ...category, frequency: "unknown" as CategoryFrequency }
+    }
+    return category
+  })
+  if (changed) $categories.set(next)
 }
 
 export function renameCategory(id: string, name: string): void {
@@ -49,7 +73,7 @@ export function ensureUncategorizedExists(): void {
   const exists = $categories.get().some((c) => c.id === UNCATEGORIZED_ID)
   if (!exists) {
     $categories.set([
-      { id: UNCATEGORIZED_ID, name: UNCATEGORIZED_NAME },
+      { id: UNCATEGORIZED_ID, name: UNCATEGORIZED_NAME, frequency: "unknown" },
       ...$categories.get(),
     ])
   }

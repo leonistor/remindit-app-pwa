@@ -10,7 +10,7 @@ All collections are persisted to `localStorage` with `@nanostores/persistent` (k
 
 - **Catalog** (`$catalog`) — the master pool of every known item `{ id, name, categoryId }`.
 - **List** (`$list`) — the currently active shopping list. Each entry `{ id, itemId, checked, addedAt }` references a catalog item and tracks a `checked` state for shopping progress.
-- **Categories** (`$categories`) — `{ id, name }`. An `uncategorized` sentinel category always exists and is the destination when another category is deleted (so items are never orphaned).
+- **Categories** (`$categories`) — `{ id, name, frequency }`. An `uncategorized` sentinel category always exists and is the destination when another category is deleted (so items are never orphaned). `frequency` records how often the category is typically bought (see below).
 - **History** (`$history`) — a pure log of shopping events `{ id, action: 'add' | 'remove', itemId, itemName, categoryId, timestamp }`.
 - **User** (`$user`) — `{ name, photo }`, assigned random defaults on first run.
 
@@ -34,6 +34,23 @@ Import everything from the barrel: `import { $list, addToList } from "@/stores"`
 - **History logs only `add`/`remove`-from-list.** `addToList` → `logHistory('add')`; `removeFromList` → `logHistory('remove')`. Editing or deleting catalog items and deleting/renaming categories deliberately **do not** write history — those callers simply never call `logHistory`.
 - **Deleting a catalog item** also drops any active list entries referencing it (cascade, no history).
 - **Deleting a category** reassigns its catalog items to `uncategorized` (no history, no orphans). The sentinel itself cannot be deleted or renamed.
+
+### Category frequency
+
+Each category carries a `frequency` (`CategoryFrequency`, exported from `types.ts`) describing how often its items are typically purchased. Allowed slugs:
+
+| Slug             | Meaning            |
+| ---------------- | ------------------ |
+| `daily`          | every day          |
+| `every-2-3-days` | every 2–3 days     |
+| `weekly`         | every week         |
+| `every-2-weeks`  | every 2 weeks      |
+| `monthly`        | every month        |
+| `every-3-months` | every 3 months     |
+| `seldom`         | rarely             |
+| `unknown`        | not yet classified |
+
+`addCategory(name, frequency?)` defaults to `"unknown"`. The sentinel and all sample-seeded categories start as `"unknown"`. `normalizeCategoryFrequencies()` (called by `initStores()`) backfills a valid `frequency` onto any category persisted before this field existed, so legacy `localStorage` data stays well-formed.
 
 ### Seeding
 
