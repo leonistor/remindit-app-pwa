@@ -49,6 +49,7 @@
     "@types/react-dom": "^19.2.4",
     "happy-dom": "^20.11.2",
     "qrcode": "^1.5.4",
+    "rsbuild-plugin-pwa": "^2.10.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3"
   }

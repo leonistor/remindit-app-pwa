@@ -1,6 +1,7 @@
 import { defineConfig } from "@rsbuild/core"
 import { pluginReact } from "@rsbuild/plugin-react"
 import { pluginTailwindcss } from "@rsbuild/plugin-tailwindcss"
+import { pluginPWA } from "rsbuild-plugin-pwa"
 import * as QRCode from "qrcode"
 
 export default defineConfig({
@@ -31,5 +32,32 @@ export default defineConfig({
       reactCompiler: true,
     }),
     pluginTailwindcss(),
+    pluginPWA({
+      webAppManifest: {
+        content: {
+          name: "Remindit",
+          short_name: "Remindit",
+          description: "Local-first reminders that work offline.",
+          theme_color: "#863bff",
+          background_color: "#ffffff",
+          display: "standalone",
+          start_url: "/",
+          icons: [
+            {
+              src: "/remindit-icon.svg",
+              sizes: "any",
+              type: "image/svg+xml",
+              purpose: "any",
+            },
+            {
+              src: "/remindit-icon-maskable.svg",
+              sizes: "any",
+              type: "image/svg+xml",
+              purpose: "maskable",
+            },
+          ],
+        },
+      },
+    }),
   ],
 })
