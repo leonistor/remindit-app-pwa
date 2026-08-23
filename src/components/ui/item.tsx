@@ -3,8 +3,8 @@
 import { ark } from "@ark-ui/react/factory"
 import type React from "react"
 import { tv, type VariantProps } from "tailwind-variants"
-import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 
 export const ItemGroup = (props: React.ComponentProps<typeof ark.div>) => {
   const { className, ...rest } = props

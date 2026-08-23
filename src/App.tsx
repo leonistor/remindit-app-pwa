@@ -1,6 +1,6 @@
 import Menu from "./components/menu"
 // import GroupingListExample from "./examples/GroupingList"
-import ResizableExample from "./examples/Resizable"
+import ShoppingPanels from "./components/shopping-panels"
 
 const App = () => {
   return (
@@ -10,7 +10,7 @@ const App = () => {
         <Menu />
         {/*content*/}
         <div className="min-h-0 grow">
-          <ResizableExample />
+          <ShoppingPanels />
         </div>
       </div>
     </div>

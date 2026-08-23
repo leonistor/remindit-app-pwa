@@ -5,10 +5,10 @@
 // `themeStore`. We assert it renders one button reflecting the store value and
 // that clicking advances the mode — using standard matchers only (no jest-dom).
 
-import { describe, expect, it, beforeEach, afterEach } from "@rstest/core"
-import { render, screen, cleanup, fireEvent } from "@testing-library/react"
+import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { themeStore, type ThemeMode } from "@/stores/theme"
+import { type ThemeMode, themeStore } from "@/stores/theme"
 
 const setMode = (mode: ThemeMode) => themeStore.set(mode)
 

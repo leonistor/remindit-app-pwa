@@ -4,8 +4,8 @@
 // tsconfig alias.
 
 import { describe, expect, test } from "@rstest/core"
-import { UNCATEGORIZED_ID } from "@/stores/types"
 import { DATASETS, DEFAULT_DATASET_ID, getDataset } from "seed"
+import { UNCATEGORIZED_ID } from "@/stores/types"
 
 describe("seed datasets", () => {
   test("registry tracks every dataset with id, name and file", () => {

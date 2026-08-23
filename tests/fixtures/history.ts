@@ -16,13 +16,13 @@
 //   timestamps are anchored to `Date.now()` (history is "the past N days"),
 //   but remain monotonically ascending and within the requested window.
 
+import { catalog, categories, hashId, type RawSeedItem, rawItems } from "seed"
 import type {
-  Category,
   CatalogItem,
+  Category,
   HistoryAction,
   HistoryEvent,
 } from "@/stores/types"
-import { rawItems, categories, catalog, hashId, type RawSeedItem } from "seed"
 
 const DAY_MS = 86_400_000
 

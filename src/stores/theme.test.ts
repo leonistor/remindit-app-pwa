@@ -9,8 +9,8 @@
 // unrelated side effects, and we avoid `vi` (it is neither a static export of
 // `@rstest/core` nor an auto-injected global in this project's config).
 
-import { describe, expect, it, beforeEach, afterEach } from "@rstest/core"
-import { themeStore, initTheme, type ThemeMode } from "@/stores/theme"
+import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
+import { initTheme, type ThemeMode, themeStore } from "@/stores/theme"
 
 // Controllable OS dark-mode flag read by the mocked matchMedia.
 let osPrefersDark = false

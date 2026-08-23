@@ -9,18 +9,18 @@
 // Strategy: assert history *counts and shapes* rather than exact random ids or
 // timestamps, since those are generated at runtime.
 
-import { describe, expect, test, beforeEach } from "@rstest/core"
+import { beforeEach, describe, expect, test } from "@rstest/core"
+import { $catalog, addCatalogItem } from "@/stores/catalog"
+import { $history } from "@/stores/history"
 import {
   $list,
   addToList,
-  removeFromList,
-  setEntryChecked,
   clearList,
   createItemAndAddToList,
+  removeFromList,
   removeListEntriesForItem,
+  setEntryChecked,
 } from "@/stores/list"
-import { $catalog, addCatalogItem } from "@/stores/catalog"
-import { $history } from "@/stores/history"
 import { resetStores } from "../fixtures/reset"
 
 describe("list store", () => {

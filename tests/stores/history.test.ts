@@ -6,8 +6,8 @@
 // happy-dom is configured globally, so `crypto.randomUUID()` and
 // `localStorage` are available without extra setup.
 
-import { describe, expect, test, beforeEach } from "@rstest/core"
-import { $history, logHistory, clearHistory } from "@/stores/history"
+import { beforeEach, describe, expect, test } from "@rstest/core"
+import { $history, clearHistory, logHistory } from "@/stores/history"
 import { resetStores } from "../fixtures/reset"
 
 describe("history store", () => {

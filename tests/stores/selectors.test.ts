@@ -7,8 +7,8 @@
 // are available without extra setup (see tests/stores/history.test.ts).
 
 import { beforeEach, describe, expect, test } from "@rstest/core"
-import { $categories } from "@/stores/categories"
 import { $catalog } from "@/stores/catalog"
+import { $categories } from "@/stores/categories"
 import { $list, addToList, setEntryChecked } from "@/stores/list"
 import {
   $activeCategoryIds,

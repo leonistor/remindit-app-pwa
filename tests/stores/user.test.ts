@@ -1,5 +1,5 @@
-import { describe, test, expect, beforeEach } from "@rstest/core"
-import { $user, updateUser, randomUser } from "@/stores/user"
+import { beforeEach, describe, expect, test } from "@rstest/core"
+import { $user, randomUser, updateUser } from "@/stores/user"
 import { resetStores } from "../fixtures/reset"
 
 describe("user store", () => {

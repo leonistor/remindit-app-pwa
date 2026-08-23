@@ -4,8 +4,8 @@ import { Listbox as ArkListbox, useListboxContext } from "@ark-ui/react/listbox"
 import { CheckIcon } from "lucide-react"
 import type React from "react"
 import { tv, type VariantProps } from "tailwind-variants"
-import { cn } from "@/lib/utils"
 import { MenuShortcut } from "@/components/ui/menu"
+import { cn } from "@/lib/utils"
 
 export const useListbox = useListboxContext
 

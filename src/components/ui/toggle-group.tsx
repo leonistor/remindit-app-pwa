@@ -6,8 +6,8 @@ import {
 } from "@ark-ui/react/toggle-group"
 import React from "react"
 import { tv } from "tailwind-variants"
-import { cn } from "@/lib/utils"
 import { Toggle, type ToggleProps } from "@/components/ui/toggle"
+import { cn } from "@/lib/utils"
 
 export const useToggleGroup = useArkToggleGroupContext
 

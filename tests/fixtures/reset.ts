@@ -16,11 +16,11 @@
 // Submodules are imported directly (NOT the `@/stores` barrel) because the
 // barrel runs `initStores` + a dev logger as a side effect.
 
-import type { User } from "@/stores/types"
 import { $catalog } from "@/stores/catalog"
 import { $categories } from "@/stores/categories"
 import { $history } from "@/stores/history"
 import { $list } from "@/stores/list"
+import type { User } from "@/stores/types"
 import { $user } from "@/stores/user"
 
 const DEFAULT_USER: User = { name: "", photo: "" }

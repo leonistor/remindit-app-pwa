@@ -1,17 +1,17 @@
-"use client";
+"use client"
 
-import { ark } from "@ark-ui/react/factory";
+import { ark } from "@ark-ui/react/factory"
 import {
   Field as ArkField,
   useFieldContext as useArkFieldContext,
-} from "@ark-ui/react/field";
-import { Fieldset as ArkFieldset } from "@ark-ui/react/fieldset";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
+} from "@ark-ui/react/field"
+import { Fieldset as ArkFieldset } from "@ark-ui/react/fieldset"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 
-export const useField = useArkFieldContext;
+export const useField = useArkFieldContext
 
 const fieldVariants = tv({
   base: [
@@ -50,7 +50,7 @@ const fieldVariants = tv({
     orientation: "vertical",
     reverse: false,
   },
-});
+})
 
 interface FieldProps
   extends React.ComponentProps<typeof ArkField.Root>,
@@ -62,7 +62,7 @@ export const Field = (props: FieldProps) => {
     reverse = false,
     className,
     ...rest
-  } = props;
+  } = props
 
   return (
     <ArkField.Root
@@ -71,13 +71,13 @@ export const Field = (props: FieldProps) => {
       data-slot="field"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const FieldSet = (
   props: React.ComponentProps<typeof ArkFieldset.Root>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkFieldset.Root
@@ -89,19 +89,19 @@ export const FieldSet = (
       data-slot="field-set"
       {...rest}
     />
-  );
-};
+  )
+}
 
 interface FieldLegendProps
   extends React.ComponentProps<typeof ArkFieldset.Legend> {
   /**
    * The variant of the legend.
    */
-  variant?: "legend" | "label";
+  variant?: "legend" | "label"
 }
 
 export const FieldLegend = (props: FieldLegendProps) => {
-  const { variant = "legend", className, ...rest } = props;
+  const { variant = "legend", className, ...rest } = props
 
   return (
     <ArkFieldset.Legend
@@ -115,11 +115,11 @@ export const FieldLegend = (props: FieldLegendProps) => {
       data-variant={variant}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const FieldGroup = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -133,11 +133,11 @@ export const FieldGroup = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="field-group"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const FieldContent = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -150,13 +150,13 @@ export const FieldContent = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="field-content"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const FieldLabel = (
   props: React.ComponentProps<typeof ArkField.Label>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkField.Label
@@ -173,13 +173,13 @@ export const FieldLabel = (
       data-slot="field-label"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const FieldRequiredIndicator = (
   props: React.ComponentProps<typeof ark.span>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkField.RequiredIndicator
@@ -194,11 +194,11 @@ export const FieldRequiredIndicator = (
     >
       {children ?? "*"}
     </ArkField.RequiredIndicator>
-  );
-};
+  )
+}
 
 export const FieldTitle = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -212,11 +212,11 @@ export const FieldTitle = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="field-title"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const FieldDescription = (props: React.ComponentProps<typeof ark.p>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.p
@@ -233,11 +233,11 @@ export const FieldDescription = (props: React.ComponentProps<typeof ark.p>) => {
       data-slot="field-description"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const FieldSeparator = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ark.div
@@ -268,13 +268,13 @@ export const FieldSeparator = (props: React.ComponentProps<typeof ark.div>) => {
         </span>
       )}
     </ark.div>
-  );
-};
+  )
+}
 
 export const FieldHelper = (
   props: React.ComponentProps<typeof ArkField.HelperText>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkField.HelperText
@@ -282,13 +282,13 @@ export const FieldHelper = (
       data-slot="field-helper"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const FieldError = (
   props: React.ComponentProps<typeof ArkField.ErrorText>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkField.ErrorText
@@ -300,5 +300,5 @@ export const FieldError = (
       data-slot="field-error"
       {...rest}
     />
-  );
-};
+  )
+}

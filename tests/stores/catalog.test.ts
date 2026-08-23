@@ -6,17 +6,17 @@
 // happy-dom is configured globally, so `crypto.randomUUID()` and `localStorage`
 // are available without extra setup.
 
-import { describe, expect, test, beforeEach } from "@rstest/core"
+import { beforeEach, describe, expect, test } from "@rstest/core"
 import {
   $catalog,
   addCatalogItem,
-  updateCatalogItem,
   removeCatalogItem,
+  updateCatalogItem,
 } from "@/stores/catalog"
-import { $list, removeListEntriesForItem } from "@/stores/list"
 import { $history } from "@/stores/history"
-import { resetStores } from "../fixtures/reset"
+import { $list, removeListEntriesForItem } from "@/stores/list"
 import type { HistoryEvent } from "@/stores/types"
+import { resetStores } from "../fixtures/reset"
 
 describe("catalog store", () => {
   beforeEach(resetStores)

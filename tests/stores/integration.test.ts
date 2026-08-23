@@ -11,8 +11,8 @@
 // deterministic IDs that line up with `shoppingHistory3mo`.
 
 import { beforeEach, describe, expect, test } from "@rstest/core"
-import { $categories } from "@/stores/categories"
 import { $catalog } from "@/stores/catalog"
+import { $categories } from "@/stores/categories"
 // `$history` is owned by the history store; `addToList` / `removeFromList` and
 // `$list` live in list.ts. `$list` is needed to recover the entry id created by
 // `addToList` for the removal step.

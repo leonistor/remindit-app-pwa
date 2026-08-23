@@ -1,8 +1,8 @@
 import { defineConfig } from "@rsbuild/core"
 import { pluginReact } from "@rsbuild/plugin-react"
 import { pluginTailwindcss } from "@rsbuild/plugin-tailwindcss"
-import { pluginPWA } from "rsbuild-plugin-pwa"
 import * as QRCode from "qrcode"
+import { pluginPWA } from "rsbuild-plugin-pwa"
 
 export default defineConfig({
   html: {

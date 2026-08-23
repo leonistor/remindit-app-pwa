@@ -17,9 +17,10 @@
  * - The `html` array contains <link>/<meta> tags (minus the manifest link) which we
  *   print so they can be pasted into public/index.html.
  */
-import favicons from "favicons"
+
 import { mkdir, writeFile } from "node:fs/promises"
 import { join } from "node:path"
+import favicons from "favicons"
 
 const PUBLIC_DIR = "public"
 const NORMAL_SOURCE = "public/remindit-icon.svg"

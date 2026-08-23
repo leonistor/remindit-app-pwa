@@ -1,19 +1,19 @@
-"use client";
+"use client"
 
 import {
   Splitter as ArkSplitter,
   useSplitterContext,
-} from "@ark-ui/react/splitter";
-import { GripVertical } from "lucide-react";
-import type React from "react";
-import { cn } from "@/lib/utils";
+} from "@ark-ui/react/splitter"
+import { GripVertical } from "lucide-react"
+import type React from "react"
+import { cn } from "@/lib/utils"
 
-export const useResizable = useSplitterContext;
+export const useResizable = useSplitterContext
 
 export const Resizable = (
   props: React.ComponentProps<typeof ArkSplitter.Root>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkSplitter.Root
@@ -21,12 +21,12 @@ export const Resizable = (
       data-slot="resizable"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ResizablePanel = (
   props: React.ComponentProps<typeof ArkSplitter.Panel>
-) => <ArkSplitter.Panel data-slot="resizable-panel" {...props} />;
+) => <ArkSplitter.Panel data-slot="resizable-panel" {...props} />
 
 interface ResizableResizeTriggerProps
   extends React.ComponentProps<typeof ArkSplitter.ResizeTrigger> {
@@ -35,11 +35,11 @@ interface ResizableResizeTriggerProps
    *
    * @default false
    */
-  withHandle?: boolean;
+  withHandle?: boolean
 }
 
 export const ResizableResizeTrigger = (props: ResizableResizeTriggerProps) => {
-  const { withHandle = false, className, ...rest } = props;
+  const { withHandle = false, className, ...rest } = props
 
   return (
     <ArkSplitter.ResizeTrigger
@@ -73,5 +73,5 @@ export const ResizableResizeTrigger = (props: ResizableResizeTriggerProps) => {
         </div>
       )}
     </ArkSplitter.ResizeTrigger>
-  );
-};
+  )
+}
