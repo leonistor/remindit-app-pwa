@@ -3,6 +3,7 @@ import {
   ResizablePanel,
   ResizableResizeTrigger,
 } from "@/components/ui/resizable"
+import AllItemsExample from "./AllItemsExample"
 
 const ResizableExample = () => (
   <Resizable
@@ -12,13 +13,13 @@ const ResizableExample = () => (
     panels={[{ id: "selected", minSize: 25, maxSize: 40 }, { id: "all" }]}
   >
     <ResizablePanel className="flex items-center justify-center" id="selected">
-      Selected items
+      <AllItemsExample title="Selected items" />
     </ResizablePanel>
 
     <ResizableResizeTrigger id="selected:all" withHandle />
 
     <ResizablePanel className="flex items-center justify-center" id="all">
-      All items
+      <AllItemsExample title="All items" />
     </ResizablePanel>
   </Resizable>
 )
