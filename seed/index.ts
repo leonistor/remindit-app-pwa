@@ -6,7 +6,7 @@
 // fixtures and the app share stable, reproducible identifiers — existing tests
 // keep producing the same category/item ids.
 
-import type { CatalogItem, Category } from "@/stores/types"
+import type { CatalogItem, Category, CategoryFrequency } from "@/stores/types"
 import rawSample from "./items_categories.json"
 
 export interface RawSeedItem {
@@ -15,6 +15,18 @@ export interface RawSeedItem {
 }
 
 export const rawItems: RawSeedItem[] = rawSample as RawSeedItem[]
+
+// Per-category purchase frequency for the sample catalog. Single source of truth
+// shared with the app seeder (`src/stores/index.ts`). Unknown categories fall
+// back to "unknown".
+export const FREQUENCY_BY_CATEGORY: Record<string, CategoryFrequency> = {
+  household: "monthly",
+  snacks: "every-2-weeks",
+  cooking: "weekly",
+  pantry: "monthly",
+  fridge: "weekly",
+  cleaning: "every-3-months",
+}
 
 // FNV-1a 32-bit hash → zero-padded 8-char hex string. Copied verbatim from
 // `tests/fixtures/history.ts` so existing test ids stay reproducible.
@@ -34,7 +46,7 @@ const categoryNames = [...new Set(rawItems.map((row) => row.category_name))]
 export const categories: Category[] = categoryNames.map((name) => ({
   id: hashId(`cat::${name}`),
   name,
-  frequency: "unknown",
+  frequency: FREQUENCY_BY_CATEGORY[name] ?? "unknown",
 }))
 
 // Precomputed map so every catalog row resolves its category id cheaply and to

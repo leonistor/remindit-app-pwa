@@ -3,6 +3,7 @@
 
 import { logger } from "@nanostores/logger"
 import seedRows from "../../seed/items_categories.json"
+import { FREQUENCY_BY_CATEGORY } from "../../seed"
 import { $catalog } from "./catalog"
 import {
   $categories,
@@ -48,7 +49,7 @@ function buildSeed(): { categories: Category[]; items: CatalogItem[] } {
       categories.push({
         id: categoryId,
         name: categoryName,
-        frequency: "unknown",
+        frequency: FREQUENCY_BY_CATEGORY[categoryName] ?? "unknown",
       })
     }
     items.push({
