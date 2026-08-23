@@ -1,15 +1,15 @@
-"use client";
+"use client"
 
 import {
   ToggleGroup as ArkToggleGroup,
   useToggleGroupContext as useArkToggleGroupContext,
-} from "@ark-ui/react/toggle-group";
-import React from "react";
-import { tv } from "tailwind-variants";
-import { cn } from "@/lib/utils";
-import { Toggle, type ToggleProps } from "@/components/ui/toggle";
+} from "@ark-ui/react/toggle-group"
+import React from "react"
+import { tv } from "tailwind-variants"
+import { cn } from "@/lib/utils"
+import { Toggle, type ToggleProps } from "@/components/ui/toggle"
 
-export const useToggleGroup = useArkToggleGroupContext;
+export const useToggleGroup = useArkToggleGroupContext
 
 type ToggleGroupContextProps = Pick<ToggleProps, "variant" | "size"> & {
   /**
@@ -17,10 +17,10 @@ type ToggleGroupContextProps = Pick<ToggleProps, "variant" | "size"> & {
    *
    * @default 0
    */
-  spacing?: number;
-};
+  spacing?: number
+}
 
-const ToggleGroupContext = React.createContext({} as ToggleGroupContextProps);
+const ToggleGroupContext = React.createContext({} as ToggleGroupContextProps)
 
 interface ToggleGroupProps
   extends React.ComponentProps<typeof ArkToggleGroup.Root>,
@@ -41,7 +41,7 @@ const toggleGroupVariants = tv({
   defaultVariants: {
     orientation: "horizontal",
   },
-});
+})
 
 export const ToggleGroup = (props: ToggleGroupProps) => {
   const {
@@ -53,7 +53,7 @@ export const ToggleGroup = (props: ToggleGroupProps) => {
     className,
     style,
     ...rest
-  } = props;
+  } = props
 
   return (
     <ToggleGroupContext.Provider value={{ variant, size, spacing }}>
@@ -71,40 +71,55 @@ export const ToggleGroup = (props: ToggleGroupProps) => {
         {...rest}
       />
     </ToggleGroupContext.Provider>
-  );
-};
+  )
+}
 
 interface ToggleGroupItemProps
   extends React.ComponentProps<typeof ArkToggleGroup.Item> {}
 
 export const ToggleGroupItem = (props: ToggleGroupItemProps) => {
-  const { value, className, ...rest } = props;
+  const { value, className, children, ...rest } = props
 
-  const { variant, size, spacing } = _useToggleGroup();
+  const { variant, size, spacing } = _useToggleGroup()
 
   return (
-    <ArkToggleGroup.Item data-slot="toggle-group-item" value={value} render={<Toggle className={cn(
-                "shrink-0 focus:z-10 focus-visible:z-10",
-                "data-[spacing=0]:rounded-none",
-                "data-[spacing=0]:px-2",
-                "data-[orientation=horizontal]:data-[spacing=0]:first:rounded-l-lg",
-                "data-[orientation=vertical]:data-[spacing=0]:first:rounded-t-lg",
-                "data-[orientation=horizontal]:data-[spacing=0]:last:rounded-r-lg",
-                "data-[orientation=vertical]:data-[spacing=0]:last:rounded-b-lg",
-                "data-[orientation=horizontal]:data-[spacing=0]:data-[variant=outline]:border-l-0",
-                "data-[orientation=vertical]:data-[spacing=0]:data-[variant=outline]:border-t-0",
-                "data-[orientation=horizontal]:data-[spacing=0]:data-[variant=outline]:first:border-l",
-                className
-              )} data-spacing={spacing} data-variant={variant} size={size} variant={variant} {...rest} />}></ArkToggleGroup.Item>
-  );
-};
+    <ArkToggleGroup.Item
+      data-slot="toggle-group-item"
+      value={value}
+      asChild
+      {...rest}
+    >
+      <Toggle
+        className={cn(
+          "shrink-0 focus:z-10 focus-visible:z-10",
+          "data-[spacing=0]:rounded-none",
+          "data-[spacing=0]:px-2",
+          "data-[orientation=horizontal]:data-[spacing=0]:first:rounded-l-lg",
+          "data-[orientation=vertical]:data-[spacing=0]:first:rounded-t-lg",
+          "data-[orientation=horizontal]:data-[spacing=0]:last:rounded-r-lg",
+          "data-[orientation=vertical]:data-[spacing=0]:last:rounded-b-lg",
+          "data-[orientation=horizontal]:data-[spacing=0]:data-[variant=outline]:border-l-0",
+          "data-[orientation=vertical]:data-[spacing=0]:data-[variant=outline]:border-t-0",
+          "data-[orientation=horizontal]:data-[spacing=0]:data-[variant=outline]:first:border-l",
+          className
+        )}
+        data-spacing={spacing}
+        data-variant={variant}
+        size={size}
+        variant={variant}
+      >
+        {children}
+      </Toggle>
+    </ArkToggleGroup.Item>
+  )
+}
 
 const _useToggleGroup = () => {
-  const context = React.useContext(ToggleGroupContext);
+  const context = React.useContext(ToggleGroupContext)
 
   if (!context) {
-    throw new Error("useToggleGroupContext must be used within a ToggleGroup");
+    throw new Error("useToggleGroupContext must be used within a ToggleGroup")
   }
 
-  return context;
-};
+  return context
+}

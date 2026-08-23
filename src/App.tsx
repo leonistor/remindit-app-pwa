@@ -10,7 +10,7 @@ const App = () => {
     <ThemeProvider defaultTheme="dark" storageKey="remindit-ui-theme">
       <div className="container mx-auto min-h-screen">
         <div className="flex flex-col gap-4">
-          <div className="h-16 flex-row gap-1">
+          <div className="flex h-16 flex-row items-center gap-1">
             <AppWindowIcon size={32} />
             <Separator />
             <ModeToggle />
