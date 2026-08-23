@@ -1,13 +1,13 @@
-"use client";
+"use client"
 
-import { ark } from "@ark-ui/react/factory";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
+import { ark } from "@ark-ui/react/factory"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { cn } from "@/lib/utils"
+import { Separator } from "@/components/ui/separator"
 
 export const ItemGroup = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -20,13 +20,13 @@ export const ItemGroup = (props: React.ComponentProps<typeof ark.div>) => {
       role="list"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ItemSeparator = (
   props: React.ComponentProps<typeof Separator>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <Separator
@@ -35,8 +35,8 @@ export const ItemSeparator = (
       orientation="horizontal"
       {...rest}
     />
-  );
-};
+  )
+}
 
 const itemVariants = tv({
   base: [
@@ -62,14 +62,14 @@ const itemVariants = tv({
   defaultVariants: {
     variant: "default",
   },
-});
+})
 
 interface ItemProps
   extends React.ComponentProps<typeof ark.div>,
     VariantProps<typeof itemVariants> {}
 
 export const Item = (props: ItemProps) => {
-  const { variant = "default", className, ...rest } = props;
+  const { variant = "default", className, ...rest } = props
 
   return (
     <ark.div
@@ -78,8 +78,8 @@ export const Item = (props: ItemProps) => {
       data-variant={variant}
       {...rest}
     />
-  );
-};
+  )
+}
 
 const itemMediaVariants = tv({
   base: [
@@ -102,14 +102,14 @@ const itemMediaVariants = tv({
   defaultVariants: {
     variant: "default",
   },
-});
+})
 
 interface ItemMediaProps
   extends React.ComponentProps<typeof ark.div>,
     VariantProps<typeof itemMediaVariants> {}
 
 export const ItemMedia = (props: ItemMediaProps) => {
-  const { variant = "default", className, ...rest } = props;
+  const { variant = "default", className, ...rest } = props
 
   return (
     <ark.div
@@ -118,11 +118,11 @@ export const ItemMedia = (props: ItemMediaProps) => {
       data-variant={variant}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ItemContent = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -134,11 +134,11 @@ export const ItemContent = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="item-content"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ItemTitle = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -152,11 +152,11 @@ export const ItemTitle = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="item-title"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ItemDescription = (props: React.ComponentProps<typeof ark.p>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.p
@@ -169,11 +169,11 @@ export const ItemDescription = (props: React.ComponentProps<typeof ark.p>) => {
       data-slot="item-description"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ItemActions = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -181,11 +181,11 @@ export const ItemActions = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="item-actions"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ItemHeader = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -197,11 +197,11 @@ export const ItemHeader = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="item-header"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ItemFooter = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -212,5 +212,5 @@ export const ItemFooter = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="item-footer"
       {...rest}
     />
-  );
-};
+  )
+}

@@ -1,19 +1,16 @@
-"use client";
+"use client"
 
-import {
-  Listbox as ArkListbox,
-  useListboxContext,
-} from "@ark-ui/react/listbox";
-import { CheckIcon } from "lucide-react";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
-import { MenuShortcut } from "@/components/ui/menu";
+import { Listbox as ArkListbox, useListboxContext } from "@ark-ui/react/listbox"
+import { CheckIcon } from "lucide-react"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { cn } from "@/lib/utils"
+import { MenuShortcut } from "@/components/ui/menu"
 
-export const useListbox = useListboxContext;
+export const useListbox = useListboxContext
 
 export const Listbox: ArkListbox.RootComponent = (props) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkListbox.Root
@@ -26,13 +23,13 @@ export const Listbox: ArkListbox.RootComponent = (props) => {
       data-slot="listbox"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ListboxContent = (
   props: React.ComponentProps<typeof ArkListbox.Content>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkListbox.Content
@@ -47,8 +44,8 @@ export const ListboxContent = (
       data-slot="listbox-content"
       {...rest}
     />
-  );
-};
+  )
+}
 
 const listboxItemVariants = tv({
   base: [
@@ -82,14 +79,14 @@ const listboxItemVariants = tv({
   defaultVariants: {
     variant: "default",
   },
-});
+})
 
 interface ListboxItemProps
   extends React.ComponentProps<typeof ArkListbox.Item>,
     VariantProps<typeof listboxItemVariants> {}
 
 export const ListboxItem = (props: ListboxItemProps) => {
-  const { variant = "default", className, ...rest } = props;
+  const { variant = "default", className, ...rest } = props
 
   return (
     <ArkListbox.Item
@@ -98,13 +95,13 @@ export const ListboxItem = (props: ListboxItemProps) => {
       data-variant={variant}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ListboxItemText = (
   props: React.ComponentProps<typeof ArkListbox.ItemText>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkListbox.ItemText
@@ -118,19 +115,19 @@ export const ListboxItemText = (
       data-slot="listbox-item-text"
       {...rest}
     />
-  );
-};
+  )
+}
 
 interface ListboxItemGroupProps
   extends React.ComponentProps<typeof ArkListbox.ItemGroup> {
   /**
    * The heading of the listbox item group.
    */
-  heading?: string;
+  heading?: string
 }
 
 export const ListboxItemGroup = (props: ListboxItemGroupProps) => {
-  const { heading, className, children, ...rest } = props;
+  const { heading, className, children, ...rest } = props
 
   return (
     <ArkListbox.ItemGroup
@@ -141,13 +138,13 @@ export const ListboxItemGroup = (props: ListboxItemGroupProps) => {
       {!!heading && <ListboxItemGroupLabel>{heading}</ListboxItemGroupLabel>}
       {children}
     </ArkListbox.ItemGroup>
-  );
-};
+  )
+}
 
 export const ListboxItemGroupLabel = (
   props: React.ComponentProps<typeof ArkListbox.ItemGroupLabel>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
   return (
     <ArkListbox.ItemGroupLabel
       className={cn(
@@ -159,13 +156,13 @@ export const ListboxItemGroupLabel = (
       data-slot="listbox-item-group-label"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ListboxValueText = (
   props: React.ComponentProps<typeof ArkListbox.ValueText>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkListbox.ValueText
@@ -173,13 +170,13 @@ export const ListboxValueText = (
       data-slot="listbox-value-text"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ListboxItemIndicator = (
   props: React.ComponentProps<typeof ArkListbox.ItemIndicator>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkListbox.ItemIndicator
@@ -195,13 +192,13 @@ export const ListboxItemIndicator = (
     >
       {children ?? <CheckIcon />}
     </ArkListbox.ItemIndicator>
-  );
-};
+  )
+}
 
 export const ListboxEmpty = (
   props: React.ComponentProps<typeof ArkListbox.Empty>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkListbox.Empty
@@ -213,9 +210,9 @@ export const ListboxEmpty = (
       data-slot="listbox-empty"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ListboxShortcut = (
   props: React.ComponentProps<typeof MenuShortcut>
-) => <MenuShortcut data-slot="listbox-shortcut" {...props} />;
+) => <MenuShortcut data-slot="listbox-shortcut" {...props} />

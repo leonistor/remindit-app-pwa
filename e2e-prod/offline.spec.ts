@@ -1,10 +1,10 @@
-import { test, expect, type Page } from "@playwright/test"
+import { expect, type Page, test } from "@playwright/test"
 
 async function waitForControllingServiceWorker(page: Page) {
   await page.waitForFunction(async () => {
     if (!("serviceWorker" in navigator)) return false
     const reg = await navigator.serviceWorker.getRegistration()
-    if (!reg || !reg.active) return false
+    if (!reg?.active) return false
     return navigator.serviceWorker.controller !== null
   })
 }

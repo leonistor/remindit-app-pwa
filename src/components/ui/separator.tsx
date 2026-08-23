@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { ark } from "@ark-ui/react/factory";
-import { cn } from "@/lib/utils";
+import { ark } from "@ark-ui/react/factory"
+import { cn } from "@/lib/utils"
 
 interface SeparatorProps extends React.ComponentProps<typeof ark.div> {
   /**
@@ -9,11 +9,11 @@ interface SeparatorProps extends React.ComponentProps<typeof ark.div> {
    *
    * @default "horizontal"
    */
-  orientation?: "horizontal" | "vertical";
+  orientation?: "horizontal" | "vertical"
 }
 
 export const Separator = (props: SeparatorProps) => {
-  const { orientation = "horizontal", className, ...rest } = props;
+  const { orientation = "horizontal", className, ...rest } = props
 
   return (
     <ark.div
@@ -30,5 +30,5 @@ export const Separator = (props: SeparatorProps) => {
       role="separator"
       {...rest}
     />
-  );
-};
+  )
+}

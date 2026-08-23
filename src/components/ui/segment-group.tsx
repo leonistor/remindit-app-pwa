@@ -1,15 +1,15 @@
-"use client";
+"use client"
 
 import {
   SegmentGroup as ArkSegmentGroup,
   useSegmentGroupContext,
-} from "@ark-ui/react/segment-group";
-import type React from "react";
-import { cn } from "@/lib/utils";
+} from "@ark-ui/react/segment-group"
+import type React from "react"
+import { cn } from "@/lib/utils"
 
-export const useSegmentGroup = useSegmentGroupContext;
+export const useSegmentGroup = useSegmentGroupContext
 
-type SegmentGroupVariant = "default" | "underline";
+type SegmentGroupVariant = "default" | "underline"
 
 interface SegmentGroupProps
   extends React.ComponentProps<typeof ArkSegmentGroup.Root> {
@@ -18,7 +18,7 @@ interface SegmentGroupProps
    *
    * @default "default"
    */
-  variant?: SegmentGroupVariant;
+  variant?: SegmentGroupVariant
 }
 
 export const SegmentGroup = (props: SegmentGroupProps) => {
@@ -28,7 +28,7 @@ export const SegmentGroup = (props: SegmentGroupProps) => {
     className,
     children,
     ...rest
-  } = props;
+  } = props
 
   return (
     <ArkSegmentGroup.Root
@@ -52,13 +52,13 @@ export const SegmentGroup = (props: SegmentGroupProps) => {
 
       {children}
     </ArkSegmentGroup.Root>
-  );
-};
+  )
+}
 
 export const SegmentGroupItem = (
   props: React.ComponentProps<typeof ArkSegmentGroup.Item>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkSegmentGroup.Item
@@ -79,13 +79,13 @@ export const SegmentGroupItem = (
       <ArkSegmentGroup.ItemControl />
       <ArkSegmentGroup.ItemHiddenInput />
     </ArkSegmentGroup.Item>
-  );
-};
+  )
+}
 
 export const SegmentGroupItemText = (
   props: React.ComponentProps<typeof ArkSegmentGroup.ItemText>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkSegmentGroup.ItemText
@@ -93,13 +93,13 @@ export const SegmentGroupItemText = (
       data-slot="segment-group-item-text"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const SegmentGroupIndicator = (
   props: React.ComponentProps<typeof ArkSegmentGroup.Indicator>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkSegmentGroup.Indicator
@@ -122,5 +122,5 @@ export const SegmentGroupIndicator = (
       data-slot="segment-group-indicator"
       {...rest}
     />
-  );
-};
+  )
+}

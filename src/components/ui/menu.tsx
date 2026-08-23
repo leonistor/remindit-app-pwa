@@ -1,18 +1,18 @@
-"use client";
+"use client"
 
-import { Portal } from "@ark-ui/react";
-import { ark } from "@ark-ui/react/factory";
+import { Portal } from "@ark-ui/react"
+import { ark } from "@ark-ui/react/factory"
 import {
   Menu as ArkMenu,
   type MenuContentProps,
   useMenuContext,
-} from "@ark-ui/react/menu";
-import { CheckIcon, ChevronRight } from "lucide-react";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
+} from "@ark-ui/react/menu"
+import { CheckIcon, ChevronRight } from "lucide-react"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { cn } from "@/lib/utils"
 
-export const useMenu = useMenuContext;
+export const useMenu = useMenuContext
 
 export const Menu = (props: React.ComponentProps<typeof ArkMenu.Root>) => {
   const {
@@ -20,7 +20,7 @@ export const Menu = (props: React.ComponentProps<typeof ArkMenu.Root>) => {
     positioning = { placement: "bottom-end" },
     unmountOnExit = true,
     ...rest
-  } = props;
+  } = props
 
   return (
     <ArkMenu.Root
@@ -30,17 +30,17 @@ export const Menu = (props: React.ComponentProps<typeof ArkMenu.Root>) => {
       unmountOnExit={unmountOnExit}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const MenuTrigger = (
   props: React.ComponentProps<typeof ArkMenu.Trigger>
-) => <ArkMenu.Trigger data-slot="menu-trigger" {...props} />;
+) => <ArkMenu.Trigger data-slot="menu-trigger" {...props} />
 
 export const MenuPositioner = (
   props: React.ComponentProps<typeof ArkMenu.Positioner>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkMenu.Positioner
@@ -48,8 +48,8 @@ export const MenuPositioner = (
       data-slot="menu-positioner"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const menuContentVariants = tv({
   base: [
@@ -72,10 +72,10 @@ export const menuContentVariants = tv({
     "data-[placement=top]:slide-in-from-bottom-2",
     "motion-reduce:animate-none!",
   ],
-});
+})
 
 export const MenuContent = (props: MenuContentProps) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <Portal>
@@ -89,19 +89,19 @@ export const MenuContent = (props: MenuContentProps) => {
         </ArkMenu.Content>
       </MenuPositioner>
     </Portal>
-  );
-};
+  )
+}
 
 interface MenuGroupProps
   extends React.ComponentProps<typeof ArkMenu.ItemGroup> {
   /**
    * The heading of the menu item group.
    */
-  heading?: string;
+  heading?: string
 }
 
 export const MenuGroup = (props: MenuGroupProps) => {
-  const { heading, children, ...rest } = props;
+  const { heading, children, ...rest } = props
 
   return (
     <ArkMenu.ItemGroup data-slot="menu-group" {...rest}>
@@ -109,13 +109,13 @@ export const MenuGroup = (props: MenuGroupProps) => {
 
       {children}
     </ArkMenu.ItemGroup>
-  );
-};
+  )
+}
 
 export const MenuSeparator = (
   props: React.ComponentProps<typeof ArkMenu.Separator>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkMenu.Separator
@@ -123,8 +123,8 @@ export const MenuSeparator = (
       data-slot="menu-separator"
       {...rest}
     />
-  );
-};
+  )
+}
 
 const menuItemVariants = tv({
   base: [
@@ -155,14 +155,14 @@ const menuItemVariants = tv({
   defaultVariants: {
     variant: "default",
   },
-});
+})
 
 interface MenuItemProps
   extends React.ComponentProps<typeof ArkMenu.Item>,
     VariantProps<typeof menuItemVariants> {}
 
 export const MenuItem = (props: MenuItemProps) => {
-  const { variant = "default", className, ...rest } = props;
+  const { variant = "default", className, ...rest } = props
 
   return (
     <ArkMenu.Item
@@ -170,11 +170,11 @@ export const MenuItem = (props: MenuItemProps) => {
       data-variant={variant}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const MenuQuickItem = (props: MenuItemProps) => {
-  const { variant = "default", className, ...rest } = props;
+  const { variant = "default", className, ...rest } = props
 
   return (
     <ArkMenu.Item
@@ -186,13 +186,13 @@ export const MenuQuickItem = (props: MenuItemProps) => {
       )}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const MenuCheckboxItem = (
   props: React.ComponentProps<typeof ArkMenu.CheckboxItem>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkMenu.CheckboxItem
@@ -216,19 +216,19 @@ export const MenuCheckboxItem = (
 
       <ArkMenu.ItemText>{children}</ArkMenu.ItemText>
     </ArkMenu.CheckboxItem>
-  );
-};
+  )
+}
 
 interface MenuRadioGroupProps
   extends React.ComponentProps<typeof ArkMenu.RadioItemGroup> {
   /**
    * The heading of the menu radio item group.
    */
-  heading?: string;
+  heading?: string
 }
 
 export const MenuRadioGroup = (props: MenuRadioGroupProps) => {
-  const { heading, children, ...rest } = props;
+  const { heading, children, ...rest } = props
 
   return (
     <ArkMenu.RadioItemGroup data-slot="menu-radio-group" {...rest}>
@@ -236,13 +236,13 @@ export const MenuRadioGroup = (props: MenuRadioGroupProps) => {
 
       {children}
     </ArkMenu.RadioItemGroup>
-  );
-};
+  )
+}
 
 export const MenuGroupLabel = (
   props: React.ComponentProps<typeof ArkMenu.ItemGroupLabel>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkMenu.ItemGroupLabel
@@ -255,13 +255,13 @@ export const MenuGroupLabel = (
       data-slot="menu-group-label"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const MenuRadioItem = (
   props: React.ComponentProps<typeof ArkMenu.RadioItem>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkMenu.RadioItem
@@ -281,17 +281,17 @@ export const MenuRadioItem = (
         {children}
       </ArkMenu.ItemText>
     </ArkMenu.RadioItem>
-  );
-};
+  )
+}
 
 export const MenuSub = (props: React.ComponentProps<typeof Menu>) => (
   <Menu data-slot="menu-sub" {...props} />
-);
+)
 
 export const MenuSubContent = (
   props: React.ComponentProps<typeof ArkMenu.Content>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <Portal>
@@ -303,13 +303,13 @@ export const MenuSubContent = (
         />
       </MenuPositioner>
     </Portal>
-  );
-};
+  )
+}
 
 export const MenuSubTrigger = (
   props: React.ComponentProps<typeof ArkMenu.TriggerItem>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkMenu.TriggerItem
@@ -323,11 +323,11 @@ export const MenuSubTrigger = (
         <ChevronRight />
       </MenuShortcut>
     </ArkMenu.TriggerItem>
-  );
-};
+  )
+}
 
 export const MenuShortcut = (props: React.ComponentProps<typeof ark.span>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.span
@@ -340,13 +340,13 @@ export const MenuShortcut = (props: React.ComponentProps<typeof ark.span>) => {
       data-slot="menu-shortcut"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const MenuArrow = (
   props: React.ComponentProps<typeof ArkMenu.Arrow>
 ) => {
-  const { style, ...rest } = props;
+  const { style, ...rest } = props
 
   return (
     <ArkMenu.Arrow
@@ -362,5 +362,5 @@ export const MenuArrow = (
     >
       <ArkMenu.ArrowTip className="border-s border-t" />
     </ArkMenu.Arrow>
-  );
-};
+  )
+}

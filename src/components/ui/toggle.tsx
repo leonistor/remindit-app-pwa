@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import { Toggle as ArkToggle, useToggleContext } from "@ark-ui/react/toggle";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
+import { Toggle as ArkToggle, useToggleContext } from "@ark-ui/react/toggle"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { cn } from "@/lib/utils"
+import { buttonVariants } from "@/components/ui/button"
 
-export const useToggle = useToggleContext;
+export const useToggle = useToggleContext
 
 export const toggleVariants = tv({
   base: [
@@ -24,7 +24,7 @@ export const toggleVariants = tv({
   defaultVariants: {
     size: "md",
   },
-});
+})
 
 export interface ToggleProps
   extends React.ComponentProps<typeof ArkToggle.Root>,
@@ -37,11 +37,11 @@ export interface ToggleProps
   variant?: Extract<
     VariantProps<typeof buttonVariants>["variant"],
     "outline" | "ghost"
-  >;
+  >
 }
 
 export const Toggle = (props: ToggleProps) => {
-  const { variant = "ghost", size = "md", className, ...rest } = props;
+  const { variant = "ghost", size = "md", className, ...rest } = props
 
   return (
     <ArkToggle.Root
@@ -53,13 +53,13 @@ export const Toggle = (props: ToggleProps) => {
       data-slot="toggle"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ToggleIndicator = (
   props: React.ComponentProps<typeof ArkToggle.Indicator>
 ) => {
-  const { children, ...rest } = props;
+  const { children, ...rest } = props
 
   return (
     <ArkToggle.Indicator
@@ -69,5 +69,5 @@ export const ToggleIndicator = (
     >
       {children}
     </ArkToggle.Indicator>
-  );
-};
+  )
+}
