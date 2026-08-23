@@ -33,6 +33,7 @@ export default defineConfig({
     }),
     pluginTailwindcss(),
     pluginPWA({
+      dev: true,
       webAppManifest: {
         content: {
           name: "Remindit",

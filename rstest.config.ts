@@ -9,4 +9,7 @@ export default defineConfig({
   extends: withRsbuildConfig(),
   testEnvironment: "happy-dom",
   setupFiles: ["./tests/rstest.setup.ts"],
+  // Keep Playwright e2e specs out of Rstest's discovery — they use
+  // @playwright/test's own `test()`, not Rstest's.
+  exclude: ["**/node_modules/**", "**/dist/**", "**/e2e/**", "**/e2e-prod/**"],
 })
