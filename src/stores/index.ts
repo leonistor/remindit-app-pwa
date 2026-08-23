@@ -2,8 +2,8 @@
 // run, assigns random user defaults, and (dev-only) attaches the logger.
 
 import { logger } from "@nanostores/logger"
-import seedRows from "../../seed/items_categories.json"
 import { FREQUENCY_BY_CATEGORY } from "../../seed"
+import seedRows from "../../seed/items_categories.json"
 import { $catalog } from "./catalog"
 import {
   $categories,
@@ -12,6 +12,7 @@ import {
 } from "./categories"
 import { $history } from "./history"
 import { $list } from "./list"
+import { initTheme } from "./theme"
 import type { CatalogItem, Category } from "./types"
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
 import { $user, randomUser } from "./user"
@@ -75,6 +76,9 @@ function buildSeed(): { categories: Category[]; items: CatalogItem[] } {
 // persistent stores). Assigns random user defaults when none exist. Safe to
 // call multiple times; it only acts when stores are empty.
 export function initStores(): void {
+  // Apply the persisted theme as early as the store layer loads.
+  initTheme()
+
   if ($catalog.get().length === 0) {
     const { categories, items } = buildSeed()
     if ($categories.get().length === 0) {
@@ -116,6 +120,7 @@ export * from "./categories"
 export * from "./history"
 export * from "./list"
 export * from "./selectors"
+export * from "./theme"
 // Public API surface — import everything from '@/stores'.
 export * from "./types"
 export * from "./user"

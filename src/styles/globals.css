@@ -294,6 +294,8 @@
 }
 
 :root {
+  color-scheme: light dark;
+
   --radius: 0.5rem;
 
   --background: var(--color-neutral-50);
@@ -382,6 +384,8 @@
 }
 
 .dark {
+  color-scheme: light dark;
+
   --background: var(--color-neutral-950);
   --foreground: var(--color-neutral-100);
 

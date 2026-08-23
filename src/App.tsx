@@ -1,6 +1,6 @@
 import { AppWindowIcon } from "@phosphor-icons/react"
 import { Separator } from "@/components/ui/separator"
-
+import { ThemeToggle } from "./components/theme-toggle"
 import GroupingListExample from "./examples/GroupingList"
 
 const App = () => {
@@ -15,7 +15,9 @@ const App = () => {
           <Separator orientation="vertical" />
           <span>RemindIt</span>
           <Separator orientation="vertical" />
-          <span>theme</span>
+          <span>
+            <ThemeToggle />
+          </span>
         </div>
         {/*content*/}
         <div className="grow">
