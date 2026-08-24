@@ -1,5 +1,6 @@
 "use client"
 
+import { useCallback, useRef, useState } from "react"
 import { useStore } from "@nanostores/react"
 import { Button } from "@/components/ui/button"
 import { $selectedView, removeFromList } from "@/stores"
@@ -16,25 +17,64 @@ export const ShoppingListPanel = ({
   title = "Selected items",
 }: ShoppingListPanelProps) => {
   const selectedView = useStore($selectedView)
+  const [removingIds, setRemovingIds] = useState<Set<string>>(new Set())
+  const animationTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  )
+
+  const handleRemove = useCallback((entryId: string) => {
+    // Prevent double-clicking during animation
+    if (animationTimeouts.current.has(entryId)) return
+
+    // Mark entry as removing (triggers exit animation)
+    setRemovingIds((prev) => new Set(prev).add(entryId))
+
+    // After animation completes, remove from store and clear the removing state
+    const timeout = setTimeout(() => {
+      removeFromList(entryId)
+      setRemovingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(entryId)
+        return next
+      })
+      animationTimeouts.current.delete(entryId)
+    }, 150)
+
+    animationTimeouts.current.set(entryId, timeout)
+  }, [])
+
+  const isEmpty = selectedView.length === 0
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <h2 className="font-medium text-foreground text-sm">{title}</h2>
       <div className="flex min-h-0 flex-1 flex-wrap gap-2 overflow-y-auto">
-        {selectedView.length === 0 ? (
+        {isEmpty ? (
           <p className="py-4 text-center text-muted-foreground text-sm">
             Nothing selected yet
           </p>
         ) : (
-          selectedView.map((entry) => (
-            <Button
-              key={entry.entryId}
-              variant="success"
-              onClick={() => removeFromList(entry.entryId)}
-            >
-              {entry.name}
-            </Button>
-          ))
+          selectedView.map((entry) => {
+            const isRemoving = removingIds.has(entry.entryId)
+            return (
+              <div
+                key={entry.entryId}
+                className={
+                  isRemoving
+                    ? "fade-out zoom-out-95 animate-out duration-150"
+                    : "fade-in zoom-in-95 animate-in duration-200"
+                }
+              >
+                <Button
+                  variant="success"
+                  onClick={() => handleRemove(entry.entryId)}
+                  disabled={isRemoving}
+                >
+                  {entry.name}
+                </Button>
+              </div>
+            )
+          })
         )}
       </div>
     </div>

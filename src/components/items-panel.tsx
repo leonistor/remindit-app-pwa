@@ -27,7 +27,7 @@ export default function ItemsPanel({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <h2 className="font-medium text-foreground text-sm">{title}</h2>
-      <Accordion multiple className="min-h-0 flex-1 overflow-y-auto">
+      <Accordion multiple defaultValue={groups.map((g) => g.categoryId)} className="min-h-0 flex-1 overflow-y-auto">
         {groups.map((group) => (
           <AccordionItem key={group.categoryId} value={group.categoryId}>
             <AccordionTrigger>{group.categoryName}</AccordionTrigger>
