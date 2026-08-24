@@ -1,14 +1,14 @@
-"use client";
+"use client"
 
 import {
   Accordion as ArkAccordion,
   useAccordionContext,
-} from "@ark-ui/react/accordion";
-import { ChevronDownIcon } from "lucide-react";
-import type React from "react";
-import { cn } from "@/lib/utils";
+} from "@ark-ui/react/accordion"
+import { ChevronDownIcon } from "lucide-react"
+import type React from "react"
+import { cn } from "@/lib/utils"
 
-export const useAccordion = useAccordionContext;
+export const useAccordion = useAccordionContext
 
 export const Accordion = (
   props: React.ComponentProps<typeof ArkAccordion.Root>
@@ -18,7 +18,7 @@ export const Accordion = (
     lazyMount = true,
     unmountOnExit = true,
     ...rest
-  } = props;
+  } = props
 
   return (
     <ArkAccordion.Root
@@ -28,13 +28,13 @@ export const Accordion = (
       unmountOnExit={unmountOnExit}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const AccordionItem = (
   props: React.ComponentProps<typeof ArkAccordion.Item>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkAccordion.Item
@@ -42,13 +42,13 @@ export const AccordionItem = (
       data-slot="accordion-item"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const AccordionTrigger = (
   props: React.ComponentProps<typeof ArkAccordion.ItemTrigger>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkAccordion.ItemTrigger
@@ -84,13 +84,13 @@ export const AccordionTrigger = (
         />
       </ArkAccordion.ItemIndicator>
     </ArkAccordion.ItemTrigger>
-  );
-};
+  )
+}
 
 export const AccordionContent = (
   props: React.ComponentProps<typeof ArkAccordion.ItemContent>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkAccordion.ItemContent
@@ -106,5 +106,5 @@ export const AccordionContent = (
     >
       <div className="pt-0 pb-4">{children}</div>
     </ArkAccordion.ItemContent>
-  );
-};
+  )
+}

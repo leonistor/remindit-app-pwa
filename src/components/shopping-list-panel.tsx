@@ -1,7 +1,7 @@
 "use client"
 
-import { useCallback, useRef, useState } from "react"
 import { useStore } from "@nanostores/react"
+import { useCallback, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { $selectedView, removeFromList } from "@/stores"
 
@@ -19,7 +19,7 @@ export const ShoppingListPanel = ({
   const selectedView = useStore($selectedView)
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set())
   const animationTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(
-    new Map(),
+    new Map()
   )
 
   const handleRemove = useCallback((entryId: string) => {
