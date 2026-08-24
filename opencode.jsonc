@@ -1,5 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "skills": {
+    "paths": [".agents/skills"]
+  },
+  "permission": {
+    "skill": { "*": "allow" }
+  },
   "mcp": {
     "playwright": {
       "enabled": true,
