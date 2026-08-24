@@ -36,6 +36,13 @@ export const buttonVariants = tv({
         "hover:bg-success/90",
         "focus-visible:border-background",
       ],
+      info: [
+        "bg-info",
+        "border border-transparent shadow-info/24 shadow-sm",
+        "text-white",
+        "hover:bg-info/90",
+        "focus-visible:border-background",
+      ],
       outline: [
         "bg-transparent",
         "text-foreground",

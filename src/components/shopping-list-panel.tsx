@@ -46,9 +46,11 @@ export const ShoppingListPanel = ({
   const isEmpty = selectedView.length === 0
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <h2 className="font-medium text-foreground text-sm">{title}</h2>
-      <div className="flex min-h-0 flex-1 flex-wrap gap-2 overflow-y-auto">
+    <div className="flex h-full min-h-0 flex-col px-4 py-3">
+      <h2 className="text-center font-bold text-base text-foreground">
+        {title}
+      </h2>
+      <div className="mt-3 flex min-h-0 flex-1 flex-wrap justify-start gap-2 overflow-y-auto">
         {isEmpty ? (
           <p className="py-4 text-center text-muted-foreground text-sm">
             Nothing selected yet
