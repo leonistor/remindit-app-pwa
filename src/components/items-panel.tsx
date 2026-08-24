@@ -25,9 +25,10 @@ export default function ItemsPanel({
     itemToString: (i) => i.name,
   })
   return (
-    <Field className="w-full">
+    <Field className="h-full min-h-0 w-full">
       <FieldLabel>{title}</FieldLabel>
       <Listbox
+        className="min-h-0 flex-1"
         collection={collection}
         orientation="horizontal"
         selectionMode="none"

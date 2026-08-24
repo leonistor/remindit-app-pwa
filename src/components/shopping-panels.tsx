@@ -13,11 +13,11 @@ const ShoppingPanels = () => (
     orientation="vertical"
     panels={[{ id: "selected", minSize: 25, maxSize: 40 }, { id: "all" }]}
   >
-    <ResizablePanel className="flex items-center justify-center" id="selected">
+    <ResizablePanel className="min-h-0 overflow-hidden" id="selected">
       <ShoppingListPanel title="Selected items" />
     </ResizablePanel>
     <ResizableResizeTrigger id="selected:all" withHandle />
-    <ResizablePanel className="flex items-center justify-center" id="all">
+    <ResizablePanel className="min-h-0 overflow-hidden" id="all">
       <ItemsPanel title="All items" />
     </ResizablePanel>
   </Resizable>

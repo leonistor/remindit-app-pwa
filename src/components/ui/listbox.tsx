@@ -37,8 +37,10 @@ export const ListboxContent = (
         "w-full",
         "flex flex-col gap-1",
         "outline-hidden",
-        "overflow-hidden",
-        "data-[orientation=horizontal]:max-h-none data-[orientation=horizontal]:flex-row",
+        "overflow-y-auto",
+        "min-h-0",
+        "flex-1",
+        "data-[orientation=horizontal]:flex-row data-[orientation=horizontal]:flex-wrap",
         className
       )}
       data-slot="listbox-content"
@@ -51,6 +53,7 @@ const listboxItemVariants = tv({
   base: [
     "group/listbox-item",
     "relative",
+    "shrink-0",
     "flex items-center gap-2",
     "px-2.5 py-2",
     "rounded-xl",
