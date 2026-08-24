@@ -1,5 +1,21 @@
 # development
 
+## UI components (Shark UI)
+
+Our primary UI framework is **Shark UI** — a shadcn-style component registry built on top of [Ark UI](https://ark-ui.com). Components live in `src/components/ui/*` and are added from the registry with the shadcn CLI:
+
+```bash
+bunx shadcn add @shark/<component>
+```
+
+Registry config lives in `components.json` (style `base-nova`, Phosphor icons, `@shark` registry at `https://shark.vini.one/r/{name}.json`).
+
+**Rules:**
+
+- Build feature UI from the existing `src/components/ui/*` Shark primitives — do **not** reach for raw `@ark-ui/react` in feature components. If a primitive is missing, add it via the CLI (or wrap Ark UI in `src/components/ui` following the existing pattern) instead of importing Ark directly.
+- Use `cn()` from `@/lib/utils` and Shark's built-in `variant` / `size` props and semantic tokens (`bg-primary`, `text-muted-foreground`, `border-input`). Avoid ad-hoc `dark:` palette pairs and `space-x/y-*`.
+- The registry docs/examples are the source of truth for each component's API and composition — check them before assuming an Ark/Radix/shadcn API.
+
 ## State architecture
 
 App state lives in **framework-agnostic [nanostores](https://github.com/nanostores/nanostores)** under `src/stores/`. No React imports there — components consume stores via `@nanostores/react`'s `useStore`. This keeps the store layer reusable and easy to test.
@@ -16,16 +32,16 @@ All collections are persisted to `localStorage` with `@nanostores/persistent` (k
 
 ### Store modules (`src/stores/`)
 
-| File            | Exposes                                                                                                                      |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `types.ts`      | Shared types + `UNCATEGORIZED_ID` / naming constants                                                                         |
-| `categories.ts` | `$categories`, `addCategory`, `renameCategory`, `removeCategory`, `getCategory`, `ensureUncategorizedExists`                 |
-| `catalog.ts`    | `$catalog`, `addCatalogItem`, `updateCatalogItem`, `removeCatalogItem`, `getCatalogItem`                                     |
-| `list.ts`       | `$list`, `addToList`, `removeFromList`, `setEntryChecked`, `clearList`, `createItemAndAddToList`, `removeListEntriesForItem` |
-| `history.ts`    | `$history`, `logHistory`, `clearHistory`                                                                                     |
-| `user.ts`       | `$user`, `getUser`, `updateUser`, `randomUser`                                                                               |
-| `selectors.ts`  | computed `$itemsByCategory`, `$activeCategoryIds`, `$listCount`, `$checkedCount`                                             |
-| `index.ts`      | Barrel exports + `initStores()` (seeds sample data, random user, dev logger)                                                 |
+| File            | Exposes                                                                                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `types.ts`      | Shared types + `UNCATEGORIZED_ID` / naming constants                                                                                                    |
+| `categories.ts` | `$categories`, `addCategory`, `renameCategory`, `removeCategory`, `getCategory`, `ensureUncategorizedExists`                                            |
+| `catalog.ts`    | `$catalog`, `addCatalogItem`, `updateCatalogItem`, `removeCatalogItem`, `getCatalogItem`                                                                |
+| `list.ts`       | `$list`, `addToList`, `removeFromList`, `setEntryChecked`, `clearList`, `createItemAndAddToList`, `removeListEntriesForItem`                            |
+| `history.ts`    | `$history`, `logHistory`, `clearHistory`                                                                                                                |
+| `user.ts`       | `$user`, `getUser`, `updateUser`, `randomUser`                                                                                                          |
+| `selectors.ts`  | computed `$itemsByCategory`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$listItemIds`, `$catalogByCategory` |
+| `index.ts`      | Barrel exports + `initStores()` (seeds sample data, random user, dev logger)                                                                            |
 
 Import everything from the barrel: `import { $list, addToList } from "@/stores"`.
 
@@ -96,4 +112,12 @@ function ShoppingList() {
     </section>
   ));
 }
+
+## Testing
+
+- **Component unit tests are intentionally postponed** until they are actually required. While the UI is actively evolving (e.g. refactoring panels), maintaining per-component unit tests is churn with little payoff — delete or skip them rather than keeping them in sync with each change.
+- **Before any version bump / release**, make sure both are in place and green:
+  - component tests for the critical UI (`src/components/**/*.test.tsx`), and
+  - end-to-end tests (Playwright, `e2e/`).
+- The store layer in `src/stores/**` should keep its unit tests — that layer is stable and cheap to test.
 ```

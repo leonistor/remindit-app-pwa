@@ -1,60 +1,64 @@
 "use client"
 
-import { createListCollection } from "@ark-ui/react"
 import { useStore } from "@nanostores/react"
-import { Field, FieldLabel } from "@/components/ui/field"
 import {
-  Listbox,
-  ListboxContent,
-  ListboxItem,
-  ListboxItemIndicator,
-  ListboxItemText,
-} from "@/components/ui/listbox"
-import { $catalogView, $listItemIds, addToList } from "@/stores"
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { Button } from "@/components/ui/button"
+import {
+  $catalogByCategory,
+  $listItemIds,
+  $selectedView,
+  addToList,
+  removeFromList,
+} from "@/stores"
 
 export default function ItemsPanel({
   title = "All items",
 }: {
   title?: string
 }) {
-  const items = useStore($catalogView)
+  const groups = useStore($catalogByCategory)
   const selected = useStore($listItemIds)
-  const collection = createListCollection({
-    items,
-    itemToValue: (i) => i.id,
-    itemToString: (i) => i.name,
-  })
+
   return (
-    <Field className="h-full min-h-0 w-full">
-      <FieldLabel>{title}</FieldLabel>
-      <Listbox
-        className="min-h-0 flex-1"
-        collection={collection}
-        orientation="horizontal"
-        selectionMode="none"
-      >
-        <ListboxContent className="flex flex-wrap gap-2">
-          {collection.items.map((item) => (
-            <ListboxItem
-              item={item}
-              key={item.id}
-              className="relative w-36 flex-col items-start"
-              onClick={() => addToList(item.id)}
-            >
-              <div className="aspect-square size-20 w-full rounded-lg bg-foreground" />
-              <div>
-                <ListboxItemText>{item.name}</ListboxItemText>
-                <p className="text-muted-foreground text-xs">
-                  {item.categoryName}
-                </p>
+    <div className="flex h-full min-h-0 flex-col">
+      <h2 className="font-medium text-foreground text-sm">{title}</h2>
+      <Accordion multiple className="min-h-0 flex-1 overflow-y-auto">
+        {groups.map((group) => (
+          <AccordionItem key={group.categoryId} value={group.categoryId}>
+            <AccordionTrigger>{group.categoryName}</AccordionTrigger>
+            <AccordionContent>
+              <div className="flex flex-wrap gap-2">
+                {group.items.map((item) => {
+                  const isSelected = selected.has(item.id)
+                  return (
+                    <Button
+                      key={item.id}
+                      variant={isSelected ? "outline" : "default"}
+                      onClick={() =>
+                        isSelected
+                          ? (() => {
+                              const entry = $selectedView
+                                .get()
+                                .find((e) => e.itemId === item.id)
+                              if (entry) removeFromList(entry.entryId)
+                            })()
+                          : addToList(item.id)
+                      }
+                    >
+                      {item.name}
+                    </Button>
+                  )
+                })}
               </div>
-              {selected.has(item.id) && (
-                <ListboxItemIndicator className="absolute top-4 right-4 shrink-0 rounded-sm bg-background [&_svg]:text-foreground!" />
-              )}
-            </ListboxItem>
-          ))}
-        </ListboxContent>
-      </Listbox>
-    </Field>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </div>
   )
 }

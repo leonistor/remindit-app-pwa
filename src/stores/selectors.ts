@@ -124,3 +124,50 @@ export const $listItemIds = computed(
   $list,
   (list) => new Set(list.map((entry) => entry.itemId))
 )
+
+// A single catalog item grouped under its category, stripped down to the fields
+// the ItemsPanel AccordionItem needs to render a button.
+export interface CatalogByCategoryItem {
+  id: string
+  name: string
+}
+
+// Catalog items grouped by category. Backs the refactored ItemsPanel, which
+// renders one AccordionItem per category containing that category's items.
+// Categories appear in first-appearance order and only when they hold at least
+// one item; the categoryName comes from the items themselves.
+export interface CatalogByCategoryGroup {
+  categoryId: string
+  categoryName: string
+  items: CatalogByCategoryItem[]
+}
+
+export const $catalogByCategory = computed(
+  $catalogView,
+  (view): CatalogByCategoryGroup[] => {
+    const groupByCategoryId = new Map<
+      string,
+      { categoryName: string; items: CatalogByCategoryItem[] }
+    >()
+
+    for (const item of view) {
+      let group = groupByCategoryId.get(item.categoryId)
+      if (!group) {
+        group = { categoryName: item.categoryName, items: [] }
+        groupByCategoryId.set(item.categoryId, group)
+      }
+      group.items.push({ id: item.id, name: item.name })
+    }
+
+    const result: CatalogByCategoryGroup[] = []
+    for (const [categoryId, group] of groupByCategoryId) {
+      if (group.items.length === 0) continue
+      result.push({
+        categoryId,
+        categoryName: group.categoryName,
+        items: group.items,
+      })
+    }
+    return result
+  }
+)

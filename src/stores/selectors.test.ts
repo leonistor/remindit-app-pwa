@@ -11,7 +11,12 @@ import { beforeEach, describe, expect, it } from "@rstest/core"
 import { $catalog } from "@/stores/catalog"
 import { $categories } from "@/stores/categories"
 import { $list } from "@/stores/list"
-import { $catalogView, $listItemIds, $selectedView } from "@/stores/selectors"
+import {
+  $catalogByCategory,
+  $catalogView,
+  $listItemIds,
+  $selectedView,
+} from "@/stores/selectors"
 import type { CatalogItem, Category, ListEntry } from "@/stores/types"
 
 const SEED_CATEGORIES: Category[] = [
@@ -100,6 +105,72 @@ describe("$selectedView", () => {
 
     const view = $selectedView.get()
     expect(view.map((entry) => entry.entryId)).toEqual(["entry-3", "entry-4"])
+  })
+})
+
+describe("$catalogByCategory", () => {
+  it("returns an empty array when the catalog is empty", () => {
+    $catalog.set([])
+    expect($catalogByCategory.get()).toEqual([])
+  })
+
+  it("groups a single category's items under one entry", () => {
+    $catalog.set([
+      { id: "item-1", name: "Apple", categoryId: "cat-1" },
+      { id: "item-2", name: "Banana", categoryId: "cat-1" },
+    ])
+    $categories.set([{ id: "cat-1", name: "Produce", frequency: "weekly" }])
+
+    const groups = $catalogByCategory.get()
+    expect(groups).toEqual([
+      {
+        categoryId: "cat-1",
+        categoryName: "Produce",
+        items: [
+          { id: "item-1", name: "Apple" },
+          { id: "item-2", name: "Banana" },
+        ],
+      },
+    ])
+  })
+
+  it("keeps multiple categories in first-appearance order", () => {
+    $catalog.set([
+      { id: "item-1", name: "Apple", categoryId: "cat-1" },
+      { id: "item-2", name: "Milk", categoryId: "cat-2" },
+      { id: "item-3", name: "Banana", categoryId: "cat-1" },
+    ])
+    $categories.set([
+      { id: "cat-1", name: "Produce", frequency: "weekly" },
+      { id: "cat-2", name: "Dairy", frequency: "weekly" },
+    ])
+
+    const groups = $catalogByCategory.get()
+    expect(groups.map((group) => group.categoryId)).toEqual(["cat-1", "cat-2"])
+    expect(groups[0].items).toHaveLength(2)
+    expect(groups[1].items).toHaveLength(1)
+  })
+
+  it("uses categoryName from the catalog item and omits empty categories", () => {
+    $catalog.set([
+      { id: "item-1", name: "Apple", categoryId: "cat-1" },
+      { id: "item-2", name: "Orphan", categoryId: "missing-cat" },
+    ])
+    $categories.set([
+      { id: "cat-1", name: "Produce", frequency: "weekly" },
+      // cat-2 has no items -> must not appear in the result.
+      { id: "cat-2", name: "Dairy", frequency: "weekly" },
+    ])
+
+    const groups = $catalogByCategory.get()
+    expect(groups).toHaveLength(2)
+    expect(groups[0]).toEqual({
+      categoryId: "cat-1",
+      categoryName: "Produce",
+      items: [{ id: "item-1", name: "Apple" }],
+    })
+    expect(groups[1].categoryId).toBe("missing-cat")
+    expect(groups[1].items).toHaveLength(1)
   })
 })
 
