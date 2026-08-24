@@ -1,14 +1,7 @@
 "use client"
 
-import { createListCollection } from "@ark-ui/react"
 import { useStore } from "@nanostores/react"
-import { Field, FieldLabel } from "@/components/ui/field"
-import {
-  Listbox,
-  ListboxContent,
-  ListboxItem,
-  ListboxItemText,
-} from "@/components/ui/listbox"
+import { Button } from "@/components/ui/button"
 import { $selectedView, removeFromList } from "@/stores"
 
 export interface ShoppingListPanelProps {
@@ -16,50 +9,34 @@ export interface ShoppingListPanelProps {
   title?: string
 }
 
-// Renders the active list ($selectedView) as an Ark UI Listbox. Each row is a
-// "destructive" listbox item showing the item name (title) and its category
-// name (subtitle). Clicking a row removes that entry from the list.
-//
-// The Listbox uses selectionMode="none" because rows are actions (remove), not
-// selectable options; the user onClick still fires because Ark UI merges the
-// internal and user handlers via mergeProps.
+// Renders the active list ($selectedView) as success-colored item chips that
+// wrap like the available-items grid in ItemsPanel. Each chip shows just the
+// item name; clicking it removes that entry from the list.
 export const ShoppingListPanel = ({
   title = "Selected items",
 }: ShoppingListPanelProps) => {
   const selectedView = useStore($selectedView)
 
-  const collection = createListCollection({
-    items: selectedView,
-    itemToValue: (entry) => entry.entryId,
-    itemToString: (entry) => entry.name,
-  })
-
   return (
-    <Field className="h-full min-h-0 w-full">
-      <FieldLabel>{title}</FieldLabel>
-      <Listbox
-        className="min-h-0 flex-1"
-        collection={collection}
-        orientation="vertical"
-        selectionMode="none"
-      >
-        <ListboxContent>
-          {collection.items.map((entry) => (
-            <ListboxItem
-              item={entry}
+    <div className="flex h-full min-h-0 flex-col">
+      <h2 className="font-medium text-foreground text-sm">{title}</h2>
+      <div className="flex min-h-0 flex-1 flex-wrap gap-2 overflow-y-auto">
+        {selectedView.length === 0 ? (
+          <p className="py-4 text-center text-muted-foreground text-sm">
+            Nothing selected yet
+          </p>
+        ) : (
+          selectedView.map((entry) => (
+            <Button
               key={entry.entryId}
-              variant="destructive"
-              className="w-full items-center"
+              variant="success"
               onClick={() => removeFromList(entry.entryId)}
             >
-              <ListboxItemText>{entry.name}</ListboxItemText>
-              <p className="text-muted-foreground text-xs">
-                {entry.categoryName}
-              </p>
-            </ListboxItem>
-          ))}
-        </ListboxContent>
-      </Listbox>
-    </Field>
+              {entry.name}
+            </Button>
+          ))
+        )}
+      </div>
+    </div>
   )
 }
