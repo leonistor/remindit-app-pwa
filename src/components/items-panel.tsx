@@ -26,7 +26,7 @@ export default function ItemsPanel({
 
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-3">
-      <h2 className="text-center font-bold text-base text-foreground">
+      <h2 className="text-center font-medium text-base text-foreground uppercase tracking-widest">
         {title}
       </h2>
       <Accordion

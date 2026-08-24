@@ -11,7 +11,7 @@ const ShoppingPanels = () => (
     className="h-full rounded-md border"
     defaultSize={[30, 70]}
     orientation="vertical"
-    panels={[{ id: "selected", minSize: 25, maxSize: 40 }, { id: "all" }]}
+    panels={[{ id: "selected", minSize: 25, maxSize: 90 }, { id: "all" }]}
   >
     <ResizablePanel className="min-h-0 overflow-hidden" id="selected">
       <ShoppingListPanel title="Selected items" />

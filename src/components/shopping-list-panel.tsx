@@ -47,7 +47,7 @@ export const ShoppingListPanel = ({
 
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-3">
-      <h2 className="text-center font-bold text-base text-foreground">
+      <h2 className="text-center font-medium text-base text-foreground uppercase tracking-widest">
         {title}
       </h2>
       <div className="mt-3 flex min-h-0 flex-1 flex-wrap justify-start gap-2 overflow-y-auto">
