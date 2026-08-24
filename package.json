@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "rsbuild build",
+    "deploy": "bash scripts/deploy.sh",
     "lint": "biome lint",
     "check": "biome check --write",
     "dev": "rsbuild",
