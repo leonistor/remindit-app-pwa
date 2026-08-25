@@ -3,8 +3,14 @@ import { pluginReact } from "@rsbuild/plugin-react"
 import { pluginTailwindcss } from "@rsbuild/plugin-tailwindcss"
 import * as QRCode from "qrcode"
 import { pluginPWA } from "rsbuild-plugin-pwa"
+import pkg from "./package.json"
 
 export default defineConfig({
+  source: {
+    define: {
+      __APP_VERSION__: JSON.stringify(pkg.version),
+    },
+  },
   html: {
     template: "public/index.html",
   },
