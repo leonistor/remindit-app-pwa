@@ -46,13 +46,13 @@ const Menu = () => {
       <span className="font-semibold text-sm">RemindIt</span>
       <NavLink
         to="/"
-        className={({ isActive }) => cn(linkClass({ isActive }), "md:hidden")}
+        className={({ isActive }) => cn(linkClass({ isActive }), "ml-auto md:hidden")}
       >
         Shopping list
       </NavLink>
 
       {/* Desktop nav — always visible on md+ */}
-      <nav className="hidden items-center gap-3 md:flex">
+      <nav className="ml-auto hidden items-center gap-3 md:flex">
         {navLinks.map(({ to, label }) => (
           <NavLink key={to} to={to} className={linkClass}>
             {label}
@@ -91,7 +91,7 @@ const Menu = () => {
         </MenuRoot>
       </div>
 
-      <span className="ml-auto">
+      <span>
         <ThemeToggle />
       </span>
     </div>
