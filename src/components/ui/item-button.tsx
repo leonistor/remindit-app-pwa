@@ -1,7 +1,15 @@
 import type { ButtonProps } from "@/components/ui/button"
 import { Button } from "@/components/ui/button"
+import type { RecommendationTier } from "@/stores/types"
+import { cn } from "@/lib/utils"
 
 type ItemPurpose = "selectable" | "removable" | "recommendation"
+
+const tierDotColor: Record<RecommendationTier, string> = {
+  overdue: "bg-destructive",
+  soon: "bg-warning",
+  frequent: "",
+}
 
 export interface ItemButtonProps {
   /** Display name of the item. */
@@ -10,6 +18,8 @@ export interface ItemButtonProps {
   purpose: ItemPurpose
   /** Whether this item is currently selected/active (only applies to "selectable" purpose). */
   isSelected?: boolean
+  /** Recommendation tier — shows a colored dot when set. */
+  recommendationTier?: RecommendationTier
   /** Disabled state (e.g. during exit animation). */
   disabled?: boolean
   /** Click handler. */
@@ -36,10 +46,13 @@ export const ItemButton = ({
   name,
   purpose,
   isSelected = false,
+  recommendationTier,
   disabled,
   onClick,
   className,
 }: ItemButtonProps) => {
+  const dotColor = recommendationTier ? tierDotColor[recommendationTier] : ""
+
   return (
     <Button
       variant={purposeToVariant(purpose, isSelected)}
@@ -49,6 +62,12 @@ export const ItemButton = ({
       className={className}
     >
       {name}
+      {dotColor && (
+        <span
+          className={cn("ml-1 inline-block size-1.5 shrink-0 rounded-full", dotColor)}
+          aria-hidden
+        />
+      )}
     </Button>
   )
 }

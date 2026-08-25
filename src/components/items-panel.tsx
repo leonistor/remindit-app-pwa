@@ -11,10 +11,12 @@ import { ItemButton } from "@/components/ui/item-button"
 import {
   $catalogByCategory,
   $listItemIds,
+  $recommendations,
   $selectedView,
   addToList,
   removeFromList,
 } from "@/stores"
+import type { RecommendationTier } from "@/stores/types"
 
 export default function ItemsPanel({
   title = "All items",
@@ -23,6 +25,12 @@ export default function ItemsPanel({
 }) {
   const groups = useStore($catalogByCategory)
   const selected = useStore($listItemIds)
+  const recommendations = useStore($recommendations)
+
+  const tierByItemId = new Map<string, RecommendationTier>()
+  for (const rec of recommendations) {
+    tierByItemId.set(rec.item.id, rec.tier)
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-3">
@@ -49,6 +57,7 @@ export default function ItemsPanel({
                       name={item.name}
                       purpose="selectable"
                       isSelected={isSelected}
+                      recommendationTier={tierByItemId.get(item.id)}
                       onClick={() =>
                         isSelected
                           ? (() => {

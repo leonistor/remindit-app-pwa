@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { Loader2Icon } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Loader2Icon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Spinner = (props: React.ComponentProps<"svg">) => {
-  const { "aria-label": ariaLabel, className, ...rest } = props
+  const { "aria-label": ariaLabel, className, ...rest } = props;
 
   return (
     <Loader2Icon
@@ -14,5 +14,5 @@ export const Spinner = (props: React.ComponentProps<"svg">) => {
       role="status"
       {...rest}
     />
-  )
-}
+  );
+};

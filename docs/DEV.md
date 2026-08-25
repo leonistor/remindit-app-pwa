@@ -1,5 +1,43 @@
 # development
 
+## Application Layout
+
+The app uses a single-route layout (`src/router.tsx`) with a top menu bar, a content area (`<Outlet />`), and a discreet version footer (hidden on the main shopping view).
+
+```
+DrawerProvider
+├── Menu (h-16 bar: logo, nav links, theme toggle)
+├── <Outlet /> (page content)
+├── ItemDetailDrawer (context-managed, hidden by default)
+└── VersionFooter (hidden on "/")
+```
+
+### Main view (`/`)
+
+A resizable two-panel split (`ShoppingPanels`):
+
+| Panel | Title | Content |
+|---|---|---|
+| Left (30%) | Selected items | Items on the active shopping list |
+| Right (70%) | All items | Catalog items grouped by category |
+
+Catalog items show recommendation badges (overdue/soon dots) based on the computed `$recommendations` store.
+
+### Item detail drawer
+
+A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Layout level. Any component can open it via `useDrawerContext().openDrawer(itemId)`. Phase 3 will populate the drawer content with item attributes (photo, quantity, price).
+
+### Routes
+
+| Path | View | Description |
+|---|---|---|
+| `/` | ShoppingPanels | Main shopping list + catalog |
+| `/catalog` | CatalogView | Manage catalog items |
+| `/history` | HistoryView | View shopping history |
+| `/settings` | SettingsView | User preferences |
+| `/about` | AboutView | About the app |
+| `/help` | HelpView | Usage help |
+
 ## UI components (Shark UI)
 
 Our primary UI framework is **Shark UI** — a shadcn-style component registry built on top of [Ark UI](https://ark-ui.com). Components live in `src/components/ui/*` and are added from the registry with the shadcn CLI:

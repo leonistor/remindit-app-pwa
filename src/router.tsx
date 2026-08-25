@@ -1,4 +1,6 @@
 import { createBrowserRouter, Outlet, useLocation } from "react-router"
+import { DrawerProvider } from "./components/drawer-context"
+import { ItemDetailDrawer } from "./components/item-detail-drawer"
 import Menu from "./components/menu"
 import ShoppingPanels from "./components/shopping-panels"
 import { VersionFooter } from "./components/version-footer"
@@ -13,15 +15,18 @@ function Layout() {
   const isHome = pathname === "/"
 
   return (
-    <div className="container mx-auto h-screen px-4 py-4">
-      <div className="flex h-full w-full flex-col gap-4">
-        <Menu />
-        <div className="min-h-0 grow">
-          <Outlet />
+    <DrawerProvider>
+      <div className="container mx-auto h-screen px-4 py-4">
+        <div className="flex h-full w-full flex-col gap-4">
+          <Menu />
+          <div className="min-h-0 grow">
+            <Outlet />
+          </div>
+          {!isHome && <VersionFooter />}
         </div>
-        {!isHome && <VersionFooter />}
       </div>
-    </div>
+      <ItemDetailDrawer />
+    </DrawerProvider>
   )
 }
 
