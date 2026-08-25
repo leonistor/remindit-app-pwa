@@ -64,7 +64,10 @@ export const ItemButton = ({
       {name}
       {dotColor && (
         <span
-          className={cn("ml-1 inline-block size-1.5 shrink-0 rounded-full", dotColor)}
+          className={cn(
+            "absolute -top-0.5 -right-0.5 inline-block size-2 rounded-full ring-2 ring-background",
+            dotColor,
+          )}
           aria-hidden
         />
       )}
