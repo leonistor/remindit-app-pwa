@@ -23,6 +23,10 @@ Based on the user's shopping history, the app provides item recommendations.
 
 The algorithm used for recommendations is either a time-series or a collaborative filtering algorithm. TBD.
 
+Users will be able to add, edit, and remove items and categories.
+
+Display ordering options will be available for categories, items, and the shopping list.
+
 ## Phase 3 (v 3.0)
 
 Categorical color palettes will be available to the user to choose from. They will be used to color-code items in the list.
