@@ -11,6 +11,7 @@
     "dev": "rsbuild",
     "format": "biome format --write",
     "preview": "rsbuild preview",
+    "screenshot:mobile": "bun run build && bun scripts/generate-mobile-screenshot.ts",
     "test": "rstest",
     "test:watch": "rstest --watch"
   },
