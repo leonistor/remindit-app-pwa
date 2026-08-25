@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Button } from "@/components/ui/button"
+import { ItemButton } from "@/components/ui/item-button"
 import {
   $catalogByCategory,
   $listItemIds,
@@ -44,9 +44,11 @@ export default function ItemsPanel({
                 {group.items.map((item) => {
                   const isSelected = selected.has(item.id)
                   return (
-                    <Button
+                    <ItemButton
                       key={item.id}
-                      variant={isSelected ? "outline" : "info"}
+                      name={item.name}
+                      purpose="selectable"
+                      isSelected={isSelected}
                       onClick={() =>
                         isSelected
                           ? (() => {
@@ -57,9 +59,7 @@ export default function ItemsPanel({
                             })()
                           : addToList(item.id)
                       }
-                    >
-                      {item.name}
-                    </Button>
+                    />
                   )
                 })}
               </div>
