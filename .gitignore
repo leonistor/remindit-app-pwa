@@ -3,6 +3,9 @@
 *.local
 *.log*
 
+# Environment variables — keep .env.example committed; .env is local-only
+.env
+
 # Dist
 node_modules
 dist/

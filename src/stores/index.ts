@@ -2,8 +2,7 @@
 // run, assigns random user defaults, and (dev-only) attaches the logger.
 
 import { logger } from "@nanostores/logger"
-import { FREQUENCY_BY_CATEGORY } from "../../seed"
-import seedRows from "../../seed/items_categories.json"
+import { getDataset, resolveDatasetId } from "../../seed"
 import { $catalog } from "./catalog"
 import {
   $categories,
@@ -13,7 +12,6 @@ import {
 import { $history } from "./history"
 import { $list } from "./list"
 import { initTheme } from "./theme"
-import type { CatalogItem, Category } from "./types"
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
 import { $user, randomUser } from "./user"
 
@@ -25,62 +23,26 @@ declare global {
       DEV?: boolean
       PROD?: boolean
       MODE?: string
+      // Public (client-exposed via Rsbuild's `PUBLIC_` convention). Selects the
+      // seed dataset on first run — see .env / .env.example.
+      PUBLIC_DATASET?: string
       [key: string]: unknown
     }
   }
 }
 
-interface SeedRow {
-  category_name: string
-  name: string
-}
-
-function buildSeed(): { categories: Category[]; items: CatalogItem[] } {
-  const rows = seedRows as SeedRow[]
-  const categoryIdByName = new Map<string, string>()
-  const categories: Category[] = []
-  const items: CatalogItem[] = []
-
-  for (const row of rows) {
-    const categoryName = row.category_name.trim()
-    // Items without a category go straight to the uncategorized sentinel; no
-    // empty-named category is ever created.
-    if (!categoryName) {
-      items.push({
-        id: crypto.randomUUID(),
-        name: row.name.trim(),
-        categoryId: UNCATEGORIZED_ID,
-      })
-      continue
-    }
-    let categoryId = categoryIdByName.get(categoryName)
-    if (!categoryId) {
-      categoryId = crypto.randomUUID()
-      categoryIdByName.set(categoryName, categoryId)
-      categories.push({
-        id: categoryId,
-        name: categoryName,
-        frequency: FREQUENCY_BY_CATEGORY[categoryName] ?? "unknown",
-      })
-    }
-    items.push({
-      id: crypto.randomUUID(),
-      name: row.name.trim(),
-      categoryId,
-    })
-  }
-  return { categories, items }
-}
-
-// Seed the catalog + categories from the sample JSON on first run (empty
-// persistent stores). Assigns random user defaults when none exist. Safe to
-// call multiple times; it only acts when stores are empty.
+// Seed the catalog + categories on first run (empty persistent stores) from the
+// dataset selected via PUBLIC_DATASET (.env / .env.example); unknown/empty
+// values fall back to DEFAULT_DATASET_ID with a warning. Also assigns random
+// user defaults when none exists. Safe to call multiple times; acts only when
+// stores are empty.
 export function initStores(): void {
   // Apply the persisted theme as early as the store layer loads.
   initTheme()
 
   if ($catalog.get().length === 0) {
-    const { categories, items } = buildSeed()
+    const datasetId = resolveDatasetId(import.meta.env?.PUBLIC_DATASET)
+    const { categories, catalog } = getDataset(datasetId)
     if ($categories.get().length === 0) {
       $categories.set([
         {
@@ -91,7 +53,7 @@ export function initStores(): void {
         ...categories,
       ])
     }
-    $catalog.set(items)
+    $catalog.set(catalog)
   }
   ensureUncategorizedExists()
   // Backfill `frequency` onto any category persisted before this field existed.

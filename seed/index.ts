@@ -116,6 +116,29 @@ export function getDataset(id: string): {
   return { rawItems, categories, catalog }
 }
 
+/**
+ * Resolves which registered dataset to seed from, given a raw candidate id
+ * (typically read from the `PUBLIC_DATASET` env var by `initStores()`).
+ *
+ * Validates `raw` against `DATASETS` and falls back to `DEFAULT_DATASET_ID` for
+ * empty/undefined/unknown values, warning loudly so a typo doesn't silently
+ * seed the wrong catalog.
+ *
+ * Pure (no env access) so callers own the env read and it is trivially
+ * unit-testable — pass any string to validate it without touching `import.meta`.
+ */
+export function resolveDatasetId(raw: string | undefined): string {
+  if (raw && DATASETS.some((d) => d.id === raw)) return raw
+  if (raw) {
+    console.warn(
+      `[seed] PUBLIC_DATASET="${raw}" is not a registered dataset id; ` +
+        `falling back to "${DEFAULT_DATASET_ID}". ` +
+        `Valid ids: ${DATASETS.map((d) => d.id).join(", ")}.`
+    )
+  }
+  return DEFAULT_DATASET_ID
+}
+
 // Backwards-compatible exports for the default dataset (used by the history
 // fixture and existing tests). New code should prefer `getDataset(id)`.
 export const rawItems: RawSeedItem[] = DATASET_ROWS[DEFAULT_DATASET_ID]

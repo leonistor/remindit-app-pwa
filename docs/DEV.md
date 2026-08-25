@@ -140,19 +140,30 @@ Pure functions in `recommender.ts` are framework-agnostic and independently test
 
 ### Seeding
 
-On first run, `initStores()` (called automatically when `src/stores/index.ts` is imported) seeds `$categories` and `$catalog` from the **default** dataset (`DEFAULT_DATASET_ID` = `items_categories`) if the catalog is empty, and assigns a random `$user` if no name is set. Re-running is a no-op once populated.
+On first run, `initStores()` (called automatically when `src/stores/index.ts` is imported) seeds `$categories` and `$catalog` from the dataset selected via the `PUBLIC_DATASET` env var (defaults to `DEFAULT_DATASET_ID` = `items_categories`) if the catalog is empty, and assigns a random `$user` if no name is set. Re-running is a no-op once populated.
 
 #### Seed datasets
 
 The repo-root `seed/` directory is a tracked, extensible registry of sample catalogs (`seed/index.ts`):
 
 - `DATASETS: DatasetMeta[]` — each entry is `{ id, name, file }` (stable key, human label, seed-relative filename).
-- `DEFAULT_DATASET_ID` — which dataset `initStores()` seeds from.
+- `DEFAULT_DATASET_ID` — the fallback dataset `initStores()` seeds from when `PUBLIC_DATASET` is unset/invalid.
+- `resolveDatasetId(raw)` — validates a raw dataset id (typically from `PUBLIC_DATASET`) against `DATASETS`, returning it or falling back to `DEFAULT_DATASET_ID` with a warning.
 - `getDataset(id)` — returns `{ rawItems, categories, catalog }` for any registered dataset.
 
 **Add a dataset:** drop its JSON into `seed/` and append a `DatasetMeta` to `DATASETS`. The loader normalizes it automatically (deterministic ids via the same FNV-1a scheme used by the history fixture).
 
 **Items without a category:** any row whose `category_name` is empty/whitespace is assigned to the `uncategorized` sentinel (`id: "uncategorized"`) and **no empty-named category is created** — consistent with how `removeCategory` already reassigns orphans to `uncategorized`. Curated `frequency` values live in `FREQUENCY_BY_CATEGORY` (English set only); other datasets fall back to `"unknown"`.
+
+#### Selecting the seeded dataset
+
+The catalog is seeded from the dataset named by the `PUBLIC_DATASET` env var — a **public** variable (Rsbuild exposes any `PUBLIC_`-prefixed var to client code via `import.meta.env`) defined in a `.env` file at the project root. Copy `.env.example` to `.env` and set:
+
+```sh
+PUBLIC_DATASET=rick_morty
+```
+
+Valid values are the `id`s registered in `DATASETS`: `items_categories`, `leo_romanian`, `rick_morty`. An empty or unknown value falls back to `DEFAULT_DATASET_ID` and prints a warning. Because Rsbuild inlines env vars at build time, **restart the dev server (or rebuild) after changing the dataset.**
 
 ### Dev tooling
 
