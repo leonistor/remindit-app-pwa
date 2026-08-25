@@ -4,7 +4,9 @@
 import { computed } from "nanostores"
 import { $catalog } from "./catalog"
 import { $categories } from "./categories"
+import { $history } from "./history"
 import { $list } from "./list"
+import { computeRecommendations } from "./recommender"
 import type { CatalogItem, Category, ListEntry } from "./types"
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
 
@@ -171,3 +173,17 @@ export const $catalogByCategory = computed(
     return result
   }
 )
+
+// ---------------------------------------------------------------------------
+// Recommendations
+// ---------------------------------------------------------------------------
+
+// Recomputed whenever history, catalog, categories, or the active list change.
+// Items on the active list and "seldom"-frequency items are always excluded.
+export const $recommendations = computed(
+  [$history, $catalog, $categories, $list],
+  (history, catalog, categories, list) =>
+    computeRecommendations(history, catalog, categories, list),
+)
+
+export type { Recommendation, RecommendationTier } from "./types"

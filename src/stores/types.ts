@@ -68,6 +68,20 @@ export interface User {
   photo: string
 }
 
+// ---------------------------------------------------------------------------
+// Recommendations
+// ---------------------------------------------------------------------------
+
+export type RecommendationTier = "overdue" | "soon" | "frequent"
+
+export interface Recommendation {
+  item: CatalogItem
+  categoryName: string
+  score: number
+  dueRatio: number
+  tier: RecommendationTier
+}
+
 // Sentinel category. Always present in $categories; used as the destination
 // when another category is deleted so catalog items are never orphaned.
 export const UNCATEGORIZED_ID = "uncategorized"

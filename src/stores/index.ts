@@ -119,6 +119,7 @@ export * from "./catalog"
 export * from "./categories"
 export * from "./history"
 export * from "./list"
+export * from "./recommender"
 export * from "./selectors"
 export * from "./theme"
 // Public API surface — import everything from '@/stores'.
