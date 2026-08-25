@@ -1,7 +1,9 @@
+import { ComingSoon } from "@/components/coming-soon"
+
 const HistoryView = () => (
-  <div>
+  <div className="flex flex-col items-center gap-6 py-8">
     <h1 className="font-bold text-2xl">History</h1>
-    <p className="text-muted-foreground">View your shopping history.</p>
+    <ComingSoon />
   </div>
 )
 
