@@ -4,6 +4,37 @@ All notable changes to Remindit will be documented in this file.
 
 ## [Unreleased]
 
+---
+
+## v1.2.0 — 2026-08-25
+
+_Recommendations arrive! Remindit now learns from your shopping history to suggest what you'll likely need next, plus a round of polish and new help content._
+
+### ✨ New Features
+
+- **Item Recommendations**: Remindit now learns from your shopping history and suggests items you'll likely need soon, scored by how overdue they are
+- **Recommendation Indicators**: Items that are due for a re-buy now show a colour-coded indicator, with a legend in the items panel so you always know what the colours mean
+- **Item Detail Drawer**: Tap an item to open a detail view with more information at a glance
+- **About & Help Pages**: Expanded, readable About and Help content to get the most out of Remindit
+- **"Coming Soon" Cards**: Not-yet-ready pages now show a friendly icon card instead of a blank screen
+- **Demo History**: The app can seed a simulated 6-month shopping history so you can explore recommendations right away
+
+### 🔧 Improvements
+
+- **Readability**: Switched to the Atkinson Hyperlegible Next font app-wide for clearer text
+- **Navigation**: Renamed the "List" menu item to "Shopping list" and made it visible on mobile
+- **Version Footer**: A discreet version label now appears in the app for easy reference
+
+### 🐛 Fixes
+
+- Fixed recommendation indicators being clipped inside accordions
+- Moved the recommendation dot to a clean top-right corner badge
+- Right-aligned menu items while keeping the theme toggle pinned to the far right
+
+---
+
+## v1.1.0 — 2026-08-24
+
 ### ✨ New Features
 
 - **Mobile Navigation**: Added responsive hamburger menu for smaller screens, making it easy to navigate on phones and tablets
