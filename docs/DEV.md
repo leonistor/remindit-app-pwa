@@ -40,7 +40,8 @@ All collections are persisted to `localStorage` with `@nanostores/persistent` (k
 | `list.ts`       | `$list`, `addToList`, `removeFromList`, `setEntryChecked`, `clearList`, `createItemAndAddToList`, `removeListEntriesForItem`                            |
 | `history.ts`    | `$history`, `logHistory`, `clearHistory`                                                                                                                |
 | `user.ts`       | `$user`, `getUser`, `updateUser`, `randomUser`                                                                                                          |
-| `selectors.ts`  | computed `$itemsByCategory`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$listItemIds`, `$catalogByCategory` |
+| `selectors.ts`  | computed `$itemsByCategory`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$listItemIds`, `$catalogByCategory`, `$recommendations` |
+| `recommender.ts`| `computeItemStats`, `getExpectedInterval`, `scoreItem`, `computeRecommendations`, `FREQ_TO_DAYS` |
 | `index.ts`      | Barrel exports + `initStores()` (seeds sample data, random user, dev logger)                                                                            |
 
 Import everything from the barrel: `import { $list, addToList } from "@/stores"`.
@@ -67,6 +68,27 @@ Each category carries a `frequency` (`CategoryFrequency`, exported from `types.t
 | `unknown`        | not yet classified |
 
 `addCategory(name, frequency?)` defaults to `"unknown"`. The sentinel and all sample-seeded categories start as `"unknown"`. `normalizeCategoryFrequencies()` (called by `initStores()`) backfills a valid `frequency` onto any category persisted before this field existed, so legacy `localStorage` data stays well-formed.
+
+### Recommendations
+
+A computed store `$recommendations` provides item recommendations based on shopping history. The algorithm scores each catalog item by how "overdue" it is relative to its normal purchase cycle.
+
+**Formula:**
+
+```
+score = due_ratio × confidence_factor
+```
+
+Where:
+- `due_ratio` = `days_since_last_added / expected_interval`
+- `expected_interval` = item's median purchase interval (if ≥3 purchases) → category's frequency default → 14-day global fallback
+- `confidence_factor` = `min(purchase_count / 5, 1)` — penalizes sparse history
+
+**Exclusions:** items in `seldom`-frequency categories and items currently on the active list are never recommended.
+
+**Tiers:** `"overdue"` (due_ratio > 1.0), `"soon"` (0.7–1.0), `"frequent"` (<0.7).
+
+Pure functions in `recommender.ts` are framework-agnostic and independently testable. `$recommendations` (in `selectors.ts`) auto-recomputes when `$history`, `$catalog`, `$categories`, or `$list` change.
 
 ### Seeding
 
