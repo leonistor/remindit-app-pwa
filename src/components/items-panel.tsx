@@ -85,7 +85,7 @@ export default function ItemsPanel({
               {group.categoryName}
             </AccordionTrigger>
             <AccordionContent>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 pt-2">
                 {group.items.map((item) => {
                   const isSelected = selected.has(item.id)
                   return (
