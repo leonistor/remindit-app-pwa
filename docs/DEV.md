@@ -165,6 +165,17 @@ PUBLIC_DATASET=rick_morty
 
 Valid values are the `id`s registered in `DATASETS`: `items_categories`, `leo_romanian`, `rick_morty`. An empty or unknown value falls back to `DEFAULT_DATASET_ID` and prints a warning. Because Rsbuild inlines env vars at build time, **restart the dev server (or rebuild) after changing the dataset.**
 
+#### Seeding history (first run)
+
+In addition to the catalog, `initStores()` seeds a simulated **6-month shopping history** into `$history` on first run (when history is empty), so the recommender has data to surface for new users. Always on; disable by setting `PUBLIC_SEED_HISTORY=0` in `.env`.
+
+The generator lives in `seed/history.ts` (`generateShoppingHistory`) and is **frequency-aware** and **reproducible** (seeded `mulberry32` PRNG, default seed `42`):
+
+- **Adds** follow each item's category `frequency` via the same `FREQ_TO_DAYS` map the recommender uses (`recommender.ts`), so a weekly item is repurchased roughly every 7 days, monthly every ~30, etc. Jitter (±20%) plus a per-item phase offset keeps the last-purchase dates spread, yielding a realistic mix of *overdue / soon / frequent* recommendations at `now`. For the shipped datasets this naturally lands at ~1–10 additions per day.
+- **Shopping sessions** happen every 2–3 days. Each session removes most of the items currently on the list (bought), clustered within a 1–3-hour window; **0–3 items are intentionally left over** (still on the list with no trailing `remove` event — the realistic "didn't get to it" outcome).
+- History is written in a **single `$history.set(...)`** (not one `logHistory` call per event) so first-run seeding stays cheap.
+- Output is deterministic for a given `{catalog, categories, days, seed}`, so recommendations are reproducible across runs.
+
 ### Dev tooling
 
 In dev builds (`import.meta.env.DEV`), every store is attached to `@nanostores/logger` for console inspection.

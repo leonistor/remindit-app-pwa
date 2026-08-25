@@ -8,6 +8,7 @@
 
 import type { CatalogItem, Category, CategoryFrequency } from "@/stores/types"
 import { UNCATEGORIZED_ID } from "@/stores/types"
+import { hashId } from "./hash"
 import rawItemsCategories from "./items_categories.json"
 import rawLeoRomanian from "./leo_romanian.json"
 import rawRickMorty from "./rick_morty.json"
@@ -52,16 +53,9 @@ export const FREQUENCY_BY_CATEGORY: Record<string, CategoryFrequency> = {
   cleaning: "every-3-months",
 }
 
-// FNV-1a 32-bit hash → zero-padded 8-char hex string. Copied verbatim from
-// `tests/fixtures/history.ts` so existing test ids stay reproducible.
-export function hashId(input: string): string {
-  let h = 0x811c9dc5
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i)
-    h = Math.imul(h, 0x01000193)
-  }
-  return (h >>> 0).toString(16).padStart(8, "0")
-}
+// FNV-1a 32-bit hash → zero-padded 8-char hex string. Shared so the loader and
+// the history generator produce stable, reproducible ids. Defined in `./hash`.
+export { hashId }
 
 // Normalizes raw rows into store-shaped categories + catalog. Rows with an empty
 // `category_name` are assigned to `UNCATEGORIZED_ID` and never produce a
@@ -143,3 +137,7 @@ export function resolveDatasetId(raw: string | undefined): string {
 // fixture and existing tests). New code should prefer `getDataset(id)`.
 export const rawItems: RawSeedItem[] = DATASET_ROWS[DEFAULT_DATASET_ID]
 export const { categories, catalog } = buildCategoriesAndCatalog(rawItems)
+
+// Frequency-aware, reproducible history generator used by the first-run seeder
+// (`src/stores/index.ts`). Kept in its own module so the loader stays focused.
+export { generateShoppingHistory } from "./history"

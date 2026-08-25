@@ -2,7 +2,11 @@
 // run, assigns random user defaults, and (dev-only) attaches the logger.
 
 import { logger } from "@nanostores/logger"
-import { getDataset, resolveDatasetId } from "../../seed"
+import {
+  generateShoppingHistory,
+  getDataset,
+  resolveDatasetId,
+} from "../../seed"
 import { $catalog } from "./catalog"
 import {
   $categories,
@@ -54,6 +58,19 @@ export function initStores(): void {
       ])
     }
     $catalog.set(catalog)
+
+    // First-run history seed: a realistic 6-month shopping history so the
+    // recommender has data to surface on a fresh install. Always on; set
+    // PUBLIC_SEED_HISTORY=0 in .env to skip. Only runs when history is empty,
+    // so it is a no-op once a user has any history of their own.
+    if (
+      import.meta.env?.PUBLIC_SEED_HISTORY !== "0" &&
+      $history.get().length === 0
+    ) {
+      $history.set(
+        generateShoppingHistory({ catalog, categories, days: 180, seed: 42 }),
+      )
+    }
   }
   ensureUncategorizedExists()
   // Backfill `frequency` onto any category persisted before this field existed.
