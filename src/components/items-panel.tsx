@@ -1,5 +1,6 @@
 "use client"
 
+import { InfoIcon } from "@phosphor-icons/react"
 import { useStore } from "@nanostores/react"
 import {
   Accordion,
@@ -7,7 +8,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { Button } from "@/components/ui/button"
 import { ItemButton } from "@/components/ui/item-button"
+import {
+  ToggleTooltip,
+  ToggleTooltipContent,
+  ToggleTooltipTrigger,
+} from "@/components/ui/toggle-tooltip"
 import {
   $catalogByCategory,
   $listItemIds,
@@ -34,9 +41,39 @@ export default function ItemsPanel({
 
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-3">
-      <h2 className="text-center font-medium text-base text-foreground uppercase tracking-widest">
-        {title}
-      </h2>
+      <div className="relative flex items-center justify-center">
+        <h2 className="text-center font-medium text-base text-foreground uppercase tracking-widest">
+          {title}
+        </h2>
+        <ToggleTooltip>
+          <ToggleTooltipTrigger asChild>
+            <Button
+              aria-label="Recommendation colour codes"
+              size="icon-sm"
+              variant="ghost"
+              className="absolute end-0 top-1/2 -translate-y-1/2"
+            >
+              <InfoIcon aria-hidden />
+            </Button>
+          </ToggleTooltipTrigger>
+          <ToggleTooltipContent className="max-w-56">
+            <p className="font-medium">Recommendation codes</p>
+            <div className="mt-2 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span
+                  className="size-2 rounded-full bg-destructive"
+                  aria-hidden
+                />
+                <span>Overdue — past its usual buy date</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-warning" aria-hidden />
+                <span>Soon — due for repurchase soon</span>
+              </div>
+            </div>
+          </ToggleTooltipContent>
+        </ToggleTooltip>
+      </div>
       <Accordion
         multiple
         defaultValue={groups.map((g) => g.categoryId)}
