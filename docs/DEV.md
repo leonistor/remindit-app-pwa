@@ -54,6 +54,16 @@ Registry config lives in `components.json` (style `base-nova`, Phosphor icons, `
 - Use `cn()` from `@/lib/utils` and Shark's built-in `variant` / `size` props and semantic tokens (`bg-primary`, `text-muted-foreground`, `border-input`). Avoid ad-hoc `dark:` palette pairs and `space-x/y-*`.
 - The registry docs/examples are the source of truth for each component's API and composition — check them before assuming an Ark/Radix/shadcn API.
 
+## Typography
+
+The application uses the self-hosted **Atkinson Hyperlegible Next** variable font from Fontsource. The font is imported from `src/index.tsx` and its `200–800` weight range is exposed through the global `font-sans` theme token in `src/styles/globals.css`. The `body` applies `font-sans`, so feature components inherit the application font without local font declarations.
+
+Install or update it with:
+
+```bash
+bun add @fontsource-variable/atkinson-hyperlegible-next
+```
+
 ## State architecture
 
 App state lives in **framework-agnostic [nanostores](https://github.com/nanostores/nanostores)** under `src/stores/`. No React imports there — components consume stores via `@nanostores/react`'s `useStore`. This keeps the store layer reusable and easy to test.

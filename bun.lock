@@ -6,6 +6,7 @@
       "name": "remindit-app-pwa",
       "dependencies": {
         "@ark-ui/react": "^5.39.0",
+        "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
         "@nanostores/logger": "^1.1.0",
         "@nanostores/persistent": "^1.3.5",
         "@nanostores/react": "^1.1.0",
@@ -281,6 +282,8 @@
     "@floating-ui/dom": ["@floating-ui/dom@1.8.0", "", { "dependencies": { "@floating-ui/core": "^1.8.0", "@floating-ui/utils": "^0.2.12" } }, "sha512-yXSrzeHZBTZadLOlfyhCkJHNeLJnHRnRInwdZ40L7ZiaAtrBwoYlsDrX3v5zB1Utk7CLfzcOVnVVWoXEky7Ceg=="],
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.12", "", {}, "sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww=="],
+
+    "@fontsource-variable/atkinson-hyperlegible-next": ["@fontsource-variable/atkinson-hyperlegible-next@5.3.0", "", {}, "sha512-UnLzNUy1RWoLDfydAatP4NaRm99X/WbQEph7q/PymJnCFIOOwKOx3pBmp5ys8trO0dM+CKGuJgeZP9fAR4mQpA=="],
 
     "@hono/node-server": ["@hono/node-server@2.1.1", "", { "peerDependencies": { "hono": "^4" } }, "sha512-ELuehkj5VCBdgEw9zs+ivkKwyzzUCSQuE96YmiPvn1ECBoZCczbFXJLeEGMTYjphP6gydh4pHMqEYPVMYUVgQg=="],
 
