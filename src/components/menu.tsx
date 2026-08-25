@@ -9,6 +9,7 @@ import {
 } from "@phosphor-icons/react"
 import { useState } from "react"
 import { NavLink } from "react-router"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   MenuContent,
@@ -16,14 +17,13 @@ import {
   Menu as MenuRoot,
   MenuTrigger,
 } from "@/components/ui/menu"
-import { Separator } from "@/components/ui/separator"
 import { ThemeToggle } from "./theme-toggle"
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `text-sm transition-colors hover:text-foreground ${isActive ? "font-medium text-foreground" : "text-muted-foreground"}`
 
 const navLinks = [
-  { to: "/", label: "List", icon: List },
+  { to: "/", label: "Shopping list", icon: List },
   { to: "/catalog", label: "Catalog", icon: Rows },
   { to: "/history", label: "History", icon: Clock },
   { to: "/settings", label: "Settings", icon: Gear },
@@ -31,14 +31,25 @@ const navLinks = [
   { to: "/help", label: "Help", icon: Question },
 ]
 
+const MOBILE_NAV_LINKS = navLinks.filter((l) => l.to !== "/")
+
 const Menu = () => {
   const [open, setOpen] = useState(false)
 
   return (
     <div className="flex h-16 flex-row items-center gap-2 rounded-md border bg-accent px-4">
-      <img alt="RemindIt logo" className="size-8" src="/remindit-icon.svg" />
-      <Separator orientation="vertical" />
+      <img
+        alt="RemindIt logo"
+        className="size-8 rounded-full"
+        src="/remindit-icon.svg"
+      />
       <span className="font-semibold text-sm">RemindIt</span>
+      <NavLink
+        to="/"
+        className={({ isActive }) => cn(linkClass({ isActive }), "md:hidden")}
+      >
+        Shopping list
+      </NavLink>
 
       {/* Desktop nav — always visible on md+ */}
       <nav className="hidden items-center gap-3 md:flex">
@@ -64,7 +75,7 @@ const Menu = () => {
             </Button>
           </MenuTrigger>
           <MenuContent className="w-52">
-            {navLinks.map(({ to, label, icon: Icon }) => (
+            {MOBILE_NAV_LINKS.map(({ to, label, icon: Icon }) => (
               <MenuItem key={to} value={to} asChild>
                 <NavLink
                   to={to}
