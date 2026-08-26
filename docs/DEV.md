@@ -176,6 +176,10 @@ The generator lives in `seed/history.ts` (`generateShoppingHistory`) and is **fr
 - History is written in a **single `$history.set(...)`** (not one `logHistory` call per event) so first-run seeding stays cheap.
 - Output is deterministic for a given `{catalog, categories, days, seed}`, so recommendations are reproducible across runs.
 
+#### Reset & reseed (runtime)
+
+Beyond the build-time `PUBLIC_DATASET` first run, the app offers a user-initiated **reset & reseed** from **Settings** (`/` → Settings). It wipes all user data — `$list`, `$history`, `$catalog`, `$categories`, and the `$user` profile — then repopulates `$catalog`/`$categories` from a dataset the user picks at reset time (one of the three registered in `seed/index.ts`), regenerating a fresh random `$user` and first-run history. The theme preference (`remindit:theme`) is deliberately preserved. This is powered by `seedFromDataset(datasetId)` in `src/stores/index.ts`, which always overwrites (unlike `initStores`, which only acts when stores are empty).
+
 ### Dev tooling
 
 In dev builds (`import.meta.env.DEV`), every store is attached to `@nanostores/logger` for console inspection.

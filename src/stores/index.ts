@@ -80,6 +80,42 @@ export function initStores(): void {
   if (!user.name) $user.set(randomUser())
 }
 
+// Runtime reset + reseed: wipes all user data (list, history, catalog,
+// categories, profile) and repopulates the catalog/categories from the chosen
+// dataset, regenerating a fresh random user and first-run history. The theme
+// preference (remindit:theme) is intentionally left untouched. Unlike
+// initStores, this always overwrites — it is the user-initiated "reset app"
+// path exposed from Settings, so it does not guard on store emptiness and takes
+// the dataset id explicitly rather than reading the build-time PUBLIC_DATASET.
+export function seedFromDataset(datasetId: string): void {
+  const resolved = resolveDatasetId(datasetId)
+  const { categories, catalog } = getDataset(resolved)
+
+  // Wipe user-generated state first so the reseed starts from a clean slate.
+  $list.set([])
+  $history.set([])
+  $user.set(randomUser())
+
+  $categories.set([
+    {
+      id: UNCATEGORIZED_ID,
+      name: UNCATEGORIZED_NAME,
+      frequency: "unknown",
+    },
+    ...categories,
+  ])
+  $catalog.set(catalog)
+
+  if (import.meta.env?.PUBLIC_SEED_HISTORY !== "0") {
+    $history.set(
+      generateShoppingHistory({ catalog, categories, days: 180, seed: 42 }),
+    )
+  }
+
+  ensureUncategorizedExists()
+  normalizeCategoryFrequencies()
+}
+
 // Run seeding as soon as this module is loaded in the browser.
 initStores()
 
