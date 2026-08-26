@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { FieldInput } from "@ark-ui/react/field";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
+import { FieldInput } from "@ark-ui/react/field"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { cn } from "@/lib/utils"
 
 export const inputVariants = tv({
   base: [
@@ -35,14 +35,14 @@ export const inputVariants = tv({
   defaultVariants: {
     size: "md",
   },
-});
+})
 
 export interface InputProps
   extends Omit<React.ComponentProps<typeof FieldInput>, "size">,
     VariantProps<typeof inputVariants> {}
 
 export const Input = (props: InputProps) => {
-  const { size = "md", type = "text", className, ...rest } = props;
+  const { size = "md", type = "text", className, ...rest } = props
 
   return (
     <FieldInput
@@ -52,5 +52,5 @@ export const Input = (props: InputProps) => {
       type={type}
       {...rest}
     />
-  );
-};
+  )
+}

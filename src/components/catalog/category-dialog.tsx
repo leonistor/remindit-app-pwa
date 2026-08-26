@@ -1,5 +1,9 @@
+import {
+  type ListCollection,
+  useListCollection,
+} from "@ark-ui/react/collection"
 import { useEffect, useState } from "react"
-import { useListCollection, type ListCollection } from "@ark-ui/react/collection"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -21,12 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
 import {
   addCategory,
-  updateCategory,
   type Category,
   type CategoryFrequency,
+  updateCategory,
 } from "@/stores"
 import { FREQUENCY_LABELS, FREQUENCY_OPTIONS } from "./frequency-labels"
 
@@ -106,7 +109,9 @@ export const CategoryDialog = ({
                 }
                 value={[frequency]}
                 onValueChange={(details) =>
-                  setFrequency((details.value[0] as CategoryFrequency) ?? "unknown")
+                  setFrequency(
+                    (details.value[0] as CategoryFrequency) ?? "unknown"
+                  )
                 }
               >
                 <SelectTrigger>

@@ -1,8 +1,8 @@
-import { Item, ItemActions, ItemContent, ItemTitle } from "@/components/ui/item"
-import { Button } from "@/components/ui/button"
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react"
+import { Button } from "@/components/ui/button"
+import { Item, ItemActions, ItemContent, ItemTitle } from "@/components/ui/item"
+import { type CatalogByCategoryItem, removeCatalogItem } from "@/stores"
 import { ConfirmDelete } from "./confirm-delete"
-import { removeCatalogItem, type CatalogByCategoryItem } from "@/stores"
 
 interface CatalogItemRowProps {
   item: CatalogByCategoryItem

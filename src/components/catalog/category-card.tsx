@@ -1,3 +1,6 @@
+import { PencilSimpleIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -5,19 +8,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { ItemGroup } from "@/components/ui/item"
-import { Button } from "@/components/ui/button"
-import { PencilSimpleIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react"
 import {
-  removeCategory,
-  UNCATEGORIZED_ID,
   type CatalogByCategoryAllGroup,
   type CatalogByCategoryItem,
+  removeCategory,
+  UNCATEGORIZED_ID,
 } from "@/stores"
-import { FREQUENCY_LABELS } from "./frequency-labels"
 import { CatalogItemRow } from "./catalog-item-row"
 import { ConfirmDelete } from "./confirm-delete"
+import { FREQUENCY_LABELS } from "./frequency-labels"
 
 interface CategoryCardProps {
   group: CatalogByCategoryAllGroup

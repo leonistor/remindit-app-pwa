@@ -1,21 +1,21 @@
-"use client";
+"use client"
 
-import { Portal } from "@ark-ui/react";
-import { ark } from "@ark-ui/react/factory";
-import { Select as ArkSelect, useSelectContext } from "@ark-ui/react/select";
-import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react";
-import type React from "react";
-import type { VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
-import { inputVariants } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+import { Portal } from "@ark-ui/react"
+import { ark } from "@ark-ui/react/factory"
+import { Select as ArkSelect, useSelectContext } from "@ark-ui/react/select"
+import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react"
+import type React from "react"
+import type { VariantProps } from "tailwind-variants"
+import { inputVariants } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 
-export const useSelect = useSelectContext;
+export const useSelect = useSelectContext
 
-export const SelectContext = ArkSelect.Context;
+export const SelectContext = ArkSelect.Context
 
 export const Select: ArkSelect.RootComponent = (props) => {
-  const { lazyMount = true, unmountOnExit = true, children, ...rest } = props;
+  const { lazyMount = true, unmountOnExit = true, children, ...rest } = props
 
   return (
     <ArkSelect.Root
@@ -28,8 +28,8 @@ export const Select: ArkSelect.RootComponent = (props) => {
 
       <ArkSelect.HiddenSelect />
     </ArkSelect.Root>
-  );
-};
+  )
+}
 
 interface SelectTriggerProps
   extends React.ComponentProps<typeof ArkSelect.Trigger>,
@@ -39,17 +39,11 @@ interface SelectTriggerProps
    *
    * @default false
    */
-  showClear?: boolean;
+  showClear?: boolean
 }
 
 export const SelectTrigger = (props: SelectTriggerProps) => {
-  const {
-    showClear = false,
-    size = "md",
-    className,
-    children,
-    ...rest
-  } = props;
+  const { showClear = false, size = "md", className, children, ...rest } = props
 
   return (
     <ArkSelect.Control data-slot="select-control">
@@ -81,13 +75,13 @@ export const SelectTrigger = (props: SelectTriggerProps) => {
         </div>
       </ArkSelect.Trigger>
     </ArkSelect.Control>
-  );
-};
+  )
+}
 
 export const SelectSeparator = (
   props: React.ComponentProps<typeof Separator>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <Separator
@@ -95,13 +89,13 @@ export const SelectSeparator = (
       data-slot="select-separator"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const SelectValue = (
   props: React.ComponentProps<typeof ArkSelect.ValueText>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkSelect.ValueText
@@ -113,13 +107,13 @@ export const SelectValue = (
       )}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const SelectContent = (
   props: React.ComponentProps<typeof ArkSelect.Content>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <Portal>
@@ -152,19 +146,19 @@ export const SelectContent = (
         />
       </ArkSelect.Positioner>
     </Portal>
-  );
-};
+  )
+}
 
 interface SelectGroupProps
   extends React.ComponentProps<typeof ArkSelect.ItemGroup> {
   /**
    * The heading of the group
    */
-  heading?: string | React.ReactNode;
+  heading?: string | React.ReactNode
 }
 
 export const SelectGroup = (props: SelectGroupProps) => {
-  const { heading, children, ...rest } = props;
+  const { heading, children, ...rest } = props
 
   return (
     <ArkSelect.ItemGroup data-slot="select-group" {...rest}>
@@ -172,13 +166,13 @@ export const SelectGroup = (props: SelectGroupProps) => {
 
       {children}
     </ArkSelect.ItemGroup>
-  );
-};
+  )
+}
 
 export const SelectGroupLabel = (
   props: React.ComponentProps<typeof ArkSelect.ItemGroupLabel>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkSelect.ItemGroupLabel
@@ -190,13 +184,13 @@ export const SelectGroupLabel = (
       data-slot="select-group-label"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const SelectItem = (
   props: React.ComponentProps<typeof ArkSelect.Item>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkSelect.Item
@@ -232,13 +226,13 @@ export const SelectItem = (
         </ArkSelect.ItemIndicator>
       </span>
     </ArkSelect.Item>
-  );
-};
+  )
+}
 
 export const SelectClearTrigger = (
   props: React.ComponentProps<typeof ArkSelect.ClearTrigger>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkSelect.ClearTrigger
@@ -255,13 +249,13 @@ export const SelectClearTrigger = (
       data-slot="select-clear-trigger"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const SelectEmpty = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
-  const { empty } = useSelectContext();
+  const { empty } = useSelectContext()
 
   if (empty) {
     return (
@@ -274,8 +268,8 @@ export const SelectEmpty = (props: React.ComponentProps<typeof ark.div>) => {
         role="presentation"
         {...rest}
       />
-    );
+    )
   }
 
-  return null;
-};
+  return null
+}

@@ -1,16 +1,16 @@
-import { useState } from "react"
-import { FolderPlusIcon, PlusIcon } from "@phosphor-icons/react"
-import { Button } from "@/components/ui/button"
 import { useStore } from "@nanostores/react"
+import { FolderPlusIcon, PlusIcon } from "@phosphor-icons/react"
+import { useState } from "react"
+import { CategoryCard } from "@/components/catalog/category-card"
+import { CategoryDialog } from "@/components/catalog/category-dialog"
+import { ItemDialog } from "@/components/catalog/item-dialog"
+import { Button } from "@/components/ui/button"
 import {
   $catalogByCategoryAll,
   type CatalogByCategoryAllGroup,
   type CatalogByCategoryItem,
   type Category,
 } from "@/stores"
-import { CategoryCard } from "@/components/catalog/category-card"
-import { CategoryDialog } from "@/components/catalog/category-dialog"
-import { ItemDialog } from "@/components/catalog/item-dialog"
 
 interface ItemDialogState {
   open: boolean
@@ -39,8 +39,7 @@ const CatalogView = () => {
     setItemDialog({ open: true, editing: null, defaultCategoryId: categoryId })
   const openEditItem = (item: CatalogByCategoryItem) =>
     setItemDialog({ open: true, editing: item })
-  const openAddCategory = () =>
-    setCategoryDialog({ open: true, editing: null })
+  const openAddCategory = () => setCategoryDialog({ open: true, editing: null })
   const openEditCategory = (group: CatalogByCategoryAllGroup) =>
     setCategoryDialog({
       open: true,

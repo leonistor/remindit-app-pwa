@@ -1,5 +1,10 @@
+import {
+  type ListCollection,
+  useListCollection,
+} from "@ark-ui/react/collection"
+import { useStore } from "@nanostores/react"
 import { useEffect, useState } from "react"
-import { useListCollection, type ListCollection } from "@ark-ui/react/collection"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -21,14 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { useStore } from "@nanostores/react"
 import {
   $categories,
   addCatalogItem,
-  updateCatalogItem,
   type CatalogByCategoryItem,
   type Category,
+  updateCatalogItem,
 } from "@/stores"
 
 interface ItemDialogProps {
@@ -79,10 +82,7 @@ export const ItemDialog = ({
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(details) => onOpenChange(details.open)}
-    >
+    <Dialog open={open} onOpenChange={(details) => onOpenChange(details.open)}>
       <DialogContent>
         <DialogHeader
           title={editingItem ? "Edit item" : "Add item"}
