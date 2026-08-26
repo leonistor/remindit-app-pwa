@@ -7,6 +7,7 @@ import { $categories } from "./categories"
 import { $history } from "./history"
 import { $list } from "./list"
 import { computeRecommendations } from "./recommender"
+import { $selectedSort } from "./ui"
 import type {
   CatalogItem,
   Category,
@@ -122,6 +123,27 @@ export const $selectedView = computed(
         addedAt: entry.addedAt,
       }
     })
+  }
+)
+
+// $selectedView reordered per the user's chosen sort ($selectedSort). "default"
+// keeps list insertion order; the two sort modes are mutually exclusive in the
+// UI. Components that need the raw, unsorted list read $selectedView directly.
+export const $selectedOrdered = computed(
+  [$selectedView, $selectedSort],
+  (view, sort) => {
+    if (sort === "default") return view
+    const copy = [...view]
+    if (sort === "category-name") {
+      copy.sort((a, b) => {
+        const byCategory = a.categoryName.localeCompare(b.categoryName)
+        return byCategory !== 0 ? byCategory : a.name.localeCompare(b.name)
+      })
+    } else {
+      // "last-added" — most recently added first.
+      copy.sort((a, b) => b.addedAt - a.addedAt)
+    }
+    return copy
   }
 )
 
