@@ -6,6 +6,24 @@ All notable changes to Remindit will be documented in this file.
 
 ---
 
+## v1.3.0 — 2026-08-26
+
+_Catalog editing, sorting, and a built-in changelog arrive — plus your panel and list preferences are now remembered._
+
+### ✨ New Features
+
+- **Manage Your Catalog**: Add, edit, and delete catalog items and categories on the Catalog page. Deleting a category moves its items to "Uncategorized"; deleting an item also removes it from your active list
+- **Ordering Controls**: In the shopping list, toggle category grouping and sort by category/name or by most recently added — your choice is remembered
+- **Category Badges**: Items in your shopping list now show a colour-coded category badge above the name
+- **Reset & Reseed**: From Settings, reset the app or reseed it from the selected demo dataset
+- **Changelog Page**: A new in-app Changelog (linked from the footer version and the About page) shows what's new at a glance
+
+### 🔧 Improvements
+
+- **Remembered Panel State**: The open/closed state of category accordions in the catalog is now saved across reloads
+
+---
+
 ## v1.2.0 — 2026-08-25
 
 _Recommendations arrive! Remindit now learns from your shopping history to suggest what you'll likely need next, plus a round of polish and new help content._
