@@ -7,7 +7,12 @@ import { $categories } from "./categories"
 import { $history } from "./history"
 import { $list } from "./list"
 import { computeRecommendations } from "./recommender"
-import type { CatalogItem, Category, ListEntry } from "./types"
+import type {
+  CatalogItem,
+  Category,
+  CategoryFrequency,
+  ListEntry,
+} from "./types"
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
 
 export interface GroupedItem {
@@ -132,7 +137,41 @@ export const $listItemIds = computed(
 export interface CatalogByCategoryItem {
   id: string
   name: string
+  /** The item's category — needed by the management UI to pre-select it. */
+  categoryId: string
 }
+
+// Like $catalogByCategory but includes EVERY category in $categories order —
+// even empty ones and the "uncategorized" sentinel — so the management UI can
+// show, edit, and add into categories that currently hold no items.
+export interface CatalogByCategoryAllGroup {
+  categoryId: string
+  categoryName: string
+  frequency: CategoryFrequency
+  items: CatalogByCategoryItem[]
+}
+
+export const $catalogByCategoryAll = computed(
+  [$catalogView, $categories],
+  (view, categories): CatalogByCategoryAllGroup[] => {
+    const itemsByCategoryId = new Map<string, CatalogByCategoryItem[]>()
+    for (const item of view) {
+      let group = itemsByCategoryId.get(item.categoryId)
+      if (!group) {
+        group = []
+        itemsByCategoryId.set(item.categoryId, group)
+      }
+      group.push({ id: item.id, name: item.name, categoryId: item.categoryId })
+    }
+
+    return categories.map((category) => ({
+      categoryId: category.id,
+      categoryName: category.name,
+      frequency: category.frequency,
+      items: itemsByCategoryId.get(category.id) ?? [],
+    }))
+  }
+)
 
 // Catalog items grouped by category. Backs the refactored ItemsPanel, which
 // renders one AccordionItem per category containing that category's items.
@@ -158,7 +197,11 @@ export const $catalogByCategory = computed(
         group = { categoryName: item.categoryName, items: [] }
         groupByCategoryId.set(item.categoryId, group)
       }
-      group.items.push({ id: item.id, name: item.name })
+      group.items.push({
+        id: item.id,
+        name: item.name,
+        categoryId: item.categoryId,
+      })
     }
 
     const result: CatalogByCategoryGroup[] = []

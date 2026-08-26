@@ -56,6 +56,25 @@ export function renameCategory(id: string, name: string): void {
   $categories.set(next)
 }
 
+// Updates a category's name and/or purchase frequency. The sentinel category
+// cannot be renamed. No history write.
+export function updateCategory(
+  id: string,
+  patch: { name?: string; frequency?: CategoryFrequency }
+): void {
+  if (id === UNCATEGORIZED_ID) return
+  const categories = $categories.get()
+  const index = categories.findIndex((c) => c.id === id)
+  if (index === -1) return
+  const next = categories.slice()
+  next[index] = {
+    ...next[index],
+    ...(patch.name !== undefined ? { name: patch.name.trim() } : {}),
+    ...(patch.frequency !== undefined ? { frequency: patch.frequency } : {}),
+  }
+  $categories.set(next)
+}
+
 // Deletes a category and reassigns its catalog items to "uncategorized".
 // No history write. The sentinel category itself cannot be deleted.
 export function removeCategory(id: string): void {
