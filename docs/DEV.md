@@ -9,7 +9,7 @@ DrawerProvider
 ├── Menu (h-16 bar: logo, nav links, theme toggle)
 ├── <Outlet /> (page content)
 ├── ItemDetailDrawer (context-managed, hidden by default)
-└── VersionFooter (hidden on "/")
+└── Footer (hidden on "/")
 ```
 
 ### Main view (`/`)

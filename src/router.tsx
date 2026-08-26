@@ -3,7 +3,7 @@ import { DrawerProvider } from "./components/drawer-context"
 import { ItemDetailDrawer } from "./components/item-detail-drawer"
 import Menu from "./components/menu"
 import ShoppingPanels from "./components/shopping-panels"
-import { VersionFooter } from "./components/version-footer"
+import { Footer } from "./components/footer"
 import AboutView from "./views/about"
 import CatalogView from "./views/catalog"
 import HelpView from "./views/help"
@@ -22,7 +22,7 @@ function Layout() {
           <div className="min-h-0 grow">
             <Outlet />
           </div>
-          {!isHome && <VersionFooter />}
+          {!isHome && <Footer />}
         </div>
       </div>
       <ItemDetailDrawer />
