@@ -14,7 +14,7 @@ const ChangelogView = () => (
           <h1 className="font-bold text-2xl">{children}</h1>
         ),
         h2: ({ children }) => (
-          <h2 className="mt-6 border-t border-border pt-6 font-semibold text-xl first:mt-0 first:border-t-0 first:pt-0">
+          <h2 className="mt-6 border-border border-t pt-6 font-semibold text-xl first:mt-0 first:border-t-0 first:pt-0">
             {children}
           </h2>
         ),
@@ -29,7 +29,7 @@ const ChangelogView = () => (
             {children}
           </ul>
         ),
-        hr: () => <hr className="border-t border-border" />,
+        hr: () => <hr className="border-border border-t" />,
         strong: ({ children }) => (
           <strong className="font-medium text-foreground">{children}</strong>
         ),

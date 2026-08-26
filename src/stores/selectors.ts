@@ -7,7 +7,6 @@ import { $categories } from "./categories"
 import { $history } from "./history"
 import { $list } from "./list"
 import { computeRecommendations } from "./recommender"
-import { $selectedSort } from "./ui"
 import type {
   CatalogItem,
   Category,
@@ -15,6 +14,7 @@ import type {
   ListEntry,
 } from "./types"
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
+import { $selectedSort } from "./ui"
 
 export interface GroupedItem {
   entry: ListEntry

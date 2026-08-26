@@ -10,9 +10,9 @@ import {
   $selectedOrdered,
   $selectedSort,
   removeFromList,
+  type SelectedSort,
   setSelectedCategoriesVisible,
   setSelectedSort,
-  type SelectedSort,
 } from "@/stores"
 
 // Renders the active list ($selectedOrdered) as success-colored item chips that
@@ -62,9 +62,9 @@ export const ShoppingListPanel = () => {
     const next = new Set(details.value)
     setSelectedCategoriesVisible(next.has("categories"))
 
-    const activeSorts = (["category-name", "last-added"] as SelectedSort[]).filter(
-      (s) => next.has(s)
-    )
+    const activeSorts = (
+      ["category-name", "last-added"] as SelectedSort[]
+    ).filter((s) => next.has(s))
     if (activeSorts.length === 0) {
       setSelectedSort("default")
       return
@@ -95,28 +95,28 @@ export const ShoppingListPanel = () => {
           className="absolute end-0.5 top-1/2 -translate-y-1/2"
           aria-label="Selected items display and ordering"
         >
-        <ToggleGroupItem
-          value="categories"
-          aria-label="Show or hide categories"
-          title="Show/hide categories"
-        >
-          <TagIcon aria-hidden />
-        </ToggleGroupItem>
-        <ToggleGroupItem
-          value="category-name"
-          aria-label="Sort by category then item name"
-          title="Sort by category, then name"
-        >
-          <SortAscendingIcon aria-hidden />
-        </ToggleGroupItem>
-        <ToggleGroupItem
-          value="last-added"
-          aria-label="Sort by last added first"
-          title="Sort by last added first"
-        >
-          <ClockIcon aria-hidden />
-        </ToggleGroupItem>
-      </ToggleGroup>
+          <ToggleGroupItem
+            value="categories"
+            aria-label="Show or hide categories"
+            title="Show/hide categories"
+          >
+            <TagIcon aria-hidden />
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="category-name"
+            aria-label="Sort by category then item name"
+            title="Sort by category, then name"
+          >
+            <SortAscendingIcon aria-hidden />
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="last-added"
+            aria-label="Sort by last added first"
+            title="Sort by last added first"
+          >
+            <ClockIcon aria-hidden />
+          </ToggleGroupItem>
+        </ToggleGroup>
       </div>
       <div
         className={
