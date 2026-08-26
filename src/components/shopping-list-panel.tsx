@@ -2,7 +2,7 @@
 
 import { useStore } from "@nanostores/react"
 import { useCallback, useRef, useState } from "react"
-import { ItemButton } from "@/components/ui/item-button"
+import { ShoppingItem } from "@/components/shopping-item"
 import { $selectedView, removeFromList } from "@/stores"
 
 export interface ShoppingListPanelProps {
@@ -67,9 +67,9 @@ export const ShoppingListPanel = ({
                     : "fade-in zoom-in-95 animate-in duration-200"
                 }
               >
-                <ItemButton
+                <ShoppingItem
                   name={entry.name}
-                  purpose="removable"
+                  categoryName={entry.categoryName}
                   onClick={() => handleRemove(entry.entryId)}
                   disabled={isRemoving}
                 />

@@ -54,6 +54,13 @@ Registry config lives in `components.json` (style `base-nova`, Phosphor icons, `
 - Use `cn()` from `@/lib/utils` and Shark's built-in `variant` / `size` props and semantic tokens (`bg-primary`, `text-muted-foreground`, `border-input`). Avoid ad-hoc `dark:` palette pairs and `space-x/y-*`.
 - The registry docs/examples are the source of truth for each component's API and composition — check them before assuming an Ark/Radix/shadcn API.
 
+### Item display components
+
+Two feature components render items; pick the right one for the context:
+
+- **`ItemButton`** (`src/components/ui/item-button.tsx`) — used for *available* catalog items. Shows only the item name and supports `selectable` / `removable` / `recommendation` purposes plus a recommendation-tier dot.
+- **`ShoppingItem`** (`src/components/shopping-item.tsx`) — used for *selected* list items. Renders a Shark UI `Badge` (category label, defaults to `"Uncategorized"`) above the item name, styled with the success/removable look. Props: `name`, `categoryName?`, **`showCategory`** (boolean, defaults to `true` — hides the Badge when `false`), `disabled?`, `onClick?`, `className?`. Left-aligned via `items-start`.
+
 ## Typography
 
 The application uses the self-hosted **Atkinson Hyperlegible Next** variable font from Fontsource. The font is imported from `src/index.tsx` and its `200–800` weight range is exposed through the global `font-sans` theme token in `src/styles/globals.css`. The `body` applies `font-sans`, so feature components inherit the application font without local font declarations.
