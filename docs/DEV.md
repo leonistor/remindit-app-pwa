@@ -40,7 +40,7 @@ A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Lay
 
 ## UI components (Shark UI)
 
-Our primary UI framework is **Shark UI** — a shadcn-style component registry built on top of [Ark UI](https://ark-ui.com). Components live in `src/components/ui/*` and are added from the registry with the shadcn CLI:
+Our primary UI framework is **Shark UI** — a shadcn-style component registry built on top of [Ark UI](https://ark-ui.com). Shark UI is the framework; Ark UI is only its internal foundation. Components live in `src/components/ui/*` and are added from the registry with the shadcn CLI:
 
 ```bash
 bunx shadcn add @shark/<component>
@@ -97,6 +97,7 @@ All collections are persisted to `localStorage` with `@nanostores/persistent` (k
 | `user.ts`       | `$user`, `getUser`, `updateUser`, `randomUser`                                                                                                          |
 | `selectors.ts`  | computed `$itemsByCategory`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$listItemIds`, `$catalogByCategory`, `$recommendations` |
 | `recommender.ts`| `computeItemStats`, `getExpectedInterval`, `scoreItem`, `computeRecommendations`, `FREQ_TO_DAYS` |
+| `ui.ts`         | UI-preference state — `$accordionOpen`, `setAccordionOpen` (persists the available-items panel's accordion open-state to `localStorage`) |
 | `index.ts`      | Barrel exports + `initStores()` (seeds sample data, random user, dev logger)                                                                            |
 
 Import everything from the barrel: `import { $list, addToList } from "@/stores"`.

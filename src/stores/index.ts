@@ -139,4 +139,5 @@ export * from "./selectors"
 export * from "./theme"
 // Public API surface — import everything from '@/stores'.
 export * from "./types"
+export * from "./ui"
 export * from "./user"

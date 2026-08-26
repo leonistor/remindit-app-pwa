@@ -16,12 +16,14 @@ import {
   ToggleTooltipTrigger,
 } from "@/components/ui/toggle-tooltip"
 import {
+  $accordionOpen,
   $catalogByCategory,
   $listItemIds,
   $recommendations,
   $selectedView,
   addToList,
   removeFromList,
+  setAccordionOpen,
 } from "@/stores"
 import type { RecommendationTier } from "@/stores/types"
 
@@ -33,6 +35,8 @@ export default function ItemsPanel({
   const groups = useStore($catalogByCategory)
   const selected = useStore($listItemIds)
   const recommendations = useStore($recommendations)
+  const open = useStore($accordionOpen)
+  const openValue = open ?? groups.map((g) => g.categoryId)
 
   const tierByItemId = new Map<string, RecommendationTier>()
   for (const rec of recommendations) {
@@ -76,7 +80,8 @@ export default function ItemsPanel({
       </div>
       <Accordion
         multiple
-        defaultValue={groups.map((g) => g.categoryId)}
+        value={openValue}
+        onValueChange={(details) => setAccordionOpen(details.value)}
         className="mt-3 min-h-0 flex-1 overflow-y-auto"
       >
         {groups.map((group) => (
