@@ -1,6 +1,19 @@
+import { Link } from "react-router"
+
 const AboutView = () => (
   <div className="mx-auto flex max-w-2xl flex-col gap-6 py-8">
     <h1 className="font-bold text-2xl">About</h1>
+
+    <p className="text-muted-foreground">
+      See what&rsquo;s new in{" "}
+      <Link
+        className="text-primary underline underline-offset-4 hover:opacity-90"
+        to="/changelog"
+      >
+        the changelog
+      </Link>
+      .
+    </p>
 
     <p className="text-muted-foreground">
       RemindIt is a Progressive Web App for managing your personal shopping

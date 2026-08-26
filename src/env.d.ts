@@ -8,3 +8,13 @@ declare module "*.svg?react" {
   const ReactComponent: React.FunctionComponent<React.SVGProps<SVGSVGElement>>
   export default ReactComponent
 }
+
+/**
+ * Imports a Markdown file's raw source as a string. Rspack is configured
+ * (rsbuild.config.ts) to treat `.md` as `asset/source`, used to load
+ * CHANGELOG.md for the changelog view.
+ */
+declare module "*.md" {
+  const content: string
+  export default content
+}

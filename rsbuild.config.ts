@@ -17,6 +17,13 @@ export default defineConfig({
   alias: {
     "@": "./src",
   },
+  tools: {
+    rspack: {
+      module: {
+        rules: [{ test: /\.md$/, type: "asset/source" }],
+      },
+    },
+  },
   server: {
     host: "0.0.0.0",
     printUrls({ urls }) {
