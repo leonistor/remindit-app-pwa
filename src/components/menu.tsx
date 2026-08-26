@@ -9,7 +9,7 @@ import {
 } from "@phosphor-icons/react"
 import { useState } from "react"
 import { NavLink } from "react-router"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/custom/button"
 import {
   MenuContent,
   MenuItem,

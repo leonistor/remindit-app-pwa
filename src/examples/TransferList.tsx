@@ -3,7 +3,7 @@
 import { createListCollection } from "@ark-ui/react"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import React from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/custom/button"
 import { Item } from "@/components/ui/item"
 import {
   Listbox,

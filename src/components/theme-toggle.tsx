@@ -7,7 +7,7 @@ import {
   MoonIcon,
   SunIcon,
 } from "@phosphor-icons/react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/custom/button"
 import { type ThemeMode, themeStore } from "@/stores/theme"
 
 const OPTIONS: Record<ThemeMode, { label: string; Icon: Icon }> = {

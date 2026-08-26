@@ -4,7 +4,7 @@ import {
 } from "@ark-ui/react/collection"
 import { useStore } from "@nanostores/react"
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/custom/button"
 import {
   Dialog,
   DialogBody,

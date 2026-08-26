@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/custom/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import {
   Dialog,

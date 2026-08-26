@@ -1,5 +1,5 @@
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/custom/button"
 import { Item, ItemActions, ItemContent, ItemTitle } from "@/components/ui/item"
 import { type CatalogByCategoryItem, removeCatalogItem } from "@/stores"
 import { ConfirmDelete } from "./confirm-delete"

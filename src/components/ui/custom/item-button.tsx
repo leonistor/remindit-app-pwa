@@ -1,5 +1,5 @@
-import type { ButtonProps } from "@/components/ui/button"
-import { Button } from "@/components/ui/button"
+import type { ButtonProps } from "./button"
+import { Button } from "./button"
 import { cn } from "@/lib/utils"
 import type { RecommendationTier } from "@/stores/types"
 

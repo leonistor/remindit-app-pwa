@@ -10,7 +10,7 @@ import { Portal } from "@ark-ui/react/portal"
 import { XIcon } from "lucide-react"
 import React from "react"
 import { tv, type VariantProps } from "tailwind-variants"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/custom/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 

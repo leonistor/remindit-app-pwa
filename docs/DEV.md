@@ -54,6 +54,17 @@ Registry config lives in `components.json` (style `base-nova`, Phosphor icons, `
 - Use `cn()` from `@/lib/utils` and Shark's built-in `variant` / `size` props and semantic tokens (`bg-primary`, `text-muted-foreground`, `border-input`). Avoid ad-hoc `dark:` palette pairs and `space-x/y-*`.
 - The registry docs/examples are the source of truth for each component's API and composition — check them before assuming an Ark/Radix/shadcn API.
 
+#### Registry vs. custom components
+
+Components are split between **registry-managed** primitives in `src/components/ui/*` (installed via
+`bunx shadcn add @shark/<component>`) and **hand-maintained / derived** components in
+`src/components/ui/custom/*` that must never be regenerated from the CLI. The custom set currently
+holds `button` (our fork of the Shark button — adds `success`/`info` variants used by `ShoppingItem`
+and `ItemButton`), plus the project-specific `item-button` and `toggle-tooltip`. **Do not run
+`shadcn add @shark/button`** — the registry HEAD drops those variants and would break the build.
+See [`DEV-COMPONENTS.md`](./DEV-COMPONENTS.md) for the full registry-vs-custom split and the latest
+upstream update-check findings.
+
 ### Item display components
 
 Two feature components render items; pick the right one for the context:

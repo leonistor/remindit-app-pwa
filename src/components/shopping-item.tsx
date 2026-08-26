@@ -1,7 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/custom/button"
 import { cn } from "@/lib/utils"
 import { UNCATEGORIZED_NAME } from "@/stores/types"
 

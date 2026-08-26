@@ -4,7 +4,7 @@ import { ark } from "@ark-ui/react/factory"
 import { Popover as ArkPopover, usePopoverContext } from "@ark-ui/react/popover"
 import { Portal } from "@ark-ui/react/portal"
 import { XIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/custom/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 

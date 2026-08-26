@@ -3,7 +3,7 @@ import {
   useListCollection,
 } from "@ark-ui/react/collection"
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/custom/button"
 import {
   Dialog,
   DialogBody,

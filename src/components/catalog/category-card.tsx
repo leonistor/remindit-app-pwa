@@ -1,6 +1,6 @@
 import { PencilSimpleIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/custom/button"
 import {
   Card,
   CardAction,

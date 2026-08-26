@@ -4,7 +4,7 @@ import { useState } from "react"
 import { CategoryCard } from "@/components/catalog/category-card"
 import { CategoryDialog } from "@/components/catalog/category-dialog"
 import { ItemDialog } from "@/components/catalog/item-dialog"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/custom/button"
 import {
   $catalogByCategoryAll,
   type CatalogByCategoryAllGroup,
