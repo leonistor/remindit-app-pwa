@@ -66,7 +66,7 @@ function shuffle<T>(arr: T[], rng: () => number): T[] {
  * @param seed        PRNG seed; same seed + inputs → identical output.
  */
 export function generateShoppingHistory(
-  opts: GenerateHistoryOptions,
+  opts: GenerateHistoryOptions
 ): HistoryEvent[] {
   const { catalog, categories } = opts
   const days = opts.days ?? DEFAULT_HISTORY_DAYS
@@ -129,7 +129,7 @@ export function generateShoppingHistory(
 
     // --- Daily adds: items that are due and not already on the list. ---
     const due = catalog.filter(
-      (item) => d >= (nextAddDay.get(item.id) ?? 0) && !cart.has(item.id),
+      (item) => d >= (nextAddDay.get(item.id) ?? 0) && !cart.has(item.id)
     )
     // A realistic day sees ~1–10 additions; cap protects the busiest days.
     for (const item of shuffle(due, rng).slice(0, 10)) {

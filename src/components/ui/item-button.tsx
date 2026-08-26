@@ -1,7 +1,7 @@
 import type { ButtonProps } from "@/components/ui/button"
 import { Button } from "@/components/ui/button"
-import type { RecommendationTier } from "@/stores/types"
 import { cn } from "@/lib/utils"
+import type { RecommendationTier } from "@/stores/types"
 
 type ItemPurpose = "selectable" | "removable" | "recommendation"
 
@@ -30,7 +30,7 @@ export interface ItemButtonProps {
 
 function purposeToVariant(
   purpose: ItemPurpose,
-  isSelected: boolean,
+  isSelected: boolean
 ): NonNullable<ButtonProps["variant"]> {
   switch (purpose) {
     case "selectable":
@@ -66,7 +66,7 @@ export const ItemButton = ({
         <span
           className={cn(
             "absolute -top-0.5 -right-0.5 inline-block size-2 rounded-full ring-2 ring-background",
-            dotColor,
+            dotColor
           )}
           aria-hidden
         />

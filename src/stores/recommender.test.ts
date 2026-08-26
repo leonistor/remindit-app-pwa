@@ -9,7 +9,6 @@ import { $catalog } from "@/stores/catalog"
 import { $categories } from "@/stores/categories"
 import { $history } from "@/stores/history"
 import { $list } from "@/stores/list"
-import { $recommendations } from "@/stores/selectors"
 import {
   computeItemStats,
   computeRecommendations,
@@ -17,6 +16,7 @@ import {
   getExpectedInterval,
   scoreItem,
 } from "@/stores/recommender"
+import { $recommendations } from "@/stores/selectors"
 import type { CatalogItem, Category, HistoryEvent } from "@/stores/types"
 
 // ---------------------------------------------------------------------------
@@ -29,7 +29,7 @@ function addEvent(
   itemId: string,
   categoryId: string,
   daysAgo: number,
-  now: number,
+  now: number
 ): HistoryEvent {
   return {
     id: crypto.randomUUID(),
@@ -45,7 +45,7 @@ function removeEvent(
   itemId: string,
   categoryId: string,
   daysAgo: number,
-  now: number,
+  now: number
 ): HistoryEvent {
   return {
     id: crypto.randomUUID(),
@@ -83,8 +83,14 @@ const SEED_CATALOG: CatalogItem[] = [
 describe("FREQ_TO_DAYS", () => {
   it("maps every CategoryFrequency slug to a positive number", () => {
     const slugs = [
-      "daily", "every-2-3-days", "weekly", "every-2-weeks",
-      "monthly", "every-3-months", "seldom", "unknown",
+      "daily",
+      "every-2-3-days",
+      "weekly",
+      "every-2-weeks",
+      "monthly",
+      "every-3-months",
+      "seldom",
+      "unknown",
     ] as const
 
     for (const slug of slugs) {
@@ -346,17 +352,13 @@ describe("computeRecommendations", () => {
   })
 
   it("excludes items with 'seldom' frequency", () => {
-    const history = [
-      addEvent("item-rare", "cat-seldom", 5, NOW),
-    ]
+    const history = [addEvent("item-rare", "cat-seldom", 5, NOW)]
     const recs = computeRecommendations(history, catalog, categories, [], NOW)
     expect(recs.find((r) => r.item.id === "item-rare")).toBeUndefined()
   })
 
   it("excludes items currently on the active list", () => {
-    const history = [
-      addEvent("item-milk", "cat-fridge", 10, NOW),
-    ]
+    const history = [addEvent("item-milk", "cat-fridge", 10, NOW)]
     const list = [{ itemId: "item-milk", id: "e1", checked: false, addedAt: 0 }]
     const recs = computeRecommendations(history, catalog, categories, list, NOW)
     expect(recs.find((r) => r.item.id === "item-milk")).toBeUndefined()
@@ -390,11 +392,19 @@ describe("computeRecommendations", () => {
   })
 
   it("falls back to 'Uncategorized' for missing category", () => {
-    const orphanItem: CatalogItem = { id: "item-orphan", name: "Orphan", categoryId: "missing-cat" }
-    const history = [
-      addEvent("item-orphan", "missing-cat", 10, NOW),
-    ]
-    const recs = computeRecommendations(history, [...catalog, orphanItem], categories, [], NOW)
+    const orphanItem: CatalogItem = {
+      id: "item-orphan",
+      name: "Orphan",
+      categoryId: "missing-cat",
+    }
+    const history = [addEvent("item-orphan", "missing-cat", 10, NOW)]
+    const recs = computeRecommendations(
+      history,
+      [...catalog, orphanItem],
+      categories,
+      [],
+      NOW
+    )
     const orphan = recs.find((r) => r.item.id === "item-orphan")
     expect(orphan).toBeDefined()
     expect(orphan?.categoryName).toBe("Uncategorized")

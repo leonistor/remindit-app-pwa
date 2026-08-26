@@ -1,14 +1,14 @@
-"use client";
+"use client"
 
 import {
   ScrollArea as ArkScrollArea,
   useScrollAreaContext,
-} from "@ark-ui/react/scroll-area";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
+} from "@ark-ui/react/scroll-area"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { cn } from "@/lib/utils"
 
-export const useScrollArea = useScrollAreaContext;
+export const useScrollArea = useScrollAreaContext
 
 const scrollAreaVariants = tv({
   base: [
@@ -33,14 +33,14 @@ const scrollAreaVariants = tv({
   defaultVariants: {
     scrollFade: false,
   },
-});
+})
 
 interface ScrollAreaProps
   extends React.ComponentProps<typeof ArkScrollArea.Root>,
     VariantProps<typeof scrollAreaVariants> {}
 
 export const ScrollArea = (props: ScrollAreaProps) => {
-  const { scrollFade = false, className, children, ...rest } = props;
+  const { scrollFade = false, className, children, ...rest } = props
 
   return (
     <ArkScrollArea.Root
@@ -62,13 +62,13 @@ export const ScrollArea = (props: ScrollAreaProps) => {
 
       <ArkScrollArea.Corner data-slot="scroll-area-corner" />
     </ArkScrollArea.Root>
-  );
-};
+  )
+}
 
 export const ScrollAreaScrollbar = (
   props: React.ComponentProps<typeof ArkScrollArea.Scrollbar>
 ) => {
-  const { orientation, className, ...rest } = props;
+  const { orientation, className, ...rest } = props
 
   return (
     <ArkScrollArea.Scrollbar
@@ -95,5 +95,5 @@ export const ScrollAreaScrollbar = (
         data-slot="scroll-area-thumb"
       />
     </ArkScrollArea.Scrollbar>
-  );
-};
+  )
+}

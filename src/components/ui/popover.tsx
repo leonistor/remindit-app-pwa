@@ -1,17 +1,14 @@
-"use client";
+"use client"
 
-import { ark } from "@ark-ui/react/factory";
-import {
-  Popover as ArkPopover,
-  usePopoverContext,
-} from "@ark-ui/react/popover";
-import { Portal } from "@ark-ui/react/portal";
-import { XIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ark } from "@ark-ui/react/factory"
+import { Popover as ArkPopover, usePopoverContext } from "@ark-ui/react/popover"
+import { Portal } from "@ark-ui/react/portal"
+import { XIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
 
-export const usePopover = usePopoverContext;
+export const usePopover = usePopoverContext
 
 export const Popover = (
   props: React.ComponentProps<typeof ArkPopover.Root>
@@ -21,7 +18,7 @@ export const Popover = (
     unmountOnExit = true,
     modal = true,
     ...rest
-  } = props;
+  } = props
 
   return (
     <ArkPopover.Root
@@ -31,20 +28,20 @@ export const Popover = (
       unmountOnExit={unmountOnExit}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const PopoverTrigger = (
   props: React.ComponentProps<typeof ArkPopover.Trigger>
-) => <ArkPopover.Trigger data-slot="popover-trigger" {...props} />;
+) => <ArkPopover.Trigger data-slot="popover-trigger" {...props} />
 
 export const PopoverAnchor = (
   props: React.ComponentProps<typeof ArkPopover.Anchor>
-) => <ArkPopover.Anchor data-slot="popover-anchor" {...props} />;
+) => <ArkPopover.Anchor data-slot="popover-anchor" {...props} />
 
 export const PopoverPositioner = (
   props: React.ComponentProps<typeof ArkPopover.Positioner>
-) => <ArkPopover.Positioner data-slot="popover-positioner" {...props} />;
+) => <ArkPopover.Positioner data-slot="popover-positioner" {...props} />
 
 interface PopoverContentProps
   extends React.ComponentProps<typeof ArkPopover.Content> {
@@ -53,11 +50,11 @@ interface PopoverContentProps
    *
    * @default true
    */
-  showCloseButton?: boolean;
+  showCloseButton?: boolean
 }
 
 export const PopoverContent = (props: PopoverContentProps) => {
-  const { showCloseButton = false, className, children, ...rest } = props;
+  const { showCloseButton = false, className, children, ...rest } = props
 
   return (
     <Portal>
@@ -90,27 +87,38 @@ export const PopoverContent = (props: PopoverContentProps) => {
           {children}
 
           {!!showCloseButton && (
-            <PopoverClose render={<Button aria-label="Close" className="absolute inset-e-2 top-2 opacity-64 hover:opacity-100" size="icon-sm" variant="ghost" />}><XIcon /></PopoverClose>
+            <PopoverClose
+              render={
+                <Button
+                  aria-label="Close"
+                  className="absolute inset-e-2 top-2 opacity-64 hover:opacity-100"
+                  size="icon-sm"
+                  variant="ghost"
+                />
+              }
+            >
+              <XIcon />
+            </PopoverClose>
           )}
         </ArkPopover.Content>
       </PopoverPositioner>
     </Portal>
-  );
-};
+  )
+}
 
 interface PopoverHeaderProps extends React.ComponentProps<typeof ark.div> {
   /**
    * The description of the popover header
    */
-  description?: string;
+  description?: string
   /**
    * The title of the popover header
    */
-  title?: string;
+  title?: string
 }
 
 export const PopoverHeader = (props: PopoverHeaderProps) => {
-  const { title, description, children, className, ...rest } = props;
+  const { title, description, children, className, ...rest } = props
 
   return (
     <ark.div
@@ -130,13 +138,13 @@ export const PopoverHeader = (props: PopoverHeaderProps) => {
         children
       )}
     </ark.div>
-  );
-};
+  )
+}
 
 export const PopoverTitle = (
   props: React.ComponentProps<typeof ArkPopover.Title>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkPopover.Title
@@ -144,13 +152,13 @@ export const PopoverTitle = (
       data-slot="popover-title"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const PopoverDescription = (
   props: React.ComponentProps<typeof ArkPopover.Description>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkPopover.Description
@@ -158,11 +166,11 @@ export const PopoverDescription = (
       data-slot="popover-description"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const PopoverBody = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ScrollArea>
@@ -179,11 +187,11 @@ export const PopoverBody = (props: React.ComponentProps<typeof ark.div>) => {
         {...rest}
       />
     </ScrollArea>
-  );
-};
+  )
+}
 
 export const PopoverFooter = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -198,17 +206,17 @@ export const PopoverFooter = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="popover-footer"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const PopoverClose = (
   props: React.ComponentProps<typeof ArkPopover.CloseTrigger>
-) => <ArkPopover.CloseTrigger data-slot="popover-close-trigger" {...props} />;
+) => <ArkPopover.CloseTrigger data-slot="popover-close-trigger" {...props} />
 
 export const PopoverArrow = (
   props: React.ComponentProps<typeof ArkPopover.Arrow>
 ) => {
-  const { style, ...rest } = props;
+  const { style, ...rest } = props
 
   return (
     <ArkPopover.Arrow
@@ -224,5 +232,5 @@ export const PopoverArrow = (
     >
       <ArkPopover.ArrowTip className="border-s border-t" />
     </ArkPopover.Arrow>
-  );
-};
+  )
+}

@@ -39,8 +39,9 @@ const HelpView = () => (
             aria-hidden
             className="mr-1 inline-block size-2 -translate-y-px rounded-full bg-warning align-middle"
           />
-          An <strong>amber</strong> pip means it&rsquo;s <strong>due soon</strong>.
-          Tap the info icon in the catalog title for the full legend.
+          An <strong>amber</strong> pip means it&rsquo;s{" "}
+          <strong>due soon</strong>. Tap the info icon in the catalog title for
+          the full legend.
         </li>
         <li>
           Recommendations learn from your history, so they improve the more you

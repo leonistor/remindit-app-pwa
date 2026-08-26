@@ -1,13 +1,7 @@
 import { useState } from "react"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
-import { seedFromDataset } from "@/stores"
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import {
   Dialog,
   DialogBody,
@@ -22,6 +16,7 @@ import {
   SegmentGroupItem,
   SegmentGroupItemText,
 } from "@/components/ui/segment-group"
+import { seedFromDataset } from "@/stores"
 
 // First-run dataset (build-time) used as the default picker selection.
 const INITIAL_DATASET = import.meta.env.PUBLIC_DATASET ?? DEFAULT_DATASET_ID
@@ -52,10 +47,7 @@ const SettingsView = () => {
           </p>
         </CardContent>
         <CardFooter>
-          <Dialog
-            open={open}
-            onOpenChange={(details) => setOpen(details.open)}
-          >
+          <Dialog open={open} onOpenChange={(details) => setOpen(details.open)}>
             <DialogTrigger asChild>
               <Button variant="destructive">Reset app & reseed</Button>
             </DialogTrigger>
@@ -73,7 +65,7 @@ const SettingsView = () => {
                     setDataset(
                       typeof details.value === "string"
                         ? details.value
-                        : details.value[0] ?? DEFAULT_DATASET_ID,
+                        : (details.value[0] ?? DEFAULT_DATASET_ID)
                     )
                   }
                 >

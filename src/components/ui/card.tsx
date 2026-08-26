@@ -1,9 +1,9 @@
-import { ark } from "@ark-ui/react/factory";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
+import { ark } from "@ark-ui/react/factory"
+import { tv, type VariantProps } from "tailwind-variants"
+import { cn } from "@/lib/utils"
 
 export const Card = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -21,8 +21,8 @@ export const Card = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="card"
       {...rest}
     />
-  );
-};
+  )
+}
 
 const cardMediaVariants = tv({
   base: [
@@ -44,14 +44,14 @@ const cardMediaVariants = tv({
   defaultVariants: {
     variant: "default",
   },
-});
+})
 
 interface CardMediaProps
   extends React.ComponentProps<typeof ark.div>,
     VariantProps<typeof cardMediaVariants> {}
 
 export const CardMedia = (props: CardMediaProps) => {
-  const { variant = "default", className, ...rest } = props;
+  const { variant = "default", className, ...rest } = props
 
   return (
     <ark.div
@@ -60,22 +60,22 @@ export const CardMedia = (props: CardMediaProps) => {
       data-variant={variant}
       {...rest}
     />
-  );
-};
+  )
+}
 
 interface HeaderProps extends React.ComponentProps<typeof ark.div> {
   /**
    * The description of the card
    */
-  description?: string;
+  description?: string
   /**
    * The title of the card
    */
-  title?: string;
+  title?: string
 }
 
 export const CardHeader = (props: HeaderProps) => {
-  const { title, description, className, children, ...rest } = props;
+  const { title, description, className, children, ...rest } = props
 
   return (
     <ark.div
@@ -97,11 +97,11 @@ export const CardHeader = (props: HeaderProps) => {
         children
       )}
     </ark.div>
-  );
-};
+  )
+}
 
 export const CardTitle = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -112,13 +112,13 @@ export const CardTitle = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="card-title"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const CardDescription = (
   props: React.ComponentProps<typeof ark.div>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -126,11 +126,11 @@ export const CardDescription = (
       data-slot="card-description"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const CardAction = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -141,11 +141,11 @@ export const CardAction = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="card-action"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const CardContent = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -153,11 +153,11 @@ export const CardContent = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="card-content"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const CardFooter = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -172,5 +172,5 @@ export const CardFooter = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="card-footer"
       {...rest}
     />
-  );
-};
+  )
+}

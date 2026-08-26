@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { ark } from "@ark-ui/react/factory";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
+import { ark } from "@ark-ui/react/factory"
+import { tv, type VariantProps } from "tailwind-variants"
+import { cn } from "@/lib/utils"
 
 export const badgeVariants = tv({
   base: [
@@ -89,9 +89,9 @@ export const badgeVariants = tv({
     size: "md",
     pill: false,
   },
-});
+})
 
-export type BadgeVariant = VariantProps<typeof badgeVariants>["variant"];
+export type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]
 
 interface BadgeProps
   extends React.ComponentProps<typeof ark.span>,
@@ -104,7 +104,7 @@ export const Badge = (props: BadgeProps) => {
     pill = false,
     className,
     ...rest
-  } = props;
+  } = props
 
   return (
     <ark.span
@@ -114,5 +114,5 @@ export const Badge = (props: BadgeProps) => {
       data-variant={variant}
       {...rest}
     />
-  );
-};
+  )
+}

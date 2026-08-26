@@ -1,20 +1,20 @@
-"use client";
+"use client"
 
 import {
   Drawer as ArkDrawer,
   DrawerContext,
   useDrawerContext,
-} from "@ark-ui/react/drawer";
-import { ark } from "@ark-ui/react/factory";
-import { Portal } from "@ark-ui/react/portal";
-import { XIcon } from "lucide-react";
-import React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from "@ark-ui/react/drawer"
+import { ark } from "@ark-ui/react/factory"
+import { Portal } from "@ark-ui/react/portal"
+import { XIcon } from "lucide-react"
+import React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
 
-export const useDrawer = useDrawerContext;
+export const useDrawer = useDrawerContext
 
 interface DrawerModalContextProps {
   /**
@@ -22,15 +22,15 @@ interface DrawerModalContextProps {
    *
    * @default true
    */
-  modal?: boolean;
+  modal?: boolean
 }
 
-const DrawerModalContext = React.createContext({} as DrawerModalContextProps);
+const DrawerModalContext = React.createContext({} as DrawerModalContextProps)
 
 export const DrawerProvider = (
   props: React.ComponentProps<typeof ArkDrawer.Indent>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkDrawer.Stack>
@@ -62,8 +62,8 @@ export const DrawerProvider = (
         {children}
       </ArkDrawer.Indent>
     </ArkDrawer.Stack>
-  );
-};
+  )
+}
 
 export const Drawer = (props: React.ComponentProps<typeof ArkDrawer.Root>) => {
   const {
@@ -71,7 +71,7 @@ export const Drawer = (props: React.ComponentProps<typeof ArkDrawer.Root>) => {
     lazyMount = true,
     unmountOnExit = true,
     ...rest
-  } = props;
+  } = props
 
   return (
     <DrawerModalContext.Provider value={{ modal }}>
@@ -83,12 +83,12 @@ export const Drawer = (props: React.ComponentProps<typeof ArkDrawer.Root>) => {
         {...rest}
       />
     </DrawerModalContext.Provider>
-  );
-};
+  )
+}
 
 export const DrawerTrigger = (
   props: React.ComponentProps<typeof ArkDrawer.Trigger>
-) => <ArkDrawer.Trigger data-slot="drawer-trigger" {...props} />;
+) => <ArkDrawer.Trigger data-slot="drawer-trigger" {...props} />
 
 const drawerOverlayVariants = tv({
   base: [
@@ -101,17 +101,17 @@ const drawerOverlayVariants = tv({
     "data-[state=closed]:fade-out-0 data-[state=closed]:animate-out",
     "motion-reduce:animate-none!",
   ],
-});
+})
 
 export const DrawerOverlay = (
   props: React.ComponentProps<typeof ArkDrawer.Backdrop>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
-  const { modal } = _useDrawerModal();
+  const { modal } = _useDrawerModal()
 
   if (!modal) {
-    return null;
+    return null
   }
 
   return (
@@ -120,8 +120,8 @@ export const DrawerOverlay = (
       data-slot="drawer-backdrop"
       {...rest}
     />
-  );
-};
+  )
+}
 
 const drawerPositionerVariants = tv({
   base: [
@@ -148,14 +148,14 @@ const drawerPositionerVariants = tv({
   defaultVariants: {
     variant: "default",
   },
-});
+})
 
 interface DrawerPositionerProps
   extends React.ComponentProps<typeof ArkDrawer.Positioner>,
     VariantProps<typeof drawerPositionerVariants> {}
 
 export const DrawerPositioner = (props: DrawerPositionerProps) => {
-  const { variant = "default", className, ...rest } = props;
+  const { variant = "default", className, ...rest } = props
 
   return (
     <ArkDrawer.Positioner
@@ -163,8 +163,8 @@ export const DrawerPositioner = (props: DrawerPositionerProps) => {
       data-slot="drawer-positioner"
       {...rest}
     />
-  );
-};
+  )
+}
 
 // ::after bleed — https://ark-ui.com/docs/components/drawer#preventing-overdrag-gaps
 const drawerContentVariants = tv({
@@ -234,16 +234,16 @@ const drawerContentVariants = tv({
   defaultVariants: {
     variant: "default",
   },
-});
+})
 
-type SnapPoint = number | string;
+type SnapPoint = number | string
 
 function needsFullHeightForSnapPoints(snapPoints: SnapPoint[]): boolean {
   if (snapPoints.length !== 1) {
-    return true;
+    return true
   }
 
-  return snapPoints[0] !== 1;
+  return snapPoints[0] !== 1
 }
 
 interface DrawerContentProps
@@ -254,13 +254,13 @@ interface DrawerContentProps
    *
    * @default true
    */
-  showBar?: boolean;
+  showBar?: boolean
   /**
    * Show close button at the top right corner
    *
    * @default false
    */
-  showCloseButton?: boolean;
+  showCloseButton?: boolean
 }
 
 export const DrawerContent = (props: DrawerContentProps) => {
@@ -271,7 +271,7 @@ export const DrawerContent = (props: DrawerContentProps) => {
     className,
     children,
     ...rest
-  } = props;
+  } = props
 
   return (
     <Portal>
@@ -280,9 +280,9 @@ export const DrawerContent = (props: DrawerContentProps) => {
       <DrawerContext>
         {({ snapPoints, swipeDirection }) => {
           const isVertical =
-            swipeDirection === "down" || swipeDirection === "up";
+            swipeDirection === "down" || swipeDirection === "up"
           const fullHeight =
-            isVertical && needsFullHeightForSnapPoints(snapPoints);
+            isVertical && needsFullHeightForSnapPoints(snapPoints)
 
           return (
             <DrawerPositioner variant={variant}>
@@ -301,19 +301,24 @@ export const DrawerContent = (props: DrawerContentProps) => {
 
                 {!!showCloseButton && (
                   <DrawerClose asChild>
-                    <Button aria-label="Close" className="absolute inset-e-4 top-4 opacity-64 hover:opacity-100 group-data-[swipe-direction=up]/drawer:top-[calc(1rem+env(safe-area-inset-top,0))]" size="icon-sm" variant="ghost">
+                    <Button
+                      aria-label="Close"
+                      className="absolute inset-e-4 top-4 opacity-64 hover:opacity-100 group-data-[swipe-direction=up]/drawer:top-[calc(1rem+env(safe-area-inset-top,0))]"
+                      size="icon-sm"
+                      variant="ghost"
+                    >
                       <XIcon aria-hidden />
                     </Button>
                   </DrawerClose>
                 )}
               </ArkDrawer.Content>
             </DrawerPositioner>
-          );
+          )
         }}
       </DrawerContext>
     </Portal>
-  );
-};
+  )
+}
 
 interface DrawerGrabberProps
   extends React.ComponentProps<typeof ArkDrawer.Grabber> {
@@ -322,14 +327,14 @@ interface DrawerGrabberProps
    *
    * @default true
    */
-  show?: boolean;
+  show?: boolean
 }
 
 export const DrawerGrabber = (props: DrawerGrabberProps) => {
-  const { show = true, className, ...rest } = props;
+  const { show = true, className, ...rest } = props
 
   if (!show) {
-    return null;
+    return null
   }
 
   return (
@@ -349,18 +354,18 @@ export const DrawerGrabber = (props: DrawerGrabberProps) => {
         data-slot="drawer-grabber-indicator"
       />
     </ArkDrawer.Grabber>
-  );
-};
+  )
+}
 
 interface DrawerHeaderProps extends React.ComponentProps<typeof ark.div> {
   /**
    * The description of the drawer
    */
-  description?: string;
+  description?: string
   /**
    * The title of the drawer
    */
-  title?: string;
+  title?: string
 }
 
 const drawerHeaderVariants = tv({
@@ -371,10 +376,10 @@ const drawerHeaderVariants = tv({
     "in-[[data-slot=drawer-content]:has([data-slot=drawer-body])]:pb-3",
     "group-data-[swipe-direction=down]/drawer:pt-0",
   ],
-});
+})
 
 export const DrawerHeader = (props: DrawerHeaderProps) => {
-  const { className, title, description, children, ...rest } = props;
+  const { className, title, description, children, ...rest } = props
 
   return (
     <ark.div
@@ -392,13 +397,13 @@ export const DrawerHeader = (props: DrawerHeaderProps) => {
         children
       )}
     </ark.div>
-  );
-};
+  )
+}
 
 export const DrawerTitle = (
   props: React.ComponentProps<typeof ArkDrawer.Title>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
   return (
     <ArkDrawer.Title
       className={cn(
@@ -408,21 +413,21 @@ export const DrawerTitle = (
       data-slot="drawer-title"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const DrawerDescription = (
   props: React.ComponentProps<typeof ArkDrawer.Description>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
   return (
     <ArkDrawer.Description
       className={cn("text-center text-muted-foreground text-sm", className)}
       data-slot="drawer-description"
       {...rest}
     />
-  );
-};
+  )
+}
 
 interface DrawerBodyProps extends React.ComponentProps<typeof ark.div> {
   /**
@@ -430,11 +435,11 @@ interface DrawerBodyProps extends React.ComponentProps<typeof ark.div> {
    *
    * @default false
    */
-  scrollFade?: boolean;
+  scrollFade?: boolean
 }
 
 export const DrawerBody = (props: DrawerBodyProps) => {
-  const { scrollFade = false, className, ...rest } = props;
+  const { scrollFade = false, className, ...rest } = props
 
   return (
     <ScrollArea className="min-h-0 flex-1 touch-pan-y" scrollFade={scrollFade}>
@@ -450,12 +455,12 @@ export const DrawerBody = (props: DrawerBodyProps) => {
         {...rest}
       />
     </ScrollArea>
-  );
-};
+  )
+}
 
 export const DrawerClose = (
   props: React.ComponentProps<typeof ArkDrawer.CloseTrigger>
-) => <ArkDrawer.CloseTrigger data-slot="drawer-close" {...props} />;
+) => <ArkDrawer.CloseTrigger data-slot="drawer-close" {...props} />
 
 const drawerFooterVariants = tv({
   base: [
@@ -473,14 +478,14 @@ const drawerFooterVariants = tv({
   defaultVariants: {
     variant: "default",
   },
-});
+})
 
 interface DrawerFooterProps
   extends React.ComponentProps<typeof ark.div>,
     VariantProps<typeof drawerFooterVariants> {}
 
 export const DrawerFooter = (props: DrawerFooterProps) => {
-  const { variant = "default", className, ...rest } = props;
+  const { variant = "default", className, ...rest } = props
 
   return (
     <ark.div
@@ -488,15 +493,15 @@ export const DrawerFooter = (props: DrawerFooterProps) => {
       data-slot="drawer-footer"
       {...rest}
     />
-  );
-};
+  )
+}
 
 const _useDrawerModal = () => {
-  const context = React.useContext(DrawerModalContext);
+  const context = React.useContext(DrawerModalContext)
 
   if (!context) {
-    throw new Error("useDrawerModal must be used within a Drawer");
+    throw new Error("useDrawerModal must be used within a Drawer")
   }
 
-  return context;
-};
+  return context
+}

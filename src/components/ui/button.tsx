@@ -1,8 +1,8 @@
-import { ark } from "@ark-ui/react/factory";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
-import { Spinner } from "@/components/ui/spinner";
+import { ark } from "@ark-ui/react/factory"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { Spinner } from "@/components/ui/spinner"
+import { cn } from "@/lib/utils"
 
 export const buttonVariants = tv({
   base: [
@@ -122,7 +122,7 @@ export const buttonVariants = tv({
     clickEffect: true,
     pill: false,
   },
-});
+})
 
 export interface ButtonProps
   extends React.ComponentProps<typeof ark.button>,
@@ -132,13 +132,13 @@ export interface ButtonProps
    *
    * @default true
    */
-  clickEffect?: boolean;
+  clickEffect?: boolean
   /**
    * Show a loading indicator
    *
    * @default false
    */
-  isLoading?: boolean;
+  isLoading?: boolean
 }
 
 export const Button = (props: ButtonProps) => {
@@ -151,7 +151,7 @@ export const Button = (props: ButtonProps) => {
     className,
     children,
     ...rest
-  } = props;
+  } = props
 
   return (
     <ark.button
@@ -184,5 +184,5 @@ export const Button = (props: ButtonProps) => {
         children
       )}
     </ark.button>
-  );
-};
+  )
+}

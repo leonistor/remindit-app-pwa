@@ -9,7 +9,6 @@ import {
 } from "@phosphor-icons/react"
 import { useState } from "react"
 import { NavLink } from "react-router"
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   MenuContent,
@@ -17,6 +16,7 @@ import {
   Menu as MenuRoot,
   MenuTrigger,
 } from "@/components/ui/menu"
+import { cn } from "@/lib/utils"
 import { ThemeToggle } from "./theme-toggle"
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -46,7 +46,9 @@ const Menu = () => {
       <span className="font-semibold text-sm">RemindIt</span>
       <NavLink
         to="/"
-        className={({ isActive }) => cn(linkClass({ isActive }), "ml-auto md:hidden")}
+        className={({ isActive }) =>
+          cn(linkClass({ isActive }), "ml-auto md:hidden")
+        }
       >
         Shopping list
       </NavLink>

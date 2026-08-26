@@ -4,19 +4,26 @@
 // The only entry point that touches stores is $recommendations (in selectors.ts);
 // every function here is a pure computation over plain data.
 
-import type { CatalogItem, Category, CategoryFrequency, HistoryEvent, Recommendation, RecommendationTier } from "./types"
+import type {
+  CatalogItem,
+  Category,
+  CategoryFrequency,
+  HistoryEvent,
+  Recommendation,
+  RecommendationTier,
+} from "./types"
 
 // CategoryFrequency → expected days between purchases. Used as fallback when an
 // item has too few purchases to estimate its own interval.
 export const FREQ_TO_DAYS: Record<CategoryFrequency, number> = {
-  "daily": 1,
+  daily: 1,
   "every-2-3-days": 2.5,
-  "weekly": 7,
+  weekly: 7,
   "every-2-weeks": 14,
-  "monthly": 30,
+  monthly: 30,
   "every-3-months": 90,
-  "seldom": 180,
-  "unknown": 14,
+  seldom: 180,
+  unknown: 14,
 }
 
 const GLOBAL_DEFAULT_INTERVAL = 14
@@ -60,7 +67,7 @@ function median(values: number[]): number | null {
 export function computeItemStats(
   history: HistoryEvent[],
   itemId: string,
-  now: number = Date.now(),
+  now: number = Date.now()
 ): ItemStats {
   // Only "add" events define the purchase cadence.
   const adds = history
@@ -69,7 +76,12 @@ export function computeItemStats(
 
   const purchaseCount = adds.length
   if (purchaseCount === 0) {
-    return { itemId, purchaseCount: 0, daysSinceLastAdded: 0, medianInterval: null }
+    return {
+      itemId,
+      purchaseCount: 0,
+      daysSinceLastAdded: 0,
+      medianInterval: null,
+    }
   }
 
   const lastAddedAt = adds[adds.length - 1].timestamp
@@ -100,7 +112,7 @@ export function computeItemStats(
  */
 export function getExpectedInterval(
   stats: ItemStats,
-  categoryFrequency: CategoryFrequency,
+  categoryFrequency: CategoryFrequency
 ): number {
   if (stats.purchaseCount >= 3 && stats.medianInterval !== null) {
     return stats.medianInterval
@@ -124,7 +136,7 @@ export interface ScoredItem {
  */
 export function scoreItem(
   stats: ItemStats,
-  categoryFrequency: CategoryFrequency,
+  categoryFrequency: CategoryFrequency
 ): ScoredItem | null {
   // No history → nothing to recommend.
   if (stats.purchaseCount === 0) return null
@@ -133,7 +145,10 @@ export function scoreItem(
   const dueRatio = stats.daysSinceLastAdded / expectedInterval
 
   // confidence_factor ramps from 0.2 (1 purchase) to 1.0 (5+ purchases).
-  const confidenceFactor = Math.min(stats.purchaseCount / CONFIDENCE_THRESHOLD, 1)
+  const confidenceFactor = Math.min(
+    stats.purchaseCount / CONFIDENCE_THRESHOLD,
+    1
+  )
   const score = dueRatio * confidenceFactor
 
   let tier: RecommendationTier
@@ -161,7 +176,7 @@ export function computeRecommendations(
   catalog: CatalogItem[],
   categories: Category[],
   list: { itemId: string }[],
-  now: number = Date.now(),
+  now: number = Date.now()
 ): Recommendation[] {
   const categoryById = new Map(categories.map((c) => [c.id, c]))
   const onList = new Set(list.map((e) => e.itemId))

@@ -1,7 +1,7 @@
 "use client"
 
-import { InfoIcon } from "@phosphor-icons/react"
 import { useStore } from "@nanostores/react"
+import { InfoIcon } from "@phosphor-icons/react"
 import {
   Accordion,
   AccordionContent,

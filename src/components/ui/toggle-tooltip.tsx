@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import { Popover as ArkPopover } from "@ark-ui/react/popover";
-import { Portal } from "@ark-ui/react/portal";
-import type React from "react";
-import { cn } from "@/lib/utils";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { Popover as ArkPopover } from "@ark-ui/react/popover"
+import { Portal } from "@ark-ui/react/portal"
+import type React from "react"
+import { Popover, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
 
 export const ToggleTooltip = (
   props: React.ComponentProps<typeof ArkPopover.Root>
@@ -16,7 +16,7 @@ export const ToggleTooltip = (
     modal = false,
     open: controlledOpen,
     ...rest
-  } = props;
+  } = props
 
   return (
     <Popover
@@ -27,17 +27,17 @@ export const ToggleTooltip = (
       unmountOnExit={unmountOnExit}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ToggleTooltipTrigger = (
   props: React.ComponentProps<typeof ArkPopover.Trigger>
-) => <PopoverTrigger data-slot="toggle-tooltip-trigger" {...props} />;
+) => <PopoverTrigger data-slot="toggle-tooltip-trigger" {...props} />
 
 export const ToggleTooltipContent = (
   props: React.ComponentProps<typeof ArkPopover.Content>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <Portal>
@@ -68,13 +68,13 @@ export const ToggleTooltipContent = (
         </ArkPopover.Content>
       </ArkPopover.Positioner>
     </Portal>
-  );
-};
+  )
+}
 
 export const ToggleTooltipArrow = (
   props: React.ComponentProps<typeof ArkPopover.Arrow>
 ) => {
-  const { style, ...rest } = props;
+  const { style, ...rest } = props
 
   return (
     <ArkPopover.Arrow
@@ -90,5 +90,5 @@ export const ToggleTooltipArrow = (
     >
       <ArkPopover.ArrowTip />
     </ArkPopover.Arrow>
-  );
-};
+  )
+}

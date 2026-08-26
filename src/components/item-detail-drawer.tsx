@@ -1,13 +1,13 @@
 "use client"
 
 import { useStore } from "@nanostores/react"
+import { useDrawerContext } from "@/components/drawer-context"
 import {
   Drawer,
   DrawerBody,
   DrawerContent,
   DrawerHeader,
 } from "@/components/ui/drawer"
-import { useDrawerContext } from "@/components/drawer-context"
 import { $catalog, $categories } from "@/stores"
 import { UNCATEGORIZED_NAME } from "@/stores/types"
 

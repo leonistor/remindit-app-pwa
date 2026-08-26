@@ -1,6 +1,11 @@
 /// <reference types="node" />
-import { spawn, type ChildProcess } from "node:child_process"
-import { chromium, devices, type Browser, type BrowserContext } from "@playwright/test"
+import { type ChildProcess, spawn } from "node:child_process"
+import {
+  type Browser,
+  type BrowserContext,
+  chromium,
+  devices,
+} from "@playwright/test"
 
 const PORT = 5182
 const BASE_URL = `http://127.0.0.1:${PORT}`

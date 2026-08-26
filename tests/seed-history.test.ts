@@ -21,7 +21,10 @@ function summarize(events: HistoryEvent[]) {
   const removes = events.filter((e) => e.action === "remove")
   const addsByCategory = new Map<string, number>()
   for (const e of adds) {
-    addsByCategory.set(e.categoryId, (addsByCategory.get(e.categoryId) ?? 0) + 1)
+    addsByCategory.set(
+      e.categoryId,
+      (addsByCategory.get(e.categoryId) ?? 0) + 1
+    )
   }
   return { adds, removes, addsByCategory }
 }
@@ -102,7 +105,10 @@ describe("generateShoppingHistory", () => {
     const sessions: number[] = []
     let current = 0
     for (let i = 0; i < removes.length; i++) {
-      if (i === 0 || removes[i].timestamp - removes[i - 1].timestamp > 3 * 3_600_000) {
+      if (
+        i === 0 ||
+        removes[i].timestamp - removes[i - 1].timestamp > 3 * 3_600_000
+      ) {
         sessions.push(0)
         current = sessions.length - 1
       }

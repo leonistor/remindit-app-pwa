@@ -4,8 +4,8 @@ const AboutView = () => (
 
     <p className="text-muted-foreground">
       RemindIt is a Progressive Web App for managing your personal shopping
-      list. Add it to your home screen and it works offline — your data stays
-      on your device.
+      list. Add it to your home screen and it works offline — your data stays on
+      your device.
     </p>
 
     <section className="flex flex-col gap-2">

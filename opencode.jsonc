@@ -24,12 +24,12 @@
       "command": ["bunx", "-y", "chrome-devtools-mcp@latest"]
     },
     "crawlberg": {
-      "enabled": true,
+      "enabled": false,
       "type": "local",
       "command": ["crawlberg", "mcp"]
     },
     "ark-ui": {
-      "enabled": true,
+      "enabled": false,
       "type": "local",
       "command": ["bunx", "-y", "@ark-ui/mcp"]
     }

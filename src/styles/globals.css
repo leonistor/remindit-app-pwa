@@ -6,8 +6,8 @@
 @theme inline {
   --header-height: calc(var(--spacing) * 14);
 
-  --font-sans: "Atkinson Hyperlegible Next Variable", ui-sans-serif, system-ui,
-    sans-serif;
+  --font-sans:
+    "Atkinson Hyperlegible Next Variable", ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-heading);
   --font-mono: var(--font-mono);
 

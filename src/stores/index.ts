@@ -68,7 +68,7 @@ export function initStores(): void {
       $history.get().length === 0
     ) {
       $history.set(
-        generateShoppingHistory({ catalog, categories, days: 180, seed: 42 }),
+        generateShoppingHistory({ catalog, categories, days: 180, seed: 42 })
       )
     }
   }
@@ -108,7 +108,7 @@ export function seedFromDataset(datasetId: string): void {
 
   if (import.meta.env?.PUBLIC_SEED_HISTORY !== "0") {
     $history.set(
-      generateShoppingHistory({ catalog, categories, days: 180, seed: 42 }),
+      generateShoppingHistory({ catalog, categories, days: 180, seed: 42 })
     )
   }
 

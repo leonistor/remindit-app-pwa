@@ -2,8 +2,8 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { UNCATEGORIZED_NAME } from "@/stores/types"
 import { cn } from "@/lib/utils"
+import { UNCATEGORIZED_NAME } from "@/stores/types"
 
 export interface ShoppingItemProps {
   /** Display name of the item. */
@@ -34,23 +34,13 @@ export const ShoppingItem = ({
   const label = categoryName?.trim() || UNCATEGORIZED_NAME
 
   return (
-    <div
-      className={cn(
-        "flex flex-col items-start gap-1",
-        className
-      )}
-    >
+    <div className={cn("flex flex-col items-start gap-1", className)}>
       {showCategory && (
         <Badge variant="success" pill className="pointer-events-none">
           {label}
         </Badge>
       )}
-      <Button
-        variant="success"
-        pill
-        disabled={disabled}
-        onClick={onClick}
-      >
+      <Button variant="success" pill disabled={disabled} onClick={onClick}>
         {name}
       </Button>
     </div>

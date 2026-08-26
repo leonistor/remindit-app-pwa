@@ -183,7 +183,7 @@ export const $catalogByCategory = computed(
 export const $recommendations = computed(
   [$history, $catalog, $categories, $list],
   (history, catalog, categories, list) =>
-    computeRecommendations(history, catalog, categories, list),
+    computeRecommendations(history, catalog, categories, list)
 )
 
 export type { Recommendation, RecommendationTier } from "./types"
