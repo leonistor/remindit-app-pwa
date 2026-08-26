@@ -16,10 +16,10 @@ DrawerProvider
 
 A resizable two-panel split (`ShoppingPanels`):
 
-| Panel | Title | Content |
-|---|---|---|
-| Left (30%) | Selected items | Items on the active shopping list |
-| Right (70%) | All items | Catalog items grouped by category |
+| Panel | Content |
+|---|---|
+| Left (30%) | Items on the active shopping list (toggle group for display/ordering) |
+| Right (70%) | Catalog items grouped by category (info tooltip for recommendation codes) |
 
 Catalog items show recommendation badges (overdue/soon dots) based on the computed `$recommendations` store.
 

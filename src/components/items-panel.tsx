@@ -27,11 +27,7 @@ import {
 } from "@/stores"
 import type { RecommendationTier } from "@/stores/types"
 
-export default function ItemsPanel({
-  title = "All items",
-}: {
-  title?: string
-}) {
+export default function ItemsPanel() {
   const groups = useStore($catalogByCategory)
   const selected = useStore($listItemIds)
   const recommendations = useStore($recommendations)
@@ -46,16 +42,13 @@ export default function ItemsPanel({
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-3">
       <div className="relative flex items-center justify-center">
-        <h2 className="text-center font-medium text-base text-foreground uppercase tracking-widest">
-          {title}
-        </h2>
         <ToggleTooltip>
           <ToggleTooltipTrigger asChild>
             <Button
               aria-label="Recommendation colour codes"
               size="icon-sm"
               variant="ghost"
-              className="absolute end-0 top-1/2 -translate-y-1/2"
+              className="absolute end-0.5 top-[52.5%] -translate-y-1/2"
             >
               <InfoIcon aria-hidden />
             </Button>

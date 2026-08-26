@@ -14,11 +14,11 @@ const ShoppingPanels = () => (
     panels={[{ id: "selected", minSize: 25, maxSize: 90 }, { id: "all" }]}
   >
     <ResizablePanel className="min-h-0 overflow-hidden" id="selected">
-      <ShoppingListPanel title="Selected items" />
+      <ShoppingListPanel />
     </ResizablePanel>
     <ResizableResizeTrigger id="selected:all" withHandle />
     <ResizablePanel className="min-h-0 overflow-hidden" id="all">
-      <ItemsPanel title="All items" />
+      <ItemsPanel />
     </ResizablePanel>
   </Resizable>
 )

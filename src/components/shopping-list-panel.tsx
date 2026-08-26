@@ -15,11 +15,6 @@ import {
   type SelectedSort,
 } from "@/stores"
 
-export interface ShoppingListPanelProps {
-  /** Heading shown above the list. */
-  title?: string
-}
-
 // Renders the active list ($selectedOrdered) as success-colored item chips that
 // wrap like the available-items grid in ItemsPanel. Each chip shows just the
 // item name; clicking it removes that entry from the list.
@@ -27,9 +22,7 @@ export interface ShoppingListPanelProps {
 // A ToggleGroup above the list drives display + ordering: an independent
 // show/hide-categories toggle and two mutually exclusive sort modes (category +
 // name, or last-added-first). Preferences persist via the ui store.
-export const ShoppingListPanel = ({
-  title = "Selected items",
-}: ShoppingListPanelProps) => {
+export const ShoppingListPanel = () => {
   const selectedView = useStore($selectedOrdered)
   const categoriesVisible = useStore($selectedCategoriesVisible)
   const sort = useStore($selectedSort)
@@ -93,16 +86,13 @@ export const ShoppingListPanel = ({
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-3">
       <div className="relative flex items-center justify-center">
-        <h2 className="text-center font-medium text-base text-foreground uppercase tracking-widest">
-          {title}
-        </h2>
         <ToggleGroup
           multiple
           variant="ghost"
           size="sm"
           value={groupValue}
           onValueChange={handleGroupChange}
-          className="absolute end-0 top-1/2 -translate-y-1/2"
+          className="absolute end-0.5 top-1/2 -translate-y-1/2"
           aria-label="Selected items display and ordering"
         >
         <ToggleGroupItem
@@ -128,11 +118,15 @@ export const ShoppingListPanel = ({
         </ToggleGroupItem>
       </ToggleGroup>
       </div>
-      <div className="mt-3 flex min-h-0 flex-1 flex-wrap justify-start gap-2 overflow-y-auto">
+      <div
+        className={
+          isEmpty
+            ? "mt-3 flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-4 text-center text-muted-foreground text-sm"
+            : "mt-3 flex min-h-0 flex-1 flex-wrap justify-start gap-2 overflow-y-auto"
+        }
+      >
         {isEmpty ? (
-          <p className="py-4 text-center text-muted-foreground text-sm">
-            Nothing selected yet
-          </p>
+          <p>Tap items below to add to the shopping list.</p>
         ) : (
           selectedView.map((entry) => {
             const isRemoving = removingIds.has(entry.entryId)
