@@ -16,7 +16,7 @@ import {
 } from "@/stores"
 
 // Renders the active list ($selectedOrdered) as success-colored item chips that
-// wrap like the available-items grid in ItemsPanel. Each chip shows just the
+// wrap like the available-items grid in ItemCatalog. Each chip shows just the
 // item name; clicking it removes that entry from the list.
 //
 // A ToggleGroup above the list drives display + ordering: an independent

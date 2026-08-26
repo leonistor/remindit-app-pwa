@@ -19,7 +19,7 @@ A resizable two-panel split (`ShoppingPanels`):
 | Panel | Content |
 |---|---|
 | Left (30%) | Items on the active shopping list (toggle group for display/ordering) |
-| Right (70%) | Catalog items grouped by category (info tooltip for recommendation codes) |
+| Right (70%) | `ItemCatalog` — catalog items grouped by category (info tooltip for recommendation codes) |
 
 Catalog items show recommendation badges (overdue/soon dots) based on the computed `$recommendations` store.
 
@@ -71,6 +71,7 @@ Two feature components render items; pick the right one for the context:
 
 - **`ItemButton`** (`src/components/ui/item-button.tsx`) — used for *available* catalog items. Shows only the item name and supports `selectable` / `removable` / `recommendation` purposes plus a recommendation-tier dot.
 - **`ShoppingItem`** (`src/components/shopping-item.tsx`) — used for *selected* list items. Renders a Shark UI `Badge` (category label, defaults to `"Uncategorized"`) above the item name, styled with the success/removable look. Props: `name`, `categoryName?`, **`showCategory`** (boolean, defaults to `true` — hides the Badge when `false`), `disabled?`, `onClick?`, `className?`. Left-aligned via `items-start`.
+- **`ItemCatalog`** (`src/components/item-catalog.tsx`) — the right-hand browse/select panel. Renders an Ark UI `Accordion` (multiple, all categories open by default) of `ItemButton`s grouped by category from `$catalogByCategory`. Clicking toggles list membership via `addToList` / `removeFromList` (resolving item id → entry id through `$selectedView`). Shows a `ToggleTooltip` with recommendation colour codes.
 
 ## Typography
 

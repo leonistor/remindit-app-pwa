@@ -27,7 +27,7 @@ import {
 } from "@/stores"
 import type { RecommendationTier } from "@/stores/types"
 
-export default function ItemsPanel() {
+export default function ItemCatalog() {
   const groups = useStore($catalogByCategory)
   const selected = useStore($listItemIds)
   const recommendations = useStore($recommendations)

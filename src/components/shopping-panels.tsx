@@ -1,4 +1,4 @@
-import ItemsPanel from "@/components/items-panel"
+import ItemCatalog from "@/components/item-catalog"
 import { ShoppingListPanel } from "@/components/shopping-list-panel"
 import {
   Resizable,
@@ -18,7 +18,7 @@ const ShoppingPanels = () => (
     </ResizablePanel>
     <ResizableResizeTrigger id="selected:all" withHandle />
     <ResizablePanel className="min-h-0 overflow-hidden" id="all">
-      <ItemsPanel />
+      <ItemCatalog />
     </ResizablePanel>
   </Resizable>
 )
