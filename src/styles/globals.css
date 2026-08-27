@@ -549,3 +549,27 @@
 .radius-lg {
   --radius: 0.625rem;
 }
+
+/* Item-travel View Transitions: the chip morphs between the catalog and the
+   shopping list via a per-item `view-transition-name`. The whole page would
+   otherwise cross-fade (root transition), so we disable that and let only the
+   named element animate. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-group(*) {
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Safety net: never animate transitions for reduced-motion users (the JS hook
+   also bails out early, this covers any stray names). */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
+}

@@ -2,7 +2,12 @@ import { ClockIcon, SortAscendingIcon, TagIcon } from "@phosphor-icons/react"
 import { useCallback, useRef, useState } from "react"
 import { ShoppingItem } from "@/components/shopping-item"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { type SelectedSort, useShoppingList } from "@/stores"
+import { useItemTravelTransition } from "@/hooks/use-item-travel-transition"
+import {
+  type SelectedSort,
+  type SelectedViewEntry,
+  useShoppingList,
+} from "@/stores"
 
 // Renders the active list ($selectedOrdered) as success-colored item chips that
 // wrap like the available-items grid in ItemCatalog. Each chip shows just the
@@ -20,31 +25,41 @@ export const ShoppingListPanel = () => {
     toggleSelectedSort,
     removeFromList,
   } = useShoppingList()
+  const { runTravel, isSupported } = useItemTravelTransition()
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set())
   const animationTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map()
   )
 
-  const handleRemove = useCallback((entryId: string) => {
-    // Prevent double-clicking during animation
-    if (animationTimeouts.current.has(entryId)) return
+  const handleRemove = useCallback(
+    (entry: SelectedViewEntry, sourceEl: HTMLElement | null) => {
+      // Prevent double-clicking during a transition/exit animation.
+      if (animationTimeouts.current.has(entry.entryId)) return
 
-    // Mark entry as removing (triggers exit animation)
-    setRemovingIds((prev) => new Set(prev).add(entryId))
+      // When View Transitions are available, morph the chip back to the catalog.
+      if (isSupported) {
+        runTravel(entry.itemId, sourceEl, () =>
+          removeFromList(entry.entryId)
+        )
+        return
+      }
 
-    // After animation completes, remove from store and clear the removing state
-    const timeout = setTimeout(() => {
-      removeFromList(entryId)
-      setRemovingIds((prev) => {
-        const next = new Set(prev)
-        next.delete(entryId)
-        return next
-      })
-      animationTimeouts.current.delete(entryId)
-    }, 150)
-
-    animationTimeouts.current.set(entryId, timeout)
-  }, [removeFromList])
+      // Fallback for unsupported browsers: play the CSS exit animation, then
+      // remove the entry from the store.
+      setRemovingIds((prev) => new Set(prev).add(entry.entryId))
+      const timeout = setTimeout(() => {
+        removeFromList(entry.entryId)
+        setRemovingIds((prev) => {
+          const next = new Set(prev)
+          next.delete(entry.entryId)
+          return next
+        })
+        animationTimeouts.current.delete(entry.entryId)
+      }, 150)
+      animationTimeouts.current.set(entry.entryId, timeout)
+    },
+    [removeFromList, runTravel, isSupported]
+  )
 
   // Build the controlled ToggleGroup value from the two pieces of UI state.
   const groupValue = [
@@ -134,7 +149,8 @@ export const ShoppingListPanel = () => {
                   name={entry.name}
                   categoryName={entry.categoryName}
                   showCategory={categoriesVisible}
-                  onClick={() => handleRemove(entry.entryId)}
+                  travelTargetId={entry.itemId}
+                  onClick={(e) => handleRemove(entry, e.currentTarget)}
                   disabled={isRemoving}
                 />
               </div>

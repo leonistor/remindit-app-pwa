@@ -35,6 +35,11 @@ export interface ItemButtonProps {
   onClick?: React.MouseEventHandler<HTMLButtonElement>
   /** Optional className for layout overrides. */
   className?: string
+  /**
+   * When set, marks this chip as the target of an item-travel View Transition
+   * (morphing to/from the shopping list). Must match the itemId on both sides.
+   */
+  travelTargetId?: string
 }
 
 export const ItemButton = ({
@@ -48,6 +53,7 @@ export const ItemButton = ({
   animationState = "idle",
   onClick,
   className,
+  travelTargetId,
 }: ItemButtonProps) => {
   // Removable/recommendation chips are inherently emphasized (in-list or
   // surfaced); only "selectable" toggles emphasis via `isSelected`.
@@ -77,6 +83,7 @@ export const ItemButton = ({
       disabled={disabled}
       onClick={onClick}
       className={cn(colorClasses, animationClass, className)}
+      data-vt-catalog={travelTargetId}
     >
       {name}
       {dotColor && (

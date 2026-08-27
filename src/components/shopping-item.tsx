@@ -17,6 +17,11 @@ export interface ShoppingItemProps {
   onClick?: React.MouseEventHandler<HTMLButtonElement>
   /** Optional className for layout overrides. */
   className?: string
+  /**
+   * When set, marks this chip as the target of an item-travel View Transition
+   * (morphing to/from the catalog). Must match the itemId on both sides.
+   */
+  travelTargetId?: string
 }
 
 // A shopping-list chip that surfaces the item's category in a Badge above its
@@ -30,6 +35,7 @@ export const ShoppingItem = ({
   disabled,
   onClick,
   className,
+  travelTargetId,
 }: ShoppingItemProps) => {
   const label = categoryName?.trim() || UNCATEGORIZED_NAME
   const palette = categoryPalette(label)
@@ -50,6 +56,7 @@ export const ShoppingItem = ({
         disabled={disabled}
         onClick={onClick}
         className={palette.buttonSelected}
+        data-vt-list={travelTargetId}
       >
         {name}
       </Button>

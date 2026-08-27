@@ -12,6 +12,7 @@ import {
   ToggleTooltipContent,
   ToggleTooltipTrigger,
 } from "@/components/ui/custom/toggle-tooltip"
+import { useItemTravelTransition } from "@/hooks/use-item-travel-transition"
 import { LEGEND_TIERS, RECOMMENDATION_TIERS } from "@/lib/recommendation-tiers"
 import { useCatalog } from "@/stores"
 
@@ -25,6 +26,7 @@ export default function ItemCatalog() {
     removeFromListByItemId,
     setAccordionOpen,
   } = useCatalog()
+  const { runTravel } = useItemTravelTransition()
   const openValue = open ?? groups.map((g) => g.categoryId)
 
   return (
@@ -83,11 +85,25 @@ export default function ItemCatalog() {
                       categoryKey={group.categoryId}
                       isSelected={isSelected}
                         recommendationTier={recommendationsByItemId.get(item.id)?.tier}
-                      onClick={() =>
-                        isSelected
-                          ? removeFromListByItemId(item.id)
-                          : addToList(item.id)
-                      }
+                      travelTargetId={item.id}
+                      onClick={(e) => {
+                        // When removing, the visible "from" is the list chip
+                        // (even though we clicked the catalog button), so it
+                        // animates out of the shopping list rather than snapping.
+                        const sourceEl = isSelected
+                          ? document.querySelector<HTMLElement>(
+                              `[data-vt-list="${item.id}"]`
+                            ) ?? e.currentTarget
+                          : e.currentTarget
+                        runTravel(
+                          item.id,
+                          sourceEl,
+                          () =>
+                            isSelected
+                              ? removeFromListByItemId(item.id)
+                              : addToList(item.id)
+                        )
+                      }}
                     />
                   )
                 })}
