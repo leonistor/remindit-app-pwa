@@ -80,6 +80,7 @@ export default function ItemCatalog() {
                       key={item.id}
                       name={item.name}
                       purpose="selectable"
+                      categoryKey={group.categoryId}
                       isSelected={isSelected}
                         recommendationTier={recommendationsByItemId.get(item.id)?.tier}
                       onClick={() =>

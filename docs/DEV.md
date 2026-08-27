@@ -63,9 +63,12 @@ Registry config lives in `components.json` (style `base-nova`, Phosphor icons, `
 Components are split between **registry-managed** primitives in `src/components/ui/*` (installed via
 `bunx shadcn add @shark/<component>`) and **hand-maintained / derived** components in
 `src/components/ui/custom/*` that must never be regenerated from the CLI. The custom set currently
-holds `button` (our fork of the Shark button — adds `success`/`info` variants used by `ShoppingItem`
-and `ItemButton`), plus the project-specific `item-button` and `toggle-tooltip`. **Do not run
-`shadcn add @shark/button`** — the registry HEAD drops those variants and would break the build.
+holds `button` (our fork of the Shark button — adds `success`/`info`/`bare` variants; `bare` is a
+transparent base for components that supply their own color via the categorical palette), plus the
+project-specific `item-button` and `toggle-tooltip`. **Do not run `shadcn add @shark/button`** — the
+registry HEAD drops those variants and would break the build. Item/category color lives in
+`src/lib/category-palette.ts` (qualitative, colorblind-safe) and is intentionally distinct from the
+recommendation-tier colors in `src/lib/recommendation-tiers.ts`.
 See [`DEV-COMPONENTS.md`](./DEV-COMPONENTS.md) for the full registry-vs-custom split and the latest
 upstream update-check findings.
 
@@ -73,8 +76,8 @@ upstream update-check findings.
 
 Two feature components render items; pick the right one for the context:
 
-- **`ItemButton`** (`src/components/ui/item-button.tsx`) — used for *available* catalog items. Shows only the item name and supports `selectable` / `removable` / `recommendation` purposes plus a recommendation-tier dot.
-- **`ShoppingItem`** (`src/components/shopping-item.tsx`) — used for *selected* list items. Renders a Shark UI `Badge` (category label, defaults to `"Uncategorized"`) above the item name, styled with the success/removable look. Props: `name`, `categoryName?`, **`showCategory`** (boolean, defaults to `true` — hides the Badge when `false`), `disabled?`, `onClick?`, `className?`. Left-aligned via `items-start`.
+- **`ItemButton`** (`src/components/ui/custom/item-button.tsx`) — used for *available* catalog items. Shows only the item name and supports `selectable` / `removable` / `recommendation` purposes. Color is **decoupled from `Button` variants**: it renders `<Button variant="bare">` and applies a tint from the categorical palette via `categoryKey` (category id/name) — `paletteOverride` allows a future user-assigned color. `isSelected` (or the `removable`/`recommendation` purpose) drives the emphasized tint. `animationState` (`enter`/`exit`) hooks the `item-enter`/`item-exit` keyframes. The recommendation-tier dot stays a separate semantic concern (see `recommendation-tiers.ts`).
+- **`ShoppingItem`** (`src/components/shopping-item.tsx`) — used for *selected* list items. Renders a Shark UI `Badge` (category label, defaults to `"Uncategorized"`) above the item name, tinted by the shared categorical palette, and the chip itself uses the selected/emphasized palette tint (no longer the `success` variant). Props: `name`, `categoryName?`, **`showCategory`** (boolean, defaults to `true` — hides the Badge when `false`), `disabled?`, `onClick?`, `className?`. Left-aligned via `items-start`.
 - **`ItemCatalog`** (`src/components/item-catalog.tsx`) — the right-hand browse/select panel. Renders an Ark UI `Accordion` (multiple, all categories open by default) of `ItemButton`s grouped by category from `$catalogByCategory`. Clicking toggles list membership via `addToList` / `removeFromList` (resolving item id → entry id through `$selectedView`). Shows a `ToggleTooltip` with recommendation colour codes.
 
 ## Typography

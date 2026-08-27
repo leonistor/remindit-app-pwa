@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/custom/button"
+import { categoryPalette } from "@/lib/category-palette"
 import { cn } from "@/lib/utils"
 import { UNCATEGORIZED_NAME } from "@/stores/types"
 
@@ -19,8 +20,9 @@ export interface ShoppingItemProps {
 }
 
 // A shopping-list chip that surfaces the item's category in a Badge above its
-// name. Distinct from ItemButton (catalog/available items) which only shows the
-// name. Mirrors ItemButton's success/removable styling for the selected list.
+// name. Shares the categorical palette with ItemButton (catalog/available
+// items) so both reflect the same category color; the chip itself reads as
+// "in list" via the selected/emphasized tint.
 export const ShoppingItem = ({
   name,
   categoryName,
@@ -30,15 +32,25 @@ export const ShoppingItem = ({
   className,
 }: ShoppingItemProps) => {
   const label = categoryName?.trim() || UNCATEGORIZED_NAME
+  const palette = categoryPalette(label)
 
   return (
     <div className={cn("flex flex-col items-start gap-1", className)}>
       {showCategory && (
-        <Badge variant="success" pill className="pointer-events-none">
+        <Badge
+          pill
+          className={cn("pointer-events-none", palette.badge)}
+        >
           {label}
         </Badge>
       )}
-      <Button variant="success" pill disabled={disabled} onClick={onClick}>
+      <Button
+        variant="bare"
+        pill
+        disabled={disabled}
+        onClick={onClick}
+        className={palette.buttonSelected}
+      >
         {name}
       </Button>
     </div>
