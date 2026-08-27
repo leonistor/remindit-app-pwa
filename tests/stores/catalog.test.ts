@@ -11,6 +11,7 @@ import {
   $catalog,
   addCatalogItem,
   removeCatalogItem,
+  renameCatalogItem,
   updateCatalogItem,
 } from "@/stores/catalog"
 import { $history } from "@/stores/history"
@@ -122,5 +123,32 @@ describe("catalog store", () => {
     const remaining = $list.get()
     expect(remaining).toHaveLength(1)
     expect(remaining[0].id).toBe("entry-b")
+  })
+
+  test("renameCatalogItem updates the name (symmetric with renameCategory)", () => {
+    const item = addCatalogItem("Milk", "cat-dairy")
+
+    renameCatalogItem(item.id, "Skim Milk")
+
+    expect($catalog.get()[0]).toMatchObject({
+      id: item.id,
+      name: "Skim Milk",
+      categoryId: "cat-dairy",
+    })
+  })
+
+  test("renameCatalogItem no-ops on an empty name or an unchanged name", () => {
+    const item = addCatalogItem("Milk", "cat-dairy")
+    const before = $catalog.get()
+
+    // Empty / whitespace-only renames are ignored.
+    renameCatalogItem(item.id, "   ")
+
+    // Renaming to the current (trimmed) name is also a no-op write.
+    renameCatalogItem(item.id, "Milk")
+
+    // The store array is referentially unchanged — no needless writes.
+    expect($catalog.get()).toBe(before)
+    expect($catalog.get()[0].name).toBe("Milk")
   })
 })

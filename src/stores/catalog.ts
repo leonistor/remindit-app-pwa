@@ -45,6 +45,18 @@ export function updateCatalogItem(
   $catalog.set(next)
 }
 
+// Renames a catalog item in place. Convenience wrapper mirroring
+// `renameCategory` so inline name editing has a symmetric, intent-revealing
+// call. No-ops on an empty name or when the trimmed name is unchanged, to
+// avoid blank items and needless `localStorage` writes.
+export function renameCatalogItem(id: string, name: string): void {
+  const trimmed = name.trim()
+  const current = getCatalogItem(id)
+  if (!current || trimmed.length === 0) return
+  if (trimmed === current.name) return
+  updateCatalogItem(id, { name: trimmed })
+}
+
 // Removing a catalog item also drops any active list entries referencing it.
 // Deliberately does NOT write history.
 export function removeCatalogItem(id: string): void {

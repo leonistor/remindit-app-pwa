@@ -48,11 +48,15 @@ export function normalizeCategoryFrequencies(): void {
 
 export function renameCategory(id: string, name: string): void {
   if (id === UNCATEGORIZED_ID) return
+  const trimmed = name.trim()
+  const category = getCategory(id)
+  if (!category || trimmed.length === 0) return
+  if (trimmed === category.name) return
   const categories = $categories.get()
   const index = categories.findIndex((c) => c.id === id)
   if (index === -1) return
   const next = categories.slice()
-  next[index] = { ...next[index], name: name.trim() }
+  next[index] = { ...next[index], name: trimmed }
   $categories.set(next)
 }
 
