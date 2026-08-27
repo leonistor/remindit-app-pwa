@@ -20,7 +20,7 @@ Branch naming suggestion: `feat/impr-tier-1`, `feat/impr-tier-2`, `feat/impr-tie
 
 **Goal: reduce noise before structural changes.**
 
-- **13. Remove `src/components/examples/*`** — `AllItemsExample.tsx`, `GroupingList.tsx`,
+- **13. Remove `src/examples/*`** — `AllItemsExample.tsx`, `GroupingList.tsx`,
   `Resizable.tsx`, `TransferList.tsx` are unreferenced demo files. Delete the directory
   (or gate behind a dev-only route if they are useful as a playground). Verify with a
   grep that nothing imports them, then remove.
