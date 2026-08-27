@@ -14,9 +14,7 @@ afterEach(cleanup)
 
 describe("ItemButton", () => {
   it("renders the name and applies a categorical palette tint", () => {
-    render(
-      <ItemButton name="Milk" purpose="selectable" categoryKey="dairy" />
-    )
+    render(<ItemButton name="Milk" purpose="selectable" categoryKey="dairy" />)
 
     const button = screen.getByRole("button", { name: "Milk" })
     // Palette tint is applied directly via the `--cat` CSS var (solid

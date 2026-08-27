@@ -1,20 +1,17 @@
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react"
 import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card"
-import { Button } from "@/components/ui/custom/button"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleIndicator,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { Button } from "@/components/ui/custom/button"
 import {
   type CatalogByCategoryAllGroup,
-  renameCategory,
   removeCategory,
+  renameCategory,
   UNCATEGORIZED_ID,
 } from "@/stores"
 import { CategoryFrequencyMenu } from "./category-frequency-menu"
@@ -31,10 +28,7 @@ interface CategorySectionProps {
 // inline-editable name, the frequency picker, the item count, and the add/delete
 // actions, and whose body is the items Table. The uncategorized sentinel is
 // shown but cannot be renamed or deleted.
-export const CategorySection = ({
-  group,
-  onAddItem,
-}: CategorySectionProps) => {
+export const CategorySection = ({ group, onAddItem }: CategorySectionProps) => {
   const isUncategorized = group.categoryId === UNCATEGORIZED_ID
 
   return (

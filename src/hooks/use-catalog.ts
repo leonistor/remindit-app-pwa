@@ -5,10 +5,10 @@ import {
   $listItemIds,
   $recommendationsByItemId,
   addToList,
-  removeFromListByItemId,
-  setAccordionOpen,
   type CatalogByCategoryGroup,
   type Recommendation,
+  removeFromListByItemId,
+  setAccordionOpen,
 } from "@/stores"
 
 export interface UseCatalog {

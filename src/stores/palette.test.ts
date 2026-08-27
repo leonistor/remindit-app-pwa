@@ -6,7 +6,12 @@
 
 import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
 import { DEFAULT_PALETTE_ID, PALETTE_POOL } from "@/lib/palettes"
-import { $activePaletteId, getActivePalette, getActivePaletteId, setActivePalette } from "./palette"
+import {
+  $activePaletteId,
+  getActivePalette,
+  getActivePaletteId,
+  setActivePalette,
+} from "./palette"
 
 const POOL_IDS = PALETTE_POOL.palettes.map((p) => p.id)
 

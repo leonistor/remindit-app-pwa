@@ -8,7 +8,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { type ThemeMode, $theme } from "@/stores/theme"
+import { $theme, type ThemeMode } from "@/stores/theme"
 
 const setMode = (mode: ThemeMode) => $theme.set(mode)
 

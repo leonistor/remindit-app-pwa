@@ -5,17 +5,17 @@
 // selected palette so users can judge real contrast before committing.
 // Selection is persisted via `setActivePalette` (src/stores/palette).
 
+import { createListCollection } from "@ark-ui/react"
+import { useStore } from "@nanostores/react"
 import {
   Listbox,
   ListboxContent,
   ListboxItem,
   ListboxItemIndicator,
 } from "@/components/ui/listbox"
-import { createListCollection } from "@ark-ui/react"
 import { categoryPalette } from "@/lib/category-palette"
-import { cn } from "@/lib/utils"
 import { getPalette, PALETTE_POOL, type Palette } from "@/lib/palettes"
-import { useStore } from "@nanostores/react"
+import { cn } from "@/lib/utils"
 import { $activePaletteId, setActivePalette } from "@/stores/palette"
 
 // Fixed demo categories used purely to preview the active palette's contrast.

@@ -1,4 +1,5 @@
 import { TrashIcon } from "@phosphor-icons/react"
+import { Button } from "@/components/ui/custom/button"
 import {
   Table,
   TableBody,
@@ -12,7 +13,6 @@ import {
   removeCatalogItem,
   renameCatalogItem,
 } from "@/stores"
-import { Button } from "@/components/ui/custom/button"
 import { InlineEditableName } from "./inline-editable-name"
 
 interface CategoryItemsTableProps {

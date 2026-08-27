@@ -6,9 +6,7 @@ import { useStore } from "@nanostores/react"
 import { useEffect, useState } from "react"
 import { FormDialog } from "@/components/ui/custom/form-dialog"
 import { ValidatedField } from "@/components/ui/custom/validated-field"
-import {
-  FieldGroup,
-} from "@/components/ui/field"
+import { FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -87,7 +85,11 @@ export const ItemDialog = ({
       saveDisabled={invalid || !categoryId}
     >
       <FieldGroup>
-        <ValidatedField label="Name" invalid={invalid} error="Name is required.">
+        <ValidatedField
+          label="Name"
+          invalid={invalid}
+          error="Name is required."
+        >
           <Input
             type="text"
             value={name}

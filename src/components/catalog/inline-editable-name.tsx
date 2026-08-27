@@ -1,5 +1,6 @@
 import { CheckIcon, XIcon } from "@phosphor-icons/react"
 import { useEffect, useId, useState } from "react"
+import { Button } from "@/components/ui/custom/button"
 import {
   Editable,
   EditableArea,
@@ -10,7 +11,6 @@ import {
   EditableSubmitTrigger,
   useEditable,
 } from "@/components/ui/editable"
-import { Button } from "@/components/ui/custom/button"
 
 interface InlineEditableNameProps {
   /** Current name, shown in the preview and used as the controlled value. */

@@ -1,8 +1,8 @@
 // Current user profile. Persisted; random defaults are assigned on first run
 // when no name is present (handled in ./index during seeding).
 
-import type { User } from "./types"
 import { jsonStore, STORAGE_KEYS } from "./persistence"
+import type { User } from "./types"
 
 const NAME_POOL = [
   "Patricia",
@@ -33,9 +33,8 @@ export function localAvatar(name: string): string {
   const initials = (
     parts.length > 1
       ? parts[0][0] + parts[parts.length - 1][0]
-      : parts[0]?.slice(0, 2) ?? ""
-  )
-    .toUpperCase()
+      : (parts[0]?.slice(0, 2) ?? "")
+  ).toUpperCase()
 
   let hash = 0
   for (let i = 0; i < name.length; i++) {

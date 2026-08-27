@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { ark } from "@ark-ui/react/factory";
-import type React from "react";
-import { cn } from "@/lib/utils";
+import { ark } from "@ark-ui/react/factory"
+import type React from "react"
+import { cn } from "@/lib/utils"
 
 interface TableProps extends React.ComponentProps<typeof ark.table> {
   /**
@@ -10,17 +10,17 @@ interface TableProps extends React.ComponentProps<typeof ark.table> {
    *
    * @default true
    */
-  isHoverable?: boolean;
+  isHoverable?: boolean
   /**
    * The variant of the table.
    *
    * @default "plain"
    */
-  variant?: "plain" | "striped";
+  variant?: "plain" | "striped"
 }
 
 export const Table = (props: TableProps) => {
-  const { variant = "plain", isHoverable = true, className, ...rest } = props;
+  const { variant = "plain", isHoverable = true, className, ...rest } = props
 
   return (
     <div className="relative w-full overflow-auto" data-slot="table-wrapper">
@@ -38,11 +38,11 @@ export const Table = (props: TableProps) => {
         {...rest}
       />
     </div>
-  );
-};
+  )
+}
 
 export const TableHeader = (props: React.ComponentProps<typeof ark.thead>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.thead
@@ -50,13 +50,14 @@ export const TableHeader = (props: React.ComponentProps<typeof ark.thead>) => {
       data-slot="table-header"
       {...rest}
     />
-  );
-};
+  )
+}
 
-export interface TableBodyProps extends React.ComponentProps<typeof ark.tbody> {}
+export interface TableBodyProps
+  extends React.ComponentProps<typeof ark.tbody> {}
 
 export const TableBody = (props: TableBodyProps) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.tbody
@@ -64,11 +65,11 @@ export const TableBody = (props: TableBodyProps) => {
       data-slot="table-body"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const TableFooter = (props: React.ComponentProps<typeof ark.tfoot>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.tfoot
@@ -82,11 +83,11 @@ export const TableFooter = (props: React.ComponentProps<typeof ark.tfoot>) => {
       data-slot="table-footer"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const TableRow = (props: React.ComponentProps<typeof ark.tr>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.tr
@@ -100,11 +101,11 @@ export const TableRow = (props: React.ComponentProps<typeof ark.tr>) => {
       data-slot="table-row"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const TableHead = (props: React.ComponentProps<typeof ark.th>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.th
@@ -119,11 +120,11 @@ export const TableHead = (props: React.ComponentProps<typeof ark.th>) => {
       data-slot="table-head"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const TableCell = (props: React.ComponentProps<typeof ark.td>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.td
@@ -135,13 +136,13 @@ export const TableCell = (props: React.ComponentProps<typeof ark.td>) => {
       data-slot="table-cell"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const TableCaption = (
   props: React.ComponentProps<typeof ark.caption>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.caption
@@ -149,5 +150,5 @@ export const TableCaption = (
       data-slot="table-caption"
       {...rest}
     />
-  );
-};
+  )
+}

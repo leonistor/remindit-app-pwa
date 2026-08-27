@@ -1,28 +1,25 @@
-"use client";
+"use client"
 
 import {
   Editable as ArkEditable,
   useEditableContext,
-} from "@ark-ui/react/editable";
-import type React from "react";
-import { cn } from "@/lib/utils";
-import {
-  type ButtonProps,
-  buttonVariants,
-} from "@/components/ui/custom/button";
+} from "@ark-ui/react/editable"
+import type React from "react"
+import { type ButtonProps, buttonVariants } from "@/components/ui/custom/button"
+import { cn } from "@/lib/utils"
 
-export const useEditable = useEditableContext;
+export const useEditable = useEditableContext
 
 export interface EditableProps
   extends React.ComponentProps<typeof ArkEditable.Root> {
   /**
    * The orientation of the editable
    */
-  orientation?: "horizontal" | "vertical";
+  orientation?: "horizontal" | "vertical"
 }
 
 export const Editable = (props: EditableProps) => {
-  const { orientation = "horizontal", className, ...rest } = props;
+  const { orientation = "horizontal", className, ...rest } = props
 
   return (
     <ArkEditable.Root
@@ -38,22 +35,22 @@ export const Editable = (props: EditableProps) => {
       data-slot="editable"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const EditableArea = (
   props: React.ComponentProps<typeof ArkEditable.Area>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkEditable.Area
-      className={cn("flex-1 min-w-0", className)}
+      className={cn("min-w-0 flex-1", className)}
       data-slot="editable-area"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export interface EditableInputProps
   extends Omit<React.ComponentProps<typeof ArkEditable.Input>, "size"> {}
@@ -68,7 +65,7 @@ export const EditableInput = (props: EditableInputProps) => {
       {...rest}
     />
   )
-};
+}
 
 interface EditablePreviewProps
   extends React.ComponentProps<typeof ArkEditable.Preview> {
@@ -77,17 +74,17 @@ interface EditablePreviewProps
    *
    * @default "md"
    */
-  size?: ButtonProps["size"];
+  size?: ButtonProps["size"]
   /**
    * The variant of the preview
    *
    * @default "outline"
    */
-  variant?: ButtonProps["variant"];
+  variant?: ButtonProps["variant"]
 }
 
 export const EditablePreview = (props: EditablePreviewProps) => {
-  const { variant = "outline", size = "md", className, ...rest } = props;
+  const { variant = "outline", size = "md", className, ...rest } = props
 
   return (
     <ArkEditable.Preview
@@ -104,13 +101,13 @@ export const EditablePreview = (props: EditablePreviewProps) => {
       data-slot="editable-preview"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const EditableControl = (
   props: React.ComponentProps<typeof ArkEditable.Control>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkEditable.Control
@@ -122,21 +119,21 @@ export const EditableControl = (
       data-slot="editable-control"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const EditableEditTrigger = (
   props: React.ComponentProps<typeof ArkEditable.EditTrigger>
-) => <ArkEditable.EditTrigger data-slot="editable-edit-trigger" {...props} />;
+) => <ArkEditable.EditTrigger data-slot="editable-edit-trigger" {...props} />
 
 export const EditableCancelTrigger = (
   props: React.ComponentProps<typeof ArkEditable.CancelTrigger>
 ) => (
   <ArkEditable.CancelTrigger data-slot="editable-cancel-trigger" {...props} />
-);
+)
 
 export const EditableSubmitTrigger = (
   props: React.ComponentProps<typeof ArkEditable.SubmitTrigger>
 ) => (
   <ArkEditable.SubmitTrigger data-slot="editable-submit-trigger" {...props} />
-);
+)

@@ -16,7 +16,6 @@ import {
   Menu as MenuRoot,
   MenuTrigger,
 } from "@/components/ui/menu"
-import { cn } from "@/lib/utils"
 import { ThemeToggle } from "./theme-toggle"
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>

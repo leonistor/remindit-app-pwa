@@ -6,11 +6,7 @@
 // never triggers persistence writes or logging on its own.
 
 import { logger } from "@nanostores/logger"
-import {
-  generateShoppingHistory,
-  getDataset,
-  resolveDatasetId,
-} from "seed"
+import { generateShoppingHistory, getDataset, resolveDatasetId } from "seed"
 import { $catalog } from "./catalog"
 import {
   $categories,
@@ -134,20 +130,19 @@ export function setupDevLogging(): void {
   })
 }
 
+export { useCatalog } from "../hooks/use-catalog"
+export { useDrawer } from "../hooks/use-drawer"
+// Feature hooks — hide atom names from components and ease mocking.
+export { useShoppingList } from "../hooks/use-shopping-list"
 export * from "./catalog"
 export * from "./categories"
 export * from "./history"
 export * from "./list"
+export * from "./palette"
 export * from "./recommender"
 export * from "./selectors"
 export * from "./theme"
-export * from "./palette"
 // Public API surface — import everything from '@/stores'.
 export * from "./types"
 export * from "./ui"
 export * from "./user"
-
-// Feature hooks — hide atom names from components and ease mocking.
-export { useShoppingList } from "../hooks/use-shopping-list"
-export { useCatalog } from "../hooks/use-catalog"
-export { useDrawer } from "../hooks/use-drawer"

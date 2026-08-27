@@ -38,9 +38,7 @@ export const ShoppingListPanel = () => {
 
       // When View Transitions are available, morph the chip back to the catalog.
       if (isSupported) {
-        runTravel(entry.itemId, sourceEl, () =>
-          removeFromList(entry.entryId)
-        )
+        runTravel(entry.itemId, sourceEl, () => removeFromList(entry.entryId))
         return
       }
 
@@ -73,7 +71,8 @@ export const ShoppingListPanel = () => {
   const handleGroupChange = useCallback(
     (details: { value: string[] }) => {
       const next = new Set(details.value)
-      if (next.has("categories") !== categoriesVisible) toggleCategoriesVisible()
+      if (next.has("categories") !== categoriesVisible)
+        toggleCategoriesVisible()
 
       const SORTS: SelectedSort[] = ["category-name", "last-added"]
       const clickedSort = SORTS.find((s) => next.has(s) && s !== sort)

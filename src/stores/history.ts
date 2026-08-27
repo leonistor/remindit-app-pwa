@@ -2,8 +2,8 @@
 // Editing, deleting, or renaming catalog items / categories must never write
 // here — those callers simply do not invoke logHistory().
 
-import type { HistoryAction, HistoryEvent } from "./types"
 import { jsonStore, STORAGE_KEYS } from "./persistence"
+import type { HistoryAction, HistoryEvent } from "./types"
 
 const $history = jsonStore<HistoryEvent[]>(STORAGE_KEYS.history, [])
 

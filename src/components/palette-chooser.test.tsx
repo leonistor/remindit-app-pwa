@@ -7,15 +7,18 @@
 import { afterEach, describe, expect, it } from "@rstest/core"
 import { act, cleanup, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { PALETTE_POOL, getPalette } from "@/lib/palettes"
-import { categoryPalette } from "@/lib/category-palette"
 import { PaletteChooser } from "@/components/palette-chooser"
+import { categoryPalette } from "@/lib/category-palette"
+import { getPalette, PALETTE_POOL } from "@/lib/palettes"
 import { $activePaletteId, setActivePalette } from "@/stores/palette"
 
 const POOL_IDS = PALETTE_POOL.palettes.map((p) => p.id)
 // The "paired" palette is selected in the store/recolor tests; its visible label
 // is the palette name, not the id.
-const PAIRED = PALETTE_POOL.palettes.find((p) => p.id === "paired")!
+const PAIRED = PALETTE_POOL.palettes.find((p) => p.id === "paired")
+if (!PAIRED) {
+  throw new Error('Expected "paired" palette to exist in PALETTE_POOL')
+}
 
 // Options render as `role="option"`; locate one by its visible palette name.
 function optionFor(name: string): HTMLElement {
@@ -64,9 +67,9 @@ describe("PaletteChooser", () => {
 
     await userEvent.click(optionFor(PAIRED.name))
 
-    const after = (screen.getByText("Produce") as HTMLElement).style.getPropertyValue(
-      "--cat"
-    )
+    const after = (
+      screen.getByText("Produce") as HTMLElement
+    ).style.getPropertyValue("--cat")
     const expectedAfter = categoryPalette(
       "Produce",
       undefined,

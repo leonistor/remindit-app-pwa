@@ -6,7 +6,7 @@ import {
   SunIcon,
 } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/custom/button"
-import { type ThemeMode, $theme } from "@/stores/theme"
+import { $theme, type ThemeMode } from "@/stores/theme"
 
 const OPTIONS: Record<ThemeMode, { label: string; Icon: Icon }> = {
   light: { label: "Light", Icon: SunIcon },

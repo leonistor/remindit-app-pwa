@@ -4,10 +4,10 @@ import {
   $selectedOrdered,
   $selectedSort,
   removeFromList,
-  toggleCategoriesVisible,
-  toggleSelectedSort,
   type SelectedSort,
   type SelectedViewEntry,
+  toggleCategoriesVisible,
+  toggleSelectedSort,
 } from "@/stores"
 
 export interface UseShoppingList {

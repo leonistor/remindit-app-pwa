@@ -10,7 +10,7 @@
 // `@rstest/core` nor an auto-injected global in this project's config).
 
 import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
-import { initTheme, type ThemeMode, $theme } from "@/stores/theme"
+import { $theme, initTheme, type ThemeMode } from "@/stores/theme"
 
 // Controllable OS dark-mode flag read by the mocked matchMedia.
 let osPrefersDark = false
@@ -70,7 +70,9 @@ describe("$theme", () => {
     // Reset back to the default so other tests start clean.
     setMode("system")
     expect($theme.get()).toBe("system")
-    expect(localStorage.getItem("remindit:theme")).toBe(JSON.stringify("system"))
+    expect(localStorage.getItem("remindit:theme")).toBe(
+      JSON.stringify("system")
+    )
   })
 })
 

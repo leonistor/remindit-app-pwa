@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
+import { PaletteChooser } from "@/components/palette-chooser"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/custom/button"
-import { PaletteChooser } from "@/components/palette-chooser"
 import {
   Dialog,
   DialogBody,

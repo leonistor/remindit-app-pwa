@@ -22,7 +22,11 @@ function Layout() {
           <Menu />
           <div className="flex min-h-0 grow flex-col overflow-y-auto">
             <Outlet />
-            {!isHome && <div className="mt-auto"><Footer /></div>}
+            {!isHome && (
+              <div className="mt-auto">
+                <Footer />
+              </div>
+            )}
           </div>
         </div>
       </div>

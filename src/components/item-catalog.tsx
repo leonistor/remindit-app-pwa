@@ -84,24 +84,23 @@ export default function ItemCatalog() {
                       purpose="selectable"
                       categoryKey={group.categoryId}
                       isSelected={isSelected}
-                        recommendationTier={recommendationsByItemId.get(item.id)?.tier}
+                      recommendationTier={
+                        recommendationsByItemId.get(item.id)?.tier
+                      }
                       travelTargetId={item.id}
                       onClick={(e) => {
                         // When removing, the visible "from" is the list chip
                         // (even though we clicked the catalog button), so it
                         // animates out of the shopping list rather than snapping.
                         const sourceEl = isSelected
-                          ? document.querySelector<HTMLElement>(
+                          ? (document.querySelector<HTMLElement>(
                               `[data-vt-list="${item.id}"]`
-                            ) ?? e.currentTarget
+                            ) ?? e.currentTarget)
                           : e.currentTarget
-                        runTravel(
-                          item.id,
-                          sourceEl,
-                          () =>
-                            isSelected
-                              ? removeFromListByItemId(item.id)
-                              : addToList(item.id)
+                        runTravel(item.id, sourceEl, () =>
+                          isSelected
+                            ? removeFromListByItemId(item.id)
+                            : addToList(item.id)
                         )
                       }}
                     />

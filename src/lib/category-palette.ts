@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react"
-import { UNCATEGORIZED_NAME } from "@/stores/types"
 import { defaultPalette, type Palette } from "@/lib/palettes"
+import { UNCATEGORIZED_NAME } from "@/stores/types"
 
 // Categorical color language for items and categories, now backed by the
 // palette *pool* in `seed/palettes.json` (see `src/lib/palettes`). This module

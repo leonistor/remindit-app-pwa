@@ -5,9 +5,7 @@ import {
 import { useEffect, useState } from "react"
 import { FormDialog } from "@/components/ui/custom/form-dialog"
 import { ValidatedField } from "@/components/ui/custom/validated-field"
-import {
-  FieldGroup,
-} from "@/components/ui/field"
+import { FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -83,7 +81,11 @@ export const CategoryDialog = ({
       saveDisabled={invalid}
     >
       <FieldGroup>
-        <ValidatedField label="Name" invalid={invalid} error="Name is required.">
+        <ValidatedField
+          label="Name"
+          invalid={invalid}
+          error="Name is required."
+        >
           <Input
             type="text"
             value={name}
@@ -99,9 +101,7 @@ export const CategoryDialog = ({
             }
             value={[frequency]}
             onValueChange={(details) =>
-              setFrequency(
-                (details.value[0] as CategoryFrequency) ?? "unknown"
-              )
+              setFrequency((details.value[0] as CategoryFrequency) ?? "unknown")
             }
           >
             <SelectTrigger>

@@ -1,4 +1,5 @@
 import { CaretDownIcon } from "@phosphor-icons/react"
+import { Button } from "@/components/ui/custom/button"
 import {
   Menu,
   MenuContent,
@@ -6,11 +7,7 @@ import {
   MenuRadioItem,
   MenuTrigger,
 } from "@/components/ui/menu"
-import { Button } from "@/components/ui/custom/button"
-import {
-  type CategoryFrequency,
-  updateCategory,
-} from "@/stores"
+import { type CategoryFrequency, updateCategory } from "@/stores"
 import { FREQUENCY_LABELS, FREQUENCY_OPTIONS } from "./frequency-labels"
 
 interface CategoryFrequencyMenuProps {

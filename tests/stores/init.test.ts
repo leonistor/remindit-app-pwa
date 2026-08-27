@@ -2,9 +2,9 @@
 // generated 6-month shopping history (not just catalog/categories).
 
 import { expect, test } from "@rstest/core"
+import { initStores } from "@/stores"
 import { $catalog } from "@/stores/catalog"
 import { $history } from "@/stores/history"
-import { initStores } from "@/stores"
 
 test("initStores seeds a non-empty catalog and a generated history on first run", () => {
   initStores()

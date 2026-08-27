@@ -73,7 +73,9 @@ export function reassignItemsToCategory(fromId: string, toId: string): void {
     item.categoryId === fromId ? { ...item, categoryId: toId } : item
   )
   // Only write when something actually moved.
-  if (next.some((item, index) => item.categoryId !== catalog[index].categoryId)) {
+  if (
+    next.some((item, index) => item.categoryId !== catalog[index].categoryId)
+  ) {
     $catalog.set(next)
   }
 }

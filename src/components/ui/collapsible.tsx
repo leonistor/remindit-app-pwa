@@ -1,14 +1,14 @@
-"use client";
+"use client"
 
 import {
   Collapsible as ArkCollapsible,
   useCollapsibleContext,
-} from "@ark-ui/react/collapsible";
-import { ChevronDownIcon } from "lucide-react";
-import type React from "react";
-import { cn } from "@/lib/utils";
+} from "@ark-ui/react/collapsible"
+import { ChevronDownIcon } from "lucide-react"
+import type React from "react"
+import { cn } from "@/lib/utils"
 
-export const useCollapsible = useCollapsibleContext;
+export const useCollapsible = useCollapsibleContext
 
 export const Collapsible = (
   props: React.ComponentProps<typeof ArkCollapsible.Root>
@@ -19,7 +19,7 @@ export const Collapsible = (
     unmountOnExit = true,
     className,
     ...rest
-  } = props;
+  } = props
 
   return (
     <ArkCollapsible.Root
@@ -31,13 +31,13 @@ export const Collapsible = (
       unmountOnExit={collapsedHeight ? false : unmountOnExit}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const CollapsibleTrigger = (
   props: React.ComponentProps<typeof ArkCollapsible.Trigger>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkCollapsible.Trigger
@@ -50,13 +50,13 @@ export const CollapsibleTrigger = (
       data-slot="collapsible-trigger"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const CollapsibleContent = (
   props: React.ComponentProps<typeof ArkCollapsible.Content>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkCollapsible.Content
@@ -74,13 +74,13 @@ export const CollapsibleContent = (
     >
       <div className={className}>{children}</div>
     </ArkCollapsible.Content>
-  );
-};
+  )
+}
 
 export const CollapsibleIndicator = (
   props: React.ComponentProps<typeof ArkCollapsible.Indicator>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkCollapsible.Indicator
@@ -90,5 +90,5 @@ export const CollapsibleIndicator = (
     >
       <ChevronDownIcon className="transition-transform duration-200 motion-reduce:transition-none!" />
     </ArkCollapsible.Indicator>
-  );
-};
+  )
+}

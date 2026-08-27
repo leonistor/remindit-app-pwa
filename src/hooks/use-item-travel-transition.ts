@@ -33,11 +33,9 @@ const selectorFor = (itemId: string) =>
   `[data-vt-catalog="${itemId}"], [data-vt-list="${itemId}"]`
 
 const clearNames = (itemId: string) => {
-  document
-    .querySelectorAll<HTMLElement>(selectorFor(itemId))
-    .forEach((el) => {
-      el.style.viewTransitionName = ""
-    })
+  document.querySelectorAll<HTMLElement>(selectorFor(itemId)).forEach((el) => {
+    el.style.viewTransitionName = ""
+  })
 }
 
 const supportsViewTransitions = () =>

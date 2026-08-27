@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/custom/button"
-import { cn } from "@/lib/utils"
 import { useCategoryPalette } from "@/hooks/use-category-palette"
+import { cn } from "@/lib/utils"
 import { UNCATEGORIZED_NAME } from "@/stores/types"
 
 export interface ShoppingItemProps {
@@ -58,10 +58,7 @@ export const ShoppingItem = ({
       data-testid="shopping-item"
     >
       {showCategory && (
-        <Badge
-          pill
-          className={cn("pointer-events-none", palette.badge)}
-        >
+        <Badge pill className={cn("pointer-events-none", palette.badge)}>
           {label}
         </Badge>
       )}
