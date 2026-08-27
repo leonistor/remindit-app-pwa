@@ -14,6 +14,11 @@ export type CategoryFrequency =
   | "seldom"
   | "unknown"
 
+// Rank of a frequency on an ascending scale (most frequent first). Drives
+// category ordering in the catalog and available-items views.
+export const frequencyRank = (f: CategoryFrequency): number =>
+  CATEGORY_FREQUENCIES.indexOf(f)
+
 // Ordered list of allowed frequencies (e.g. for building a picker or labels).
 export const CATEGORY_FREQUENCIES: readonly CategoryFrequency[] = [
   "daily",

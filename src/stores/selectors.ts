@@ -1,7 +1,7 @@
 // Derived / computed views used by the main screen. Components stay dumb and
 // read these instead of recomputing grouping logic themselves.
 
-import { type ReadableAtom, computed } from "nanostores"
+import { computed, type ReadableAtom } from "nanostores"
 import { $catalog } from "./catalog"
 import { $categories } from "./categories"
 import { $history } from "./history"
@@ -13,7 +13,7 @@ import type {
   CategoryFrequency,
   ListEntry,
 } from "./types"
-import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
+import { frequencyRank, UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
 import { $selectedSort } from "./ui"
 
 export interface GroupedItem {
@@ -186,12 +186,17 @@ export const $catalogByCategoryAll = computed(
       group.push({ id: item.id, name: item.name, categoryId: item.categoryId })
     }
 
-    return categories.map((category) => ({
+    const groups = categories.map((category) => ({
       categoryId: category.id,
       categoryName: category.name,
       frequency: category.frequency,
       items: itemsByCategoryId.get(category.id) ?? [],
     }))
+
+    // Show most-frequently-bought categories first; ties keep $categories order.
+    return groups.sort(
+      (a, b) => frequencyRank(a.frequency) - frequencyRank(b.frequency)
+    )
   }
 )
 
@@ -206,8 +211,13 @@ export interface CatalogByCategoryGroup {
 }
 
 export const $catalogByCategory = computed(
-  $catalogView,
-  (view): CatalogByCategoryGroup[] => {
+  [$catalogView, $categories],
+  (view, categories): CatalogByCategoryGroup[] => {
+    const frequencyById = new Map<string, CategoryFrequency>()
+    for (const category of categories) {
+      frequencyById.set(category.id, category.frequency)
+    }
+
     const groupByCategoryId = new Map<
       string,
       { categoryName: string; items: CatalogByCategoryItem[] }
@@ -235,7 +245,14 @@ export const $catalogByCategory = computed(
         items: group.items,
       })
     }
-    return result
+
+    // Show most-frequently-bought categories first; ties keep first-appearance
+    // order within $catalogView.
+    return result.sort(
+      (a, b) =>
+        frequencyRank(frequencyById.get(a.categoryId) ?? "unknown") -
+        frequencyRank(frequencyById.get(b.categoryId) ?? "unknown")
+    )
   }
 )
 
@@ -255,8 +272,7 @@ export const $recommendations = computed(
 // instead of rebuilding a `.find()` map on every render.
 export const $recommendationsByItemId = computed(
   $recommendations,
-  (recommendations) =>
-    new Map(recommendations.map((rec) => [rec.item.id, rec]))
+  (recommendations) => new Map(recommendations.map((rec) => [rec.item.id, rec]))
 )
 
 // A per-item detail selector. Components call `$itemDetail(itemId)` to get a
@@ -277,15 +293,18 @@ export function $itemDetail(itemId: string | null) {
   const key = itemId ?? NULL_ID
   let store = $itemDetailCache.get(key)
   if (!store) {
-    store = computed<ItemDetail>([$catalog, $categories], (catalog, categories) => {
-      if (itemId === null) return { item: null, categoryName: "" }
-      const item = catalog.find((i) => i.id === itemId) ?? null
-      if (!item) return { item: null, categoryName: "" }
-      const categoryName =
-        categories.find((c) => c.id === item.categoryId)?.name ??
-        UNCATEGORIZED_NAME
-      return { item, categoryName }
-    })
+    store = computed<ItemDetail>(
+      [$catalog, $categories],
+      (catalog, categories) => {
+        if (itemId === null) return { item: null, categoryName: "" }
+        const item = catalog.find((i) => i.id === itemId) ?? null
+        if (!item) return { item: null, categoryName: "" }
+        const categoryName =
+          categories.find((c) => c.id === item.categoryId)?.name ??
+          UNCATEGORIZED_NAME
+        return { item, categoryName }
+      }
+    )
     $itemDetailCache.set(key, store)
   }
   return store
