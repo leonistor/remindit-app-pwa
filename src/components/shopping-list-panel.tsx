@@ -1,19 +1,10 @@
 "use client"
 
-import { useStore } from "@nanostores/react"
 import { ClockIcon, SortAscendingIcon, TagIcon } from "@phosphor-icons/react"
 import { useCallback, useRef, useState } from "react"
 import { ShoppingItem } from "@/components/shopping-item"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import {
-  $selectedCategoriesVisible,
-  $selectedOrdered,
-  $selectedSort,
-  removeFromList,
-  type SelectedSort,
-  setSelectedCategoriesVisible,
-  setSelectedSort,
-} from "@/stores"
+import { type SelectedSort, useShoppingList } from "@/stores"
 
 // Renders the active list ($selectedOrdered) as success-colored item chips that
 // wrap like the available-items grid in ItemCatalog. Each chip shows just the
@@ -23,9 +14,14 @@ import {
 // show/hide-categories toggle and two mutually exclusive sort modes (category +
 // name, or last-added-first). Preferences persist via the ui store.
 export const ShoppingListPanel = () => {
-  const selectedView = useStore($selectedOrdered)
-  const categoriesVisible = useStore($selectedCategoriesVisible)
-  const sort = useStore($selectedSort)
+  const {
+    items: selectedView,
+    categoriesVisible,
+    sort,
+    toggleCategoriesVisible,
+    toggleSelectedSort,
+    removeFromList,
+  } = useShoppingList()
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set())
   const animationTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map()
@@ -50,7 +46,7 @@ export const ShoppingListPanel = () => {
     }, 150)
 
     animationTimeouts.current.set(entryId, timeout)
-  }, [])
+  }, [removeFromList])
 
   // Build the controlled ToggleGroup value from the two pieces of UI state.
   const groupValue = [
@@ -58,28 +54,25 @@ export const ShoppingListPanel = () => {
     sort !== "default" ? sort : "",
   ].filter(Boolean)
 
-  const handleGroupChange = useCallback((details: { value: string[] }) => {
-    const next = new Set(details.value)
-    setSelectedCategoriesVisible(next.has("categories"))
+  // The ToggleGroup reports the full resulting value set on each toggle. We
+  // diff it against the current store values (no `.get()` reads needed) and
+  // delegate the flip to the ui store, which owns the sort state machine.
+  const handleGroupChange = useCallback(
+    (details: { value: string[] }) => {
+      const next = new Set(details.value)
+      if (next.has("categories") !== categoriesVisible) toggleCategoriesVisible()
 
-    const activeSorts = (
-      ["category-name", "last-added"] as SelectedSort[]
-    ).filter((s) => next.has(s))
-    if (activeSorts.length === 0) {
-      setSelectedSort("default")
-      return
-    }
-    if (activeSorts.length === 1) {
-      setSelectedSort(activeSorts[0])
-      return
-    }
-    // Both sort toggles on at once — the newly clicked one is the opposite of
-    // the previously active sort, so switch to that.
-    const previouslyActive = $selectedSort.get()
-    setSelectedSort(
-      activeSorts.find((s) => s !== previouslyActive) ?? activeSorts[0]
-    )
-  }, [])
+      const SORTS: SelectedSort[] = ["category-name", "last-added"]
+      const clickedSort = SORTS.find((s) => next.has(s) && s !== sort)
+      if (clickedSort) {
+        toggleSelectedSort(clickedSort)
+      } else if (!next.has(sort) && sort !== "default") {
+        // The active sort was just toggled off.
+        toggleSelectedSort(sort)
+      }
+    },
+    [categoriesVisible, sort, toggleCategoriesVisible, toggleSelectedSort]
+  )
 
   const isEmpty = selectedView.length === 0
 

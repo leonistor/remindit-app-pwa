@@ -10,7 +10,7 @@
 // `@rstest/core` nor an auto-injected global in this project's config).
 
 import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
-import { initTheme, type ThemeMode, themeStore } from "@/stores/theme"
+import { initTheme, type ThemeMode, $theme } from "@/stores/theme"
 
 // Controllable OS dark-mode flag read by the mocked matchMedia.
 let osPrefersDark = false
@@ -32,7 +32,7 @@ function makeMatchMedia() {
 const originalMatchMedia = window.matchMedia
 
 // Helper that keeps the imported `ThemeMode` type in use and makes intent clear.
-const setMode = (mode: ThemeMode) => themeStore.set(mode)
+const setMode = (mode: ThemeMode) => $theme.set(mode)
 
 beforeEach(() => {
   osPrefersDark = false
@@ -54,14 +54,14 @@ afterEach(() => {
   })
 })
 
-describe("themeStore", () => {
+describe("$theme", () => {
   it("defaults to 'system' when nothing is persisted", () => {
-    expect(themeStore.get()).toBe("system")
+    expect($theme.get()).toBe("system")
   })
 
   it("round-trips a value through localStorage", () => {
     setMode("dark")
-    expect(themeStore.get()).toBe("dark")
+    expect($theme.get()).toBe("dark")
 
     // Every store now uses JSON serialization, so the persisted key is the
     // JSON-encoded string, not a raw value.
@@ -69,7 +69,7 @@ describe("themeStore", () => {
 
     // Reset back to the default so other tests start clean.
     setMode("system")
-    expect(themeStore.get()).toBe("system")
+    expect($theme.get()).toBe("system")
     expect(localStorage.getItem("remindit:theme")).toBe(JSON.stringify("system"))
   })
 })
@@ -77,7 +77,7 @@ describe("themeStore", () => {
 describe("initTheme", () => {
   // initTheme() guards against running twice via a module-level `initialized`
   // flag, but it subscribes to the store on first run. Every subsequent
-  // themeStore.set re-applies the theme, so we can drive all scenarios through
+  // $theme.set re-applies the theme, so we can drive all scenarios through
   // the store + the mocked OS preference without re-invoking initTheme.
 
   it("applies light mode without the .dark class", () => {

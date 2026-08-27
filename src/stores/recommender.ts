@@ -12,6 +12,7 @@ import type {
   Recommendation,
   RecommendationTier,
 } from "./types"
+import { UNCATEGORIZED_NAME } from "./types"
 
 // CategoryFrequency → expected days between purchases. Used as fallback when an
 // item has too few purchases to estimate its own interval.
@@ -199,7 +200,7 @@ export function computeRecommendations(
 
     results.push({
       item,
-      categoryName: category?.name ?? "Uncategorized",
+      categoryName: category?.name ?? UNCATEGORIZED_NAME,
       score: scored.score,
       dueRatio: scored.dueRatio,
       tier: scored.tier,

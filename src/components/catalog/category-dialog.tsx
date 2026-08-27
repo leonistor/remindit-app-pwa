@@ -3,19 +3,10 @@ import {
   useListCollection,
 } from "@ark-ui/react/collection"
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/custom/button"
+import { FormDialog } from "@/components/ui/custom/form-dialog"
+import { ValidatedField } from "@/components/ui/custom/validated-field"
 import {
-  Dialog,
-  DialogBody,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-} from "@/components/ui/dialog"
-import {
-  Field,
-  FieldError,
   FieldGroup,
-  FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -78,65 +69,54 @@ export const CategoryDialog = ({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(details) => onOpenChange(details.open)}>
-      <DialogContent>
-        <DialogHeader
-          title={editingCategory ? "Edit category" : "Add category"}
-          description={
-            editingCategory
-              ? "Rename the category or change how often it is bought."
-              : "Name the category and set how often it is typically bought."
-          }
-        />
-        <DialogBody>
-          <FieldGroup>
-            <Field invalid={invalid}>
-              <FieldLabel>Name</FieldLabel>
-              <Input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Dairy"
-                autoFocus
-              />
-              {invalid && <FieldError>Name is required.</FieldError>}
-            </Field>
-            <Field>
-              <FieldLabel>Purchase frequency</FieldLabel>
-              <Select
-                collection={
-                  frequencyCollection as unknown as ListCollection<unknown>
-                }
-                value={[frequency]}
-                onValueChange={(details) =>
-                  setFrequency(
-                    (details.value[0] as CategoryFrequency) ?? "unknown"
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a frequency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {FREQUENCY_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} item={option}>
-                      {FREQUENCY_LABELS[option.value]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          </FieldGroup>
-        </DialogBody>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={invalid}>
-            {editingCategory ? "Save" : "Add"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={editingCategory ? "Edit category" : "Add category"}
+      description={
+        editingCategory
+          ? "Rename the category or change how often it is bought."
+          : "Name the category and set how often it is typically bought."
+      }
+      onSave={handleSave}
+      saveLabel={editingCategory ? "Save" : "Add"}
+      saveDisabled={invalid}
+    >
+      <FieldGroup>
+        <ValidatedField label="Name" invalid={invalid} error="Name is required.">
+          <Input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Dairy"
+            autoFocus
+          />
+        </ValidatedField>
+        <ValidatedField label="Purchase frequency">
+          <Select
+            collection={
+              frequencyCollection as unknown as ListCollection<unknown>
+            }
+            value={[frequency]}
+            onValueChange={(details) =>
+              setFrequency(
+                (details.value[0] as CategoryFrequency) ?? "unknown"
+              )
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a frequency" />
+            </SelectTrigger>
+            <SelectContent>
+              {FREQUENCY_OPTIONS.map((option) => (
+                <SelectItem key={option.value} item={option}>
+                  {FREQUENCY_LABELS[option.value]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </ValidatedField>
+      </FieldGroup>
+    </FormDialog>
   )
 }

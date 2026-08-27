@@ -1,30 +1,24 @@
 "use client"
 
 import { useStore } from "@nanostores/react"
-import { useDrawerContext } from "@/components/drawer-context"
 import {
   Drawer,
   DrawerBody,
   DrawerContent,
   DrawerHeader,
 } from "@/components/ui/drawer"
-import { $catalog, $categories } from "@/stores"
-import { UNCATEGORIZED_NAME } from "@/stores/types"
+import { $itemDetail, useDrawer } from "@/stores"
 
 export const ItemDetailDrawer = () => {
-  const { open, itemId, closeDrawer } = useDrawerContext()
-  const catalog = useStore($catalog)
-  const categories = useStore($categories)
-
-  const item = catalog.find((i) => i.id === itemId)
-  const category = categories.find((c) => c.id === item?.categoryId)
+  const { open, itemId, closeDrawer } = useDrawer()
+  const { item, categoryName } = useStore($itemDetail(itemId))
 
   return (
     <Drawer open={open} onOpenChange={({ open }) => !open && closeDrawer()}>
       <DrawerContent swipeDirection="end">
         <DrawerHeader
           title={item?.name ?? "Item details"}
-          description={category?.name ?? UNCATEGORIZED_NAME}
+          description={categoryName}
         />
         <DrawerBody>
           {/* Phase 3: item attributes — photo, quantity, price */}

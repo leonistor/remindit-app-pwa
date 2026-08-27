@@ -145,3 +145,8 @@ export * from "./theme"
 export * from "./types"
 export * from "./ui"
 export * from "./user"
+
+// Feature hooks — hide atom names from components and ease mocking.
+export { useShoppingList } from "../hooks/use-shopping-list"
+export { useCatalog } from "../hooks/use-catalog"
+export { useDrawer } from "../hooks/use-drawer"
