@@ -63,14 +63,14 @@ describe("themeStore", () => {
     setMode("dark")
     expect(themeStore.get()).toBe("dark")
 
-    // @nanostores/persistent stores the value as a raw string (no JSON
-    // encoding in this version), so the persisted key directly equals "dark".
-    expect(localStorage.getItem("remindit:theme")).toBe("dark")
+    // Every store now uses JSON serialization, so the persisted key is the
+    // JSON-encoded string, not a raw value.
+    expect(localStorage.getItem("remindit:theme")).toBe(JSON.stringify("dark"))
 
     // Reset back to the default so other tests start clean.
     setMode("system")
     expect(themeStore.get()).toBe("system")
-    expect(localStorage.getItem("remindit:theme")).toBe("system")
+    expect(localStorage.getItem("remindit:theme")).toBe(JSON.stringify("system"))
   })
 })
 

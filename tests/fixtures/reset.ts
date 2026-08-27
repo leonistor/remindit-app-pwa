@@ -13,8 +13,9 @@
 //     })
 //   })
 //
-// Submodules are imported directly (NOT the `@/stores` barrel) because the
-// barrel runs `initStores` + a dev logger as a side effect.
+// Submodules are imported directly (NOT the `@/stores` barrel) so the test
+// stays decoupled from the app's bootstrap (`initStores` / `setupDevLogging`),
+// which the entry point calls explicitly.
 
 import { $catalog } from "@/stores/catalog"
 import { $categories } from "@/stores/categories"

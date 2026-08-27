@@ -1,12 +1,17 @@
 // Master pool of every known shopping item, grouped by category.
 // Editing or deleting a catalog item must NOT touch history; only the active
 // list's add/remove events are logged.
+//
+// Lazy cross-import contract: `./list` imports action functions from here and we
+// import `removeListEntriesForItem` from `./list`, but each reference lives
+// inside a function body (see `removeCatalogItem`) — never at module top level.
+// That keeps the circular dependency from tripping a TDZ error at evaluation.
 
-import { persistentJSON } from "@nanostores/persistent"
 import { removeListEntriesForItem } from "./list"
+import { jsonStore, STORAGE_KEYS } from "./persistence"
 import type { CatalogItem } from "./types"
 
-const $catalog = persistentJSON<CatalogItem[]>("remindit:catalog", [])
+const $catalog = jsonStore<CatalogItem[]>(STORAGE_KEYS.catalog, [])
 
 export function getCatalogItem(id: string): CatalogItem | undefined {
   return $catalog.get().find((item) => item.id === id)
@@ -45,6 +50,20 @@ export function updateCatalogItem(
 export function removeCatalogItem(id: string): void {
   $catalog.set($catalog.get().filter((item) => item.id !== id))
   removeListEntriesForItem(id)
+}
+
+// Reassigns every catalog item currently in `fromId` to `toId`. Exposed so a
+// category can be deleted without the categories store reaching into `$catalog`
+// directly (see `removeCategory`). Does NOT write history.
+export function reassignItemsToCategory(fromId: string, toId: string): void {
+  const catalog = $catalog.get()
+  const next = catalog.map((item) =>
+    item.categoryId === fromId ? { ...item, categoryId: toId } : item
+  )
+  // Only write when something actually moved.
+  if (next.some((item, index) => item.categoryId !== catalog[index].categoryId)) {
+    $catalog.set(next)
+  }
 }
 
 export { $catalog }

@@ -2,10 +2,10 @@
 // Editing, deleting, or renaming catalog items / categories must never write
 // here — those callers simply do not invoke logHistory().
 
-import { persistentJSON } from "@nanostores/persistent"
 import type { HistoryAction, HistoryEvent } from "./types"
+import { jsonStore, STORAGE_KEYS } from "./persistence"
 
-const $history = persistentJSON<HistoryEvent[]>("remindit:history", [])
+const $history = jsonStore<HistoryEvent[]>(STORAGE_KEYS.history, [])
 
 export interface LogHistoryInput {
   action: HistoryAction

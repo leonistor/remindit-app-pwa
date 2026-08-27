@@ -20,9 +20,8 @@ import {
   $catalogByCategory,
   $listItemIds,
   $recommendations,
-  $selectedView,
   addToList,
-  removeFromList,
+  removeFromListByItemId,
   setAccordionOpen,
 } from "@/stores"
 import type { RecommendationTier } from "@/stores/types"
@@ -95,12 +94,7 @@ export default function ItemCatalog() {
                       recommendationTier={tierByItemId.get(item.id)}
                       onClick={() =>
                         isSelected
-                          ? (() => {
-                              const entry = $selectedView
-                                .get()
-                                .find((e) => e.itemId === item.id)
-                              if (entry) removeFromList(entry.entryId)
-                            })()
+                          ? removeFromListByItemId(item.id)
                           : addToList(item.id)
                       }
                     />
