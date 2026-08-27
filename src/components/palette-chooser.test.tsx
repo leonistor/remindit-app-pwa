@@ -1,8 +1,8 @@
 // Component test for the palette chooser (src/components/palette-chooser).
 //
-// Verifies it renders one radio per pool palette, that selecting a palette updates
-// the persisted active-palette store, and that the live preview recolors to
-// reflect the active palette's colors.
+// Verifies it renders one option per pool palette, that selecting a palette
+// updates the persisted active-palette store, and that the live preview recolors
+// to reflect the active palette's colors.
 
 import { afterEach, describe, expect, it } from "@rstest/core"
 import { act, cleanup, render, screen } from "@testing-library/react"
@@ -13,6 +13,17 @@ import { PaletteChooser } from "@/components/palette-chooser"
 import { $activePaletteId, setActivePalette } from "@/stores/palette"
 
 const POOL_IDS = PALETTE_POOL.palettes.map((p) => p.id)
+// The "paired" palette is selected in the store/recolor tests; its visible label
+// is the palette name, not the id.
+const PAIRED = PALETTE_POOL.palettes.find((p) => p.id === "paired")!
+
+// Options render as `role="option"`; locate one by its visible palette name.
+function optionFor(name: string): HTMLElement {
+  const label = screen.getByText(name)
+  const option = label.closest<HTMLElement>('[role="option"]')
+  if (!option) throw new Error(`No listbox option found for "${name}"`)
+  return option
+}
 
 afterEach(() => {
   cleanup()
@@ -20,27 +31,16 @@ afterEach(() => {
 })
 
 describe("PaletteChooser", () => {
-  it("renders one radio per palette in the pool", () => {
+  it("renders one option per palette in the pool", () => {
     render(<PaletteChooser />)
-    const radios = screen.getAllByRole("radio")
-    expect(radios).toHaveLength(POOL_IDS.length)
-    for (const id of POOL_IDS) {
-      const input = document.querySelector<HTMLInputElement>(
-        `input[value="${id}"]`
-      )
-      expect(input).not.toBeNull()
-    }
+    expect(screen.getAllByRole("option")).toHaveLength(POOL_IDS.length)
   })
 
   it("updates the active palette store when an option is chosen", async () => {
     render(<PaletteChooser />)
     expect($activePaletteId.get()).toBe(PALETTE_POOL.palettes[0].id)
 
-    const input = document.querySelector<HTMLInputElement>(
-      `input[value="paired"]`
-    ) as HTMLInputElement | null
-    expect(input).not.toBeNull()
-    await userEvent.click(input)
+    await userEvent.click(optionFor(PAIRED.name))
 
     expect($activePaletteId.get()).toBe("paired")
   })
@@ -62,11 +62,7 @@ describe("PaletteChooser", () => {
     )
     expect(before).toBe(defaultValue.hex)
 
-    const input = document.querySelector<HTMLInputElement>(
-      `input[value="paired"]`
-    ) as HTMLInputElement | null
-    expect(input).not.toBeNull()
-    await userEvent.click(input)
+    await userEvent.click(optionFor(PAIRED.name))
 
     const after = (screen.getByText("Produce") as HTMLElement).style.getPropertyValue(
       "--cat"

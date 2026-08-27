@@ -1,11 +1,17 @@
 // Palette chooser for Settings (Phase 3, sub-phase 3).
 //
-// Lists every palette in the pool as a selectable radio card with a 12-color
-// preview strip, and a live preview of sample category chips recolored with the
-// currently selected palette so users can judge real contrast before committing.
+// Lists every palette in the pool as a selectable card in an inline Listbox, and
+// shows a live preview of sample category chips recolored with the currently
+// selected palette so users can judge real contrast before committing.
 // Selection is persisted via `setActivePalette` (src/stores/palette).
 
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+  Listbox,
+  ListboxContent,
+  ListboxItem,
+  ListboxItemIndicator,
+} from "@/components/ui/listbox"
+import { createListCollection } from "@ark-ui/react"
 import { categoryPalette } from "@/lib/category-palette"
 import { cn } from "@/lib/utils"
 import { getPalette, PALETTE_POOL, type Palette } from "@/lib/palettes"
@@ -15,9 +21,17 @@ import { $activePaletteId, setActivePalette } from "@/stores/palette"
 // Fixed demo categories used purely to preview the active palette's contrast.
 const SAMPLE_CATEGORIES = ["Produce", "Dairy", "Bakery", "Beverages", "Frozen"]
 
-// A single preview chip. `categoryPalette` is pure; we pass the active palette
-// resolved by the parent (which subscribes to the same store the chooser sets),
-// so each chip recolors live when the palette changes.
+// Listbox needs a flat collection; the value is the palette id and the visible
+// label is the palette name.
+const collection = createListCollection({
+  items: PALETTE_POOL.palettes,
+  itemToValue: (palette) => palette.id,
+  itemToString: (palette) => palette.name,
+})
+
+// A single preview chip. `categoryPalette` is pure; the parent passes the active
+// palette (resolved from the same store the chooser sets), so each chip recolors
+// live when the palette changes.
 function PreviewChip({ name, palette }: { name: string; palette: Palette }) {
   const resolved = categoryPalette(name, undefined, palette)
   return (
@@ -37,26 +51,39 @@ export const PaletteChooser = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <RadioGroup
+      <div className="flex flex-col gap-2">
+        <p className="text-muted-foreground text-xs">Preview</p>
+        <div className="flex flex-wrap gap-2">
+          {SAMPLE_CATEGORIES.map((name) => (
+            <PreviewChip key={name} name={name} palette={activePalette} />
+          ))}
+        </div>
+      </div>
+
+      <Listbox
+        collection={collection}
+        value={[activeId]}
+        onValueChange={(details) => setActivePalette(details.value[0])}
         aria-label="Category color palette"
-        value={activeId}
-        onValueChange={(details) => setActivePalette(details.value)}
-        className="gap-3"
       >
-        {PALETTE_POOL.palettes.map((palette) => (
-          <RadioGroupItem
-            key={palette.id}
-            value={palette.id}
-            // `RadioGroupItem` wraps its children in an inline label; force that
-            // label to be a full-width flex container so the card fills the row.
-            className="group w-full gap-3 [&_[data-slot=radio-group-item-text]]:flex [&_[data-slot=radio-group-item-text]]:w-full"
-          >
-            <div className="w-full rounded-lg border border-input p-3 transition-colors group-data-[state=checked]:border-primary">
-              <div className="mb-2 flex items-baseline justify-between gap-2">
-                <span className="font-medium text-sm">{palette.name}</span>
-                <span className="text-muted-foreground text-xs">
-                  {palette.source}
-                </span>
+        <ListboxContent className="gap-3">
+          {collection.items.map((palette) => (
+            <ListboxItem
+              key={palette.id}
+              item={palette}
+              className={cn(
+                "group w-full flex-col items-stretch gap-3 rounded-xl border border-input p-3",
+                "data-[state=checked]:border-primary data-[state=checked]:bg-transparent"
+              )}
+            >
+              <div className="flex w-full items-center justify-between gap-2">
+                <div className="flex min-w-0 flex-col">
+                  <span className="font-medium text-sm">{palette.name}</span>
+                  <span className="text-muted-foreground text-xs">
+                    {palette.source}
+                  </span>
+                </div>
+                <ListboxItemIndicator className="size-4" />
               </div>
               <div className="flex gap-1" aria-hidden>
                 {palette.colors.map((color) => (
@@ -67,19 +94,10 @@ export const PaletteChooser = () => {
                   />
                 ))}
               </div>
-            </div>
-          </RadioGroupItem>
-        ))}
-      </RadioGroup>
-
-      <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-xs">Preview</p>
-        <div className="flex flex-wrap gap-2">
-          {SAMPLE_CATEGORIES.map((name) => (
-            <PreviewChip key={name} name={name} palette={activePalette} />
+            </ListboxItem>
           ))}
-        </div>
-      </div>
+        </ListboxContent>
+      </Listbox>
     </div>
   )
 }
