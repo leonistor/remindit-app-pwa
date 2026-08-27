@@ -97,8 +97,8 @@ rstest (105 passed), Playwright (6 passed), `rsbuild build`.
 
 ## Tier 3 — Config & polish (low risk, cosmetic)
 
-**Status: DONE** — merged to `main`. Verified: biome lint, rstest (105 passed),
-Playwright (6 passed), `rsbuild build`.
+**Status: DONE** — merged to `main` (commit `e7641e3`). Verified: biome lint,
+rstest (105 passed), Playwright (6 passed), `rsbuild build`.
 
 - Items 12–16 implemented as written, with one deliberate deviation on item 12
   (documented stub instead of wiring `openDrawer`).
