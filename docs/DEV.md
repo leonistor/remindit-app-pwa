@@ -25,7 +25,7 @@ Catalog items show recommendation badges (overdue/soon dots) based on the comput
 
 ### Item detail drawer
 
-A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Layout level. Any component can open it via `useDrawerContext().openDrawer(itemId)`. Phase 3 will populate the drawer content with item attributes (photo, quantity, price).
+A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Layout level. `openDrawer(itemId)` (via `useDrawer()` / `useDrawerContext()`) is **reserved for Phase 3** and is intentionally not wired into the item UI yet — `ItemDetailDrawer` currently renders placeholder content. Phase 3 will populate it with item attributes (photo, quantity, price).
 
 ### Routes
 
@@ -37,6 +37,10 @@ A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Lay
 | `/settings` | SettingsView | User preferences |
 | `/about` | AboutView | About the app |
 | `/help` | HelpView | Usage help |
+
+### PWA manifest
+
+The installable web manifest is defined in `pwa-manifest.config.ts` (the `WEB_APP_MANIFEST` object), **not** inline in `rsbuild.config.ts`. Brand color for both the manifest and the generated icons lives in that same file as `PWA_THEME_COLOR` / `PWA_BACKGROUND_COLOR` — both default to the **neutral app primary** (`#262626`, background `#ffffff`), reconciled with the neutral UI chrome. `scripts/generate-favicons.ts` imports those same constants when regenerating icons, so the manifest and favicons stay in sync. The master icon SVGs (`public/remindit-icon.svg`, `public/remindit-icon-maskable.svg`) carry the same `#262626` fill.
 
 ## UI components (Shark UI)
 
@@ -95,7 +99,7 @@ All collections are persisted to `localStorage` with `@nanostores/persistent` (k
 - **List** (`$list`) — the currently active shopping list. Each entry `{ id, itemId, checked, addedAt }` references a catalog item and tracks a `checked` state for shopping progress.
 - **Categories** (`$categories`) — `{ id, name, frequency }`. An `uncategorized` sentinel category always exists and is the destination when another category is deleted (so items are never orphaned). `frequency` records how often the category is typically bought (see below).
 - **History** (`$history`) — a pure log of shopping events `{ id, action: 'add' | 'remove', itemId, itemName, categoryId, timestamp }`.
-- **User** (`$user`) — `{ name, photo }`, assigned random defaults on first run.
+- **User** (`$user`) — `{ name, photo }`, assigned random defaults on first run. `photo` is a **locally generated** SVG initials avatar (a `data:` URI from `randomUser()` in `user.ts`) — no network request, in keeping with the local-first positioning.
 
 ### Store modules (`src/stores/`)
 
