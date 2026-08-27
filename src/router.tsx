@@ -20,10 +20,10 @@ function Layout() {
       <div className="container mx-auto h-screen px-4 py-4">
         <div className="flex h-full w-full flex-col gap-4">
           <Menu />
-          <div className="min-h-0 grow">
+          <div className="flex min-h-0 grow flex-col overflow-y-auto">
             <Outlet />
+            {!isHome && <div className="mt-auto"><Footer /></div>}
           </div>
-          {!isHome && <Footer />}
         </div>
       </div>
       <ItemDetailDrawer />
