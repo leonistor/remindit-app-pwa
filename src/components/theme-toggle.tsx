@@ -8,7 +8,7 @@ import {
   SunIcon,
 } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/custom/button"
-import { type ThemeMode, themeStore } from "@/stores/theme"
+import { type ThemeMode, $theme } from "@/stores/theme"
 
 const OPTIONS: Record<ThemeMode, { label: string; Icon: Icon }> = {
   light: { label: "Light", Icon: SunIcon },
@@ -20,12 +20,12 @@ const OPTIONS: Record<ThemeMode, { label: string; Icon: Icon }> = {
 const ORDER: ThemeMode[] = ["light", "dark", "system"]
 
 export function ThemeToggle() {
-  const mode = useStore(themeStore)
+  const mode = useStore($theme)
   const { label, Icon } = OPTIONS[mode]
 
   const cycle = () => {
     const next = ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length]
-    themeStore.set(next)
+    $theme.set(next)
   }
 
   return (

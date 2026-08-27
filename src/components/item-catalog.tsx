@@ -1,6 +1,5 @@
 "use client"
 
-import { useStore } from "@nanostores/react"
 import { InfoIcon } from "@phosphor-icons/react"
 import {
   Accordion,
@@ -15,28 +14,20 @@ import {
   ToggleTooltipContent,
   ToggleTooltipTrigger,
 } from "@/components/ui/custom/toggle-tooltip"
-import {
-  $accordionOpen,
-  $catalogByCategory,
-  $listItemIds,
-  $recommendations,
-  addToList,
-  removeFromListByItemId,
-  setAccordionOpen,
-} from "@/stores"
-import type { RecommendationTier } from "@/stores/types"
+import { LEGEND_TIERS, RECOMMENDATION_TIERS } from "@/lib/recommendation-tiers"
+import { useCatalog } from "@/stores"
 
 export default function ItemCatalog() {
-  const groups = useStore($catalogByCategory)
-  const selected = useStore($listItemIds)
-  const recommendations = useStore($recommendations)
-  const open = useStore($accordionOpen)
+  const {
+    groups,
+    selected,
+    recommendationsByItemId,
+    open,
+    addToList,
+    removeFromListByItemId,
+    setAccordionOpen,
+  } = useCatalog()
   const openValue = open ?? groups.map((g) => g.categoryId)
-
-  const tierByItemId = new Map<string, RecommendationTier>()
-  for (const rec of recommendations) {
-    tierByItemId.set(rec.item.id, rec.tier)
-  }
 
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-3">
@@ -55,17 +46,18 @@ export default function ItemCatalog() {
           <ToggleTooltipContent className="max-w-56">
             <p className="font-medium">Recommendation codes</p>
             <div className="mt-2 flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <span
-                  className="size-2 rounded-full bg-destructive"
-                  aria-hidden
-                />
-                <span>Overdue — past its usual buy date</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="size-2 rounded-full bg-warning" aria-hidden />
-                <span>Soon — due for repurchase soon</span>
-              </div>
+              {LEGEND_TIERS.map((tier) => (
+                <div key={tier} className="flex items-center gap-2">
+                  <span
+                    className={`size-2 rounded-full ${RECOMMENDATION_TIERS[tier].dotColor}`}
+                    aria-hidden
+                  />
+                  <span>
+                    {RECOMMENDATION_TIERS[tier].label} —{" "}
+                    {RECOMMENDATION_TIERS[tier].description}
+                  </span>
+                </div>
+              ))}
             </div>
           </ToggleTooltipContent>
         </ToggleTooltip>
@@ -91,7 +83,7 @@ export default function ItemCatalog() {
                       name={item.name}
                       purpose="selectable"
                       isSelected={isSelected}
-                      recommendationTier={tierByItemId.get(item.id)}
+                        recommendationTier={recommendationsByItemId.get(item.id)?.tier}
                       onClick={() =>
                         isSelected
                           ? removeFromListByItemId(item.id)

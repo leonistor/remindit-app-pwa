@@ -1,3 +1,5 @@
+import { RECOMMENDATION_TIERS } from "@/lib/recommendation-tiers"
+
 const HelpView = () => (
   <div className="mx-auto flex max-w-2xl flex-col gap-6 py-8">
     <h1 className="font-bold text-2xl">Help</h1>
@@ -29,7 +31,7 @@ const HelpView = () => (
         <li>
           <span
             aria-hidden
-            className="mr-1 inline-block size-2 -translate-y-px rounded-full bg-destructive align-middle"
+            className={`mr-1 inline-block size-2 -translate-y-px rounded-full ${RECOMMENDATION_TIERS.overdue.dotColor} align-middle`}
           />
           A <strong>red</strong> pip means an item is <strong>overdue</strong> —
           past when you&rsquo;d normally buy it.
@@ -37,7 +39,7 @@ const HelpView = () => (
         <li>
           <span
             aria-hidden
-            className="mr-1 inline-block size-2 -translate-y-px rounded-full bg-warning align-middle"
+            className={`mr-1 inline-block size-2 -translate-y-px rounded-full ${RECOMMENDATION_TIERS.soon.dotColor} align-middle`}
           />
           An <strong>amber</strong> pip means it&rsquo;s{" "}
           <strong>due soon</strong>. Tap the info icon in the catalog title for

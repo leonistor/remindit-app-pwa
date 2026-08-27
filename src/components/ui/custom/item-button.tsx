@@ -1,15 +1,10 @@
 import { cn } from "@/lib/utils"
+import { RECOMMENDATION_TIERS } from "@/lib/recommendation-tiers"
 import type { RecommendationTier } from "@/stores/types"
 import type { ButtonProps } from "./button"
 import { Button } from "./button"
 
 type ItemPurpose = "selectable" | "removable" | "recommendation"
-
-const tierDotColor: Record<RecommendationTier, string> = {
-  overdue: "bg-destructive",
-  soon: "bg-warning",
-  frequent: "",
-}
 
 export interface ItemButtonProps {
   /** Display name of the item. */
@@ -51,7 +46,9 @@ export const ItemButton = ({
   onClick,
   className,
 }: ItemButtonProps) => {
-  const dotColor = recommendationTier ? tierDotColor[recommendationTier] : ""
+  const dotColor = recommendationTier
+    ? RECOMMENDATION_TIERS[recommendationTier].dotColor
+    : ""
 
   return (
     <Button

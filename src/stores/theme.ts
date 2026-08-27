@@ -8,7 +8,7 @@ const DARK_QUERY = "(prefers-color-scheme: dark)"
 // JSON-encoded like every other store (single serialization strategy). The
 // decode tolerates legacy raw values written before serialization was unified,
 // so existing persisted themes survive the migration instead of resetting.
-export const themeStore = persistentAtom<ThemeMode>(STORAGE_KEYS.theme, "system", {
+export const $theme = persistentAtom<ThemeMode>(STORAGE_KEYS.theme, "system", {
   encode: JSON.stringify,
   decode: (value) => {
     try {
@@ -43,9 +43,9 @@ export function initTheme(): void {
   if (initialized) return
   initialized = true
 
-  const apply = () => applyTheme(themeStore.get())
+  const apply = () => applyTheme($theme.get())
   apply()
-  themeStore.subscribe(apply)
+  $theme.subscribe(apply)
 
   if (!mediaQuery) {
     mediaQuery = window.matchMedia(DARK_QUERY)

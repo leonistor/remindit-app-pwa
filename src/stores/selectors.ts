@@ -1,7 +1,7 @@
 // Derived / computed views used by the main screen. Components stay dumb and
 // read these instead of recomputing grouping logic themselves.
 
-import { computed } from "nanostores"
+import { type ReadableAtom, computed } from "nanostores"
 import { $catalog } from "./catalog"
 import { $categories } from "./categories"
 import { $history } from "./history"
@@ -250,5 +250,45 @@ export const $recommendations = computed(
   (history, catalog, categories, list) =>
     computeRecommendations(history, catalog, categories, list)
 )
+
+// Item-id → recommendation lookup, so catalog views can read a tier in O(1)
+// instead of rebuilding a `.find()` map on every render.
+export const $recommendationsByItemId = computed(
+  $recommendations,
+  (recommendations) =>
+    new Map(recommendations.map((rec) => [rec.item.id, rec]))
+)
+
+// A per-item detail selector. Components call `$itemDetail(itemId)` to get a
+// store yielding `{ item, categoryName }`, replacing inline `.find()` joins.
+// Each itemId gets one memoized computed so re-renders don't rebuild atoms.
+export interface ItemDetail {
+  item: CatalogItem | null
+  categoryName: string
+}
+
+const $itemDetailCache = new Map<string, ReadableAtom<ItemDetail>>()
+
+// `computed` needs its dependency list, so null is cached under a sentinel key
+// and the lookup is guarded inside the callback.
+const NULL_ID = ""
+
+export function $itemDetail(itemId: string | null) {
+  const key = itemId ?? NULL_ID
+  let store = $itemDetailCache.get(key)
+  if (!store) {
+    store = computed<ItemDetail>([$catalog, $categories], (catalog, categories) => {
+      if (itemId === null) return { item: null, categoryName: "" }
+      const item = catalog.find((i) => i.id === itemId) ?? null
+      if (!item) return { item: null, categoryName: "" }
+      const categoryName =
+        categories.find((c) => c.id === item.categoryId)?.name ??
+        UNCATEGORIZED_NAME
+      return { item, categoryName }
+    })
+    $itemDetailCache.set(key, store)
+  }
+  return store
+}
 
 export type { Recommendation, RecommendationTier } from "./types"

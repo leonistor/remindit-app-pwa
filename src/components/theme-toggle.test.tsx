@@ -2,15 +2,15 @@
 //
 // ThemeToggle is now a single ghost icon button showing the active theme's
 // icon; clicking it cycles light -> dark -> system -> light through
-// `themeStore`. We assert it renders one button reflecting the store value and
+// `$theme`. We assert it renders one button reflecting the store value and
 // that clicking advances the mode — using standard matchers only (no jest-dom).
 
 import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { type ThemeMode, themeStore } from "@/stores/theme"
+import { type ThemeMode, $theme } from "@/stores/theme"
 
-const setMode = (mode: ThemeMode) => themeStore.set(mode)
+const setMode = (mode: ThemeMode) => $theme.set(mode)
 
 beforeEach(() => {
   localStorage.clear()
@@ -38,6 +38,6 @@ describe("ThemeToggle", () => {
     const button = screen.getByRole("button", { name: /Theme/ })
     fireEvent.click(button)
 
-    expect(themeStore.get()).toBe("dark")
+    expect($theme.get()).toBe("dark")
   })
 })
