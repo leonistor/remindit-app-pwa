@@ -77,6 +77,16 @@ export const buttonVariants = tv({
         "hover:underline",
         "focus-visible:border-primary",
       ],
+      // Transparent base for components that supply their own color language
+      // (e.g. ItemButton/ShoppingItem via the categorical palette). Keeps
+      // Button's structural, focus and size handling while decoupling color.
+      bare: [
+        "bg-transparent",
+        "text-foreground",
+        "border border-transparent",
+        "hover:bg-transparent",
+        "focus-visible:border-primary",
+      ],
     },
     size: {
       xs: [
