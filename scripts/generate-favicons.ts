@@ -21,6 +21,7 @@
 import { mkdir, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 import favicons from "favicons"
+import { PWA_BACKGROUND_COLOR, PWA_THEME_COLOR } from "../pwa-manifest.config"
 
 const PUBLIC_DIR = "public"
 const NORMAL_SOURCE = "public/remindit-icon.svg"
@@ -31,8 +32,8 @@ const configuration = {
   appName: "Remindit",
   appShortName: "Remindit",
   appDescription: "Local-first reminders that work offline.",
-  theme_color: "#863bff",
-  background: "#ffffff",
+  theme_color: PWA_THEME_COLOR,
+  background: PWA_BACKGROUND_COLOR,
   // Only run the platforms we actually need. android produces the 18 PNGs we put in
   // the web manifest; appleIcon/windows/yandex produce icons referenced from HTML.
   icons: {

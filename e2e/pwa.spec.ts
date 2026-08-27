@@ -32,7 +32,7 @@ test.describe("Remindit PWA (dev mode)", () => {
     }
     expect(manifest.name).toBe("Remindit")
     expect(manifest.display).toBe("standalone")
-    expect(manifest.theme_color).toBe("#863bff")
+    expect(manifest.theme_color).toBe("#262626")
     expect(manifest.icons).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ purpose: "any" }),

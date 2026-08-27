@@ -1,5 +1,3 @@
-"use client"
-
 import { Dialog as ArkDialog, useDialogContext } from "@ark-ui/react/dialog"
 import { ark } from "@ark-ui/react/factory"
 import { Portal } from "@ark-ui/react/portal"

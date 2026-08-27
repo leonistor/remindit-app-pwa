@@ -1,5 +1,3 @@
-"use client"
-
 import { createContext, useCallback, useContext, useState } from "react"
 
 interface DrawerContextValue {
@@ -7,7 +5,7 @@ interface DrawerContextValue {
   open: boolean
   /** ID of the item being viewed, or null if no item selected. */
   itemId: string | null
-  /** Open the drawer for a specific item. */
+  /** Open the drawer for a specific item. Reserved for Phase 3 — currently unwired (see ItemDetailDrawer). */
   openDrawer: (itemId: string) => void
   /** Close the drawer. */
   closeDrawer: () => void

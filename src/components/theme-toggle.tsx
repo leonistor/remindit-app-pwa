@@ -1,5 +1,3 @@
-"use client"
-
 import { useStore } from "@nanostores/react"
 import {
   type Icon,

@@ -1,5 +1,3 @@
-"use client"
-
 import { ark } from "@ark-ui/react/factory"
 import { Popover as ArkPopover, usePopoverContext } from "@ark-ui/react/popover"
 import { Portal } from "@ark-ui/react/portal"

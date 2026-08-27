@@ -1,5 +1,3 @@
-"use client"
-
 import { Listbox as ArkListbox, useListboxContext } from "@ark-ui/react/listbox"
 import { CheckIcon } from "lucide-react"
 import type React from "react"

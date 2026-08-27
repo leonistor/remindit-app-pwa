@@ -1,5 +1,3 @@
-"use client"
-
 import { ClockIcon, SortAscendingIcon, TagIcon } from "@phosphor-icons/react"
 import { useCallback, useRef, useState } from "react"
 import { ShoppingItem } from "@/components/shopping-item"

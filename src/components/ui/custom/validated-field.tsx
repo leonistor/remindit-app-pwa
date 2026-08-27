@@ -1,5 +1,3 @@
-"use client"
-
 import type { ReactNode } from "react"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 

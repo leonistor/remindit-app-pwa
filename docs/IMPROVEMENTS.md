@@ -97,26 +97,32 @@ rstest (105 passed), Playwright (6 passed), `rsbuild build`.
 
 ## Tier 3 — Config & polish (low risk, cosmetic)
 
-12. **Wire or stub the drawer** — either call `openDrawer` from item/catalog UI, or
-    document `ItemDetailDrawer` as a Phase-3 stub (currently `openDrawer` in
-    `drawer-context.tsx:22` is never called, so the drawer can never open).
+**Status: DONE** — merged to `main`. Verified: biome lint, rstest (105 passed),
+Playwright (6 passed), `rsbuild build`.
 
-13. **Externalize PWA manifest** from `rsbuild.config.ts:48-185` into
-    `pwa-manifest.config.ts`; centralize `theme_color` + icon palette into one constant
-    consumed by both `rsbuild.config.ts` and `scripts/generate-favicons.ts`, reconciled
-    with the actual app primary (the hardcoded `#863bff` purple contradicts the neutral
-    app chrome).
+- Items 12–16 implemented as written, with one deliberate deviation on item 12
+  (documented stub instead of wiring `openDrawer`).
 
-14. **Decide on `"use client"`** — strip the no-op directives (Next.js residue, inert in
-    an Rsbuild SPA) or document them as intentional with a Biome ignore.
+12. **Drawer**: documented `ItemDetailDrawer` as a Phase-3 stub rather than wiring
+    `openDrawer` into the catalog/item UI. Item buttons already own primary actions
+    (select / remove) and the drawer only renders placeholder content, so an immediate
+    click handler would conflict; `openDrawer` stays reserved for Phase 3.
 
-15. **Local-first avatar** — replace `i.pravatar.cc` (`user.ts:30`) with a generated local
-    avatar (initials / SVG data-URI) to honor the offline/local-first positioning.
+13. **Externalize PWA manifest** — new `pwa-manifest.config.ts` holds `WEB_APP_MANIFEST`
+    plus `PWA_THEME_COLOR` / `PWA_BACKGROUND_COLOR` (`#262626` / `#ffffff`, reconciled with
+    the neutral app chrome). `rsbuild.config.ts` and `scripts/generate-favicons.ts` both
+    consume them, and the icon SVGs were recolored from the old `#863bff` purple.
 
-16. **Minor**: unify dataset import style (`stores/index.ts:9` relative vs `settings.tsx`
-    alias); use the `@/` alias for the `CHANGELOG.md` import (`changelog.tsx:3`); trim the
-    dormant ~1.5k-line theme class block in `globals.css` (Phase-3 palettes, no consumers
-    yet) or generate it via a loop.
+14. **`"use client"`** — stripped the inert directive from all 28 `.tsx` files (Next.js
+    residue, no effect in the Rsbuild SPA).
+
+15. **Local-first avatar** — `user.ts` now generates an offline SVG initials avatar
+    (`data:` URI) instead of fetching from `i.pravatar.cc`.
+
+16. **Minor**: `stores/index.ts` imports `seed` via the alias (was relative `../../seed`);
+    `changelog.tsx` uses the `@/` alias for the `CHANGELOG.md` import; the dormant
+    ~1k-line `.theme-*` / `.bg-*` palette block in `globals.css` was trimmed (zero
+    consumers — the `.radius-*` set, including the used `radius-lg`, was kept).
 
 ---
 
