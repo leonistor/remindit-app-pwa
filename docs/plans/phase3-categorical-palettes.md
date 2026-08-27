@@ -1,7 +1,7 @@
 # Phase 3 — Categorical color palettes
 
-**Status:** Foundation done (palette pool generated + loader + tests) on branch
-`feat/categorical-palettes`. Later sub-phases (color picker, palette chooser) pending.
+**Status:** Foundation + sub-phase 3 (palette chooser) done on branch
+`feat/categorical-palettes` (merged to `main`). Custom color picker still pending.
 
 ## Goal
 
@@ -91,7 +91,22 @@ used `src/lib/category-palette.ts` Tailwind-class slots.
 When editing a category, let the user override its color (persist on `Category`;
 `categoryPalette(key, overrideSlot)` already accepts the explicit palette index).
 
-### 3. Palette chooser in settings — NOT STARTED
+### 3. Palette chooser in settings — DONE
 
 Pick the active palette (`defaultPaletteId` is the seed default; user choice
 persisted). The pool/loader already supports multiple palettes.
+
+Implemented on `feat/categorical-palettes` (merged to `main`):
+
+- `src/stores/palette.ts` — persisted `jsonStore` `$activePaletteId`
+  (`remindit:active-palette`) + `setActivePalette` / `getActivePalette`.
+- `src/hooks/use-category-palette.ts` — `useCategoryPalette(key, overrideSlot?)`
+  subscribes to the active palette and returns the live `categoryPalette(...)`.
+  `ItemButton` and `ShoppingItem` consume it, so colors recolor everywhere when
+  the choice changes.
+- `src/components/palette-chooser.tsx` — inline Shark `Listbox` of the pool in
+  **Settings**, with a 12-swatch preview per option and a live sample-chip
+  preview above the list. Selection calls `setActivePalette`.
+- `src/lib/category-palette.ts` is now a pure `categoryPalette(key, overrideSlot?, palette)`;
+  it no longer reads the store, so `useCategoryPalette` is the single place that
+  wires the active palette in.
