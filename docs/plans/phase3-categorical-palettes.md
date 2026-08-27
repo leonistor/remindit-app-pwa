@@ -59,12 +59,35 @@ used `src/lib/category-palette.ts` Tailwind-class slots.
 - `package.json` — added `generate:palettes` script; added `chroma-js` +
   `@types/chroma-js` (dev).
 
-## Next sub-phases (not yet started)
+## Sub-phases
 
-1. **Wire consumers** — replace `category-palette.ts` Tailwind-class usage with
-   the hex-based pool (button/badge/dot tokens derived from `PaletteColor.hex`,
-   with dark-mode variants). Keep the `overrideSlot` seam → future `Category.color`.
-2. **Custom color picker** — when editing a category, let the user override its
-   color (persist on `Category`; `getPaletteColor`/override path).
-3. **Palette chooser in settings** — pick the active palette (`defaultPaletteId`
-   is the seed default; user choice persisted).
+### 1. Wire consumers — DONE (feat/categorical-palettes)
+
+- Rewrote `src/lib/category-palette.ts` to back the `ItemPalette` tokens with the
+  pool (`src/lib/palettes`), using **static CSS-var classes** (`--cat` base hue +
+  `--cat-ink` darkened text) set inline per element — required because pool colors
+  are arbitrary hex that Tailwind can't statically scan. Keeps the exact
+  `button`/`buttonSelected`/`badge`/`border`/`ring`/`dot` class-string API, plus a
+  `style` prop carrying the vars and `hex`. Dark-mode variants preserved via
+  `dark:` classes. `overrideSlot` seam kept (now a palette **index** 0..11).
+- **Fixed the cross-panel inconsistency**: the catalog keyed by `categoryId`
+  while the shopping list keyed by `categoryName` → same category hashed to two
+  colors. Both panels now key by the stable `categoryId`
+  (`shopping-list-panel` passes `categoryId={entry.categoryId}`;
+  `ShoppingItem` gained a `categoryId` prop and keys by it, falling back to name).
+  `UNCATEGORIZED_ID` ("uncategorized") equals `UNCATEGORIZED_NAME.toLowerCase()`
+  so uncategorized still resolves to the neutral slot.
+- `item-button.tsx` and `shopping-item.tsx` apply `style={palette.style}` so the
+  vars cascade to children. Tests updated (`item-button.test.tsx` regex +
+  `category-palette.test.ts` rewritten for the new contract). Build confirms
+  `var(--cat)` is emitted to CSS.
+
+### 2. Custom color picker — NOT STARTED
+
+When editing a category, let the user override its color (persist on `Category`;
+`categoryPalette(key, overrideSlot)` already accepts the explicit palette index).
+
+### 3. Palette chooser in settings — NOT STARTED
+
+Pick the active palette (`defaultPaletteId` is the seed default; user choice
+persisted). The pool/loader already supports multiple palettes.

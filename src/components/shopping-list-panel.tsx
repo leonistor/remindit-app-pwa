@@ -148,6 +148,7 @@ export const ShoppingListPanel = () => {
                 <ShoppingItem
                   name={entry.name}
                   categoryName={entry.categoryName}
+                  categoryId={entry.categoryId}
                   showCategory={categoriesVisible}
                   travelTargetId={entry.itemId}
                   onClick={(e) => handleRemove(entry, e.currentTarget)}

@@ -9,6 +9,12 @@ export interface ShoppingItemProps {
   name: string
   /** Category label shown in a Badge above the name. */
   categoryName?: string
+  /**
+   * Stable category id. Used as the palette key so the chip shares the exact
+   * color the catalog assigns to the same category (the catalog keys by id
+   * too). Falls back to `categoryName` when absent.
+   */
+  categoryId?: string
   /** Whether to show the category Badge above the name. Defaults to true. */
   showCategory?: boolean
   /** Disabled state (e.g. during exit animation). */
@@ -31,6 +37,7 @@ export interface ShoppingItemProps {
 export const ShoppingItem = ({
   name,
   categoryName,
+  categoryId,
   showCategory = true,
   disabled,
   onClick,
@@ -38,10 +45,15 @@ export const ShoppingItem = ({
   travelTargetId,
 }: ShoppingItemProps) => {
   const label = categoryName?.trim() || UNCATEGORIZED_NAME
-  const palette = categoryPalette(label)
+  // Key by the stable category id (matching the catalog) so the same category
+  // keeps one color across panels; fall back to the name when no id is given.
+  const palette = categoryPalette((categoryId ?? categoryName ?? UNCATEGORIZED_NAME).trim())
 
   return (
-    <div className={cn("flex flex-col items-start gap-1", className)}>
+    <div
+      className={cn("flex flex-col items-start gap-1", className)}
+      style={palette.style}
+    >
       {showCategory && (
         <Badge
           pill
