@@ -1,0 +1,285 @@
+{
+  "defaultPaletteId": "category10",
+  "palettes": [
+    {
+      "id": "category10",
+      "name": "Category 10",
+      "source": "d3 schemeCategory10",
+      "description": "Generated from https://d3js.org/d3-scale-chromatic/categorical",
+      "colors": [
+        {
+          "hex": "#1f77b4",
+          "name": "cyan"
+        },
+        {
+          "hex": "#ff7f0e",
+          "name": "orange"
+        },
+        {
+          "hex": "#ad9622",
+          "name": "brown"
+        },
+        {
+          "hex": "#2ca02c",
+          "name": "green"
+        },
+        {
+          "hex": "#9f762a",
+          "name": "brown"
+        },
+        {
+          "hex": "#d62728",
+          "name": "red"
+        },
+        {
+          "hex": "#9467bd",
+          "name": "purple"
+        },
+        {
+          "hex": "#8c564b",
+          "name": "brown"
+        },
+        {
+          "hex": "#e377c2",
+          "name": "magenta"
+        },
+        {
+          "hex": "#7f7f7f",
+          "name": "gray"
+        },
+        {
+          "hex": "#bcbd22",
+          "name": "brown"
+        },
+        {
+          "hex": "#17becf",
+          "name": "cyan"
+        }
+      ]
+    },
+    {
+      "id": "dark2",
+      "name": "Dark 2",
+      "source": "d3 schemeDark2",
+      "description": "Generated from https://d3js.org/d3-scale-chromatic/categorical",
+      "colors": [
+        {
+          "hex": "#1b9e77",
+          "name": "dark teal"
+        },
+        {
+          "hex": "#9a864f",
+          "name": "orange"
+        },
+        {
+          "hex": "#d95f02",
+          "name": "brown"
+        },
+        {
+          "hex": "#a96e76",
+          "name": "red"
+        },
+        {
+          "hex": "#7570b3",
+          "name": "indigo"
+        },
+        {
+          "hex": "#e7298a",
+          "name": "magenta"
+        },
+        {
+          "hex": "#b57c63",
+          "name": "orange"
+        },
+        {
+          "hex": "#949349",
+          "name": "brown"
+        },
+        {
+          "hex": "#66a61e",
+          "name": "lime"
+        },
+        {
+          "hex": "#e6ab02",
+          "name": "orange"
+        },
+        {
+          "hex": "#a6761d",
+          "name": "brown"
+        },
+        {
+          "hex": "#666666",
+          "name": "gray"
+        }
+      ]
+    },
+    {
+      "id": "observable10",
+      "name": "Observable 10",
+      "source": "d3 schemeObservable10",
+      "description": "Generated from https://d3js.org/d3-scale-chromatic/categorical",
+      "colors": [
+        {
+          "hex": "#4269d0",
+          "name": "blue"
+        },
+        {
+          "hex": "#989598",
+          "name": "gray"
+        },
+        {
+          "hex": "#efb118",
+          "name": "orange"
+        },
+        {
+          "hex": "#ff725c",
+          "name": "light red"
+        },
+        {
+          "hex": "#6cc5b0",
+          "name": "teal"
+        },
+        {
+          "hex": "#3ca951",
+          "name": "green"
+        },
+        {
+          "hex": "#b0a087",
+          "name": "orange"
+        },
+        {
+          "hex": "#ff8ab7",
+          "name": "light red"
+        },
+        {
+          "hex": "#a463f2",
+          "name": "indigo"
+        },
+        {
+          "hex": "#97bbf5",
+          "name": "light blue"
+        },
+        {
+          "hex": "#9c6b4e",
+          "name": "orange"
+        },
+        {
+          "hex": "#9498a0",
+          "name": "gray"
+        }
+      ]
+    },
+    {
+      "id": "paired",
+      "name": "Paired",
+      "source": "d3 schemePaired",
+      "description": "Generated from https://d3js.org/d3-scale-chromatic/categorical",
+      "colors": [
+        {
+          "hex": "#a6cee3",
+          "name": "light cyan"
+        },
+        {
+          "hex": "#1f78b4",
+          "name": "cyan"
+        },
+        {
+          "hex": "#b2df8a",
+          "name": "light lime"
+        },
+        {
+          "hex": "#33a02c",
+          "name": "green"
+        },
+        {
+          "hex": "#fb9a99",
+          "name": "light red"
+        },
+        {
+          "hex": "#e31a1c",
+          "name": "red"
+        },
+        {
+          "hex": "#fdbf6f",
+          "name": "light orange"
+        },
+        {
+          "hex": "#ff7f00",
+          "name": "orange"
+        },
+        {
+          "hex": "#cab2d6",
+          "name": "light purple"
+        },
+        {
+          "hex": "#6a3d9a",
+          "name": "indigo"
+        },
+        {
+          "hex": "#ffff99",
+          "name": "light yellow"
+        },
+        {
+          "hex": "#b15928",
+          "name": "brown"
+        }
+      ]
+    },
+    {
+      "id": "set3",
+      "name": "Set 3",
+      "source": "d3 schemeSet3",
+      "description": "Generated from https://d3js.org/d3-scale-chromatic/categorical",
+      "colors": [
+        {
+          "hex": "#8dd3c7",
+          "name": "light teal"
+        },
+        {
+          "hex": "#ffffb3",
+          "name": "light yellow"
+        },
+        {
+          "hex": "#bebada",
+          "name": "light indigo"
+        },
+        {
+          "hex": "#fb8072",
+          "name": "light red"
+        },
+        {
+          "hex": "#80b1d3",
+          "name": "cyan"
+        },
+        {
+          "hex": "#fdb462",
+          "name": "light orange"
+        },
+        {
+          "hex": "#b3de69",
+          "name": "lime"
+        },
+        {
+          "hex": "#fccde5",
+          "name": "light magenta"
+        },
+        {
+          "hex": "#d9d9d9",
+          "name": "white"
+        },
+        {
+          "hex": "#bc80bd",
+          "name": "purple"
+        },
+        {
+          "hex": "#ccebc5",
+          "name": "light green"
+        },
+        {
+          "hex": "#ffed6f",
+          "name": "light yellow"
+        }
+      ]
+    }
+  ]
+}
