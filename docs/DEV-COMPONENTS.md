@@ -21,10 +21,14 @@ Rule of thumb:
 
 ### `button.tsx` — derived from Shark `base-nova` button
 
-This is our fork of the official `@shark/button`. It adds two variants required by the app:
+This is our fork of the official `@shark/button`. It keeps two extra variants that the
+`@shark` registry HEAD would drop — they are retained so a regeneration can't silently
+remove them, but **item/category coloring no longer uses them**: `ItemButton` and
+`ShoppingItem` both render `<Button variant="bare">` and apply their own palette tokens
+via `categoryPalette` (see `DEV.md`).
 
-- `success` — used by `ShoppingItem` (`<Button variant="success" …>` in `src/components/shopping-item.tsx`).
-- `info` — used by `ItemButton` for the "selectable but not selected" purpose.
+- `success` — retained but **unused** by feature components.
+- `info` — retained but **unused** by feature components.
 
 > **⚠️ Guardrail:** The current `@shark` registry HEAD **removes** the `success` and `info`
 > variants. Running `bunx shadcn add @shark/button` (or `--overwrite`) would recreate
@@ -34,9 +38,10 @@ This is our fork of the official `@shark/button`. It adds two variants required 
 
 ### `item-button.tsx` — project-custom
 
-Catalog item button (`ItemPurpose` → `Button` variant mapping + recommendation dot). **Not** in the
-`@shark` registry. Imports the sibling `./button` (our custom one) so it always gets the `info` /
-`success` variants.
+Catalog item button (applies the categorical palette via `categoryPalette` + a recommendation dot).
+**Not** in the `@shark` registry. Imports the sibling `./button` (our custom fork) so it gets the
+`bare` variant the palette tokens are applied to, and so the retained `success` / `info` variants
+stay available.
 
 ### `toggle-tooltip.tsx` — project-custom
 
