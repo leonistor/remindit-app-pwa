@@ -19,9 +19,10 @@ describe("ItemButton", () => {
     )
 
     const button = screen.getByRole("button", { name: "Milk" })
-    // Palette tint is applied directly via the `--cat` CSS var (qualitative
-    // color), not a Button semantic variant class like `bg-info` / `bg-success`.
-    expect(button.className).toMatch(/bg-\[var\(--cat\)\]\/\d+/)
+    // Palette tint is applied directly via the `--cat` CSS var (solid
+    // background, qualitative color), not a Button semantic variant class like
+    // `bg-info` / `bg-success`.
+    expect(button.className).toMatch(/bg-\[var\(--cat\)\]/)
     expect(button.className).not.toContain("bg-success")
     expect(button.className).not.toContain("bg-info")
   })

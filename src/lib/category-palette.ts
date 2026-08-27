@@ -9,9 +9,10 @@ import { defaultPalette } from "@/lib/palettes"
 // Because pool colors are arbitrary hex (not fixed Tailwind hues), we can't emit
 // static `bg-orange-500` classes — Tailwind's scanner wouldn't see them.
 // Instead every token is a *static* class that reads two CSS variables set
-// inline per element: `--cat` (the base hue) and `--cat-ink` (a darkened variant
-// for legible light-mode text). The variables give us full dynamic coloring plus
-// free dark-mode variants via the `dark:` classes below.
+// inline per element: `--cat` (the solid palette hue, used as the full
+// background) and `--cat-ink` (a precomputed near-black/white text color chosen
+// for WCAG contrast). The background is the same full color in light and dark
+// themes, so a single contrast ink stays accessible in both.
 //
 // Color identity is deterministic from the category key (hash → slot) so a
 // category keeps its color across reloads and across components. The
@@ -44,48 +45,61 @@ export interface ItemPalette {
 export const PALETTE_SLOT_COUNT = defaultPalette.colors.length
 
 // Neutral slot for the uncategorized sentinel — uses existing design tokens
-// rather than a hue, so it reads as "no category". No CSS vars are set.
+// rather than a hue, so it reads as "no category". No CSS vars are set, and no
+// border (consistent with the pool-backed slots).
 const NEUTRAL: ItemPalette = {
   style: {},
-  button: "bg-muted text-foreground border border-input",
-  buttonSelected: "bg-accent text-accent-foreground border border-input",
-  badge: "bg-muted text-muted-foreground border border-input",
-  border: "border-input",
-  ring: "ring-ring/40",
+  button: "bg-muted text-foreground",
+  buttonSelected: "bg-accent text-accent-foreground",
+  badge: "bg-muted text-muted-foreground",
+  border: "",
+  ring: "",
   dot: "bg-muted-foreground",
   hex: "",
 }
 
-// Darken a hex toward black by `amount` (0..1) for legible light-mode text.
-function shadeTowardBlack(hex: string, amount: number): string {
+// WCAG relative luminance of a hex (sRGB, linearized).
+function relativeLuminance(hex: string): number {
   const m = /^#([0-9a-f]{6})$/i.exec(hex)
-  if (!m) return hex
-  const num = parseInt(m[1], 16)
-  const mix = (c: number) => Math.round(c + (0 - c) * amount)
-  const r = mix((num >> 16) & 255)
-  const g = mix((num >> 8) & 255)
-  const b = mix(num & 255)
-  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
+  const num = m ? parseInt(m[1], 16) : 0
+  const channel = (c: number) => {
+    const s = c / 255
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
+  }
+  const r = channel((num >> 16) & 255)
+  const g = channel((num >> 8) & 255)
+  const b = channel(num & 255)
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+// Pick the readable ink (near-black or white) for a full-strength background,
+// using the higher WCAG contrast ratio. Because the background is the solid
+// palette hue in *both* light and dark modes, the same ink stays accessible in
+// either theme.
+function contrastInk(hex: string): string {
+  const l = relativeLuminance(hex)
+  const contrastWhite = (1.0 + 0.05) / (l + 0.05)
+  const contrastBlack = (l + 0.05) / 0.05
+  return contrastWhite >= contrastBlack ? "#ffffff" : "#0a0a0a"
 }
 
 // Build the token set for a single hex. The class strings are written as
 // complete literals (no interpolation) so Tailwind's content scanner detects
 // every token; the hue itself comes from the inline `--cat` / `--cat-ink` vars.
+// The background is the *full* palette color with no border, and the text color
+// (`--cat-ink`) is precomputed for accessible contrast.
 function paletteForHex(hex: string): ItemPalette {
-  const ink = shadeTowardBlack(hex, 0.45)
+  const ink = contrastInk(hex)
   const style = { "--cat": hex, "--cat-ink": ink } as CSSProperties
   return {
     style,
     hex,
-    button:
-      "bg-[var(--cat)]/15 text-[color:var(--cat-ink)] border border-[var(--cat)]/30 dark:bg-[var(--cat)]/20 dark:text-[color:var(--cat)] dark:border-[var(--cat)]/40",
-    buttonSelected:
-      "bg-[var(--cat)]/25 text-[color:var(--cat-ink)] border border-[var(--cat)]/30 dark:bg-[var(--cat)]/25 dark:text-[color:var(--cat)] dark:border-[var(--cat)]/40",
-    badge:
-      "bg-[var(--cat)]/15 text-[color:var(--cat-ink)] dark:bg-[var(--cat)]/20 dark:text-[color:var(--cat)]",
-    border: "border-[var(--cat)]/30 dark:border-[var(--cat)]/40",
-    ring: "ring-[color:var(--cat)]/40 dark:ring-[color:var(--cat)]/50",
-    dot: "bg-[var(--cat)] dark:bg-[var(--cat)]",
+    button: "bg-[var(--cat)] text-[color:var(--cat-ink)]",
+    buttonSelected: "bg-[var(--cat)] text-[color:var(--cat-ink)]",
+    badge: "bg-[var(--cat)] text-[color:var(--cat-ink)]",
+    border: "",
+    ring: "",
+    dot: "bg-[var(--cat)]",
   }
 }
 

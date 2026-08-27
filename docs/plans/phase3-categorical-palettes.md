@@ -64,12 +64,14 @@ used `src/lib/category-palette.ts` Tailwind-class slots.
 ### 1. Wire consumers — DONE (feat/categorical-palettes)
 
 - Rewrote `src/lib/category-palette.ts` to back the `ItemPalette` tokens with the
-  pool (`src/lib/palettes`), using **static CSS-var classes** (`--cat` base hue +
-  `--cat-ink` darkened text) set inline per element — required because pool colors
-  are arbitrary hex that Tailwind can't statically scan. Keeps the exact
-  `button`/`buttonSelected`/`badge`/`border`/`ring`/`dot` class-string API, plus a
-  `style` prop carrying the vars and `hex`. Dark-mode variants preserved via
-  `dark:` classes. `overrideSlot` seam kept (now a palette **index** 0..11).
+  pool (`src/lib/palettes`), using **static CSS-var classes** set inline per
+  element: `--cat` is the *solid* palette hue used as the full background, and
+  `--cat-ink` is a precomputed near-black/white text color chosen by WCAG
+  contrast (so it stays accessible in light and dark themes). **No border.**
+  Required because pool colors are arbitrary hex Tailwind can't statically scan.
+  Keeps the `button`/`buttonSelected`/`badge`/`dot` class-string API plus a
+  `style` prop carrying the vars and `hex`. `overrideSlot` seam kept (now a
+  palette **index** 0..11).
 - **Fixed the cross-panel inconsistency**: the catalog keyed by `categoryId`
   while the shopping list keyed by `categoryName` → same category hashed to two
   colors. Both panels now key by the stable `categoryId`
