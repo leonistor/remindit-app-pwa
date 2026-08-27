@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { Button, type ButtonProps } from "@/components/ui/custom/button"
 import {

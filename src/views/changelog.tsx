@@ -1,6 +1,6 @@
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import changelog from "../../CHANGELOG.md"
+import changelog from "@/../CHANGELOG.md"
 
 // Renders the hand-maintained CHANGELOG.md (imported as raw text) with
 // react-markdown. Element mappings reuse the app's Tailwind tokens so the page

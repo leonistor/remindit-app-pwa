@@ -1,5 +1,3 @@
-"use client"
-
 import { InfoIcon } from "@phosphor-icons/react"
 import {
   Accordion,

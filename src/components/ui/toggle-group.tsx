@@ -1,5 +1,3 @@
-"use client"
-
 import {
   ToggleGroup as ArkToggleGroup,
   useToggleGroupContext as useArkToggleGroupContext,

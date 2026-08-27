@@ -10,7 +10,7 @@ import {
   generateShoppingHistory,
   getDataset,
   resolveDatasetId,
-} from "../../seed"
+} from "seed"
 import { $catalog } from "./catalog"
 import {
   $categories,

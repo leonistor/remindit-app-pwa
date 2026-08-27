@@ -13,12 +13,12 @@ describe("user store", () => {
     expect($user.get().photo).toBe("p")
   })
 
-  test("randomUser returns a named user with a pravatar photo", () => {
+  test("randomUser returns a named user with a local SVG avatar", () => {
     const user = randomUser()
 
     expect(typeof user.name).toBe("string")
     expect(user.name.length).toBeGreaterThan(0)
     expect(typeof user.photo).toBe("string")
-    expect(user.photo.startsWith("https://i.pravatar.cc/")).toBe(true)
+    expect(user.photo.startsWith("data:image/svg+xml")).toBe(true)
   })
 })
