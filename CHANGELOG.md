@@ -2,7 +2,25 @@
 
 All notable changes to Remindit will be documented in this file.
 
-## [Unreleased]
+## v2.0.0 — 2026-08-27
+
+_Phase 2 lands: inline catalog editing, a unified menu, and smoother item moves — Remindit now learns your habits and puts full catalog control at your fingertips._
+
+### ✨ New Features
+
+- **Inline Catalog Editing**: Click any item or category name to rename it in place; catalog items are now organized into collapsible sections rendered in a table
+- **Unified Menu**: A single hamburger menu replaces the navigation; the brand mark now jumps straight to the Shopping list
+- **Smooth Item Moves**: Items animate as they travel between the catalog and your shopping list (View Transitions)
+- **Categorical Colors**: Item colors now come from a dedicated categorical palette, independent of button styling
+
+### 🔧 Improvements
+
+- Unified border treatment for selected vs. available items; selected items are now dimmed in the catalog
+
+### 🐛 Fixes
+
+- Footer no longer stays pinned to the viewport on long pages (Catalog, Changelog) — it scrolls with the content
+- Fixed the category-frequency picker using an incorrect collection
 
 ---
 
