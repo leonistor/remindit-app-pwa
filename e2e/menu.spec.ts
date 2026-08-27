@@ -1,7 +1,18 @@
 import { expect, type Page, test } from "@playwright/test"
 
-// Mirrors the navLinks config in src/components/menu.tsx
-const NAV_LINKS = ["List", "Catalog", "History", "Settings", "About", "Help"]
+// Mirrors the navLinks config in src/components/menu.tsx. The home route renders
+// with the label "Shopping list" on desktop and is excluded from the mobile
+// dropdown (it has its own dedicated link on mobile).
+const DESKTOP_LINKS = [
+  "Shopping list",
+  "Catalog",
+  "History",
+  "Settings",
+  "About",
+  "Help",
+]
+// Mobile dropdown omits the home route (see MOBILE_NAV_LINKS in menu.tsx).
+const MOBILE_LINKS = DESKTOP_LINKS.filter((label) => label !== "Shopping list")
 
 const desktopNavLink = (page: Page, name: string) =>
   page.locator("nav").locator("a").getByText(name, { exact: true })
@@ -18,8 +29,10 @@ test.describe("Responsive top menu", () => {
   }) => {
     await page.goto("/")
 
-    await expect(page.locator("nav").locator("a")).toHaveCount(NAV_LINKS.length)
-    for (const name of NAV_LINKS) {
+    await expect(page.locator("nav").locator("a")).toHaveCount(
+      DESKTOP_LINKS.length
+    )
+    for (const name of DESKTOP_LINKS) {
       await expect(desktopNavLink(page, name)).toBeVisible()
     }
     // Hamburger is desktop-hidden
@@ -46,8 +59,8 @@ test.describe("Responsive top menu", () => {
     await hamburger.click()
     await expect(page.locator('button[aria-label="Close menu"]')).toBeVisible()
 
-    // All links appear inside the dropdown
-    for (const name of NAV_LINKS) {
+    // All (non-home) links appear inside the dropdown
+    for (const name of MOBILE_LINKS) {
       await expect(dropdownLink(page, name)).toBeVisible()
     }
 

@@ -127,8 +127,8 @@ describe("$catalogByCategory", () => {
         categoryId: "cat-1",
         categoryName: "Produce",
         items: [
-          { id: "item-1", name: "Apple" },
-          { id: "item-2", name: "Banana" },
+          { id: "item-1", name: "Apple", categoryId: "cat-1" },
+          { id: "item-2", name: "Banana", categoryId: "cat-1" },
         ],
       },
     ])
@@ -167,7 +167,7 @@ describe("$catalogByCategory", () => {
     expect(groups[0]).toEqual({
       categoryId: "cat-1",
       categoryName: "Produce",
-      items: [{ id: "item-1", name: "Apple" }],
+      items: [{ id: "item-1", name: "Apple", categoryId: "cat-1" }],
     })
     expect(groups[1].categoryId).toBe("missing-cat")
     expect(groups[1].items).toHaveLength(1)
