@@ -2,14 +2,16 @@
 import { type ChildProcess, spawn } from "node:child_process"
 import {
   type Browser,
-  type BrowserContext,
   chromium,
   devices,
 } from "@playwright/test"
 
 const PORT = 5182
 const BASE_URL = `http://127.0.0.1:${PORT}`
-const OUTPUT_PATH = "public/mobile-screenshot.png"
+const OUTPUT_PATHS: Record<"light" | "dark", string> = {
+  light: "public/mobile-screenshot-light.png",
+  dark: "public/mobile-screenshot-dark.png",
+}
 // Existing README image is 550x1196 (~440x956 @1.25x); we keep the same aspect
 // so the `width="300"` README img scales cleanly.
 const DEVICE = devices["iPhone 17 Pro Max"]
@@ -58,7 +60,24 @@ function startPreviewServer(): ChildProcess {
   return proc
 }
 
-async function generateScreenshot(context: BrowserContext) {
+async function generateScreenshot(
+  browser: Browser,
+  theme: "light" | "dark",
+  outputPath: string
+) {
+  const context = await browser.newContext({
+    ...DEVICE,
+    // Pin the real iPhone 17 Pro Max logical size; Playwright's bundled
+    // descriptor reports an incorrect 440x763 viewport.
+    viewport: VIEWPORT,
+    baseURL: BASE_URL,
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+    // The app defaults to "system" theme, so the browser color-scheme drives
+    // light vs. dark rendering for the screenshot.
+    colorScheme: theme,
+  })
   const page = await context.newPage()
   const rng = makeRng(process.env.SCREENSHOT_SEED)
 
@@ -96,11 +115,12 @@ async function generateScreenshot(context: BrowserContext) {
 
   // Capture the full device viewport (the README <img> already applies the
   // rounded-corner frame via inline CSS).
-  await page.screenshot({ path: OUTPUT_PATH })
+  await page.screenshot({ path: outputPath })
   console.log(
-    `Captured ${added} random items -> ${OUTPUT_PATH} (${VIEWPORT.width}x${VIEWPORT.height} @${DEVICE.deviceScaleFactor}x)`
+    `Captured ${added} random items -> ${outputPath} (${theme}, ${VIEWPORT.width}x${VIEWPORT.height} @${DEVICE.deviceScaleFactor}x)`
   )
   await page.close()
+  await context.close()
 }
 
 async function main() {
@@ -109,17 +129,9 @@ async function main() {
   try {
     await waitForServer(BASE_URL)
     browser = await chromium.launch()
-    const context = await browser.newContext({
-      ...DEVICE,
-      // Pin the real iPhone 17 Pro Max logical size; Playwright's bundled
-      // descriptor reports an incorrect 440x763 viewport.
-      viewport: VIEWPORT,
-      baseURL: BASE_URL,
-      deviceScaleFactor: 3,
-      isMobile: true,
-      hasTouch: true,
-    })
-    await generateScreenshot(context)
+    for (const theme of ["light", "dark"] as const) {
+      await generateScreenshot(browser, theme, OUTPUT_PATHS[theme])
+    }
   } finally {
     await browser?.close()
     server.kill("SIGTERM")
