@@ -1,11 +1,11 @@
 {
-  "defaultPaletteId": "category10",
+  "defaultPaletteId": "paired",
   "palettes": [
     {
       "id": "category10",
-      "name": "Category 10",
+      "name": "Fast and Furious",
       "source": "d3 schemeCategory10",
-      "description": "Generated from https://d3js.org/d3-scale-chromatic/categorical",
+      "description": "Based on d3 schemeCategory10",
       "colors": [
         {
           "hex": "#1f77b4",
@@ -59,9 +59,9 @@
     },
     {
       "id": "dark2",
-      "name": "Dark 2",
+      "name": "Why so serious?",
       "source": "d3 schemeDark2",
-      "description": "Generated from https://d3js.org/d3-scale-chromatic/categorical",
+      "description": "Based on d3 schemeDark2",
       "colors": [
         {
           "hex": "#1b9e77",
@@ -115,9 +115,9 @@
     },
     {
       "id": "observable10",
-      "name": "Observable 10",
+      "name": "New York",
       "source": "d3 schemeObservable10",
-      "description": "Generated from https://d3js.org/d3-scale-chromatic/categorical",
+      "description": "Based on d3 schemeObservable10",
       "colors": [
         {
           "hex": "#4269d0",
@@ -171,9 +171,9 @@
     },
     {
       "id": "paired",
-      "name": "Paired",
+      "name": "Van Gogh",
       "source": "d3 schemePaired",
-      "description": "Generated from https://d3js.org/d3-scale-chromatic/categorical",
+      "description": "Based on d3 schemePaired",
       "colors": [
         {
           "hex": "#a6cee3",
@@ -227,9 +227,9 @@
     },
     {
       "id": "set3",
-      "name": "Set 3",
+      "name": "Claude Monet",
       "source": "d3 schemeSet3",
-      "description": "Generated from https://d3js.org/d3-scale-chromatic/categorical",
+      "description": "Based on d3 schemeSet3",
       "colors": [
         {
           "hex": "#8dd3c7",

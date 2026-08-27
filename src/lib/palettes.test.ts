@@ -55,11 +55,9 @@ describe("palette pool", () => {
     )
   })
 
-  it("exposes a description sourced from the d3 categorical page", () => {
+  it("exposes a description sourced from the d3 scheme", () => {
     for (const palette of PALETTE_POOL.palettes) {
-      expect(palette.description).toContain(
-        "https://d3js.org/d3-scale-chromatic/categorical"
-      )
+      expect(palette.description).toMatch(/^Based on d3 scheme/)
     }
   })
 })

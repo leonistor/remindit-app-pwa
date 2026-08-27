@@ -15,9 +15,7 @@ import { writeFileSync } from "node:fs"
 import { join } from "node:path"
 import chroma from "chroma-js"
 
-const D3_URL = "https://d3js.org/d3-scale-chromatic/categorical"
-
-const DEFAULT_PALETTE_ID = "category10"
+const DEFAULT_PALETTE_ID = "paired"
 const TARGET_COLOR_COUNT = 12
 
 interface SeedPalette {
@@ -34,9 +32,9 @@ interface SeedPalette {
 const SEED_PALETTES: SeedPalette[] = [
   {
     id: "category10",
-    name: "Category 10",
+    name: "Fast and Furious",
     source: "d3 schemeCategory10",
-    description: `Generated from ${D3_URL}`,
+    description: "Based on d3 schemeCategory10",
     colors: [
       "#1f77b4",
       "#ff7f0e",
@@ -52,9 +50,9 @@ const SEED_PALETTES: SeedPalette[] = [
   },
   {
     id: "dark2",
-    name: "Dark 2",
+    name: "Why so serious?",
     source: "d3 schemeDark2",
-    description: `Generated from ${D3_URL}`,
+    description: "Based on d3 schemeDark2",
     colors: [
       "#1b9e77",
       "#d95f02",
@@ -68,9 +66,9 @@ const SEED_PALETTES: SeedPalette[] = [
   },
   {
     id: "observable10",
-    name: "Observable 10",
+    name: "New York",
     source: "d3 schemeObservable10",
-    description: `Generated from ${D3_URL}`,
+    description: "Based on d3 schemeObservable10",
     colors: [
       "#4269d0",
       "#efb118",
@@ -86,9 +84,9 @@ const SEED_PALETTES: SeedPalette[] = [
   },
   {
     id: "paired",
-    name: "Paired",
+    name: "Van Gogh",
     source: "d3 schemePaired",
-    description: `Generated from ${D3_URL}`,
+    description: "Based on d3 schemePaired",
     colors: [
       "#a6cee3",
       "#1f78b4",
@@ -106,9 +104,9 @@ const SEED_PALETTES: SeedPalette[] = [
   },
   {
     id: "set3",
-    name: "Set 3",
+    name: "Claude Monet",
     source: "d3 schemeSet3",
-    description: `Generated from ${D3_URL}`,
+    description: "Based on d3 schemeSet3",
     colors: [
       "#8dd3c7",
       "#ffffb3",
