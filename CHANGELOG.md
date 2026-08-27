@@ -2,6 +2,28 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v3.1.0 — 2026-08-27
+
+_Categorical colors grow up: a managed palette system with a palette picker in Settings, smarter category ordering, and crisper, more accessible color contrast._
+
+### ✨ New Features
+
+- **Palette Picker**: Choose your categorical color palette from Settings — Remindit now ships a pool of palettes (Van Gogh is the new default) and remembers your selection
+- **Categorical Palette Pool**: Category colors are backed by a dedicated palette pool, eliminating color drift between the catalog and the shopping list
+- **Palette Preview**: The picker shows a live preview of each palette's colors above the options so you can choose at a glance
+
+### 🔧 Improvements
+
+- **Smarter Category Order**: Catalog categories are now sorted by frequency, so the items you reach for most sit at the top
+- **Consistent Contrast**: Solid palette backgrounds with WCAG-compliant text replace the old dimmed translucency, and a theme-aware muted tint keeps selected items readable in both light and dark mode
+
+### 🐛 Fixes
+
+- Fixed cross-panel color drift by routing all category colors through the shared palette pool
+- Inline Listbox now drives the palette chooser, with the preview rendered above the options for a cleaner layout
+
+---
+
 ## v2.0.0 — 2026-08-27
 
 _Phase 2 lands: inline catalog editing, a unified menu, and smoother item moves — Remindit now learns your habits and puts full catalog control at your fingertips._
