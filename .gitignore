@@ -15,6 +15,7 @@ deploy/
 
 # Playwright artifacts
 test-results/
+.playwright-mcp/
 
 # Profile
 .rspack-profile-*/
