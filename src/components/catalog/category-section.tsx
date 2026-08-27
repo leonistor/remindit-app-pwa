@@ -70,18 +70,23 @@ export const CategorySection = ({
               />
             )}
 
-            <Badge variant="outline">
-              {group.items.length} {group.items.length === 1 ? "item" : "items"}
+            <Badge
+              variant="outline"
+              size="sm"
+              className="h-7"
+              aria-label={`${group.items.length} ${group.items.length === 1 ? "item" : "items"}`}
+            >
+              {group.items.length}
             </Badge>
 
             <div className="ml-auto flex items-center gap-2">
               <Button
                 variant="outline"
-                size="sm"
+                size="icon-sm"
+                aria-label="Add item"
                 onClick={() => onAddItem(group.categoryId)}
               >
                 <PlusIcon />
-                Add item
               </Button>
               {!isUncategorized && (
                 <ConfirmDelete

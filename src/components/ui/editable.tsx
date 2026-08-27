@@ -48,7 +48,7 @@ export const EditableArea = (
 
   return (
     <ArkEditable.Area
-      className={cn("w-full", className)}
+      className={cn("flex-1 min-w-0", className)}
       data-slot="editable-area"
       {...rest}
     />
@@ -58,9 +58,17 @@ export const EditableArea = (
 export interface EditableInputProps
   extends Omit<React.ComponentProps<typeof ArkEditable.Input>, "size"> {}
 
-export const EditableInput = (props: EditableInputProps) => (
-  <ArkEditable.Input data-slot="editable-input" {...props} />
-);
+export const EditableInput = (props: EditableInputProps) => {
+  const { className, ...rest } = props
+
+  return (
+    <ArkEditable.Input
+      className={cn("w-full", className)}
+      data-slot="editable-input"
+      {...rest}
+    />
+  )
+};
 
 interface EditablePreviewProps
   extends React.ComponentProps<typeof ArkEditable.Preview> {
