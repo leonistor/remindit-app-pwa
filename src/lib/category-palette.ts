@@ -35,8 +35,7 @@ export interface ItemPalette {
 // rather than a hue, so it reads as "no category".
 const NEUTRAL: ItemPalette = {
   button: "bg-muted text-foreground border border-input",
-  buttonSelected:
-    "bg-accent text-accent-foreground border border-input ring-2 ring-ring/40",
+  buttonSelected: "bg-accent text-accent-foreground border border-input",
   badge: "bg-muted text-muted-foreground border border-input",
   border: "border-input",
   ring: "ring-ring/40",
@@ -50,7 +49,7 @@ const PALETTE_SLOTS: ItemPalette[] = [
     button:
       "bg-orange-500/15 text-orange-700 border border-orange-500/30 dark:bg-orange-400/20 dark:text-orange-300 dark:border-orange-400/40",
     buttonSelected:
-      "bg-orange-500/25 text-orange-800 border border-orange-500/40 ring-2 ring-orange-500/40 dark:bg-orange-400/25 dark:text-orange-200 dark:border-orange-400/50 dark:ring-orange-400/50",
+      "bg-orange-500/25 text-orange-800 border border-orange-500/30 dark:bg-orange-400/25 dark:text-orange-200 dark:border-orange-400/40",
     badge:
       "bg-orange-500/15 text-orange-700 dark:bg-orange-400/20 dark:text-orange-300",
     border: "border-orange-500/30 dark:border-orange-400/40",
@@ -61,7 +60,7 @@ const PALETTE_SLOTS: ItemPalette[] = [
     button:
       "bg-sky-500/15 text-sky-700 border border-sky-500/30 dark:bg-sky-400/20 dark:text-sky-300 dark:border-sky-400/40",
     buttonSelected:
-      "bg-sky-500/25 text-sky-800 border border-sky-500/40 ring-2 ring-sky-500/40 dark:bg-sky-400/25 dark:text-sky-200 dark:border-sky-400/50 dark:ring-sky-400/50",
+      "bg-sky-500/25 text-sky-800 border border-sky-500/30 dark:bg-sky-400/25 dark:text-sky-200 dark:border-sky-400/40",
     badge:
       "bg-sky-500/15 text-sky-700 dark:bg-sky-400/20 dark:text-sky-300",
     border: "border-sky-500/30 dark:border-sky-400/40",
@@ -72,7 +71,7 @@ const PALETTE_SLOTS: ItemPalette[] = [
     button:
       "bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 dark:bg-emerald-400/20 dark:text-emerald-300 dark:border-emerald-400/40",
     buttonSelected:
-      "bg-emerald-500/25 text-emerald-800 border border-emerald-500/40 ring-2 ring-emerald-500/40 dark:bg-emerald-400/25 dark:text-emerald-200 dark:border-emerald-400/50 dark:ring-emerald-400/50",
+      "bg-emerald-500/25 text-emerald-800 border border-emerald-500/30 dark:bg-emerald-400/25 dark:text-emerald-200 dark:border-emerald-400/40",
     badge:
       "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-400/20 dark:text-emerald-300",
     border: "border-emerald-500/30 dark:border-emerald-400/40",
@@ -83,7 +82,7 @@ const PALETTE_SLOTS: ItemPalette[] = [
     button:
       "bg-yellow-500/15 text-yellow-700 border border-yellow-500/30 dark:bg-yellow-400/20 dark:text-yellow-300 dark:border-yellow-400/40",
     buttonSelected:
-      "bg-yellow-500/25 text-yellow-800 border border-yellow-500/40 ring-2 ring-yellow-500/40 dark:bg-yellow-400/25 dark:text-yellow-200 dark:border-yellow-400/50 dark:ring-yellow-400/50",
+      "bg-yellow-500/25 text-yellow-800 border border-yellow-500/30 dark:bg-yellow-400/25 dark:text-yellow-200 dark:border-yellow-400/40",
     badge:
       "bg-yellow-500/15 text-yellow-700 dark:bg-yellow-400/20 dark:text-yellow-300",
     border: "border-yellow-500/30 dark:border-yellow-400/40",
@@ -94,7 +93,7 @@ const PALETTE_SLOTS: ItemPalette[] = [
     button:
       "bg-blue-500/15 text-blue-700 border border-blue-500/30 dark:bg-blue-400/20 dark:text-blue-300 dark:border-blue-400/40",
     buttonSelected:
-      "bg-blue-500/25 text-blue-800 border border-blue-500/40 ring-2 ring-blue-500/40 dark:bg-blue-400/25 dark:text-blue-200 dark:border-blue-400/50 dark:ring-blue-400/50",
+      "bg-blue-500/25 text-blue-800 border border-blue-500/30 dark:bg-blue-400/25 dark:text-blue-200 dark:border-blue-400/40",
     badge:
       "bg-blue-500/15 text-blue-700 dark:bg-blue-400/20 dark:text-blue-300",
     border: "border-blue-500/30 dark:border-blue-400/40",
@@ -105,7 +104,7 @@ const PALETTE_SLOTS: ItemPalette[] = [
     button:
       "bg-red-500/15 text-red-700 border border-red-500/30 dark:bg-red-400/20 dark:text-red-300 dark:border-red-400/40",
     buttonSelected:
-      "bg-red-500/25 text-red-800 border border-red-500/40 ring-2 ring-red-500/40 dark:bg-red-400/25 dark:text-red-200 dark:border-red-400/50 dark:ring-red-400/50",
+      "bg-red-500/25 text-red-800 border border-red-500/30 dark:bg-red-400/25 dark:text-red-200 dark:border-red-400/40",
     badge: "bg-red-500/15 text-red-700 dark:bg-red-400/20 dark:text-red-300",
     border: "border-red-500/30 dark:border-red-400/40",
     ring: "ring-red-500/40 dark:ring-red-400/50",
@@ -115,7 +114,7 @@ const PALETTE_SLOTS: ItemPalette[] = [
     button:
       "bg-fuchsia-500/15 text-fuchsia-700 border border-fuchsia-500/30 dark:bg-fuchsia-400/20 dark:text-fuchsia-300 dark:border-fuchsia-400/40",
     buttonSelected:
-      "bg-fuchsia-500/25 text-fuchsia-800 border border-fuchsia-500/40 ring-2 ring-fuchsia-500/40 dark:bg-fuchsia-400/25 dark:text-fuchsia-200 dark:border-fuchsia-400/50 dark:ring-fuchsia-400/50",
+      "bg-fuchsia-500/25 text-fuchsia-800 border border-fuchsia-500/30 dark:bg-fuchsia-400/25 dark:text-fuchsia-200 dark:border-fuchsia-400/40",
     badge:
       "bg-fuchsia-500/15 text-fuchsia-700 dark:bg-fuchsia-400/20 dark:text-fuchsia-300",
     border: "border-fuchsia-500/30 dark:border-fuchsia-400/40",

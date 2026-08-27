@@ -56,14 +56,19 @@ export const ItemButton = ({
   travelTargetId,
 }: ItemButtonProps) => {
   // Removable/recommendation chips are inherently emphasized (in-list or
-  // surfaced); only "selectable" toggles emphasis via `isSelected`.
-  const selected =
+  // surfaced) via the stronger `buttonSelected` tint. "Selectable" chips stay
+  // at the resting `button` border; a selected one is merely dimmed (so it
+  // reads as "already added" without a heavier border or being disabled).
+  const emphasized =
     purpose === "removable" || purpose === "recommendation"
-      ? true
-      : isSelected
+  const dimmed = purpose === "selectable" && isSelected
 
   const palette = categoryPalette(categoryKey ?? name, paletteOverride)
-  const colorClasses = selected ? palette.buttonSelected : palette.button
+  const colorClasses = emphasized
+    ? palette.buttonSelected
+    : dimmed
+      ? cn(palette.button, "opacity-60 saturate-50")
+      : palette.button
 
   const animationClass =
     animationState === "enter"

@@ -26,7 +26,7 @@ describe("ItemButton", () => {
     expect(button.className).not.toContain("bg-info")
   })
 
-  it("emphasizes the selected tint for a selected selectable item", () => {
+  it("dims a selected selectable item instead of emphasizing it", () => {
     const { rerender } = render(
       <ItemButton
         name="Milk"
@@ -36,6 +36,7 @@ describe("ItemButton", () => {
       />
     )
     const idle = screen.getByRole("button", { name: "Milk" })
+    expect(idle.className).not.toContain("opacity-60")
     expect(idle.className).not.toContain("ring-2")
 
     rerender(
@@ -47,7 +48,8 @@ describe("ItemButton", () => {
       />
     )
     const selected = screen.getByRole("button", { name: "Milk" })
-    expect(selected.className).toContain("ring-2")
+    expect(selected.className).toContain("opacity-60")
+    expect(selected.className).not.toContain("ring-2")
   })
 
   it("renders a recommendation dot as a separate semantic concern", () => {
