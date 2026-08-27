@@ -19,6 +19,7 @@ export const STORAGE_KEYS = {
   selectedSort: "remindit:selected-sort",
   accordionOpen: "remindit:accordion-open",
   theme: "remindit:theme",
+  activePalette: "remindit:active-palette",
 } as const
 
 // JSON-encoded persistent store. The single serialization strategy avoids the

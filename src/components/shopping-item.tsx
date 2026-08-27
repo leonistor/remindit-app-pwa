@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/custom/button"
-import { categoryPalette } from "@/lib/category-palette"
 import { cn } from "@/lib/utils"
+import { useCategoryPalette } from "@/hooks/use-category-palette"
 import { UNCATEGORIZED_NAME } from "@/stores/types"
 
 export interface ShoppingItemProps {
@@ -47,7 +47,9 @@ export const ShoppingItem = ({
   const label = categoryName?.trim() || UNCATEGORIZED_NAME
   // Key by the stable category id (matching the catalog) so the same category
   // keeps one color across panels; fall back to the name when no id is given.
-  const palette = categoryPalette((categoryId ?? categoryName ?? UNCATEGORIZED_NAME).trim())
+  const palette = useCategoryPalette(
+    (categoryId ?? categoryName ?? UNCATEGORIZED_NAME).trim()
+  )
 
   return (
     <div

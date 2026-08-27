@@ -2,6 +2,7 @@ import { useState } from "react"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/custom/button"
+import { PaletteChooser } from "@/components/palette-chooser"
 import {
   Dialog,
   DialogBody,
@@ -87,6 +88,16 @@ const SettingsView = () => {
             </DialogContent>
           </Dialog>
         </CardFooter>
+      </Card>
+
+      <Card className="w-full max-w-xl">
+        <CardHeader
+          title="Color palette"
+          description="Choose how categories and items are colored across the app. Your pick is saved and applies everywhere."
+        />
+        <CardContent>
+          <PaletteChooser />
+        </CardContent>
       </Card>
     </div>
   )

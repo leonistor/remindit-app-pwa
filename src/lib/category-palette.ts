@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react"
 import { UNCATEGORIZED_NAME } from "@/stores/types"
-import { defaultPalette } from "@/lib/palettes"
+import { defaultPalette, type Palette } from "@/lib/palettes"
 
 // Categorical color language for items and categories, now backed by the
 // palette *pool* in `seed/palettes.json` (see `src/lib/palettes`). This module
@@ -43,7 +43,8 @@ export interface ItemPalette {
   hex: string
 }
 
-// Number of colors in the active palette. Assignment wraps modulo this.
+// Number of colors in the (default) palette. Assignment wraps modulo this.
+// Every pool palette is padded to the same length, so this is a constant.
 export const PALETTE_SLOT_COUNT = defaultPalette.colors.length
 
 // Neutral slot for the uncategorized sentinel — uses existing design tokens
@@ -139,13 +140,13 @@ function paletteForHex(hex: string): ItemPalette {
 // keeps its color across reloads and across components until an explicit
 // override is supplied. The key is lowercased first so casing differences
 // ("Produce" vs "produce") resolve to the same color.
-function paletteSlotFor(key: string): number {
+function paletteSlotFor(key: string, len: number): number {
   const norm = key.toLowerCase()
   let hash = 5381
   for (let i = 0; i < norm.length; i++) {
     hash = (hash * 33) ^ norm.charCodeAt(i)
   }
-  return Math.abs(hash) % PALETTE_SLOT_COUNT
+  return Math.abs(hash) % len
 }
 
 /**
@@ -156,10 +157,14 @@ function paletteSlotFor(key: string): number {
  *   user-assigned `Category.color`, or the index a dataset assigned
  *   sequentially at init). When omitted, the color is derived deterministically
  *   from `key`.
+ * @param palette - The palette to color from. Callers should pass the active
+ *   palette (see `useCategoryPalette`); it defaults to the seed default so the
+ *   function stays pure and free of any store dependency.
  */
 export function categoryPalette(
   key: string,
-  overrideSlot?: ItemPaletteSlot
+  overrideSlot?: ItemPaletteSlot,
+  palette: Palette = defaultPalette
 ): ItemPalette {
   if (
     key.trim().toLowerCase() === UNCATEGORIZED_NAME.toLowerCase() ||
@@ -167,13 +172,10 @@ export function categoryPalette(
   ) {
     return NEUTRAL
   }
+  const len = palette.colors.length
   const slot =
     overrideSlot !== undefined
-      ? ((overrideSlot % PALETTE_SLOT_COUNT) + PALETTE_SLOT_COUNT) %
-        PALETTE_SLOT_COUNT
-      : paletteSlotFor(key)
-  return paletteForHex(defaultPalette.colors[slot].hex)
+      ? ((overrideSlot % len) + len) % len
+      : paletteSlotFor(key, len)
+  return paletteForHex(palette.colors[slot].hex)
 }
-
-/** The active (default) palette's hex list — convenience for a future picker. */
-export const ALL_PALETTE_HEXES = defaultPalette.colors.map((c) => c.hex)

@@ -1,9 +1,7 @@
 import { cn } from "@/lib/utils"
 import { RECOMMENDATION_TIERS } from "@/lib/recommendation-tiers"
-import {
-  categoryPalette,
-  type ItemPaletteSlot,
-} from "@/lib/category-palette"
+import type { ItemPaletteSlot } from "@/lib/category-palette"
+import { useCategoryPalette } from "@/hooks/use-category-palette"
 import type { RecommendationTier } from "@/stores/types"
 import { Button } from "./button"
 
@@ -63,7 +61,7 @@ export const ItemButton = ({
     purpose === "removable" || purpose === "recommendation"
   const dimmed = purpose === "selectable" && isSelected
 
-  const palette = categoryPalette(categoryKey ?? name, paletteOverride)
+  const palette = useCategoryPalette(categoryKey ?? name, paletteOverride)
   const colorClasses = emphasized
     ? palette.buttonSelected
     : dimmed

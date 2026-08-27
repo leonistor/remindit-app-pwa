@@ -141,6 +141,7 @@ export * from "./list"
 export * from "./recommender"
 export * from "./selectors"
 export * from "./theme"
+export * from "./palette"
 // Public API surface — import everything from '@/stores'.
 export * from "./types"
 export * from "./ui"
