@@ -36,7 +36,7 @@ export const CategoryDialog = ({
   onOpenChange,
   editingCategory,
 }: CategoryDialogProps) => {
-  const frequencyCollection = useListCollection<{
+  const { collection: frequencyCollection } = useListCollection<{
     label: string
     value: CategoryFrequency
   }>({
