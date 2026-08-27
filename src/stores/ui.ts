@@ -1,20 +1,18 @@
-import { persistentAtom, persistentJSON } from "@nanostores/persistent"
+import { jsonStore, STORAGE_KEYS } from "./persistence"
 
 export type SelectedSort = "default" | "category-name" | "last-added"
 
 // Whether the category Badge is shown on each selected-item chip.
-export const $selectedCategoriesVisible = persistentAtom<boolean>(
-  "remindit:selected-categories-visible",
-  true,
-  { encode: JSON.stringify, decode: JSON.parse }
+export const $selectedCategoriesVisible = jsonStore<boolean>(
+  STORAGE_KEYS.selectedCategoriesVisible,
+  true
 )
 
 // Ordering of the selected-items panel. "default" preserves list insertion
 // order; the other two modes are mutually exclusive sort strategies.
-export const $selectedSort = persistentAtom<SelectedSort>(
-  "remindit:selected-sort",
-  "default",
-  { encode: JSON.stringify, decode: JSON.parse }
+export const $selectedSort = jsonStore<SelectedSort>(
+  STORAGE_KEYS.selectedSort,
+  "default"
 )
 
 export function setSelectedCategoriesVisible(visible: boolean): void {
@@ -30,8 +28,8 @@ export function setSelectedSort(sort: SelectedSort): void {
 // first visit, preserving the original default. Once the user toggles anything,
 // the exact open-id set is persisted so the layout is remembered across reloads.
 // Keyed by categoryId so the remembered state survives catalog edits.
-export const $accordionOpen = persistentJSON<string[] | null>(
-  "remindit:accordion-open",
+export const $accordionOpen = jsonStore<string[] | null>(
+  STORAGE_KEYS.accordionOpen,
   null
 )
 

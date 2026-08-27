@@ -4,11 +4,14 @@ import "@fontsource-variable/atkinson-hyperlegible-next"
 import "./styles/globals.css"
 
 import App from "./App"
+import { initStores, setupDevLogging } from "./stores"
 import { initTheme } from "./stores/theme"
 
 // Apply the persisted theme before first paint to avoid a flash of the wrong
-// palette.
+// palette, and seed first-run data. Both are idempotent.
 initTheme()
+initStores()
+setupDevLogging()
 
 const rootEl = document.getElementById("root")
 if (rootEl) {

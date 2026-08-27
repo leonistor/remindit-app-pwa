@@ -1,14 +1,23 @@
 import { persistentAtom } from "@nanostores/persistent"
+import { STORAGE_KEYS } from "./persistence"
 
 export type ThemeMode = "light" | "dark" | "system"
 
 const DARK_QUERY = "(prefers-color-scheme: dark)"
 
-export const themeStore = persistentAtom<ThemeMode>(
-  "remindit:theme",
-  "system",
-  {}
-)
+// JSON-encoded like every other store (single serialization strategy). The
+// decode tolerates legacy raw values written before serialization was unified,
+// so existing persisted themes survive the migration instead of resetting.
+export const themeStore = persistentAtom<ThemeMode>(STORAGE_KEYS.theme, "system", {
+  encode: JSON.stringify,
+  decode: (value) => {
+    try {
+      return JSON.parse(value) as ThemeMode
+    } catch {
+      return value as ThemeMode
+    }
+  },
+})
 
 let mediaQuery: MediaQueryList | null = null
 let initialized = false

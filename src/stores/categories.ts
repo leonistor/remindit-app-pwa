@@ -2,8 +2,8 @@
 // "uncategorized" sentinel rather than dropping them, and must NOT write
 // history.
 
-import { persistentJSON } from "@nanostores/persistent"
-import { $catalog } from "./catalog"
+import { reassignItemsToCategory } from "./catalog"
+import { jsonStore, STORAGE_KEYS } from "./persistence"
 import type { Category, CategoryFrequency } from "./types"
 import {
   CATEGORY_FREQUENCIES,
@@ -11,7 +11,7 @@ import {
   UNCATEGORIZED_NAME,
 } from "./types"
 
-const $categories = persistentJSON<Category[]>("remindit:categories", [])
+const $categories = jsonStore<Category[]>(STORAGE_KEYS.categories, [])
 
 export function getCategory(id: string): Category | undefined {
   return $categories.get().find((c) => c.id === id)
@@ -79,12 +79,7 @@ export function updateCategory(
 // No history write. The sentinel category itself cannot be deleted.
 export function removeCategory(id: string): void {
   if (id === UNCATEGORIZED_ID) return
-  const reassigned = $catalog
-    .get()
-    .map((item) =>
-      item.categoryId === id ? { ...item, categoryId: UNCATEGORIZED_ID } : item
-    )
-  $catalog.set(reassigned)
+  reassignItemsToCategory(id, UNCATEGORIZED_ID)
   $categories.set($categories.get().filter((c) => c.id !== id))
 }
 

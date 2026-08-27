@@ -1,8 +1,8 @@
 // Current user profile. Persisted; random defaults are assigned on first run
 // when no name is present (handled in ./index during seeding).
 
-import { persistentJSON } from "@nanostores/persistent"
 import type { User } from "./types"
+import { jsonStore, STORAGE_KEYS } from "./persistence"
 
 const NAME_POOL = [
   "Patricia",
@@ -15,7 +15,7 @@ const NAME_POOL = [
   "Riley",
 ]
 
-const $user = persistentJSON<User>("remindit:user", { name: "", photo: "" })
+const $user = jsonStore<User>(STORAGE_KEYS.user, { name: "", photo: "" })
 
 export function getUser(): User {
   return $user.get()

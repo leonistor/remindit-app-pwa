@@ -1,13 +1,19 @@
 // Active shopping list. Adding/removing entries is the ONLY thing that writes
 // history (via logHistory in ./history).
+//
+// Lazy cross-import contract: this module imports action functions from
+// `./catalog` and `./catalog` imports `removeListEntriesForItem` from here, but
+// each is only ever referenced *inside* a function body — never at module top
+// level. That keeps the circular dependency between the two stores from tripping
+// a temporal-dead-zone error at evaluation time.
 
-import { persistentJSON } from "@nanostores/persistent"
 import { addCatalogItem, getCatalogItem } from "./catalog"
 import { logHistory } from "./history"
+import { jsonStore, STORAGE_KEYS } from "./persistence"
 import type { ListEntry } from "./types"
 import { UNCATEGORIZED_ID } from "./types"
 
-const $list = persistentJSON<ListEntry[]>("remindit:list", [])
+const $list = jsonStore<ListEntry[]>(STORAGE_KEYS.list, [])
 
 // Removes every list entry that references the given catalog item.
 // Exposed so catalog deletion can cascade without writing history.
@@ -49,6 +55,14 @@ export function removeFromList(entryId: string): void {
     itemName: item?.name ?? "(unknown)",
     categoryId: item?.categoryId ?? UNCATEGORIZED_ID,
   })
+}
+
+// Removes the active-list entry for a given catalog item (if present), logging a
+// "remove" history event. Mirrors `addToList`'s itemId-based API so the catalog
+// UI never has to resolve an entry id itself.
+export function removeFromListByItemId(itemId: string): void {
+  const entry = $list.get().find((e) => e.itemId === itemId)
+  if (entry) removeFromList(entry.id)
 }
 
 export function setEntryChecked(entryId: string, checked: boolean): void {

@@ -1,11 +1,8 @@
 // Verifies the runtime reset + reseed path (`seedFromDataset`) used by the
 // Settings "Reset app & reseed" action. Unlike `initStores` (first-run, guarded
 // on empty stores), this always overwrites and takes the dataset id explicitly.
-//
-// Imports the barrel on purpose so `initStores()` runs once as a side effect
-// (mirrors the real app entry), seeding the default dataset before we reseed.
 
-import { expect, test } from "@rstest/core"
+import { beforeAll, expect, test } from "@rstest/core"
 import { getDataset } from "seed"
 import {
   $catalog,
@@ -13,14 +10,18 @@ import {
   $history,
   $list,
   $user,
+  initStores,
   seedFromDataset,
 } from "@/stores"
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "@/stores/types"
 
 const THEME_KEY = "remindit:theme"
 
+// Seed the default dataset once, mirroring the real app entry point, so the
+// reseed tests start from a populated store.
+beforeAll(() => initStores())
+
 test("seedFromDataset overwrites the catalog/categories with the chosen dataset", () => {
-  // @/stores import already seeded the default (items_categories) dataset.
   expect($catalog.get().length).toBeGreaterThan(0)
 
   const { categories, catalog } = getDataset("rick_morty")

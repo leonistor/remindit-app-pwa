@@ -1,5 +1,9 @@
-// Store entry-point: wires the modules together, seeds sample data on first
-// run, assigns random user defaults, and (dev-only) attaches the logger.
+// Store entry-point: wires the modules together and exposes the public API.
+//
+// IMPORTANT: this barrel has NO side effects. Seeding (`initStores`) and the
+// dev logger (`setupDevLogging`) are explicit bootstrap calls the app entry
+// point invokes once — so importing a store (e.g. from a test or a component)
+// never triggers persistence writes or logging on its own.
 
 import { logger } from "@nanostores/logger"
 import {
@@ -116,11 +120,11 @@ export function seedFromDataset(datasetId: string): void {
   normalizeCategoryFrequencies()
 }
 
-// Run seeding as soon as this module is loaded in the browser.
-initStores()
-
-// Dev-only store logging. Guarded so it never runs in production builds.
-if (import.meta.env?.DEV) {
+// Dev-only store logging. Call this once from the app entry point; it is a
+// no-op outside development builds. Kept out of `initStores` so the logger is
+// never wired just by importing a store.
+export function setupDevLogging(): void {
+  if (!import.meta.env?.DEV) return
   logger({
     catalog: $catalog,
     list: $list,
