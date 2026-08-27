@@ -67,7 +67,7 @@ export const ItemButton = ({
   const colorClasses = emphasized
     ? palette.buttonSelected
     : dimmed
-      ? cn(palette.button, "opacity-60 saturate-50")
+      ? palette.dimmed
       : palette.button
 
   const animationClass =

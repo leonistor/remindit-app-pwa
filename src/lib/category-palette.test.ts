@@ -46,6 +46,15 @@ describe("categoryPalette", () => {
     )
   })
 
+  it("exposes a theme-aware muted 'dimmed' token with its own contrast vars", () => {
+    const palette = categoryPalette("dairy")
+    expect(palette.dimmed).toContain("var(--cat-dim)")
+    expect(palette.dimmed).toContain("var(--cat-dim-dark)")
+    const style = palette.style as Record<string, string>
+    expect(style["--cat-dim"]).toMatch(/^#[0-9a-f]{6}$/)
+    expect(style["--cat-dim-dark"]).toMatch(/^#[0-9a-f]{6}$/)
+  })
+
   it("honors an explicit override slot and wraps out-of-range values", () => {
     const slotZero = defaultPalette.colors[0].hex
     expect(categoryPalette("dairy", 0).hex).toBe(slotZero)

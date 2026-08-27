@@ -31,6 +31,8 @@ export interface ItemPalette {
   buttonSelected: string
   /** Tint for a small category label badge. */
   badge: string
+  /** Muted tint for an "already added" (dimmed) chip. */
+  dimmed: string
   /** Border color token. */
   border: string
   /** Ring color token (used for emphasis). */
@@ -52,6 +54,7 @@ const NEUTRAL: ItemPalette = {
   button: "bg-muted text-foreground",
   buttonSelected: "bg-accent text-accent-foreground",
   badge: "bg-muted text-muted-foreground",
+  dimmed: "bg-muted text-muted-foreground",
   border: "",
   ring: "",
   dot: "bg-muted-foreground",
@@ -83,20 +86,49 @@ function contrastInk(hex: string): string {
   return contrastWhite >= contrastBlack ? "#ffffff" : "#0a0a0a"
 }
 
+// Linearly mix a hex toward `target` by `amount` (0..1). Used to derive the
+// muted "already added" tint without translucency (which would wreck text
+// contrast over the page background).
+function mixToward(hex: string, target: string, amount: number): string {
+  const m1 = /^#([0-9a-f]{6})$/i.exec(hex)
+  const m2 = /^#([0-9a-f]{6})$/i.exec(target)
+  if (!m1 || !m2) return hex
+  const a = parseInt(m1[1], 16)
+  const b = parseInt(m2[1], 16)
+  const ch = (ca: number, cb: number) => Math.round(ca + (cb - ca) * amount)
+  const r = ch((a >> 16) & 255, (b >> 16) & 255)
+  const g = ch((a >> 8) & 255, (b >> 8) & 255)
+  const bl = ch(a & 255, b & 255)
+  return `#${((1 << 24) + (r << 16) + (g << 8) + bl).toString(16).slice(1)}`
+}
+
 // Build the token set for a single hex. The class strings are written as
 // complete literals (no interpolation) so Tailwind's content scanner detects
 // every token; the hue itself comes from the inline `--cat` / `--cat-ink` vars.
 // The background is the *full* palette color with no border, and the text color
-// (`--cat-ink`) is precomputed for accessible contrast.
+// (`--cat-ink`) is precomputed for accessible contrast. The `dimmed` token is a
+// theme-aware muted tint (pale in light mode, dark in dark mode), each with its
+// own contrast ink, so "already added" stays legible without translucency.
 function paletteForHex(hex: string): ItemPalette {
   const ink = contrastInk(hex)
-  const style = { "--cat": hex, "--cat-ink": ink } as CSSProperties
+  const dimLight = mixToward(hex, "#ffffff", 0.72)
+  const dimDark = mixToward(hex, "#0a0a0a", 0.72)
+  const style = {
+    "--cat": hex,
+    "--cat-ink": ink,
+    "--cat-dim": dimLight,
+    "--cat-dim-ink": contrastInk(dimLight),
+    "--cat-dim-dark": dimDark,
+    "--cat-dim-dark-ink": contrastInk(dimDark),
+  } as CSSProperties
   return {
     style,
     hex,
     button: "bg-[var(--cat)] text-[color:var(--cat-ink)]",
     buttonSelected: "bg-[var(--cat)] text-[color:var(--cat-ink)]",
     badge: "bg-[var(--cat)] text-[color:var(--cat-ink)]",
+    dimmed:
+      "bg-[var(--cat-dim)] text-[color:var(--cat-dim-ink)] dark:bg-[var(--cat-dim-dark)] dark:text-[color:var(--cat-dim-dark-ink)]",
     border: "",
     ring: "",
     dot: "bg-[var(--cat)]",

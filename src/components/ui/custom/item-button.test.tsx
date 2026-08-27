@@ -37,7 +37,7 @@ describe("ItemButton", () => {
       />
     )
     const idle = screen.getByRole("button", { name: "Milk" })
-    expect(idle.className).not.toContain("opacity-60")
+    expect(idle.className).not.toContain("var(--cat-dim)")
     expect(idle.className).not.toContain("ring-2")
 
     rerender(
@@ -49,7 +49,7 @@ describe("ItemButton", () => {
       />
     )
     const selected = screen.getByRole("button", { name: "Milk" })
-    expect(selected.className).toContain("opacity-60")
+    expect(selected.className).toContain("var(--cat-dim)")
     expect(selected.className).not.toContain("ring-2")
   })
 

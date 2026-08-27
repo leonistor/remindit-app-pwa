@@ -69,9 +69,11 @@ used `src/lib/category-palette.ts` Tailwind-class slots.
   `--cat-ink` is a precomputed near-black/white text color chosen by WCAG
   contrast (so it stays accessible in light and dark themes). **No border.**
   Required because pool colors are arbitrary hex Tailwind can't statically scan.
-  Keeps the `button`/`buttonSelected`/`badge`/`dot` class-string API plus a
-  `style` prop carrying the vars and `hex`. `overrideSlot` seam kept (now a
-  palette **index** 0..11).
+  Keeps the `button`/`buttonSelected`/`badge`/`dimmed`/`dot` class-string API
+  plus a `style` prop carrying the vars and `hex`. The `dimmed` ("already added")
+  token is a theme-aware muted tint (pale in light, dark in dark) with its own
+  contrast ink, replacing the old translucency hack. `overrideSlot` seam kept
+  (now a palette **index** 0..11).
 - **Fixed the cross-panel inconsistency**: the catalog keyed by `categoryId`
   while the shopping list keyed by `categoryName` → same category hashed to two
   colors. Both panels now key by the stable `categoryId`
