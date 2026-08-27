@@ -89,6 +89,8 @@ export const ItemButton = ({
       onClick={onClick}
       className={cn(colorClasses, animationClass, className)}
       style={palette.style}
+      data-testid="catalog-item"
+      data-selected={isSelected ? "true" : "false"}
       data-vt-catalog={travelTargetId}
     >
       {name}

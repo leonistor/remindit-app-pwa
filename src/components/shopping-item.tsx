@@ -53,6 +53,7 @@ export const ShoppingItem = ({
     <div
       className={cn("flex flex-col items-start gap-1", className)}
       style={palette.style}
+      data-testid="shopping-item"
     >
       {showCategory && (
         <Badge

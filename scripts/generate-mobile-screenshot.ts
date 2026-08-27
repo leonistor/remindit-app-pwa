@@ -64,8 +64,11 @@ async function generateScreenshot(context: BrowserContext) {
 
   await page.goto("/")
   await page.waitForLoadState("networkidle")
-  // The unselected catalog chips in ItemsPanel are the only info-variant buttons.
-  const itemButtons = page.locator('[data-variant="info"]')
+  // Unselected catalog chips carry data-testid="catalog-item" with
+  // data-selected="false"; they are the only clickable add targets.
+  const itemButtons = page.locator(
+    '[data-testid="catalog-item"]:not([data-selected="true"])'
+  )
   await itemButtons.first().waitFor({ state: "visible", timeout: 30_000 })
   // Let React finish hydrating so the chips are actually interactive.
   await page.waitForTimeout(800)
@@ -73,7 +76,9 @@ async function generateScreenshot(context: BrowserContext) {
   // Add 5-7 random items by driving off the live selected count rather than
   // fixed positions — the layout reflows as items are added, so positional
   // clicks are flaky. Retry a different chip if a click doesn't register.
-  const selectedCount = () => page.locator('[data-variant="success"]').count()
+  // Shopping-list chips expose a stable data-testid="shopping-item".
+  const selectedCount = () =>
+    page.locator('[data-testid="shopping-item"]').count()
   const target = MIN_ITEMS + Math.floor(rng() * (MAX_ITEMS - MIN_ITEMS + 1))
   let added = 0
   for (let attempt = 0; added < target && attempt < target * 4; attempt++) {
