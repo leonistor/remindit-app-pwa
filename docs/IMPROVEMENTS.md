@@ -29,6 +29,17 @@ Branch naming suggestion: `feat/impr-tier-1`, `feat/impr-tier-2`, `feat/impr-tie
 
 ## Tier 1 — Encapsulation & persistence (highest value, low risk)
 
+**Status: DONE** — merged to `main` (commit `308394b`). Verified: biome lint,
+rstest (105 passed), Playwright (6 passed), `rsbuild build`.
+
+- Items 1–4 implemented as written.
+- Item 5: the `catalog ⇄ list` cycle was **documented** (lazy cross-import
+  contract in `catalog.ts` / `list.ts`) rather than restructured. A blanket
+  `list`-side subscription would have changed cascade semantics (dropping *all*
+  list entries whose items aren't in the catalog) and broken
+  `tests/stores/catalog.test.ts`. The `categories → catalog` leakage (item 1)
+  was genuinely removed via `reassignItemsToCategory`.
+
 1. **Add a catalog action for category reassignment**
    Replace `$catalog.set(reassigned)` in `src/stores/categories.ts:87` with a new
    `reassignItemsToCategory(fromId, toId)` action in `src/stores/catalog.ts`. Keeps
