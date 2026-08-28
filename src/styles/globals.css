@@ -517,7 +517,7 @@
 }
 
 @utility container {
-  @apply mx-auto max-w-350 px-4;
+  @apply mx-auto max-w-3xl px-2 py-2 md:px-4 md:py-4;
 }
 
 @utility step {

@@ -33,7 +33,7 @@ function Layout() {
 
   return (
     <DrawerProvider>
-      <div className="container mx-auto h-screen px-4 py-4">
+      <div className="container h-screen">
         <div className="flex h-full w-full flex-col gap-4">
           <Menu />
           <div className="flex min-h-0 grow flex-col overflow-y-auto">
