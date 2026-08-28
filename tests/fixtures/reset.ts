@@ -21,10 +21,16 @@ import { $catalog } from "@/stores/catalog"
 import { $categories } from "@/stores/categories"
 import { $history } from "@/stores/history"
 import { $list } from "@/stores/list"
-import type { User } from "@/stores/types"
+import type { UserProfile } from "@/stores/types"
 import { $user } from "@/stores/user"
 
-const DEFAULT_USER: User = { name: "", photo: "" }
+const DEFAULT_USER: UserProfile = {
+  username: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  avatar: "",
+}
 
 // Clears every store and the persisted localStorage so each test starts from a
 // clean, deterministic slate.

@@ -11,6 +11,7 @@ import { UNCATEGORIZED_ID } from "@/stores/types"
 import { hashId } from "./hash"
 import rawItemsCategories from "./items_categories.json"
 import rawLeoRomanian from "./leo_romanian.json"
+import rawMinimal from "./minimal.json"
 import rawRickMorty from "./rick_morty.json"
 
 export interface RawSeedItem {
@@ -31,6 +32,11 @@ export interface DatasetMeta {
 
 export const DATASETS: DatasetMeta[] = [
   {
+    id: "minimal",
+    name: "Minimal (starter)",
+    file: "minimal.json",
+  },
+  {
     id: "items_categories",
     name: "English groceries",
     file: "items_categories.json",
@@ -39,7 +45,9 @@ export const DATASETS: DatasetMeta[] = [
   { id: "rick_morty", name: "Rick & Morty", file: "rick_morty.json" },
 ]
 
-export const DEFAULT_DATASET_ID = "items_categories"
+// The starter dataset onboarding selects by default — a small, curated subset of
+// the full English groceries catalog so first-time users aren't overwhelmed.
+export const DEFAULT_DATASET_ID = "minimal"
 
 // Per-category purchase frequency for the sample catalog. Single source of truth
 // shared with the app seeder (`src/stores/index.ts`). Only the English set has
@@ -94,6 +102,7 @@ export function buildCategoriesAndCatalog(rows: RawSeedItem[]): {
 }
 
 const DATASET_ROWS: Record<string, RawSeedItem[]> = {
+  minimal: rawMinimal as RawSeedItem[],
   items_categories: rawItemsCategories as RawSeedItem[],
   leo_romanian: rawLeoRomanian as RawSeedItem[],
   rick_morty: rawRickMorty as RawSeedItem[],

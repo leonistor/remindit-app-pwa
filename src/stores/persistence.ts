@@ -20,6 +20,8 @@ export const STORAGE_KEYS = {
   accordionOpen: "remindit:accordion-open",
   theme: "remindit:theme",
   activePalette: "remindit:active-palette",
+  onboarded: "remindit:onboarded",
+  selectedDataset: "remindit:selected-dataset",
 } as const
 
 // JSON-encoded persistent store. The single serialization strategy avoids the

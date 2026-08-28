@@ -1,0 +1,15 @@
+[
+  { "category_name": "household", "name": "toilet paper" },
+  { "category_name": "household", "name": "paper towels" },
+  { "category_name": "household", "name": "dish soap" },
+  { "category_name": "cooking", "name": "eggs" },
+  { "category_name": "cooking", "name": "olive oil" },
+  { "category_name": "cooking", "name": "pasta" },
+  { "category_name": "snacks", "name": "chocolate" },
+  { "category_name": "snacks", "name": "crackers" },
+  { "category_name": "fridge", "name": "milk" },
+  { "category_name": "fridge", "name": "yogurt" },
+  { "category_name": "fridge", "name": "butter" },
+  { "category_name": "pantry", "name": "rice" },
+  { "category_name": "pantry", "name": "canned tomatoes" }
+]

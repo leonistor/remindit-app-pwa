@@ -6,19 +6,25 @@ describe("user store", () => {
   beforeEach(resetStores)
 
   test("updateUser merges a patch without dropping other fields", () => {
-    $user.set({ name: "A", photo: "p" })
-    updateUser({ name: "B" })
+    $user.set({
+      username: "A",
+      firstName: "",
+      lastName: "",
+      email: "",
+      avatar: "p",
+    })
+    updateUser({ firstName: "B" })
 
-    expect($user.get().name).toBe("B")
-    expect($user.get().photo).toBe("p")
+    expect($user.get().firstName).toBe("B")
+    expect($user.get().avatar).toBe("p")
   })
 
-  test("randomUser returns a named user with a local SVG avatar", () => {
+  test("randomUser returns a profile with a local SVG avatar", () => {
     const user = randomUser()
 
-    expect(typeof user.name).toBe("string")
-    expect(user.name.length).toBeGreaterThan(0)
-    expect(typeof user.photo).toBe("string")
-    expect(user.photo.startsWith("data:image/svg+xml")).toBe(true)
+    expect(typeof user.username).toBe("string")
+    expect(user.username.length).toBeGreaterThan(0)
+    expect(typeof user.avatar).toBe("string")
+    expect(user.avatar.startsWith("data:image/svg+xml")).toBe(true)
   })
 })

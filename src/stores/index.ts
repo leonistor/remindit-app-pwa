@@ -17,7 +17,14 @@ import { $history } from "./history"
 import { $list } from "./list"
 import { initTheme } from "./theme"
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
-import { $user, randomUser } from "./user"
+import {
+  isOnboarded,
+  resolveSelectedDataset,
+  setOnboarded,
+  setSelectedDataset,
+} from "./onboarding"
+import type { UserProfile } from "./types"
+import { $user, randomUser, updateUser } from "./user"
 
 // Rsbuild exposes import.meta.env.DEV at build time. Declared here so the
 // project's tsconfig (which does not ship Rsbuild client types) type-checks.
@@ -36,16 +43,22 @@ declare global {
 }
 
 // Seed the catalog + categories on first run (empty persistent stores) from the
-// dataset selected via PUBLIC_DATASET (.env / .env.example); unknown/empty
-// values fall back to DEFAULT_DATASET_ID with a warning. Also assigns random
-// user defaults when none exists. Safe to call multiple times; acts only when
-// stores are empty.
+// dataset selected by the user during onboarding (persisted as `selectedDataset`,
+// falling back to the build-time PUBLIC_DATASET, then the default dataset id).
+// Safe to call multiple times; acts only when stores are empty.
+//
+// When the user is NOT yet onboarded we intentionally do nothing here: the
+// catalog/history/profile are seeded later by `completeOnboarding` once the
+// onboarding flow has picked a dataset and built a profile. This keeps the
+// first-run app lightweight (no catalog) and defers the choice to the user.
 export function initStores(): void {
   // Apply the persisted theme as early as the store layer loads.
   initTheme()
 
+  if (!isOnboarded()) return
+
   if ($catalog.get().length === 0) {
-    const datasetId = resolveDatasetId(import.meta.env?.PUBLIC_DATASET)
+    const datasetId = resolveSelectedDataset()
     const { categories, catalog } = getDataset(datasetId)
     if ($categories.get().length === 0) {
       $categories.set([
@@ -75,9 +88,17 @@ export function initStores(): void {
   ensureUncategorizedExists()
   // Backfill `frequency` onto any category persisted before this field existed.
   normalizeCategoryFrequencies()
+}
 
-  const user = $user.get()
-  if (!user.name) $user.set(randomUser())
+// Finalizes onboarding: persists the chosen profile + dataset, seeds the catalog
+// from the chosen dataset (with a fresh first-run history), and flips the
+// onboarded flag so the app leaves the onboarding gate. Called from the
+// Onboarding view after the user accepts their profile and dataset.
+export function completeOnboarding(profile: UserProfile, datasetId: string): void {
+  updateUser(profile)
+  setSelectedDataset(datasetId)
+  seedFromDataset(datasetId, profile)
+  setOnboarded(true)
 }
 
 // Runtime reset + reseed: wipes all user data (list, history, catalog,
@@ -85,16 +106,23 @@ export function initStores(): void {
 // dataset, regenerating a fresh random user and first-run history. The theme
 // preference (remindit:theme) is intentionally left untouched. Unlike
 // initStores, this always overwrites — it is the user-initiated "reset app"
-// path exposed from Settings, so it does not guard on store emptiness and takes
+// path exposed from Profile, so it does not guard on store emptiness and takes
 // the dataset id explicitly rather than reading the build-time PUBLIC_DATASET.
-export function seedFromDataset(datasetId: string): void {
+//
+// When `profile` is supplied (onboarding or a reset that regenerates the
+// profile via the DiceBear generator), it becomes the new user profile;
+// otherwise a synchronous offline fallback profile is used.
+export function seedFromDataset(
+  datasetId: string,
+  profile?: UserProfile
+): void {
   const resolved = resolveDatasetId(datasetId)
   const { categories, catalog } = getDataset(resolved)
 
   // Wipe user-generated state first so the reseed starts from a clean slate.
   $list.set([])
   $history.set([])
-  $user.set(randomUser())
+  $user.set(profile ?? randomUser())
 
   $categories.set([
     {
@@ -138,6 +166,7 @@ export * from "./catalog"
 export * from "./categories"
 export * from "./history"
 export * from "./list"
+export * from "./onboarding"
 export * from "./palette"
 export * from "./recommender"
 export * from "./selectors"

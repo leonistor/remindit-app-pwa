@@ -14,7 +14,7 @@ import { UNCATEGORIZED_ID } from "@/stores/types"
 
 describe("seed datasets", () => {
   test("registry tracks every dataset with id, name and file", () => {
-    expect(DATASETS).toHaveLength(3)
+    expect(DATASETS).toHaveLength(4)
 
     const ids = DATASETS.map((d) => d.id)
     expect(ids).toContain("items_categories")
@@ -26,7 +26,7 @@ describe("seed datasets", () => {
       expect(d.name.length).toBeGreaterThan(0)
       expect(d.file).toMatch(/\.json$/)
     }
-    expect(DEFAULT_DATASET_ID).toBe("items_categories")
+    expect(DEFAULT_DATASET_ID).toBe("minimal")
   })
 
   test("default dataset keeps stable ids and curated frequencies", () => {

@@ -1,33 +1,35 @@
-// Current user profile. Persisted; random defaults are assigned on first run
-// when no name is present (handled in ./index during seeding).
+// Current user profile. Persisted; random defaults (with a DiceBear avatar) are
+// assigned during onboarding via `completeOnboarding`. `randomUser` here is a
+// synchronous offline fallback (initials SVG) used only when no generated
+// profile is supplied to `seedFromDataset` — the rich DiceBear + username
+// generator lives in `src/lib/profile-generator.ts` and is loaded lazily so it
+// stays out of the main bundle.
 
 import { jsonStore, STORAGE_KEYS } from "./persistence"
-import type { User } from "./types"
+import type { UserProfile } from "./types"
 
-const NAME_POOL = [
-  "Patricia",
-  "Sam",
-  "Alex",
-  "Jordan",
-  "Taylor",
-  "Morgan",
-  "Casey",
-  "Riley",
-]
+const EMPTY_PROFILE: UserProfile = {
+  username: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  avatar: "",
+}
 
-const $user = jsonStore<User>(STORAGE_KEYS.user, { name: "", photo: "" })
+const $user = jsonStore<UserProfile>(STORAGE_KEYS.user, EMPTY_PROFILE)
 
-export function getUser(): User {
+export function getUser(): UserProfile {
   return $user.get()
 }
 
-export function updateUser(patch: Partial<User>): void {
+export function updateUser(patch: Partial<UserProfile>): void {
   $user.set({ ...$user.get(), ...patch })
 }
 
 // Generates a deterministic, offline-friendly avatar as an inline SVG data URI
 // (initials on a colored background). Avoids external network requests so the
-// app stays fully local-first.
+// app stays fully local-first. Used as the fallback when the DiceBear generator
+// is not in play (e.g. a sync reseed without a generated profile).
 export function localAvatar(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   const initials = (
@@ -47,10 +49,17 @@ export function localAvatar(name: string): string {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`
 }
 
-export function randomUser(): User {
-  const name = NAME_POOL[Math.floor(Math.random() * NAME_POOL.length)]
-  const photo = localAvatar(name)
-  return { name, photo }
+// Synchronous fallback profile. Not used for first-run onboarding (that path
+// uses the async DiceBear generator); kept for the reseed-without-profile case.
+export function randomUser(): UserProfile {
+  const username = `user-${Math.random().toString(36).slice(2, 8)}`
+  return {
+    username,
+    firstName: "",
+    lastName: "",
+    email: "",
+    avatar: localAvatar(username),
+  }
 }
 
 export { $user }

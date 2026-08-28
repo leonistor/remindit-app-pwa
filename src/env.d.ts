@@ -18,3 +18,14 @@ declare module "*.md" {
   const content: string
   export default content
 }
+
+/**
+ * DiceBear avatar style definitions are imported as JSON subpaths
+ * (e.g. `@dicebear/styles/cameo.json`). The package does not ship a typed
+ * subpath export for every style, so we declare the wildcard here. The value is
+ * only ever passed to `@dicebear/core`'s `Style` constructor.
+ */
+declare module "@dicebear/styles/*.json" {
+  const definition: unknown
+  export default definition
+}

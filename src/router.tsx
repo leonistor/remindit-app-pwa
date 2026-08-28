@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet, useLocation } from "react-router"
+import { createBrowserRouter, Navigate, Outlet, useLocation } from "react-router"
 import { DrawerProvider } from "./components/drawer-context"
 import { Footer } from "./components/footer"
 import { ItemDetailDrawer } from "./components/item-detail-drawer"
@@ -9,11 +9,20 @@ import CatalogView from "./views/catalog"
 import ChangelogView from "./views/changelog"
 import HelpView from "./views/help"
 import HistoryView from "./views/history"
-import SettingsView from "./views/settings"
+import OnboardingView from "./views/onboarding"
+import ProfileView from "./views/profile"
+import { $onboarded } from "@/stores"
+import { useStore } from "@nanostores/react"
 
 function Layout() {
   const { pathname } = useLocation()
   const isHome = pathname === "/"
+  const onboarded = useStore($onboarded)
+
+  // First-run gate: un-onboarded users are sent to the onboarding flow, which
+  // lives outside this Layout (so the menu never shows). Onboarding redirects
+  // home once complete.
+  if (!onboarded) return <Navigate to="/onboarding" replace />
 
   return (
     <DrawerProvider>
@@ -42,10 +51,12 @@ export const router = createBrowserRouter([
       { index: true, element: <ShoppingPanels /> },
       { path: "/catalog", element: <CatalogView /> },
       { path: "/history", element: <HistoryView /> },
-      { path: "/settings", element: <SettingsView /> },
+      { path: "/profile", element: <ProfileView /> },
       { path: "/about", element: <AboutView /> },
       { path: "/changelog", element: <ChangelogView /> },
       { path: "/help", element: <HelpView /> },
     ],
   },
+  // Onboarding is a top-level route with no menu chrome.
+  { path: "/onboarding", element: <OnboardingView /> },
 ])

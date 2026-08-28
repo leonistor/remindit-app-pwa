@@ -1,10 +1,10 @@
 import {
   Clock,
-  Gear,
   Info,
   List,
   Question,
   Rows,
+  User,
   X,
 } from "@phosphor-icons/react"
 import { useState } from "react"
@@ -23,9 +23,9 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
 
 const navLinks = [
   { to: "/", label: "Shopping list", icon: List },
+  { to: "/profile", label: "Profile", icon: User },
   { to: "/catalog", label: "Catalog", icon: Rows },
   { to: "/history", label: "History", icon: Clock },
-  { to: "/settings", label: "Settings", icon: Gear },
   { to: "/about", label: "About", icon: Info },
   { to: "/help", label: "Help", icon: Question },
 ]

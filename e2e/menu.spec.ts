@@ -5,9 +5,9 @@ import { expect, type Page, test } from "@playwright/test"
 // dropdown (it has its own dedicated link on mobile).
 const DESKTOP_LINKS = [
   "Shopping list",
+  "Profile",
   "Catalog",
   "History",
-  "Settings",
   "About",
   "Help",
 ]
@@ -47,7 +47,7 @@ test.describe("Responsive top menu", () => {
     await page.goto("/")
 
     // Desktop nav is collapsed on mobile
-    for (const name of ["Catalog", "History", "Settings"]) {
+    for (const name of ["Catalog", "History", "Profile"]) {
       await expect(desktopNavLink(page, name)).toBeHidden()
     }
 
