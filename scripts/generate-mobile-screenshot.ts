@@ -79,6 +79,29 @@ async function generateScreenshot(
 
   await page.goto("/")
   await page.waitForLoadState("networkidle")
+
+  // First-run onboarding gates the catalog: the router redirects un-onboarded
+  // users to /onboarding, so we complete it here (with the default starter
+  // catalog) to reach the populated shopping screen.
+  const usernameInput = page.locator("#username")
+  if (await usernameInput.count()) {
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector<HTMLInputElement>("#username")
+        return el !== null && !el.disabled
+      },
+      { timeout: 30_000 }
+    )
+    await page.fill("#firstName", "Demo")
+    await page.fill("#lastName", "User")
+    await page.fill("#username", "demo")
+    await page.getByRole("button", { name: "Next" }).click()
+    await page.getByRole("button", { name: "Finish" }).click()
+    await page.waitForURL((url) => url.pathname === "/")
+    await page.waitForLoadState("networkidle")
+    await page.waitForTimeout(800)
+  }
+
   // Unselected catalog chips carry data-testid="catalog-item" with
   // data-selected="false"; they are the only clickable add targets.
   const itemButtons = page.locator(

@@ -2,6 +2,20 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v3.2.0 — 2026-08-28
+
+_Your first run just got friendlier: a guided onboarding flow sets up your profile and starter catalog, and a new Profile page puts your account front and center._
+
+### ✨ New Features
+
+- **First-Run Onboarding**: New users are walked through a quick setup that rolls a random profile (avatar + handle) and lets you pick a starter catalog before landing on your list
+- **Profile Page**: Settings becomes Profile — manage your name, avatar, starter catalog, color palette, and reset or reseed your data, all from one place
+
+### 🔧 Improvements
+
+- **Menu Avatar**: The "RemindIt" wordmark is now your user avatar, linking straight to Profile (the logo still takes you home)
+- **Bigger Onboarding Roll**: The "roll a new profile" button is larger and more inviting on the welcome screen
+
 ## v3.1.0 — 2026-08-27
 
 _Categorical colors grow up: a managed palette system with a palette picker in Settings, smarter category ordering, and crisper, more accessible color contrast._
