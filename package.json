@@ -12,6 +12,7 @@
     "format": "biome format --write",
     "preview": "rsbuild preview",
     "screenshot:mobile": "bun run build && bun scripts/generate-mobile-screenshot.ts",
+    "screenshot:gallery": "bun run build && bun scripts/generate-mobile-screenshot.ts",
     "generate:palettes": "bun scripts/generate-palettes.ts",
     "test": "rstest",
     "test:watch": "rstest --watch"

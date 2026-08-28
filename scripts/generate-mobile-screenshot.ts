@@ -1,21 +1,24 @@
 /// <reference types="node" />
 import { type ChildProcess, spawn } from "node:child_process"
-import { type Browser, chromium, devices } from "@playwright/test"
+import { mkdirSync, writeFileSync } from "node:fs"
+import { type Browser, type Page, chromium, devices } from "@playwright/test"
 
 const PORT = 5182
 const BASE_URL = `http://127.0.0.1:${PORT}`
-const OUTPUT_PATHS: Record<"light" | "dark", string> = {
+// README image is 550x1196 (~440x956 @1.25x); "mobile-screenshot-*" keep that
+// aspect so the README <img width="300"> scales cleanly.
+const README_OUTPUT: Record<"light" | "dark", string> = {
   light: "public/mobile-screenshot-light.png",
   dark: "public/mobile-screenshot-dark.png",
 }
-// Existing README image is 550x1196 (~440x956 @1.25x); we keep the same aspect
-// so the `width="300"` README img scales cleanly.
-const DEVICE = devices["iPhone 17 Pro Max"]
-// Real iPhone 17 Pro Max logical resolution; Playwright's bundled descriptor
+// Existing iPhone 17 Pro Max logical resolution; Playwright's bundled descriptor
 // reports an incorrect 440x763, so we pin it explicitly.
-const VIEWPORT = { width: 440, height: 956 }
+const MOBILE_VIEWPORT = { width: 440, height: 956 }
+const DESKTOP_VIEWPORT = { width: 1280, height: 720 }
 const MIN_ITEMS = 5
 const MAX_ITEMS = 7
+
+type Theme = "light" | "dark"
 
 // Deterministic when SCREENSHOT_SEED is set, otherwise a fresh random pick.
 function makeRng(seed?: string): () => number {
@@ -56,65 +59,43 @@ function startPreviewServer(): ChildProcess {
   return proc
 }
 
-async function generateScreenshot(
-  browser: Browser,
-  theme: "light" | "dark",
-  outputPath: string
-) {
-  const context = await browser.newContext({
-    ...DEVICE,
-    // Pin the real iPhone 17 Pro Max logical size; Playwright's bundled
-    // descriptor reports an incorrect 440x763 viewport.
-    viewport: VIEWPORT,
-    baseURL: BASE_URL,
-    deviceScaleFactor: 3,
-    isMobile: true,
-    hasTouch: true,
-    // The app defaults to "system" theme, so the browser color-scheme drives
-    // light vs. dark rendering for the screenshot.
-    colorScheme: theme,
-  })
-  const page = await context.newPage()
-  const rng = makeRng(process.env.SCREENSHOT_SEED)
-
-  await page.goto("/")
-  await page.waitForLoadState("networkidle")
-
-  // First-run onboarding gates the catalog: the router redirects un-onboarded
-  // users to /onboarding, so we complete it here (with the default starter
-  // catalog) to reach the populated shopping screen.
-  const usernameInput = page.locator("#username")
-  if (await usernameInput.count()) {
-    await page.waitForFunction(
-      () => {
-        const el = document.querySelector<HTMLInputElement>("#username")
-        return el !== null && !el.disabled
-      },
-      { timeout: 30_000 }
-    )
-    await page.fill("#firstName", "Demo")
-    await page.fill("#lastName", "User")
-    await page.fill("#username", "demo")
-    await page.getByRole("button", { name: "Next" }).click()
-    await page.getByRole("button", { name: "Finish" }).click()
-    await page.waitForURL((url) => url.pathname === "/")
-    await page.waitForLoadState("networkidle")
-    await page.waitForTimeout(800)
+// Capture the current page to every output path (same pixels, multiple names).
+async function capture(page: Page, outputs: string[]) {
+  const buffer = await page.screenshot()
+  for (const path of outputs) {
+    mkdirSync(path.split("/").slice(0, -1).join("/") || ".", { recursive: true })
+    writeFileSync(path, buffer)
+    console.log(`  -> ${path}`)
   }
+}
 
-  // Unselected catalog chips carry data-testid="catalog-item" with
-  // data-selected="false"; they are the only clickable add targets.
+async function completeOnboarding(page: Page) {
+  const usernameInput = page.locator("#username")
+  if (!(await usernameInput.count())) return
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector<HTMLInputElement>("#username")
+      return el !== null && !el.disabled
+    },
+    { timeout: 30_000 }
+  )
+  await page.fill("#firstName", "Demo")
+  await page.fill("#lastName", "User")
+  await page.fill("#username", "demo")
+  await page.getByRole("button", { name: "Next" }).click()
+  await page.getByRole("button", { name: "Finish" }).click()
+  await page.waitForURL((url) => url.pathname === "/")
+  await page.waitForLoadState("networkidle")
+  await page.waitForTimeout(800)
+}
+
+// Build a realistic list so the shopping screen and History page have content.
+async function seedList(page: Page, rng: () => number) {
   const itemButtons = page.locator(
     '[data-testid="catalog-item"]:not([data-selected="true"])'
   )
   await itemButtons.first().waitFor({ state: "visible", timeout: 30_000 })
-  // Let React finish hydrating so the chips are actually interactive.
   await page.waitForTimeout(800)
-
-  // Add 5-7 random items by driving off the live selected count rather than
-  // fixed positions — the layout reflows as items are added, so positional
-  // clicks are flaky. Retry a different chip if a click doesn't register.
-  // Shopping-list chips expose a stable data-testid="shopping-item".
   const selectedCount = () =>
     page.locator('[data-testid="shopping-item"]').count()
   const target = MIN_ITEMS + Math.floor(rng() * (MAX_ITEMS - MIN_ITEMS + 1))
@@ -124,20 +105,75 @@ async function generateScreenshot(
     if (count === 0) break
     const before = await selectedCount()
     const i = Math.floor(rng() * count)
-    await itemButtons
-      .nth(i)
-      .click({ timeout: 8_000 })
-      .catch(() => {})
+    await itemButtons.nth(i).click({ timeout: 8_000 }).catch(() => {})
     await page.waitForTimeout(200)
     if ((await selectedCount()) > before) added++
   }
+  return added
+}
 
-  // Capture the full device viewport (the README <img> already applies the
-  // rounded-corner frame via inline CSS).
-  await page.screenshot({ path: outputPath })
+async function runProfile(
+  browser: Browser,
+  theme: Theme,
+  isMobile: boolean
+) {
+  const context = await browser.newContext({
+    ...(isMobile ? devices["iPhone 17 Pro Max"] : {}),
+    viewport: isMobile ? MOBILE_VIEWPORT : DESKTOP_VIEWPORT,
+    baseURL: BASE_URL,
+    deviceScaleFactor: isMobile ? 3 : 1,
+    isMobile,
+    hasTouch: isMobile,
+    colorScheme: theme,
+  })
+  const page = await context.newPage()
+  const rng = makeRng(process.env.SCREENSHOT_SEED)
+
+  await page.goto("/")
+  await page.waitForLoadState("networkidle")
+  await completeOnboarding(page)
+  const added = await seedList(page, rng)
+
+  const dir = isMobile ? "mobile" : "desktop"
+  const size = isMobile ? "1320x2868" : "1280x720"
   console.log(
-    `Captured ${added} random items -> ${outputPath} (${theme}, ${VIEWPORT.width}x${VIEWPORT.height} @${DEVICE.deviceScaleFactor}x)`
+    `${dir} (${theme}): seeded ${added} items @ ${size}`
   )
+
+  if (isMobile) {
+    // List — also feed the README images (mobile-screenshot-*) from this shot.
+    await capture(page, [
+      `public/screenshot-${dir}-list-${theme}.png`,
+      README_OUTPUT[theme],
+    ])
+    // Catalog (mobile only does light to stay within the 8-shot cap)
+    if (theme === "light") {
+      await page.goto("/catalog")
+      await page.waitForLoadState("networkidle")
+      await page.waitForTimeout(400)
+      await capture(page, [`public/screenshot-${dir}-catalog-${theme}.png`])
+    }
+    // Profile (mobile only does light to stay within the 8-shot cap)
+    if (theme === "light") {
+      await page.goto("/profile")
+      await page.waitForLoadState("networkidle")
+      await page.waitForTimeout(400)
+      await capture(page, [`public/screenshot-${dir}-profile-${theme}.png`])
+    }
+  } else {
+    for (const [path, name] of [
+      ["/", "list"],
+      ["/catalog", "catalog"],
+      ["/profile", "profile"],
+      ["/history", "history"],
+    ] as const) {
+      await page.goto(path)
+      await page.waitForLoadState("networkidle")
+      await page.waitForTimeout(400)
+      await capture(page, [`public/screenshot-${dir}-${name}-${theme}.png`])
+    }
+  }
+
   await page.close()
   await context.close()
 }
@@ -148,9 +184,9 @@ async function main() {
   try {
     await waitForServer(BASE_URL)
     browser = await chromium.launch()
-    for (const theme of ["light", "dark"] as const) {
-      await generateScreenshot(browser, theme, OUTPUT_PATHS[theme])
-    }
+    await runProfile(browser, "light", true)
+    await runProfile(browser, "dark", true)
+    await runProfile(browser, "light", false)
   } finally {
     await browser?.close()
     server.kill("SIGTERM")
