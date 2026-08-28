@@ -1,4 +1,4 @@
-# Tasks
+# Tasks & Ideas
 
 ## Dev
 
@@ -9,10 +9,11 @@
 - [ ] pwa checklist
 - [ ] app update available in pwa -> reload
 - [ ] intl ro
+- [ ] quick search+add floating button
 
 ## Marketing
 
-- [ ] mailing list + testers (arly adopters)
-- [ ] videos la help
+- [ ] mailing list + testers (early adopters)
+- [ ] videos in help
 - [ ] website
 - [ ] feedback capture
