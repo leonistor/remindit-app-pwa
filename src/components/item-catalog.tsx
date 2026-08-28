@@ -38,7 +38,7 @@ export default function ItemCatalog() {
               aria-label="Recommendation colour codes"
               size="icon-sm"
               variant="ghost"
-              className="absolute end-0.5 top-[52.5%] -translate-y-1/2"
+              className="absolute inset-e-0.5 top-[52.5%] -translate-y-1/2"
             >
               <InfoIcon aria-hidden />
             </Button>

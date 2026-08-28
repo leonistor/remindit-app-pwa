@@ -7,7 +7,7 @@
     "build": "rsbuild build",
     "deploy": "bash scripts/deploy.sh",
     "lint": "biome lint",
-    "check": "biome check --write",
+    "check": "biome check --write --unsafe",
     "dev": "rsbuild",
     "format": "biome format --write",
     "preview": "rsbuild preview",

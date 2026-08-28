@@ -17,6 +17,7 @@
     "useIgnoreFile": true
   },
   "formatter": {
+    "enabled": true,
     "indentStyle": "space"
   },
   "javascript": {
@@ -40,6 +41,7 @@
   },
   "linter": {
     "enabled": true,
+    "domains": { "tailwind": "all" },
     "rules": {
       "preset": "recommended",
       "nursery": {
