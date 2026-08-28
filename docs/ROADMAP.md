@@ -2,41 +2,52 @@
 
 This project is a Progressive Web App (PWA) to manage a personal shopping list.
 
-The phases of development are:
+## [x] Phase 1 (version 1)
 
-- Phase 1: basic functionality
-- Phase 2: items recommendations
-- Phase 3: extra functionality: color palettes, item attributes
-- Phase 4: multi-user and sync with server with real-time collaboration
+- [x] The user has `items` to be added to the shopping `list`. The items are organized into `categories`. Adding/removing items from the list is logged into `history`.
+- [x] The use data is: `name`, `photo`. If no data is available, the user is prompted to provide it or accept default values, randomly generated.
+- [x] The main screen shows the list of items, organized by category. Controls are available to add/remove items, and to edit items and categories.
 
-## Phase 1 (v 1.0)
+## [x] Phase 2 (version 2)
 
-The user has `items` to be added to the shopping `list`. The items are organized into `categories`. Adding/removing items from the list is logged into `history`.
+- [x] Based on the user's shopping history, the app provides item recommendations.
+- [x] The algorithm used for recommendations is either a time-series or a collaborative filtering algorithm. TBD.
+- [x] Users will be able to add, edit, and remove items and categories.
+- [x] Display ordering options will be available for categories, items, and the shopping list.
 
-The use data is: `name`, `photo`. If no data is available, the user is prompted to provide it or accept default values, randomly generated.
+## [x] Phase 3 (version 3)
 
-The main screen shows the list of items, organized by category. Controls are available to add/remove items, and to edit items and categories.
+- [x] Categorical color palettes will be available to the user to choose from. They will be used to color-code items in the list.
+- [x] a basic user profile
 
-## Phase 2 (v 2.0)
+## [ ] Phase 4 (version 4)
 
-Based on the user's shopping history, the app provides item recommendations.
+- [ ] Items might have attributes associated with them, such as photo, quantity, or price.
+- [ ] Inspect history
+- [ ] app updates in browser
+- [ ] quick search+add item floating button
 
-The algorithm used for recommendations is either a time-series or a collaborative filtering algorithm. TBD.
+## [ ] Phase 5 (version 5)
 
-Users will be able to add, edit, and remove items and categories.
+- [ ] Help content: text, videos; update onboarding
+- [ ] add license
+- [ ] automate screenshots in PWA manifest
+- [ ] PWA checklist with recommended best practices
 
-Display ordering options will be available for categories, items, and the shopping list.
+## [ ] Phase 6 (version 6)
 
-## Phase 3 (v 3.0)
+- [ ] app website
+- [ ] community of early adopters and feedback capture
 
-Categorical color palettes will be available to the user to choose from. They will be used to color-code items in the list.
+## [ ] Phase 7 (version 7)
 
-Items might have attributes associated with them, such as photo, quantity, or price.
+- [ ] Multi-user support will be added, allowing multiple users to share the same list and collaborate in real-time.
+- [ ] Sync with the server will be implemented to allow the list to be saved and loaded across devices.
+- [ ] The primary use case will be family shopping lists, where multiple users can share and collaborate on a single list.
 
-## Phase 4 (v 4.0)
+---
 
-Multi-user support will be added, allowing multiple users to share the same list and collaborate in real-time.
+# Whishlist
 
-Sync with the server will be implemented to allow the list to be saved and loaded across devices.
-
-The primary use case will be family shopping lists, where multiple users can share and collaborate on a single list.
+- [ ] multi-language support
+- [ ] native application with notifications and live activities/updates

@@ -6,6 +6,7 @@ Release a new version of the app:
 
 - verify git status, including untracked files
 - verify with lint, tests and build
+- update screenshots
 - check current version in package.json
 - ask for new version number, suggest a minor version bump
 - use the `changelog-generator` skill to update the CHANGELOG.md
