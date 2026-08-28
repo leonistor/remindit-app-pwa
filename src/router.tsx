@@ -1,6 +1,8 @@
 import { createBrowserRouter, Navigate, Outlet, useLocation } from "react-router"
+import { useEffect } from "react"
 import { DrawerProvider } from "./components/drawer-context"
 import { Footer } from "./components/footer"
+import { InstallBanner } from "./components/install-banner"
 import { ItemDetailDrawer } from "./components/item-detail-drawer"
 import Menu from "./components/menu"
 import ShoppingPanels from "./components/shopping-panels"
@@ -11,13 +13,18 @@ import HelpView from "./views/help"
 import HistoryView from "./views/history"
 import OnboardingView from "./views/onboarding"
 import ProfileView from "./views/profile"
-import { $onboarded } from "@/stores"
+import { $onboarded, initPwaInstall } from "@/stores"
 import { useStore } from "@nanostores/react"
 
 function Layout() {
   const { pathname } = useLocation()
   const isHome = pathname === "/"
   const onboarded = useStore($onboarded)
+
+  // Wire the PWA install-prompt listener once the app shell mounts.
+  useEffect(() => {
+    initPwaInstall()
+  }, [])
 
   // First-run gate: un-onboarded users are sent to the onboarding flow, which
   // lives outside this Layout (so the menu never shows). Onboarding redirects
@@ -40,6 +47,7 @@ function Layout() {
         </div>
       </div>
       <ItemDetailDrawer />
+      <InstallBanner />
     </DrawerProvider>
   )
 }

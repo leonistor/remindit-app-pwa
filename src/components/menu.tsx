@@ -1,5 +1,6 @@
 import {
   Clock,
+  DownloadSimple,
   Info,
   List,
   Question,
@@ -18,8 +19,9 @@ import {
   MenuTrigger,
 } from "@/components/ui/menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { $user } from "@/stores"
+import { installApp, $user, usePwaInstall } from "@/stores"
 import { ThemeToggle } from "./theme-toggle"
+import { InstallInstructionsDialog } from "./install-instructions-dialog"
 
 const avatarInitials = (user: {
   firstName: string
@@ -72,6 +74,15 @@ const MOBILE_NAV_LINKS = navLinks.filter((l) => l.to !== "/")
 
 const Menu = () => {
   const [open, setOpen] = useState(false)
+  const [installOpen, setInstallOpen] = useState(false)
+  const { canInstall, installed, platform } = usePwaInstall()
+
+  const handleInstall = () => {
+    setOpen(false)
+    // Chromium offers a native prompt; everyone else gets manual steps.
+    if (canInstall) void installApp()
+    else setInstallOpen(true)
+  }
 
   return (
     <div className="flex h-16 shrink-0 flex-row items-center gap-2 rounded-md border bg-accent px-4">
@@ -122,10 +133,22 @@ const Menu = () => {
                 </NavLink>
               </MenuItem>
             ))}
+            {!installed && (
+              <MenuItem value="install-app" onClick={handleInstall}>
+                <DownloadSimple size={16} />
+                Install Remindit
+              </MenuItem>
+            )}
           </MenuContent>
         </MenuRoot>
         <ThemeToggle />
       </div>
+
+      <InstallInstructionsDialog
+        open={installOpen}
+        onOpenChange={setInstallOpen}
+        platform={platform}
+      />
     </div>
   )
 }
