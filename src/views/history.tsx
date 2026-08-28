@@ -99,26 +99,32 @@ const HistoryView = () => {
           they&rsquo;ll show up here.
         </p>
       ) : (
-        groups.map(({ key, events }) => (
-          <section key={key} className="flex flex-col gap-2">
-            <h2 className="font-semibold text-lg">{formatDayHeading(key)}</h2>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Item</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>When</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {events.map((event) => (
-                  <HistoryRow key={event.id} event={event} />
-                ))}
-              </TableBody>
-            </Table>
-          </section>
-        ))
+        <>
+          {groups.slice(0, 7).map(({ key, events }) => (
+            <section key={key} className="flex flex-col gap-2">
+              <h2 className="font-semibold text-lg">{formatDayHeading(key)}</h2>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Item</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>When</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {events.map((event) => (
+                    <HistoryRow key={event.id} event={event} />
+                  ))}
+                </TableBody>
+              </Table>
+            </section>
+          ))}
+
+          <p className="text-muted-foreground text-sm">
+            Full history display and search will be implemented soon.
+          </p>
+        </>
       )}
     </div>
   )
