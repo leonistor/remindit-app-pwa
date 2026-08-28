@@ -24,14 +24,52 @@ const AboutView = () => (
     <section className="flex flex-col gap-2">
       <h2 className="font-semibold text-lg">What&rsquo;s included today</h2>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
-        <li>Organize items into categories and browse them in the catalog.</li>
         <li>
-          Build your list by tapping items; tap again to remove them. Adds and
-          removes are kept in your history.
+          <strong>First-run onboarding</strong>: a quick 2-step setup rolls a
+          random profile (avatar + handle) and lets you pick a starter catalog
+          before landing on your list.
         </li>
         <li>
-          Smart recommendations: colored pips mark items that are overdue or due
-          soon based on how often you buy them.
+          <strong>Profile</strong>: manage your name and username, switch your
+          starter catalog, pick a color palette, and reset or reseed your data —
+          all from one place (tap your avatar in the menu).
+        </li>
+        <li>
+          Build your list by tapping items; tap again to remove them. Your list
+          is grouped by category and you can check items off as you shop.
+        </li>
+        <li>
+          <strong>Catalog</strong>: browse and search your items, rename them in
+          place, and add or delete items and categories in collapsible sections
+          sorted by how often you reach for them.
+        </li>
+        <li>
+          <strong>Smart recommendations</strong>: colored pips mark items that
+          are overdue or due soon based on how often you buy them, and learn
+          from your history the more you shop.
+        </li>
+        <li>
+          <strong>Item detail</strong>: tap an item to open a detail view with
+          more information at a glance.
+        </li>
+        <li>
+          <strong>Color palettes</strong>: choose a categorical palette (Van
+          Gogh is the default) with a live preview; it colors categories and
+          items consistently across the app.
+        </li>
+        <li>
+          <strong>Ordering controls</strong>: toggle category grouping and sort
+          your list by category/name or most recently added — your choice is
+          remembered.
+        </li>
+        <li>
+          <strong>Theme</strong>: pick dark, light, or system and your preference
+          is saved.
+        </li>
+        <li>
+          <strong>Install as an app</strong>: add Remindit to your home screen
+          and use it offline like a native app, with an in-app changelog to track
+          what&rsquo;s new.
         </li>
       </ul>
     </section>
@@ -40,8 +78,8 @@ const AboutView = () => (
       <h2 className="font-semibold text-lg">What&rsquo;s coming</h2>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
         <li>
-          Phase 3 — category color palettes and item attributes (photo,
-          quantity, price).
+          Item attributes (photo, quantity, price) — the remaining piece of
+          Phase 3.
         </li>
         <li>Phase 4 — multi-user lists with real-time sync across devices.</li>
       </ul>

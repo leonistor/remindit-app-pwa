@@ -1,3 +1,4 @@
+import { Link } from "react-router"
 import { RECOMMENDATION_TIERS } from "@/lib/recommendation-tiers"
 
 const HelpView = () => (
@@ -6,6 +7,27 @@ const HelpView = () => (
     <p className="text-muted-foreground">
       Quick tips to get the most out of RemindIt.
     </p>
+
+    <section className="flex flex-col gap-2">
+      <h2 className="font-semibold text-lg">Get started</h2>
+      <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
+        <li>
+          The first time you open RemindIt you&rsquo;re walked through a quick
+          setup: a random profile is rolled for you (roll again for a different
+          one) and you pick a starter catalog before landing on your list.
+        </li>
+        <li>
+          Your user avatar sits in the menu and links straight to your{" "}
+          <Link
+            className="text-primary underline underline-offset-4 hover:opacity-90"
+            to="/profile"
+          >
+            Profile
+          </Link>{" "}
+          (the round logo still takes you home).
+        </li>
+      </ul>
+    </section>
 
     <section className="flex flex-col gap-2">
       <h2 className="font-semibold text-lg">Build your list</h2>
@@ -21,6 +43,31 @@ const HelpView = () => (
         <li>
           Your list is grouped by category. Check items off as you put them in
           the cart.
+        </li>
+      </ul>
+    </section>
+
+    <section className="flex flex-col gap-2">
+      <h2 className="font-semibold text-lg">Personalize</h2>
+      <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
+        <li>
+          Change your name and username anytime from{" "}
+          <Link
+            className="text-primary underline underline-offset-4 hover:opacity-90"
+            to="/profile"
+          >
+            Profile
+          </Link>
+          .
+        </li>
+        <li>
+          Choose your categorical <strong>color palette</strong> in Profile — a
+          live preview shows each palette&rsquo;s colors and your pick applies
+          everywhere.
+        </li>
+        <li>
+          Switch or reseed your catalog from Profile. Avatar editing is coming
+          later.
         </li>
       </ul>
     </section>
@@ -60,8 +107,14 @@ const HelpView = () => (
           uploaded yet.
         </li>
         <li>
-          Set or change your name and photo anytime in <strong>Settings</strong>{" "}
-          (coming soon).
+          Reset or reseed all your local data from{" "}
+          <Link
+            className="text-primary underline underline-offset-4 hover:opacity-90"
+            to="/profile"
+          >
+            Profile
+          </Link>
+          — your profile and theme preference are kept.
         </li>
       </ul>
     </section>
