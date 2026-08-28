@@ -1,5 +1,5 @@
 ---
-description: Release coverage
+description: Release new version
 ---
 
 Release a new version of the app:
