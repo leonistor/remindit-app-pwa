@@ -95,12 +95,12 @@ const OnboardingView = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  size="icon-sm"
+                  size="icon-xl"
                   onClick={roll}
                   disabled={busy}
                   aria-label="Roll a new random name and avatar"
                 >
-                  <DiceFive size={18} />
+                  <DiceFive size={28} />
                 </Button>
                 <span className="text-muted-foreground text-xs">
                   Not feeling it? Roll again.

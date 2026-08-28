@@ -134,6 +134,10 @@ Dialog, Listbox (PaletteChooser), Badge; Phosphor `DiceFive`, `User`, `Rows`.
 - Local feature branch `feature/phase4-onboarding-profile`; commit there; no PR/push.
 
 ## Follow-ups (out of scope)
-- Avatar update in Profile (re-roll).
-- Future onboarding steps (feature overview).
-- Multi-user/sync (rest of Phase 4).
+- Bigger dice-rolling button in onboarding step 1 — make the roll action the
+  clear hero of the profile step (larger icon button, no text label).
+- Top-menu avatar — replace the "RemindIt" wordmark on the left with the
+  signed-in user's avatar (Shark `Avatar`, `$user.avatar`), linked to
+  `/profile`; keep the round logo as the home (`/`) link.
+- The rest of Phase 4 (multi-user / server sync + real-time collaboration) stays
+  out of scope.

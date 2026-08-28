@@ -4,9 +4,9 @@ import App from "../src/App"
 import { setOnboarded } from "../src/stores"
 
 test("renders the main page", () => {
-  // A returning (onboarded) user lands on the main shopping view.
+  // A returning (onboarded) user lands on the main shopping view with the
+  // profile avatar (replacing the old wordmark) in the top menu.
   setOnboarded(true)
-  const testMessage = "RemindIt"
   render(<App />)
-  expect(screen.getByText(testMessage)).toBeInTheDocument()
+  expect(screen.getByLabelText("Your profile")).toBeInTheDocument()
 })
