@@ -3,6 +3,7 @@ import {
   DownloadSimple,
   Info,
   List,
+  Plus,
   Question,
   Rows,
   User,
@@ -16,11 +17,12 @@ import {
   MenuContent,
   MenuItem,
   Menu as MenuRoot,
+  MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { installApp, $user, usePwaInstall } from "@/stores"
-import { ThemeToggle } from "./theme-toggle"
+import { ThemeMenu } from "./theme-menu"
 import { InstallInstructionsDialog } from "./install-instructions-dialog"
 
 const avatarInitials = (user: {
@@ -84,6 +86,11 @@ const Menu = () => {
     else setInstallOpen(true)
   }
 
+  // Placeholder for the quick-add action; the real behavior is decided later.
+  const handleAddClick = () => {
+    /* TODO: quick-add to shopping list */
+  }
+
   return (
     <div className="flex h-16 shrink-0 flex-row items-center gap-2 rounded-md border bg-accent px-4">
       {/* Round logo links home; the wordmark is replaced by the user avatar
@@ -139,9 +146,18 @@ const Menu = () => {
                 Install Remindit
               </MenuItem>
             )}
+            <MenuSeparator />
+            <ThemeMenu />
           </MenuContent>
         </MenuRoot>
-        <ThemeToggle />
+        <Button
+          variant="default"
+          size="icon-md"
+          aria-label="Add to shopping list"
+          onClick={handleAddClick}
+        >
+          <Plus size={18} aria-hidden />
+        </Button>
       </div>
 
       <InstallInstructionsDialog

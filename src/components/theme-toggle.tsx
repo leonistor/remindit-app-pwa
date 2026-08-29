@@ -8,14 +8,17 @@ import {
 import { Button } from "@/components/ui/custom/button"
 import { $theme, type ThemeMode } from "@/stores/theme"
 
-const OPTIONS: Record<ThemeMode, { label: string; Icon: Icon }> = {
+export const OPTIONS: Record<ThemeMode, { label: string; Icon: Icon }> = {
   light: { label: "Light", Icon: SunIcon },
   dark: { label: "Dark", Icon: MoonIcon },
   system: { label: "System", Icon: MonitorIcon },
 }
 
 // Cycle order when clicking the toggle.
-const ORDER: ThemeMode[] = ["light", "dark", "system"]
+export const ORDER: ThemeMode[] = ["light", "dark", "system"]
+
+// Sets an explicit theme mode (used by the menu picker).
+export const setTheme = (mode: ThemeMode) => $theme.set(mode)
 
 export function ThemeToggle() {
   const mode = useStore($theme)
