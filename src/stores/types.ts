@@ -63,6 +63,8 @@ export interface HistoryEvent {
   itemId: string
   itemName: string
   categoryId: string
+  /** Snapshot of the category name at log time (categories may be renamed). */
+  categoryName: string
   /** Epoch millis of the event. */
   timestamp: number
 }
