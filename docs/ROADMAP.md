@@ -42,6 +42,11 @@ This project is a Progressive Web App (PWA) to manage a personal shopping list.
 - [ ] Sync with the server will be implemented to allow the list to be saved and loaded across devices.
 - [ ] The primary use case will be family shopping lists, where multiple users can share and collaborate on a single list.
 
+## [ ] Version 7
+
+- [ ] basic AI features
+- [ ] integration with LLMs (MCP, skills)
+
 ---
 
 # Whishlist
