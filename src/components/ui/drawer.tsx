@@ -219,6 +219,7 @@ const drawerContentVariants = tv({
     "data-[swipe-direction=right]:after:inset-block-0 data-[swipe-direction=right]:after:inset-inline-auto data-[swipe-direction=right]:after:inset-s-full data-[swipe-direction=right]:after:h-auto data-[swipe-direction=right]:after:w-(--bleed)",
     "data-[swipe-direction=right]:data-[state=open]:animate-drawer-slide-in-right",
     "data-[swipe-direction=right]:data-[state=closed]:animate-drawer-slide-out-right",
+    "pb-[env(safe-area-inset-bottom,0px)]",
   ],
   variants: {
     variant: {

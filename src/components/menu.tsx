@@ -89,7 +89,7 @@ const Menu = () => {
   }
 
   return (
-    <div className="flex h-16 shrink-0 flex-row items-center gap-2 rounded-md border bg-accent px-4">
+    <div className="flex min-h-16 shrink-0 flex-row items-center gap-2 rounded-md border bg-accent px-4 pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-top,0px)]">
       {/* Round logo links home; the wordmark is replaced by the user avatar
           (links to Profile) per the Phase 4 plan. */}
       <NavLink

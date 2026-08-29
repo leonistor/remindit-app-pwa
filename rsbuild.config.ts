@@ -51,6 +51,22 @@ export default defineConfig({
       webAppManifest: {
         content: WEB_APP_MANIFEST,
       },
+      sw: {
+        mode: "generateSw",
+        workboxOptions: {
+          clientsClaim: true,
+          cleanupOutdatedCaches: true,
+          // SPA deep links must resolve to the cached app shell when offline
+          // instead of failing with a browser error page.
+          // NOTE: navigateFallback is implemented via createHandlerBoundToURL,
+          // which throws at SW evaluation time if the URL is NOT in the
+          // precache. The dev server's precache only contains the Workbox
+          // suppression script, so we restrict this to production builds.
+          ...(!process.argv.includes("dev")
+            ? { navigateFallback: "/index.html" }
+            : {}),
+        },
+      },
     }),
   ],
 })

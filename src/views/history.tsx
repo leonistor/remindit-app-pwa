@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useCategoryPalette } from "@/hooks/use-category-palette"
+import { BackButton } from "@/components/back-button"
 import { $categories, $history, UNCATEGORIZED_NAME } from "@/stores"
 import type { HistoryEvent } from "@/stores/types"
 
@@ -91,7 +92,10 @@ const HistoryView = () => {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-8 py-8">
-      <h1 className="font-bold text-2xl">History</h1>
+      <div className="flex items-center gap-2">
+        <BackButton />
+        <h1 className="font-bold text-2xl">History</h1>
+      </div>
 
       {groups.length === 0 ? (
         <p className="text-muted-foreground">

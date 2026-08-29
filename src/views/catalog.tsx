@@ -5,6 +5,7 @@ import { CategoryDialog } from "@/components/catalog/category-dialog"
 import { CategorySection } from "@/components/catalog/category-section"
 import { ItemDialog } from "@/components/catalog/item-dialog"
 import { Button } from "@/components/ui/custom/button"
+import { BackButton } from "@/components/back-button"
 import { $catalogByCategoryAll } from "@/stores"
 
 const CatalogView = () => {
@@ -25,7 +26,10 @@ const CatalogView = () => {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="font-bold text-2xl">Catalog</h1>
+        <div className="flex items-center gap-2">
+          <BackButton />
+          <h1 className="font-bold text-2xl">Catalog</h1>
+        </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => openAddItem()}>
             <PlusIcon />

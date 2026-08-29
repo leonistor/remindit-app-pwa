@@ -11,6 +11,7 @@ import { DrawerProvider } from "./components/drawer-context"
 import { Footer } from "./components/footer"
 import { InstallBanner } from "./components/install-banner"
 import { ItemDetailDrawer } from "./components/item-detail-drawer"
+import { UpdatePrompt } from "./components/update-prompt"
 import Menu from "./components/menu"
 import ShoppingPanels from "./components/shopping-panels"
 import AboutView from "./views/about"
@@ -53,6 +54,7 @@ function Layout() {
       </div>
       <ItemDetailDrawer />
       <InstallBanner />
+      <UpdatePrompt />
     </DrawerProvider>
   )
 }

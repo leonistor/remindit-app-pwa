@@ -1,9 +1,13 @@
 import { Link } from "react-router"
+import { BackButton } from "@/components/back-button"
 import { RECOMMENDATION_TIERS } from "@/lib/recommendation-tiers"
 
 const HelpView = () => (
   <div className="mx-auto flex max-w-2xl flex-col gap-6 py-8">
-    <h1 className="font-bold text-2xl">Help</h1>
+    <div className="flex items-center gap-2">
+      <BackButton />
+      <h1 className="font-bold text-2xl">Help</h1>
+    </div>
     <p className="text-muted-foreground">
       Quick tips to get the most out of RemindIt.
     </p>

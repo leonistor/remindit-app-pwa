@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { PaletteChooser } from "@/components/palette-chooser"
+import { BackButton } from "@/components/back-button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/custom/button"
 import {
@@ -72,7 +73,10 @@ const ProfileView = () => {
 
   return (
     <div className="flex flex-col items-center gap-6 py-8">
-      <h1 className="font-bold text-2xl">Profile</h1>
+      <div className="flex items-center gap-2">
+        <BackButton />
+        <h1 className="font-bold text-2xl">Profile</h1>
+      </div>
 
       <Card className="w-full max-w-xl">
         <CardHeader
