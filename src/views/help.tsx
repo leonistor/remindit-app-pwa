@@ -73,7 +73,7 @@ const HelpView = () => (
     </section>
 
     <section className="flex flex-col gap-2">
-      <h2 className="font-semibold text-lg">Understand recommendations</h2>
+      <h2 className="font-semibold text-lg">Recommendations</h2>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
         <li>
           <span
@@ -95,6 +95,49 @@ const HelpView = () => (
         <li>
           Recommendations learn from your history, so they improve the more you
           shop.
+        </li>
+      </ul>
+    </section>
+
+    <section className="flex flex-col gap-2">
+      <h2 className="font-semibold text-lg">How recommendations work</h2>
+      <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
+        <li>
+          RemindIt learns your shopping rhythm by remembering when you add each
+          item, then estimates how often you usually buy it.
+        </li>
+        <li>
+          It nudges you when something is due based on that rhythm — the
+          suggestions grow more confident the more you shop, and it stays quiet
+          about things you rarely buy or already have on your list.
+        </li>
+      </ul>
+    </section>
+
+    <section className="flex flex-col gap-2">
+      <h2 className="font-semibold text-lg">About your sample data</h2>
+      <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
+        <li>
+          On first setup RemindIt seeds your list with a starter catalog and a
+          simulated shopping history spanning a few months, so recommendations
+          start working right away instead of waiting for you to build up real
+          history.
+        </li>
+        <li>
+          That sample history is generated realistically: each item reappears at
+          roughly its category&rsquo;s frequency with natural variation, giving a
+          believable mix of overdue, due-soon, and frequent items.
+        </li>
+        <li>
+          It&rsquo;s just local sample data. Reset or reseed anytime from{" "}
+          <Link
+            className="text-primary underline underline-offset-4 hover:opacity-90"
+            to="/profile"
+          >
+            Profile
+          </Link>{" "}
+          to swap the catalog or generate a fresh simulated history — your
+          profile and theme preference are kept.
         </li>
       </ul>
     </section>
