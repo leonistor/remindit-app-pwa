@@ -1,11 +1,11 @@
+import { useStore } from "@nanostores/react"
 import { Rows } from "@phosphor-icons/react"
 import { useEffect, useState } from "react"
 import { Link } from "react-router"
+import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { PaletteChooser } from "@/components/palette-chooser"
-import { Button } from "@/components/ui/custom/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Field, FieldLabel } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/custom/button"
 import {
   Dialog,
   DialogBody,
@@ -15,12 +15,13 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
 import {
   SegmentGroup,
   SegmentGroupItem,
   SegmentGroupItemText,
 } from "@/components/ui/segment-group"
-import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import {
   $user,
   getUser,
@@ -28,7 +29,6 @@ import {
   setSelectedDataset,
   updateUser,
 } from "@/stores"
-import { useStore } from "@nanostores/react"
 
 // First-run dataset (build-time) used as the default picker selection.
 const INITIAL_DATASET = import.meta.env.PUBLIC_DATASET ?? DEFAULT_DATASET_ID

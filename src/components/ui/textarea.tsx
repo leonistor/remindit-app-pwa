@@ -1,13 +1,13 @@
-"use client";
+"use client"
 
-import { Field as ArkField } from "@ark-ui/react/field";
-import type React from "react";
-import { cn } from "@/lib/utils";
+import { Field as ArkField } from "@ark-ui/react/field"
+import type React from "react"
+import { cn } from "@/lib/utils"
 
 export const Textarea = (
   props: React.ComponentProps<typeof ArkField.Textarea>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkField.Textarea
@@ -32,5 +32,5 @@ export const Textarea = (
       data-slot="textarea"
       {...rest}
     />
-  );
-};
+  )
+}

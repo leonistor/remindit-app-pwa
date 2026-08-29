@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import { ark } from "@ark-ui/react/factory";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { ark } from "@ark-ui/react/factory"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
 
 const inpuGroupVariants = tv({
   base: [
@@ -37,14 +37,14 @@ const inpuGroupVariants = tv({
   defaultVariants: {
     size: "md",
   },
-});
+})
 
 export interface InputGroupProps
   extends React.ComponentProps<typeof ark.div>,
     VariantProps<typeof inpuGroupVariants> {}
 
 export const InputGroup = (props: InputGroupProps) => {
-  const { size = "md", className, ...rest } = props;
+  const { size = "md", className, ...rest } = props
 
   return (
     <ark.div
@@ -54,8 +54,8 @@ export const InputGroup = (props: InputGroupProps) => {
       role="group"
       {...rest}
     />
-  );
-};
+  )
+}
 
 const inputGroupAddonVariants = tv({
   base: [
@@ -95,14 +95,14 @@ const inputGroupAddonVariants = tv({
   defaultVariants: {
     align: "inline-start",
   },
-});
+})
 
 interface InputGroupAddonProps
   extends React.ComponentProps<typeof ark.div>,
     VariantProps<typeof inputGroupAddonVariants> {}
 
 export const InputGroupAddon = (props: InputGroupAddonProps) => {
-  const { className, align = "inline-start", ...rest } = props;
+  const { className, align = "inline-start", ...rest } = props
 
   return (
     <ark.div
@@ -111,15 +111,15 @@ export const InputGroupAddon = (props: InputGroupAddonProps) => {
       data-slot="input-group-addon"
       onClick={(e) => {
         if ((e.target as HTMLElement).closest("button")) {
-          return;
+          return
         }
-        e.currentTarget.parentElement?.querySelector("input")?.focus();
+        e.currentTarget.parentElement?.querySelector("input")?.focus()
       }}
       role="group"
       {...rest}
     />
-  );
-};
+  )
+}
 
 const inputGroupButtonVariants = tv({
   base: [
@@ -152,7 +152,7 @@ const inputGroupButtonVariants = tv({
   defaultVariants: {
     size: "xs",
   },
-});
+})
 
 interface InputGroupButtonProps
   extends Omit<React.ComponentProps<typeof Button>, "size">,
@@ -165,7 +165,7 @@ export const InputGroupButton = (props: InputGroupButtonProps) => {
     variant = "ghost",
     size = "xs",
     ...rest
-  } = props;
+  } = props
 
   return (
     <Button
@@ -176,13 +176,13 @@ export const InputGroupButton = (props: InputGroupButtonProps) => {
       variant={variant}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const InputGroupText = (
   props: React.ComponentProps<typeof ark.span>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.span
@@ -195,11 +195,11 @@ export const InputGroupText = (
       data-slot="input-group-text"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const InputGroupInput = (props: React.ComponentProps<typeof Input>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <Input
@@ -215,13 +215,13 @@ export const InputGroupInput = (props: React.ComponentProps<typeof Input>) => {
       data-slot="input-group-control"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const InputGroupTextarea = (
   props: React.ComponentProps<typeof Textarea>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <Textarea
@@ -238,5 +238,5 @@ export const InputGroupTextarea = (
       data-slot="input-group-control"
       {...rest}
     />
-  );
-};
+  )
+}

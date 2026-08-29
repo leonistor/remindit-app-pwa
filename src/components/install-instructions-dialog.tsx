@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/custom/button"
 import {
   Dialog,
   DialogBody,
@@ -6,7 +7,6 @@ import {
   DialogFooter,
   DialogHeader,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/custom/button"
 import type { ManualInstallPlatform } from "@/stores/pwa-install"
 
 const INSTRUCTIONS: Record<
@@ -16,9 +16,9 @@ const INSTRUCTIONS: Record<
   ios: {
     title: "Add to your iPhone or iPad",
     steps: [
-      'Tap the Share button (the square with an arrow) in Safari.',
+      "Tap the Share button (the square with an arrow) in Safari.",
       'Scroll down and tap "Add to Home Screen".',
-      'Tap Add in the top-right to confirm.',
+      "Tap Add in the top-right to confirm.",
     ],
   },
   "mac-safari": {
@@ -31,7 +31,7 @@ const INSTRUCTIONS: Record<
   "android-nonchrome": {
     title: "Add to your Android device",
     steps: [
-      'Open your browser menu (the three-dot or three-line icon).',
+      "Open your browser menu (the three-dot or three-line icon).",
       'Tap "Install app" or "Add to Home screen".',
       "Confirm to install Remindit.",
     ],
@@ -39,7 +39,7 @@ const INSTRUCTIONS: Record<
   other: {
     title: "Install Remindit",
     steps: [
-      'Open your browser menu (usually top-right).',
+      "Open your browser menu (usually top-right).",
       'Choose "Install Remindit" or "Add to Home screen".',
       "Confirm to install.",
     ],
@@ -62,10 +62,7 @@ export function InstallInstructionsDialog({
   const { title, steps } = INSTRUCTIONS[platform]
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(details) => onOpenChange(details.open)}
-    >
+    <Dialog open={open} onOpenChange={(details) => onOpenChange(details.open)}>
       <DialogContent>
         <DialogHeader
           description="Remindit works best installed, with offline access from your home screen or dock."

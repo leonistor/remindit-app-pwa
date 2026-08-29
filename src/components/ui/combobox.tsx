@@ -1,27 +1,27 @@
-"use client";
+"use client"
 
 import {
   Combobox as ArkCombobox,
   type ComboboxList as ArkComboboxList,
   useComboboxContext as useArkComboboxContext,
-} from "@ark-ui/react/combobox";
-import { Portal } from "@ark-ui/react/portal";
-import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import type { inputVariants } from "@/components/ui/input";
+} from "@ark-ui/react/combobox"
+import { Portal } from "@ark-ui/react/portal"
+import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { Button } from "@/components/ui/button"
+import type { inputVariants } from "@/components/ui/input"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "@/components/ui/input-group";
+} from "@/components/ui/input-group"
+import { cn } from "@/lib/utils"
 
-export const useCombobox = useArkComboboxContext;
+export const useCombobox = useArkComboboxContext
 
-export const ComboboxContext = ArkCombobox.Context;
+export const ComboboxContext = ArkCombobox.Context
 
 export const Combobox: ArkCombobox.RootComponent = (props) => {
   const {
@@ -29,7 +29,7 @@ export const Combobox: ArkCombobox.RootComponent = (props) => {
     lazyMount = true,
     unmountOnExit = true,
     ...rest
-  } = props;
+  } = props
 
   return (
     <ArkCombobox.Root
@@ -39,13 +39,13 @@ export const Combobox: ArkCombobox.RootComponent = (props) => {
       unmountOnExit={unmountOnExit}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const ComboboxControl = (
   props: React.ComponentProps<typeof ArkCombobox.Control>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkCombobox.Control
@@ -57,8 +57,8 @@ export const ComboboxControl = (
       data-slot="combobox-control"
       {...rest}
     />
-  );
-};
+  )
+}
 
 interface ComboboxInputProps
   extends Omit<React.ComponentProps<typeof ArkCombobox.Input>, "size">,
@@ -68,20 +68,20 @@ interface ComboboxInputProps
    *
    * @default false
    */
-  disabled?: boolean;
+  disabled?: boolean
 
   /**
    * Whether to show the clear button.
    *
    * @default false
    */
-  showClear?: boolean;
+  showClear?: boolean
   /**
    * Whether to show the trigger button.
    *
    * @default true
    */
-  showTrigger?: boolean;
+  showTrigger?: boolean
 }
 
 export const ComboboxInput = (props: ComboboxInputProps) => {
@@ -92,32 +92,43 @@ export const ComboboxInput = (props: ComboboxInputProps) => {
     className,
     children,
     ...rest
-  } = props;
+  } = props
 
-  const { inputValue } = useCombobox();
+  const { inputValue } = useCombobox()
 
   return (
     <ComboboxControl data-size={size}>
       <InputGroup className={cn(className)} size={size}>
         {children}
-        <ArkCombobox.Input render={<InputGroupInput {...rest} />}></ArkCombobox.Input>
+        <ArkCombobox.Input
+          render={<InputGroupInput {...rest} />}
+        ></ArkCombobox.Input>
         <InputGroupAddon align="inline-end">
           {showTrigger && (
-            <InputGroupButton className="group-has-data-[slot=combobox-clear]/input-group:hidden" size="icon-xs" variant="ghost" render={<ComboboxTrigger />}></InputGroupButton>
+            <InputGroupButton
+              className="group-has-data-[slot=combobox-clear]/input-group:hidden"
+              size="icon-xs"
+              variant="ghost"
+              render={<ComboboxTrigger />}
+            ></InputGroupButton>
           )}
           {showClear && inputValue && (
-            <ComboboxClear render={<InputGroupButton size="icon-xs" variant="ghost" />}><XIcon /></ComboboxClear>
+            <ComboboxClear
+              render={<InputGroupButton size="icon-xs" variant="ghost" />}
+            >
+              <XIcon />
+            </ComboboxClear>
           )}
         </InputGroupAddon>
       </InputGroup>
     </ComboboxControl>
-  );
-};
+  )
+}
 
 export const ComboboxTrigger = (
   props: React.ComponentProps<typeof ArkCombobox.Trigger>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkCombobox.Trigger
@@ -131,26 +142,26 @@ export const ComboboxTrigger = (
         </Button>
       )}
     </ArkCombobox.Trigger>
-  );
-};
+  )
+}
 
 export const ComboboxClear = (
   props: React.ComponentProps<typeof ArkCombobox.ClearTrigger>
-) => <ArkCombobox.ClearTrigger data-slot="combobox-clear" {...props} />;
+) => <ArkCombobox.ClearTrigger data-slot="combobox-clear" {...props} />
 
 /** Composable combobox input for custom controls (e.g. Tags Input). */
 export const ComboboxFieldInput = (
   props: React.ComponentProps<typeof ArkCombobox.Input>
-) => <ArkCombobox.Input data-slot="combobox-field-input" {...props} />;
+) => <ArkCombobox.Input data-slot="combobox-field-input" {...props} />
 
 export const ComboboxPositioner = (
   props: React.ComponentProps<typeof ArkCombobox.Positioner>
-) => <ArkCombobox.Positioner data-slot="combobox-positioner" {...props} />;
+) => <ArkCombobox.Positioner data-slot="combobox-positioner" {...props} />
 
 export const ComboboxContent = (
   props: React.ComponentProps<typeof ArkCombobox.Content>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <Portal>
@@ -183,19 +194,19 @@ export const ComboboxContent = (
         </ArkCombobox.Content>
       </ComboboxPositioner>
     </Portal>
-  );
-};
+  )
+}
 
 interface ComboboxGroupProps
   extends React.ComponentProps<typeof ArkCombobox.ItemGroup> {
   /**
    * The heading of the group
    */
-  heading?: string | React.ReactNode;
+  heading?: string | React.ReactNode
 }
 
 export const ComboboxGroup = (props: ComboboxGroupProps) => {
-  const { heading, children, ...rest } = props;
+  const { heading, children, ...rest } = props
 
   return (
     <ArkCombobox.ItemGroup data-slot="combobox-group" {...rest}>
@@ -203,13 +214,13 @@ export const ComboboxGroup = (props: ComboboxGroupProps) => {
 
       {children}
     </ArkCombobox.ItemGroup>
-  );
-};
+  )
+}
 
 export const ComboboxGroupLabel = (
   props: React.ComponentProps<typeof ArkCombobox.ItemGroupLabel>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkCombobox.ItemGroupLabel
@@ -220,8 +231,8 @@ export const ComboboxGroupLabel = (
       data-slot="combobox-group-label"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const comboboxItemVariants = tv({
   base: [
@@ -247,14 +258,14 @@ export const comboboxItemVariants = tv({
   defaultVariants: {
     showIndicator: true,
   },
-});
+})
 
 interface ComboboxItemProps
   extends React.ComponentProps<typeof ArkCombobox.Item>,
     VariantProps<typeof comboboxItemVariants> {}
 
 export const ComboboxItem = (props: ComboboxItemProps) => {
-  const { showIndicator = true, className, children, ...rest } = props;
+  const { showIndicator = true, className, children, ...rest } = props
 
   return (
     <ArkCombobox.Item
@@ -273,13 +284,13 @@ export const ComboboxItem = (props: ComboboxItemProps) => {
         </span>
       ) : null}
     </ArkCombobox.Item>
-  );
-};
+  )
+}
 
 export const ComboboxEmpty = (
   props: React.ComponentProps<typeof ArkCombobox.Empty>
 ) => {
-  const { className, children, ...rest } = props;
+  const { className, children, ...rest } = props
 
   return (
     <ArkCombobox.Empty
@@ -293,13 +304,13 @@ export const ComboboxEmpty = (
     >
       {children || "No results found."}
     </ArkCombobox.Empty>
-  );
-};
+  )
+}
 
 export const ComboboxList = (
   props: React.ComponentProps<typeof ArkComboboxList>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkCombobox.List
@@ -307,5 +318,5 @@ export const ComboboxList = (
       data-slot="combobox-list"
       {...rest}
     />
-  );
-};
+  )
+}

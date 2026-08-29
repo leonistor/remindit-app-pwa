@@ -1,13 +1,10 @@
+import { useStore } from "@nanostores/react"
 import { DiceFive, User } from "@phosphor-icons/react"
 import { useEffect, useState } from "react"
 import { Navigate, useNavigate } from "react-router"
+import { DATASETS, DEFAULT_DATASET_ID } from "seed"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/custom/button"
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -15,11 +12,9 @@ import {
   SegmentGroupItem,
   SegmentGroupItemText,
 } from "@/components/ui/segment-group"
-import { DATASETS, DEFAULT_DATASET_ID } from "seed"
-import { completeOnboarding, $onboarded } from "@/stores"
-import type { UserProfile } from "@/stores/types"
 import { generateRandomProfile } from "@/lib/profile-generator"
-import { useStore } from "@nanostores/react"
+import { $onboarded, completeOnboarding } from "@/stores"
+import type { UserProfile } from "@/stores/types"
 
 const EMPTY_PROFILE: UserProfile = {
   username: "",

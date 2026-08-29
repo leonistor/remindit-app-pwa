@@ -15,15 +15,15 @@ import {
 } from "./categories"
 import { $history } from "./history"
 import { $list } from "./list"
-import { initTheme } from "./theme"
-import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
 import {
   isOnboarded,
   resolveSelectedDataset,
   setOnboarded,
   setSelectedDataset,
 } from "./onboarding"
+import { initTheme } from "./theme"
 import type { UserProfile } from "./types"
+import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
 import { $user, randomUser, updateUser } from "./user"
 
 // Rsbuild exposes import.meta.env.DEV at build time. Declared here so the
@@ -94,7 +94,10 @@ export function initStores(): void {
 // from the chosen dataset (with a fresh first-run history), and flips the
 // onboarded flag so the app leaves the onboarding gate. Called from the
 // Onboarding view after the user accepts their profile and dataset.
-export function completeOnboarding(profile: UserProfile, datasetId: string): void {
+export function completeOnboarding(
+  profile: UserProfile,
+  datasetId: string
+): void {
   updateUser(profile)
   setSelectedDataset(datasetId)
   seedFromDataset(datasetId, profile)

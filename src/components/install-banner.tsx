@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
 import { DownloadSimple, X } from "@phosphor-icons/react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/custom/button"
 import { dismissInstall, installApp, usePwaInstall } from "@/stores/pwa-install"
 

@@ -1,5 +1,12 @@
-import { createBrowserRouter, Navigate, Outlet, useLocation } from "react-router"
+import { useStore } from "@nanostores/react"
 import { useEffect } from "react"
+import {
+  createBrowserRouter,
+  Navigate,
+  Outlet,
+  useLocation,
+} from "react-router"
+import { $onboarded, initPwaInstall } from "@/stores"
 import { DrawerProvider } from "./components/drawer-context"
 import { Footer } from "./components/footer"
 import { InstallBanner } from "./components/install-banner"
@@ -13,8 +20,6 @@ import HelpView from "./views/help"
 import HistoryView from "./views/history"
 import OnboardingView from "./views/onboarding"
 import ProfileView from "./views/profile"
-import { $onboarded, initPwaInstall } from "@/stores"
-import { useStore } from "@nanostores/react"
 
 function Layout() {
   const { pathname } = useLocation()

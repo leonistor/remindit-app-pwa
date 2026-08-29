@@ -11,8 +11,8 @@
 // side effects on import (matching the stores barrel contract) — callers invoke
 // `initPwaInstall()` from the app entry / layout.
 
-import { atom, computed } from "nanostores"
 import { useStore } from "@nanostores/react"
+import { atom, computed } from "nanostores"
 import { pwaInstallHandler } from "pwa-install-handler"
 import { jsonStore, STORAGE_KEYS } from "./persistence"
 
@@ -25,7 +25,7 @@ export const $installed = atom(false)
 // `jsonStore` keeps the boolean serialized as JSON consistently.
 export const $installDismissed = jsonStore<boolean>(
   STORAGE_KEYS.installDismissed,
-  false,
+  false
 )
 // Which manual-install instructions to show when there is no native prompt.
 export const $manualPlatform = atom<ManualInstallPlatform>("other")
@@ -60,9 +60,8 @@ function detectPlatform(): ManualInstallPlatform {
 function isStandalone(): boolean {
   if (typeof window === "undefined" || !window.matchMedia) return false
   const mq = window.matchMedia("(display-mode: standalone)")
-  const navStandalone = (
-    navigator as Navigator & { standalone?: boolean }
-  ).standalone
+  const navStandalone = (navigator as Navigator & { standalone?: boolean })
+    .standalone
   return mq.matches || navStandalone === true
 }
 
@@ -102,8 +101,7 @@ export async function installApp(): Promise<boolean> {
 // previously dismissed.
 export const $showInstallBanner = computed(
   [$canInstall, $installed, $installDismissed],
-  (canInstall, installed, dismissed) =>
-    canInstall && !installed && !dismissed,
+  (canInstall, installed, dismissed) => canInstall && !installed && !dismissed
 )
 
 export function usePwaInstall() {

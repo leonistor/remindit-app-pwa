@@ -63,13 +63,13 @@ const AboutView = () => (
           remembered.
         </li>
         <li>
-          <strong>Theme</strong>: pick dark, light, or system and your preference
-          is saved.
+          <strong>Theme</strong>: pick dark, light, or system and your
+          preference is saved.
         </li>
         <li>
           <strong>Install as an app</strong>: add Remindit to your home screen
-          and use it offline like a native app, with an in-app changelog to track
-          what&rsquo;s new.
+          and use it offline like a native app, with an in-app changelog to
+          track what&rsquo;s new.
         </li>
       </ul>
     </section>

@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react"
 import { useFilter, useListCollection } from "@ark-ui/react"
+import { useStore } from "@nanostores/react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   Autocomplete,
   AutocompleteContent,
@@ -10,6 +11,7 @@ import {
   AutocompleteItem,
   AutocompleteList,
 } from "@/components/ui/autocomplete"
+import { Button } from "@/components/ui/custom/button"
 import {
   Dialog,
   DialogBody,
@@ -18,7 +20,6 @@ import {
   DialogFooter,
   DialogHeader,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/custom/button"
 import {
   $catalogByCategory,
   $categories,
@@ -27,7 +28,6 @@ import {
   createItemAndAddToList,
   UNCATEGORIZED_ID,
 } from "@/stores"
-import { useStore } from "@nanostores/react"
 import { frequencyRank } from "@/stores/types"
 
 interface QuickAddDialogProps {
@@ -53,8 +53,16 @@ interface QuickAddItem {
 // category/item ordering (categories by frequency rank, items in catalog order).
 function buildItems(
   useRecommendedOnly: boolean,
-  recommendations: { item: { id: string; name: string; categoryId: string }; categoryName: string; score: number }[],
-  catalogGroups: { categoryId: string; categoryName: string; items: { id: string; name: string; categoryId: string }[] }[],
+  recommendations: {
+    item: { id: string; name: string; categoryId: string }
+    categoryName: string
+    score: number
+  }[],
+  catalogGroups: {
+    categoryId: string
+    categoryName: string
+    items: { id: string; name: string; categoryId: string }[]
+  }[],
   categoryRank: Map<string, number>
 ): QuickAddItem[] {
   if (useRecommendedOnly) {
@@ -113,7 +121,13 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
   )
 
   const baseItems = useMemo(
-    () => buildItems(useRecommendedOnly, recommendations, catalogGroups, categoryRank),
+    () =>
+      buildItems(
+        useRecommendedOnly,
+        recommendations,
+        catalogGroups,
+        categoryRank
+      ),
     [useRecommendedOnly, recommendations, catalogGroups, categoryRank]
   )
 
@@ -166,9 +180,7 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
     // Focus the input once the dialog content has mounted and the dialog's own
     // focus-on-open handling has settled.
     const id = window.setTimeout(() => {
-      contentRef.current
-        ?.querySelector<HTMLInputElement>("input")
-        ?.focus()
+      contentRef.current?.querySelector<HTMLInputElement>("input")?.focus()
     }, 120)
     return () => clearTimeout(id)
   }, [open])

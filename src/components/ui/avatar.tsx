@@ -1,16 +1,13 @@
-"use client";
+"use client"
 
-import { Avatar as ArkAvatar, useAvatarContext } from "@ark-ui/react/avatar";
-import { ark } from "@ark-ui/react/factory";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
-import {
-  Status,
-  type statusVariants,
-} from "@/components/ui/status";
+import { Avatar as ArkAvatar, useAvatarContext } from "@ark-ui/react/avatar"
+import { ark } from "@ark-ui/react/factory"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { Status, type statusVariants } from "@/components/ui/status"
+import { cn } from "@/lib/utils"
 
-export const useAvatar = useAvatarContext;
+export const useAvatar = useAvatarContext
 
 const avatarVariants = tv({
   base: [
@@ -33,14 +30,14 @@ const avatarVariants = tv({
   defaultVariants: {
     size: "md",
   },
-});
+})
 
 interface AvatarProps
   extends React.ComponentProps<typeof ArkAvatar.Root>,
     VariantProps<typeof avatarVariants> {}
 
 export const Avatar = (props: AvatarProps) => {
-  const { size = "md", className, ...rest } = props;
+  const { size = "md", className, ...rest } = props
 
   return (
     <ArkAvatar.Root
@@ -49,13 +46,13 @@ export const Avatar = (props: AvatarProps) => {
       data-slot="avatar"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const AvatarImage = (
   props: React.ComponentProps<typeof ArkAvatar.Image>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkAvatar.Image
@@ -68,13 +65,13 @@ export const AvatarImage = (
       data-slot="avatar-image"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const AvatarFallback = (
   props: React.ComponentProps<typeof ArkAvatar.Fallback>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ArkAvatar.Fallback
@@ -89,15 +86,15 @@ export const AvatarFallback = (
       data-slot="avatar-fallback"
       {...rest}
     />
-  );
-};
+  )
+}
 
 interface AvatarBadgeProps
   extends React.ComponentProps<typeof ark.span>,
     Pick<VariantProps<typeof statusVariants>, "variant"> {}
 
 export const AvatarBadge = (props: AvatarBadgeProps) => {
-  const { variant, className, ...rest } = props;
+  const { variant, className, ...rest } = props
 
   return (
     <Status
@@ -113,11 +110,11 @@ export const AvatarBadge = (props: AvatarBadgeProps) => {
       variant={variant}
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const AvatarGroup = (props: React.ComponentProps<typeof ark.div>) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -129,13 +126,13 @@ export const AvatarGroup = (props: React.ComponentProps<typeof ark.div>) => {
       data-slot="avatar-group"
       {...rest}
     />
-  );
-};
+  )
+}
 
 export const AvatarGroupCount = (
   props: React.ComponentProps<typeof ark.div>
 ) => {
-  const { className, ...rest } = props;
+  const { className, ...rest } = props
 
   return (
     <ark.div
@@ -153,5 +150,5 @@ export const AvatarGroupCount = (
       data-slot="avatar-group-count"
       {...rest}
     />
-  );
-};
+  )
+}

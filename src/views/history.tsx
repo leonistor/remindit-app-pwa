@@ -1,5 +1,6 @@
-import { useMemo } from "react"
 import { useStore } from "@nanostores/react"
+import { useMemo } from "react"
+import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
@@ -8,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { useCategoryPalette } from "@/hooks/use-category-palette"
 import { $categories, $history, UNCATEGORIZED_NAME } from "@/stores"
 import type { HistoryEvent } from "@/stores/types"

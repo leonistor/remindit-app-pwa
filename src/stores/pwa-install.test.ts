@@ -9,8 +9,8 @@ import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
 import { pwaInstallHandler } from "pwa-install-handler"
 import {
   $canInstall,
-  $installed,
   $installDismissed,
+  $installed,
   $showInstallBanner,
   dismissInstall,
   installApp,

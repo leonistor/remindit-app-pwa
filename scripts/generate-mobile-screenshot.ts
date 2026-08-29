@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { type ChildProcess, spawn } from "node:child_process"
 import { mkdirSync, writeFileSync } from "node:fs"
-import { type Browser, type Page, chromium, devices } from "@playwright/test"
+import { type Browser, chromium, devices, type Page } from "@playwright/test"
 
 const PORT = 5182
 const BASE_URL = `http://127.0.0.1:${PORT}`
@@ -63,7 +63,9 @@ function startPreviewServer(): ChildProcess {
 async function capture(page: Page, outputs: string[]) {
   const buffer = await page.screenshot()
   for (const path of outputs) {
-    mkdirSync(path.split("/").slice(0, -1).join("/") || ".", { recursive: true })
+    mkdirSync(path.split("/").slice(0, -1).join("/") || ".", {
+      recursive: true,
+    })
     writeFileSync(path, buffer)
     console.log(`  -> ${path}`)
   }
@@ -105,18 +107,17 @@ async function seedList(page: Page, rng: () => number) {
     if (count === 0) break
     const before = await selectedCount()
     const i = Math.floor(rng() * count)
-    await itemButtons.nth(i).click({ timeout: 8_000 }).catch(() => {})
+    await itemButtons
+      .nth(i)
+      .click({ timeout: 8_000 })
+      .catch(() => {})
     await page.waitForTimeout(200)
     if ((await selectedCount()) > before) added++
   }
   return added
 }
 
-async function runProfile(
-  browser: Browser,
-  theme: Theme,
-  isMobile: boolean
-) {
+async function runProfile(browser: Browser, theme: Theme, isMobile: boolean) {
   const context = await browser.newContext({
     ...(isMobile ? devices["iPhone 17 Pro Max"] : {}),
     viewport: isMobile ? MOBILE_VIEWPORT : DESKTOP_VIEWPORT,
@@ -136,9 +137,7 @@ async function runProfile(
 
   const dir = isMobile ? "mobile" : "desktop"
   const size = isMobile ? "1320x2868" : "1280x720"
-  console.log(
-    `${dir} (${theme}): seeded ${added} items @ ${size}`
-  )
+  console.log(`${dir} (${theme}): seeded ${added} items @ ${size}`)
 
   if (isMobile) {
     // List — also feed the README images (mobile-screenshot-*) from this shot.

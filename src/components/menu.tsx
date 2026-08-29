@@ -1,3 +1,4 @@
+import { useStore } from "@nanostores/react"
 import {
   Clock,
   DownloadSimple,
@@ -11,7 +12,7 @@ import {
 } from "@phosphor-icons/react"
 import { useState } from "react"
 import { NavLink } from "react-router"
-import { useStore } from "@nanostores/react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/custom/button"
 import {
   MenuContent,
@@ -20,11 +21,10 @@ import {
   MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { installApp, $user, usePwaInstall } from "@/stores"
-import { ThemeMenu } from "./theme-menu"
-import { QuickAddDialog } from "./quick-add-dialog"
+import { $user, installApp, usePwaInstall } from "@/stores"
 import { InstallInstructionsDialog } from "./install-instructions-dialog"
+import { QuickAddDialog } from "./quick-add-dialog"
+import { ThemeMenu } from "./theme-menu"
 
 const avatarInitials = (user: {
   firstName: string
@@ -55,11 +55,11 @@ const navLinks = [
 const ProfileAvatarLink = () => {
   const user = useStore($user)
   return (
-      <NavLink
-        to="/profile"
-        aria-label="Your profile"
-        className="inline-flex items-center rounded-full hover:opacity-80"
-      >
+    <NavLink
+      to="/profile"
+      aria-label="Your profile"
+      className="inline-flex items-center rounded-full hover:opacity-80"
+    >
       <Avatar size="md">
         {user.avatar ? (
           <AvatarImage

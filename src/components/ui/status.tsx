@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { ark } from "@ark-ui/react/factory";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
+import { ark } from "@ark-ui/react/factory"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { cn } from "@/lib/utils"
 
 export const statusVariants = tv({
   base: [
@@ -30,14 +30,14 @@ export const statusVariants = tv({
     variant: "default",
     size: "md",
   },
-});
+})
 
 interface StatusProps
   extends React.ComponentProps<typeof ark.span>,
     VariantProps<typeof statusVariants> {}
 
 export const Status = (props: StatusProps) => {
-  const { variant, size, className, ...rest } = props;
+  const { variant, size, className, ...rest } = props
 
   return (
     <ark.span
@@ -47,5 +47,5 @@ export const Status = (props: StatusProps) => {
       data-slot="status-indicator"
       {...rest}
     />
-  );
-};
+  )
+}

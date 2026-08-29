@@ -125,8 +125,8 @@ const HelpView = () => (
         </li>
         <li>
           That sample history is generated realistically: each item reappears at
-          roughly its category&rsquo;s frequency with natural variation, giving a
-          believable mix of overdue, due-soon, and frequent items.
+          roughly its category&rsquo;s frequency with natural variation, giving
+          a believable mix of overdue, due-soon, and frequent items.
         </li>
         <li>
           It&rsquo;s just local sample data. Reset or reseed anytime from{" "}

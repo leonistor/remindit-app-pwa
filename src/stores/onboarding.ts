@@ -38,7 +38,9 @@ export function setSelectedDataset(id: string): void {
 // Resolves the effective dataset id: the user's stored choice, else the
 // build-time PUBLIC_DATASET, else the registered default.
 export function resolveSelectedDataset(): string {
-  return resolveDatasetId($selectedDatasetId.get() || import.meta.env?.PUBLIC_DATASET)
+  return resolveDatasetId(
+    $selectedDatasetId.get() || import.meta.env?.PUBLIC_DATASET
+  )
 }
 
 export { $onboarded, $selectedDatasetId }
