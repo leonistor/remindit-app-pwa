@@ -27,6 +27,9 @@ export const $installDismissed = jsonStore<boolean>(
   STORAGE_KEYS.installDismissed,
   false
 )
+// "Maybe later" dismissal for the current session only. Intentionally NOT
+// persisted: it resets on the next app open so the prompt can reappear.
+export const $installLater = atom(false)
 // Which manual-install instructions to show when there is no native prompt.
 export const $manualPlatform = atom<ManualInstallPlatform>("other")
 
@@ -88,6 +91,11 @@ export function dismissInstall(): void {
   $installDismissed.set(true)
 }
 
+// Hides the banner for the rest of this session only ("Maybe later").
+export function dismissLater(): void {
+  $installLater.set(true)
+}
+
 // Triggers the native prompt. No-op (false) when the platform doesn't support
 // it. Resolves true when the user accepted the install.
 export async function installApp(): Promise<boolean> {
@@ -100,8 +108,9 @@ export async function installApp(): Promise<boolean> {
 // Banner shows only for the native-prompt path and only while not installed or
 // previously dismissed.
 export const $showInstallBanner = computed(
-  [$canInstall, $installed, $installDismissed],
-  (canInstall, installed, dismissed) => canInstall && !installed && !dismissed
+  [$canInstall, $installed, $installDismissed, $installLater],
+  (canInstall, installed, dismissed, later) =>
+    canInstall && !installed && !dismissed && !later
 )
 
 export function usePwaInstall() {
@@ -119,5 +128,6 @@ export function usePwaInstall() {
     showBanner,
     installApp,
     dismissInstall,
+    dismissLater,
   }
 }

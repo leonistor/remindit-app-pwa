@@ -1,12 +1,17 @@
-import { DownloadSimple, X } from "@phosphor-icons/react"
+import { DownloadSimple } from "@phosphor-icons/react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/custom/button"
-import { dismissInstall, installApp, usePwaInstall } from "@/stores/pwa-install"
+import {
+  dismissInstall,
+  dismissLater,
+  installApp,
+  usePwaInstall,
+} from "@/stores/pwa-install"
 
 // Non-blocking prompt for Chromium browsers that offer a native install. Hidden
-// once installed or dismissed (dismissal is persisted, so it never reappears).
-// Appears shortly after the app becomes installable so it doesn't pop in on the
-// first paint.
+// once installed, dismissed forever ("No"), or dismissed for this session
+// ("Maybe later", which resets on the next app open). Appears shortly after the
+// app becomes installable so it doesn't pop in on the first paint.
 export function InstallBanner() {
   const { showBanner } = usePwaInstall()
   const [mounted, setMounted] = useState(false)
@@ -32,17 +37,17 @@ export function InstallBanner() {
             Add it to your device for quick, offline access.
           </p>
         </div>
-        <Button size="sm" onClick={() => installApp()}>
-          Install
-        </Button>
-        <Button
-          aria-label="Dismiss install prompt"
-          size="icon-sm"
-          variant="ghost"
-          onClick={dismissInstall}
-        >
-          <X size={16} />
-        </Button>
+        <div className="flex shrink-0 items-center gap-1">
+          <Button size="sm" variant="ghost" onClick={dismissLater}>
+            Maybe later
+          </Button>
+          <Button size="sm" variant="ghost" onClick={dismissInstall}>
+            No
+          </Button>
+          <Button size="sm" onClick={() => installApp()}>
+            Install
+          </Button>
+        </div>
       </div>
     </div>
   )
