@@ -22,14 +22,15 @@ This project is a Progressive Web App (PWA) to manage a personal shopping list.
 
 ## [ ] Version 4
 
-- [ ] Inspect history
-- [ ] quick search+add item floating button
-- [ ] automate screenshots in PWA manifest
-- [ ] PWA checklist with recommended best practices
+- [x] Inspect history
+- [x] quick search+add item floating button
+- [x] automate screenshots in PWA manifest
+- [x] PWA checklist with recommended best practices
 
 ## [ ] Version 5
 
-- [ ] Help content: text, videos; update onboarding
+- [ ] DESIGN.md
+- [ ] Help content: text, videos; update onboarding; tour
 - [ ] add license
 - [ ] app website
 - [ ] app updates in browser
