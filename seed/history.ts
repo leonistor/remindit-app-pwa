@@ -77,6 +77,7 @@ export function generateShoppingHistory(
   const start = now - days * DAY_MS
 
   const freqByCategory = new Map(categories.map((c) => [c.id, c.frequency]))
+  const nameByCategory = new Map(categories.map((c) => [c.id, c.name]))
   const intervalFor = (item: CatalogItem): number => {
     const freq = freqByCategory.get(item.categoryId) ?? "unknown"
     return FREQ_TO_DAYS[freq] ?? FREQ_TO_DAYS.unknown
@@ -119,6 +120,7 @@ export function generateShoppingHistory(
           itemId: item.id,
           itemName: item.name,
           categoryId: item.categoryId,
+          categoryName: nameByCategory.get(item.categoryId) ?? "",
           timestamp: Math.min(cursor, now),
         })
         cart.delete(item.id)
@@ -140,6 +142,7 @@ export function generateShoppingHistory(
         itemId: item.id,
         itemName: item.name,
         categoryId: item.categoryId,
+        categoryName: nameByCategory.get(item.categoryId) ?? "",
         timestamp,
       })
       cart.set(item.id, item)

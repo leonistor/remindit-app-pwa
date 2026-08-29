@@ -37,6 +37,7 @@ function addEvent(
     itemId,
     itemName: "test",
     categoryId,
+    categoryName: "",
     timestamp: now - daysAgo * DAY_MS,
   }
 }
@@ -53,6 +54,7 @@ function removeEvent(
     itemId,
     itemName: "test",
     categoryId,
+    categoryName: "",
     timestamp: now - daysAgo * DAY_MS,
   }
 }

@@ -27,7 +27,7 @@ export async function generateRandomProfile(): Promise<UserProfile> {
   const [first, last] = username.split("-")
 
   const { Style, Avatar } = core
-  const style = new Style(cameoMod.default as Parameters<typeof Style>[0])
+  const style = new Style(cameoMod.default as ConstructorParameters<typeof Style>[0])
   // Inline SVG as a data URI — self-contained, no network, easy to persist.
   const avatar = new Avatar(style, { seed: username }).toDataUri()
 

@@ -293,7 +293,7 @@ export function $itemDetail(itemId: string | null) {
   const key = itemId ?? NULL_ID
   let store = $itemDetailCache.get(key)
   if (!store) {
-    store = computed<ItemDetail>(
+    store = computed<ItemDetail, [typeof $catalog, typeof $categories]>(
       [$catalog, $categories],
       (catalog, categories) => {
         if (itemId === null) return { item: null, categoryName: "" }

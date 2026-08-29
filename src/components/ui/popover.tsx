@@ -85,17 +85,15 @@ export const PopoverContent = (props: PopoverContentProps) => {
           {children}
 
           {!!showCloseButton && (
-            <PopoverClose
-              render={
-                <Button
-                  aria-label="Close"
-                  className="absolute inset-e-2 top-2 opacity-64 hover:opacity-100"
-                  size="icon-sm"
-                  variant="ghost"
-                />
-              }
-            >
-              <XIcon />
+            <PopoverClose asChild>
+              <Button
+                aria-label="Close"
+                className="absolute inset-e-2 top-2 opacity-64 hover:opacity-100"
+                size="icon-sm"
+                variant="ghost"
+              >
+                <XIcon />
+              </Button>
             </PopoverClose>
           )}
         </ArkPopover.Content>

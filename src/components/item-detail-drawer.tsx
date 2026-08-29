@@ -17,8 +17,12 @@ export const ItemDetailDrawer = () => {
   const { item, categoryName } = useStore($itemDetail(itemId))
 
   return (
-    <Drawer open={open} onOpenChange={({ open }) => !open && closeDrawer()}>
-      <DrawerContent swipeDirection="end">
+    <Drawer
+      open={open}
+      swipeDirection="end"
+      onOpenChange={({ open }) => !open && closeDrawer()}
+    >
+      <DrawerContent>
         <DrawerHeader
           title={item?.name ?? "Item details"}
           description={categoryName}

@@ -100,23 +100,25 @@ export const ComboboxInput = (props: ComboboxInputProps) => {
     <ComboboxControl data-size={size}>
       <InputGroup className={cn(className)} size={size}>
         {children}
-        <ArkCombobox.Input
-          render={<InputGroupInput {...rest} />}
-        ></ArkCombobox.Input>
+        <ArkCombobox.Input asChild>
+          <InputGroupInput {...rest} />
+        </ArkCombobox.Input>
         <InputGroupAddon align="inline-end">
           {showTrigger && (
             <InputGroupButton
+              asChild
               className="group-has-data-[slot=combobox-clear]/input-group:hidden"
               size="icon-xs"
               variant="ghost"
-              render={<ComboboxTrigger />}
-            ></InputGroupButton>
+            >
+              <ComboboxTrigger />
+            </InputGroupButton>
           )}
           {showClear && inputValue && (
-            <ComboboxClear
-              render={<InputGroupButton size="icon-xs" variant="ghost" />}
-            >
-              <XIcon />
+            <ComboboxClear asChild>
+              <InputGroupButton size="icon-xs" variant="ghost">
+                <XIcon />
+              </InputGroupButton>
             </ComboboxClear>
           )}
         </InputGroupAddon>
