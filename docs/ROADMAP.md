@@ -22,7 +22,6 @@ This project is a Progressive Web App (PWA) to manage a personal shopping list.
 
 ## [ ] Version 4
 
-- [ ] Items might have attributes associated with them, such as photo, quantity, or price.
 - [ ] Inspect history
 - [ ] quick search+add item floating button
 - [ ] automate screenshots in PWA manifest
@@ -51,6 +50,7 @@ This project is a Progressive Web App (PWA) to manage a personal shopping list.
 
 # Whishlist
 
+- [ ] Items might have attributes associated with them, such as photo, quantity, or price.
 - [ ] multi-language support
 - [ ] native application
 - [ ] notifications and live activities/updates
