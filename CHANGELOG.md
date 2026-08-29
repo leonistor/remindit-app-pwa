@@ -2,6 +2,27 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v3.3.0 — 2026-08-29
+
+_Your shopping history arrives, adding items is faster, and Remindit now nudges you to install it as a real app — all wrapped in a more robust offline experience._
+
+### ✨ New Features
+
+- **History**: A new History tab shows your last 7 days of shopping — every item added and removed — grouped by day so you can see what you've already picked up
+- **Quick Add**: Tap the + button in the menu to add items on the fly. A grouped autocomplete suggests items by category and surfaces your recommendations as you type
+- **Install Prompt**: Remindit now prompts you to install it to your home screen, with "Maybe later" and "No" options so the banner stays out of your way
+- **Richer Install Gallery**: The install UI shows a screenshot gallery so the app looks great before you add it
+
+### 🔧 Improvements
+
+- **PWA Hardening**: Better safe-area handling, an in-app update prompt when a new version ships, and offline deep links that survive reloads
+- **Responsive Shell**: The app is now constrained to a comfortable max width with tighter mobile insets
+- **Help & About**: Documentation updated to cover History and Quick Add
+
+### 🐛 Fixes
+
+- **History Categories**: History rows now show the correct category name, captured as a snapshot when each event happened
+
 ## v3.2.0 — 2026-08-28
 
 _Your first run just got friendlier: a guided onboarding flow sets up your profile and starter catalog, and a new Profile page puts your account front and center._

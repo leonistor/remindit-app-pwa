@@ -48,6 +48,12 @@ const HelpView = () => (
           Your list is grouped by category. Check items off as you put them in
           the cart.
         </li>
+        <li>
+          Need something that isn&rsquo;t in the catalog yet? Tap the{" "}
+          <strong>+</strong> button in the menu to open quick add — a grouped
+          autocomplete suggests items by category and surfaces your
+          recommendations as you type.
+        </li>
       </ul>
     </section>
 
@@ -114,6 +120,21 @@ const HelpView = () => (
           It nudges you when something is due based on that rhythm — the
           suggestions grow more confident the more you shop, and it stays quiet
           about things you rarely buy or already have on your list.
+        </li>
+      </ul>
+    </section>
+
+    <section className="flex flex-col gap-2">
+      <h2 className="font-semibold text-lg">History</h2>
+      <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
+        <li>
+          The <strong>History</strong> tab shows your recent shopping activity —
+          every add and remove — grouped by day and limited to the last 7 days,
+          so you can quickly see what you&rsquo;ve already picked up.
+        </li>
+        <li>
+          The category label on each row is a snapshot taken when the event
+          happened, so it stays accurate even if you rename a category later.
         </li>
       </ul>
     </section>

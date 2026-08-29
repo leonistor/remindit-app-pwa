@@ -43,6 +43,11 @@ const AboutView = () => (
           is grouped by category and you can check items off as you shop.
         </li>
         <li>
+          <strong>Quick add</strong>: tap the <strong>+</strong> button in the
+          menu to add a new item on the fly. A grouped autocomplete suggests
+          items by category and surfaces your recommendations as you type.
+        </li>
+        <li>
           <strong>Catalog</strong>: browse and search your items, rename them in
           place, and add or delete items and categories in collapsible sections
           sorted by how often you reach for them.
@@ -53,8 +58,9 @@ const AboutView = () => (
           from your history the more you shop.
         </li>
         <li>
-          <strong>Item detail</strong>: tap an item to open a detail view with
-          more information at a glance.
+          <strong>History</strong>: review your recent shopping in the History
+          tab — your last 7 days of adds and removes, grouped by day, so you can
+          see what you&rsquo;ve picked up and what&rsquo;s still pending.
         </li>
         <li>
           <strong>Color palettes</strong>: choose a categorical palette (Van
