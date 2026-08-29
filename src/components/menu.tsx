@@ -23,6 +23,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { installApp, $user, usePwaInstall } from "@/stores"
 import { ThemeMenu } from "./theme-menu"
+import { QuickAddDialog } from "./quick-add-dialog"
 import { InstallInstructionsDialog } from "./install-instructions-dialog"
 
 const avatarInitials = (user: {
@@ -77,6 +78,7 @@ const MOBILE_NAV_LINKS = navLinks.filter((l) => l.to !== "/")
 const Menu = () => {
   const [open, setOpen] = useState(false)
   const [installOpen, setInstallOpen] = useState(false)
+  const [quickAddOpen, setQuickAddOpen] = useState(false)
   const { canInstall, installed, platform } = usePwaInstall()
 
   const handleInstall = () => {
@@ -84,11 +86,6 @@ const Menu = () => {
     // Chromium offers a native prompt; everyone else gets manual steps.
     if (canInstall) void installApp()
     else setInstallOpen(true)
-  }
-
-  // Placeholder for the quick-add action; the real behavior is decided later.
-  const handleAddClick = () => {
-    /* TODO: quick-add to shopping list */
   }
 
   return (
@@ -154,10 +151,11 @@ const Menu = () => {
           variant="default"
           size="icon-md"
           aria-label="Add to shopping list"
-          onClick={handleAddClick}
+          onClick={() => setQuickAddOpen(true)}
         >
           <Plus size={18} aria-hidden />
         </Button>
+        <QuickAddDialog open={quickAddOpen} onOpenChange={setQuickAddOpen} />
       </div>
 
       <InstallInstructionsDialog

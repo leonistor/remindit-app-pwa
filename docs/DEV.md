@@ -6,7 +6,7 @@ The app uses a single-route layout (`src/router.tsx`) with a top menu bar, a con
 
 ```
 DrawerProvider
-├── Menu (h-16 bar: logo, nav links, theme toggle)
+├── Menu (h-16 bar: logo, profile avatar, quick-add (+) button, hamburger menu with theme picker)
 ├── <Outlet /> (page content)
 ├── ItemDetailDrawer (context-managed, hidden by default)
 └── Footer (hidden on "/")
@@ -90,6 +90,15 @@ The **active palette** is a persisted user choice:
 - `src/hooks/use-category-palette.ts` — `useCategoryPalette(key, overrideSlot?)` subscribes to the active palette and returns `categoryPalette(...)` for it, so any consumer recolors live when the choice changes. `ItemButton` and `ShoppingItem` use this hook.
 - Pick the active palette in **Settings** via `PaletteChooser` (`src/components/palette-chooser.tsx`): an inline Shark `Listbox` of the pool with a 12-swatch preview per option and a live sample-chip preview above the list. Selection calls `setActivePalette`.
 - **`ItemCatalog`** (`src/components/item-catalog.tsx`) — the right-hand browse/select panel. Renders an Ark UI `Accordion` (multiple, all categories open by default) of `ItemButton`s grouped by category from `$catalogByCategory`. Clicking toggles list membership via `addToList` / `removeFromList` (resolving item id → entry id through `$selectedView`). Shows a `ToggleTooltip` with recommendation colour codes.
+
+### Quick add
+
+The header `+` button opens a `QuickAddDialog` (`src/components/quick-add-dialog.tsx`) — a Shark UI `Dialog` containing a grouped `Autocomplete` (`@shark/autocomplete`, added via the registry) for fast list entry.
+
+- **Source list** — built from the same stores the available-items panel uses, so ordering matches: categories ordered by `frequencyRank` (most-frequent first), items in catalog order (`$catalogByCategory`). When `$recommendations.length >= 10` it shows **only** recommended items (grouped by category, ordered by recommendation score within the category); otherwise it shows the full catalog.
+- **Grouping** — one `AutocompleteGroup` per category (`heading` = category name); choices are `AutocompleteItem`s keyed by item **id** (not the label) so selection adds the correct item via `addToList`.
+- **Create new item** — always available: when the typed value matches no catalog item, an "Add \"<name>\"" row appears and creates the item under `UNCATEGORIZED_ID` via `createItemAndAddToList`, then adds it to the list. A hint below the input reminds users to reach 10 items to unlock personalized recommendations.
+- **Closing** — selecting any item (or creating one) adds it to the list and closes the dialog; the input is auto-focused when the dialog opens.
 
 ## Typography
 
