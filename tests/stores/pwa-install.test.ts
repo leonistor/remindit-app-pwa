@@ -14,7 +14,7 @@ import {
   $showInstallBanner,
   dismissInstall,
   installApp,
-} from "./pwa-install"
+} from "@/stores/pwa-install"
 
 // Tracks whether the (stubbed) native prompt was actually triggered.
 let installCalled = false

@@ -12,7 +12,7 @@ import {
   getActivePaletteId,
   initActivePalette,
   setActivePalette,
-} from "./palette"
+} from "@/stores/palette"
 
 const POOL_IDS = PALETTE_POOL.palettes.map((p) => p.id)
 

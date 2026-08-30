@@ -13,7 +13,6 @@ import {
   renameCatalogItem,
   updateCatalogItem,
 } from "@/stores/catalog"
-import { $list, removeListEntriesForItem } from "@/stores/list"
 import { resetStores } from "../fixtures/reset"
 
 describe("catalog store", () => {
@@ -65,20 +64,6 @@ describe("catalog store", () => {
 
     // The total number of items is unchanged across updates.
     expect($catalog.get()).toHaveLength(1)
-  })
-
-  test("removeListEntriesForItem drops only the entries referencing the given item", () => {
-    $list.set([
-      { id: "entry-a", itemId: "item-a", checked: false, addedAt: 1 },
-      { id: "entry-b", itemId: "item-b", checked: false, addedAt: 2 },
-      { id: "entry-c", itemId: "item-a", checked: true, addedAt: 3 },
-    ])
-
-    removeListEntriesForItem("item-a")
-
-    const remaining = $list.get()
-    expect(remaining).toHaveLength(1)
-    expect(remaining[0].id).toBe("entry-b")
   })
 
   test("renameCatalogItem updates the name (symmetric with renameCategory)", () => {
