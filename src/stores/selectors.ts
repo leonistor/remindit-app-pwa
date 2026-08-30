@@ -196,12 +196,20 @@ export const $catalogByCategoryAll = computed(
       group.push({ id: item.id, name: item.name, categoryId: item.categoryId })
     }
 
-    const groups = categories.map((category) => ({
-      categoryId: category.id,
-      categoryName: category.name,
-      frequency: category.frequency,
-      items: itemsByCategoryId.get(category.id) ?? [],
-    }))
+    const groups = categories.map((category) => {
+      const items = itemsByCategoryId.get(category.id) ?? []
+      // Alphabetical within the category (case-insensitive) so the Catalog
+      // stays scannable after renames or bulk adds.
+      items.sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+      )
+      return {
+        categoryId: category.id,
+        categoryName: category.name,
+        frequency: category.frequency,
+        items,
+      }
+    })
 
     // Show most-frequently-bought categories first; ties keep $categories order.
     return groups.sort(
