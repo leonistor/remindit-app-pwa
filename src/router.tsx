@@ -1,5 +1,5 @@
 import { useStore } from "@nanostores/react"
-import { useEffect } from "react"
+import { lazy, Suspense, useEffect } from "react"
 import {
   createBrowserRouter,
   Navigate,
@@ -14,13 +14,16 @@ import { ItemDetailDrawer } from "./components/item-detail-drawer"
 import { UpdatePrompt } from "./components/update-prompt"
 import Menu from "./components/menu"
 import ShoppingPanels from "./components/shopping-panels"
-import AboutView from "./views/about"
-import CatalogView from "./views/catalog"
-import ChangelogView from "./views/changelog"
-import HelpView from "./views/help"
-import HistoryView from "./views/history"
 import OnboardingView from "./views/onboarding"
-import ProfileView from "./views/profile"
+
+// Secondary routes are code-split so the main shopping view (the LCP) ships
+// without their bundles. The home route stays eager on purpose.
+const AboutView = lazy(() => import("@/views/about"))
+const CatalogView = lazy(() => import("@/views/catalog"))
+const ChangelogView = lazy(() => import("@/views/changelog"))
+const HelpView = lazy(() => import("@/views/help"))
+const HistoryView = lazy(() => import("@/views/history"))
+const ProfileView = lazy(() => import("@/views/profile"))
 
 function Layout() {
   const { pathname } = useLocation()
@@ -44,7 +47,9 @@ function Layout() {
           <Menu />
           <div className="flex min-h-0 grow flex-col overflow-y-auto">
             <main className="flex min-h-0 grow flex-col">
-              <Outlet />
+              <Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Loading…</div>}>
+                <Outlet />
+              </Suspense>
               {!isHome && (
                 <div className="mt-auto">
                   <Footer />
