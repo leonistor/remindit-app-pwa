@@ -10,6 +10,7 @@ import {
   $activePaletteId,
   getActivePalette,
   getActivePaletteId,
+  initActivePalette,
   setActivePalette,
 } from "./palette"
 
@@ -48,5 +49,19 @@ describe("active palette store", () => {
       setActivePalette(id)
       expect(POOL_IDS).toContain(getActivePaletteId())
     }
+  })
+
+  it("initActivePalette resets a stale persisted id to the default", () => {
+    // The read helpers already fall back without writing; the bootstrap should
+    // actually clear the invalid value from storage.
+    $activePaletteId.set("removed-palette")
+    initActivePalette()
+    expect($activePaletteId.get()).toBe(DEFAULT_PALETTE_ID)
+  })
+
+  it("initActivePalette leaves a valid persisted id untouched", () => {
+    $activePaletteId.set("paired")
+    initActivePalette()
+    expect($activePaletteId.get()).toBe("paired")
   })
 })

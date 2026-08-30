@@ -23,6 +23,7 @@ import {
   setOnboarded,
   setSelectedDataset,
 } from "./onboarding"
+import { initActivePalette } from "./palette"
 import { initTheme } from "./theme"
 import type { UserProfile } from "./types"
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
@@ -56,6 +57,8 @@ declare global {
 export function initStores(): void {
   // Apply the persisted theme as early as the store layer loads.
   initTheme()
+  // Reset a stale, invalid persisted palette id once at startup (no-op otherwise).
+  initActivePalette()
 
   if (!isOnboarded()) return
 

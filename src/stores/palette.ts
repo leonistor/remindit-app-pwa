@@ -19,10 +19,14 @@ const $activePaletteId = jsonStore<string>(
   DEFAULT_PALETTE_ID
 )
 
-// Guard against a persisted id that no longer exists in the pool (e.g. a palette
-// was removed upstream). Reset to the seed default so coloring never breaks.
-if (!getPalette($activePaletteId.get())) {
-  $activePaletteId.set(DEFAULT_PALETTE_ID)
+// One-time startup reset: if a persisted id no longer exists in the pool (e.g. a
+// palette was removed upstream), reset to the seed default so coloring never
+// breaks. Called once from `initStores()` — deliberately NOT on import, so the
+// barrel stays side-effect-free.
+export function initActivePalette(): void {
+  if (!getPalette($activePaletteId.get())) {
+    $activePaletteId.set(DEFAULT_PALETTE_ID)
+  }
 }
 
 /** The chosen palette id, guaranteed to resolve to a real palette. */
