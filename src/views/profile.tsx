@@ -1,10 +1,17 @@
 import { useStore } from "@nanostores/react"
-import { Rows } from "@phosphor-icons/react"
+import { DownloadSimple, Rows, Trash } from "@phosphor-icons/react"
 import { useEffect, useState } from "react"
 import { Link } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { BackButton } from "@/components/back-button"
 import { PaletteChooser } from "@/components/palette-chooser"
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/custom/button"
 import {
@@ -23,6 +30,7 @@ import {
   SegmentGroupItem,
   SegmentGroupItemText,
 } from "@/components/ui/segment-group"
+import { downloadLocalData, eraseLocalData } from "@/lib/local-data"
 import {
   $user,
   getUser,
@@ -37,6 +45,7 @@ const INITIAL_DATASET = import.meta.env.PUBLIC_DATASET ?? DEFAULT_DATASET_ID
 const ProfileView = () => {
   const user = useStore($user)
   const [open, setOpen] = useState(false)
+  const [eraseOpen, setEraseOpen] = useState(false)
   const [dataset, setDataset] = useState<string>(INITIAL_DATASET)
   const [form, setForm] = useState({
     firstName: user.firstName,
@@ -69,6 +78,12 @@ const ProfileView = () => {
     seedFromDataset(dataset, getUser())
     setSelectedDataset(dataset)
     setOpen(false)
+  }
+
+  const handleErase = () => {
+    // Full wipe — including theme — then let the onboarding guard redirect.
+    eraseLocalData()
+    setEraseOpen(false)
   }
 
   return (
@@ -160,6 +175,51 @@ const ProfileView = () => {
         <CardContent>
           <PaletteChooser />
         </CardContent>
+      </Card>
+
+      <Card className="w-full max-w-xl">
+        <CardHeader
+          title="My local data"
+          description="Download a copy of your data or erase everything stored in this browser."
+        />
+        <CardContent>
+          <p className="text-muted-foreground text-sm">
+            Download saves a JSON file with all your lists, catalog, history,
+            and preferences. Erase removes everything — including theme — and
+            sends you back to onboarding.
+          </p>
+        </CardContent>
+        <CardFooter className="flex gap-2">
+          <Button variant="outline" onClick={downloadLocalData}>
+            <DownloadSimple size={16} />
+            Download
+          </Button>
+          <AlertDialog
+            open={eraseOpen}
+            onOpenChange={(d) => setEraseOpen(d.open)}
+          >
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash size={16} />
+                Erase
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader
+                title="Erase all local data?"
+                description="This cannot be undone. All lists, history, catalog, and preferences will be removed and you will be sent back to onboarding."
+              />
+              <AlertDialogFooter>
+                <Button variant="outline" onClick={() => setEraseOpen(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleErase}>
+                  Erase
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardFooter>
       </Card>
 
       <Card className="w-full max-w-xl">
