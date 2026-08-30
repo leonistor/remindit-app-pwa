@@ -5,7 +5,8 @@ import {
   DrawerContent,
   DrawerHeader,
 } from "@/components/ui/drawer"
-import { $itemDetail, useDrawer } from "@/stores"
+import { useDrawerContext as useDrawer } from "@/components/drawer-context"
+import { $itemDetail } from "@/stores"
 
 // Phase 3 stub. `openDrawer` (from drawer-context) is intentionally not wired
 // into the catalog/item UI yet: item buttons already own primary actions

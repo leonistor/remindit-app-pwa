@@ -10,11 +10,8 @@ import { ShoppingItem } from "@/components/shopping-item"
 import { Button } from "@/components/ui/custom/button"
 import { Float } from "@/components/ui/float"
 import { useItemTravelTransition } from "@/hooks/use-item-travel-transition"
-import {
-  type SelectedSort,
-  type SelectedViewEntry,
-  useShoppingList,
-} from "@/stores"
+import { useShoppingList } from "@/hooks/use-shopping-list"
+import type { SelectedSort, SelectedViewEntry } from "@/stores"
 
 // Icon + label per sort mode, mirroring the theme toggle's OPTIONS map. The
 // single sort button renders the entry for the active mode.

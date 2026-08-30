@@ -167,10 +167,6 @@ export function setupDevLogging(): void {
   })
 }
 
-export { useCatalog } from "../hooks/use-catalog"
-export { useDrawer } from "../hooks/use-drawer"
-// Feature hooks — hide atom names from components and ease mocking.
-export { useShoppingList } from "../hooks/use-shopping-list"
 export * from "./catalog"
 export * from "./categories"
 export * from "./history"

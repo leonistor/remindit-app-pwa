@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/accordion"
 import { ItemButton } from "@/components/ui/custom/item-button"
 import { useItemTravelTransition } from "@/hooks/use-item-travel-transition"
-import { useCatalog } from "@/stores"
+import { useCatalog } from "@/hooks/use-catalog"
 
 export default function ItemCatalog() {
   const {

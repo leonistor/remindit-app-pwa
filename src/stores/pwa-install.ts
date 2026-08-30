@@ -11,7 +11,6 @@
 // side effects on import (matching the stores barrel contract) — callers invoke
 // `initPwaInstall()` from the app entry / layout.
 
-import { useStore } from "@nanostores/react"
 import { atom, computed } from "nanostores"
 import { pwaInstallHandler } from "pwa-install-handler"
 import { jsonStore, STORAGE_KEYS } from "./persistence"
@@ -113,21 +112,4 @@ export const $showInstallBanner = computed(
     canInstall && !installed && !dismissed && !later
 )
 
-export function usePwaInstall() {
-  const canInstall = useStore($canInstall)
-  const installed = useStore($installed)
-  const dismissed = useStore($installDismissed)
-  const platform = useStore($manualPlatform)
-  const showBanner = useStore($showInstallBanner)
 
-  return {
-    canInstall,
-    installed,
-    dismissed,
-    platform,
-    showBanner,
-    installApp,
-    dismissInstall,
-    dismissLater,
-  }
-}

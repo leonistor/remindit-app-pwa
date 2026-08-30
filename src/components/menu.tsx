@@ -21,7 +21,8 @@ import {
   MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu"
-import { $user, installApp, usePwaInstall } from "@/stores"
+import { usePwaInstall } from "@/hooks/use-pwa-install"
+import { $user, installApp } from "@/stores"
 import { InstallInstructionsDialog } from "./install-instructions-dialog"
 import { QuickAddDialog } from "./quick-add-dialog"
 import { ThemeMenu } from "./theme-menu"
