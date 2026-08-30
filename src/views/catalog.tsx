@@ -6,7 +6,11 @@ import { CategoryDialog } from "@/components/catalog/category-dialog"
 import { CategorySection } from "@/components/catalog/category-section"
 import { ItemDialog } from "@/components/catalog/item-dialog"
 import { Button } from "@/components/ui/custom/button"
-import { $catalogByCategoryAll } from "@/stores"
+import {
+  $catalogByCategoryAll,
+  type CatalogByCategoryItem,
+  type Category,
+} from "@/stores"
 
 const CatalogView = () => {
   const groups = useStore($catalogByCategoryAll)
@@ -16,12 +20,29 @@ const CatalogView = () => {
     string | undefined
   >(undefined)
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState<CatalogByCategoryItem | null>(
+    null
+  )
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
 
   const openAddItem = (categoryId?: string) => {
+    setEditingItem(null)
     setItemDialogCategoryId(categoryId)
     setItemDialogOpen(true)
   }
-  const openAddCategory = () => setCategoryDialogOpen(true)
+  const openAddCategory = () => {
+    setEditingCategory(null)
+    setCategoryDialogOpen(true)
+  }
+  const openEditItem = (item: CatalogByCategoryItem) => {
+    setEditingItem(item)
+    setItemDialogCategoryId(item.categoryId)
+    setItemDialogOpen(true)
+  }
+  const openEditCategory = (category: Category) => {
+    setEditingCategory(category)
+    setCategoryDialogOpen(true)
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
@@ -48,18 +69,28 @@ const CatalogView = () => {
             key={group.categoryId}
             group={group}
             onAddItem={openAddItem}
+            onEditCategory={openEditCategory}
+            onEditItem={openEditItem}
           />
         ))}
       </div>
 
       <ItemDialog
         open={itemDialogOpen}
-        onOpenChange={setItemDialogOpen}
+        onOpenChange={(open) => {
+          setItemDialogOpen(open)
+          if (!open) setEditingItem(null)
+        }}
+        editingItem={editingItem}
         defaultCategoryId={itemDialogCategoryId}
       />
       <CategoryDialog
         open={categoryDialogOpen}
-        onOpenChange={setCategoryDialogOpen}
+        onOpenChange={(open) => {
+          setCategoryDialogOpen(open)
+          if (!open) setEditingCategory(null)
+        }}
+        editingCategory={editingCategory}
       />
     </div>
   )
