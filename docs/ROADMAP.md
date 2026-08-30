@@ -19,15 +19,12 @@ This project is a Progressive Web App (PWA) to manage a personal shopping list.
 
 - [x] Categorical color palettes will be available to the user to choose from. They will be used to color-code items in the list.
 - [x] a basic user profile
-
-## [ ] Version 4
-
 - [x] Inspect history
 - [x] quick search+add item floating button
 - [x] automate screenshots in PWA manifest
 - [x] PWA checklist with recommended best practices
 
-## [ ] Version 5
+## [ ] Version 4
 
 - [ ] DESIGN.md
 - [ ] Help content: text, videos; update onboarding; tour
@@ -36,13 +33,13 @@ This project is a Progressive Web App (PWA) to manage a personal shopping list.
 - [ ] app updates in browser
 - [ ] community of early adopters and feedback capture
 
-## [ ] Version 6
+## [ ] Version 5
 
 - [ ] Multi-user support will be added, allowing multiple users to share the same list and collaborate in real-time.
 - [ ] Sync with the server will be implemented to allow the list to be saved and loaded across devices.
 - [ ] The primary use case will be family shopping lists, where multiple users can share and collaborate on a single list.
 
-## [ ] Version 7
+## [ ] Version 6
 
 - [ ] basic AI features
 - [ ] integration with LLMs (MCP, skills)
