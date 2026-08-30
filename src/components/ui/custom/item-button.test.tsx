@@ -36,7 +36,9 @@ describe("ItemButton", () => {
     )
     const idle = screen.getByRole("button", { name: "Milk" })
     expect(idle.className).not.toContain("var(--cat-dim)")
-    expect(idle.className).not.toContain("ring-2")
+    // No standing (unconditional) emphasis ring at rest — a desktop hover ring
+    // (`hover:ring-2`) is allowed, so reject only a variant-less `ring-2`.
+    expect(idle.className).not.toMatch(/(?<!:)ring-2/)
 
     rerender(
       <ItemButton
@@ -48,7 +50,7 @@ describe("ItemButton", () => {
     )
     const selected = screen.getByRole("button", { name: "Milk" })
     expect(selected.className).toContain("var(--cat-dim)")
-    expect(selected.className).not.toContain("ring-2")
+    expect(selected.className).not.toMatch(/(?<!:)ring-2/)
   })
 
   test("renders a recommendation dot as a separate semantic concern", () => {

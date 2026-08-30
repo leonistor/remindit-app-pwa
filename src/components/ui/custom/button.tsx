@@ -84,7 +84,6 @@ export const buttonVariants = tv({
         "bg-transparent",
         "text-foreground",
         "border border-transparent",
-        "hover:bg-transparent",
         "focus-visible:border-primary",
       ],
     },

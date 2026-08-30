@@ -84,7 +84,13 @@ export const ItemButton = ({
       pill
       disabled={disabled}
       onClick={onClick}
-      className={cn(colorClasses, animationClass, className)}
+      className={cn(
+        colorClasses,
+        palette.ring,
+        "hover:ring-2",
+        animationClass,
+        className
+      )}
       style={palette.style}
       data-testid="catalog-item"
       data-selected={isSelected ? "true" : "false"}

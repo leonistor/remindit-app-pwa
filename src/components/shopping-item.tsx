@@ -67,7 +67,7 @@ export const ShoppingItem = ({
         pill
         disabled={disabled}
         onClick={onClick}
-        className={palette.buttonSelected}
+        className={cn(palette.buttonSelected, palette.ring, "hover:ring-2")}
         data-vt-list={travelTargetId}
       >
         {name}

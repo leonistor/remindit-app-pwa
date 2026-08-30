@@ -29,8 +29,7 @@ export interface ItemPalette {
   button: string
   /**
    * Emphasized tint (selected / in-list). For real palette slots it is the same
-   * solid hue as `button`; the `ring` token is reserved for a future emphasis
-   * ring, so there is no ring in the current build.
+   * solid hue as `button`.
    */
   buttonSelected: string
   /** Tint for a small category label badge. */
@@ -61,7 +60,7 @@ const NEUTRAL: ItemPalette = {
   badge: "bg-muted text-muted-foreground",
   dimmed: "bg-muted text-muted-foreground",
   border: "",
-  ring: "",
+  ring: "ring-foreground",
   dot: "bg-muted-foreground",
   hex: "",
 }
@@ -135,7 +134,9 @@ function paletteForHex(hex: string): ItemPalette {
     dimmed:
       "bg-[var(--cat-dim)] text-[color:var(--cat-dim-ink)] dark:bg-[var(--cat-dim-dark)] dark:text-[color:var(--cat-dim-dark-ink)]",
     border: "",
-    ring: "",
+    // Emphasis ring (desktop hover). Uses the WCAG-picked contrast ink so it
+    // always reads against the solid categorical fill in both themes.
+    ring: "ring-[color:var(--cat-ink)]",
     dot: "bg-[var(--cat)]",
   }
 }
