@@ -2,6 +2,31 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v3.4.0 — 2026-08-30
+
+_Your list gets lighter and more distinct — alphabetical sorting, distinct category colors, and a faster, more accessible shopping experience._
+
+### ✨ New Features
+
+- **Alphabetical Sorting**: The shopping-list sort button now cycles through three modes — category/name, most-recently-added, and a new alphabetical (A–Z) order — so you can find items the way you like
+- **Distinct Category Colors**: Categories now get a stable sequential palette slot at creation (not a hash), so each of your first 12 categories gets a unique, consistent color across the catalog and your list — no more accidental duplicates like fridge/snacks sharing a hue
+- **Faster Startup**: Secondary routes (About, Catalog, Changelog, Help, History, Profile) are now code-split and lazy-loaded, shrinking the initial bundle by ~34% so the main shopping view loads quicker
+- **Accessible Landmark**: The main routed content is wrapped in a proper `<main>` landmark for screen-reader navigation
+
+### 🔧 Improvements
+
+- **Floating Sort Control**: The shopping-list sort toggle is now a floating Shark UI Float pinned to the top-right of the list — it no longer wastes a header row and uses the secondary variant for a cleaner look
+- **Cleaner Catalog**: Only the first category accordion opens by default, and the recommendation legend/tooltip was removed from the available-items panel for a less cluttered view
+- **Simpler Chips**: Shopping-list chips no longer show a redundant category-name badge — the color-coded tint already conveys the category
+- **Fresh Avatars**: DiceBear avatar style switched from Cameo to Personas for a more personable default profile
+- **Help & About**: Documentation updated to cover the new alphabetical sort and floating sort button
+
+### 🐛 Fixes
+
+- **History Categories Stay Accurate**: History rows now render the category name snapshot stored when the event happened, so renamed or deleted categories no longer show stale or missing labels; palette lookups for history and chips are now reactive via a `$categoryById` Map and stay correct after recolors
+- **PWA Service Worker in Dev**: Fixed a false `navigateFallback` injection that caused the dev service worker to throw at evaluation time because `index.html` wasn't in the dev precache — detection now uses `NODE_ENV` instead of `process.argv`
+- **Shopping List Layout**: Wrapped rows now pack to the top (`content-start`) instead of stretching, and deprecated category-visibility state was pruned
+
 ## v3.3.0 — 2026-08-29
 
 _Your shopping history arrives, adding items is faster, and Remindit now nudges you to install it as a real app — all wrapped in a more robust offline experience._

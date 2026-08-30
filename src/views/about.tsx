@@ -68,9 +68,9 @@ const AboutView = () => (
           items consistently across the app.
         </li>
         <li>
-          <strong>Ordering controls</strong>: toggle category grouping and sort
-          your list by category/name or most recently added — your choice is
-          remembered.
+          <strong>Ordering controls</strong>: a floating sort button cycles your
+          list between category/name, most-recently-added, and alphabetical
+          (A–Z) — your choice is remembered.
         </li>
         <li>
           <strong>Theme</strong>: pick dark, light, or system and your
