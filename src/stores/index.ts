@@ -25,7 +25,7 @@ import {
 } from "./onboarding"
 import { initActivePalette } from "./palette"
 import { initTheme } from "./theme"
-import type { UserProfile } from "./types"
+import type { Category, UserProfile } from "./types"
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
 import { $user, randomUser, updateUser } from "./user"
 
@@ -43,6 +43,17 @@ declare global {
       [key: string]: unknown
     }
   }
+}
+
+// Prepends the "uncategorized" sentinel and assigns sequential palette color
+// slots so the dataset categories are display-ready. Shared by `initStores`
+// (first run) and `seedFromDataset` (onboarding / reset) so the two seeding
+// paths can't diverge in how the sentinel + colors are built.
+function seedCategories(categories: Category[]): Category[] {
+  return assignCategoryColors([
+    { id: UNCATEGORIZED_ID, name: UNCATEGORIZED_NAME, frequency: "unknown" },
+    ...categories,
+  ])
 }
 
 // Seed the catalog + categories on first run (empty persistent stores) from the
@@ -66,14 +77,7 @@ export function initStores(): void {
     const datasetId = resolveSelectedDataset()
     const { categories, catalog } = getDataset(datasetId)
     if ($categories.get().length === 0) {
-      $categories.set([
-        {
-          id: UNCATEGORIZED_ID,
-          name: UNCATEGORIZED_NAME,
-          frequency: "unknown",
-        },
-        ...categories,
-      ])
+      $categories.set(seedCategories(categories))
     }
     $catalog.set(catalog)
 
@@ -134,16 +138,7 @@ export function seedFromDataset(
   $history.set([])
   $user.set(profile ?? randomUser())
 
-  $categories.set(
-    assignCategoryColors([
-      {
-        id: UNCATEGORIZED_ID,
-        name: UNCATEGORIZED_NAME,
-        frequency: "unknown",
-      },
-      ...categories,
-    ])
-  )
+  $categories.set(seedCategories(categories))
   $catalog.set(catalog)
 
   if (import.meta.env?.PUBLIC_SEED_HISTORY !== "0") {
