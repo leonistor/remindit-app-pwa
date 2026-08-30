@@ -7,7 +7,9 @@
 // `localStorage` are available without extra setup.
 
 import { beforeEach, describe, expect, test } from "@rstest/core"
+import { $categories } from "@/stores/categories"
 import { $history, clearHistory, logHistory } from "@/stores/history"
+import { UNCATEGORIZED_NAME } from "@/stores/types"
 import { resetStores } from "../fixtures/reset"
 
 describe("history store", () => {
@@ -79,5 +81,28 @@ describe("history store", () => {
     expect(events[0].action).toBe("add")
     expect(events[1].id).toBe(second.id)
     expect(events[1].action).toBe("remove")
+  })
+
+  test("logHistory snapshots the category name at log time, falling back for a missing category", () => {
+    // The history view renders the stored categoryName snapshot (see step 6),
+    // so logHistory must capture the name at event time rather than resolving it
+    // live against a later-set $categories.
+    $categories.set([{ id: "cat-dairy", name: "Dairy", frequency: "weekly" }])
+
+    const known = logHistory({
+      action: "add",
+      itemId: "item-1",
+      itemName: "Milk",
+      categoryId: "cat-dairy",
+    })
+    expect(known.categoryName).toBe("Dairy")
+
+    const orphan = logHistory({
+      action: "add",
+      itemId: "item-2",
+      itemName: "Solo",
+      categoryId: "missing-cat",
+    })
+    expect(orphan.categoryName).toBe(UNCATEGORIZED_NAME)
   })
 })

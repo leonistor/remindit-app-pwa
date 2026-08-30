@@ -12,6 +12,7 @@ import { $categories } from "@/stores/categories"
 import { $list, addToList, setEntryChecked } from "@/stores/list"
 import {
   $activeCategoryIds,
+  $categoryById,
   $checkedCount,
   $itemsByCategory,
   $listCount,
@@ -88,5 +89,12 @@ describe("selectors", () => {
     expect($listCount.get()).toBe(2)
     addToList("i3")
     expect($listCount.get()).toBe(3)
+  })
+
+  test("$categoryById is an O(1) id -> category Map", () => {
+    const byId = $categoryById.get()
+    expect(byId.get("b")).toEqual({ id: "b", name: "B", frequency: "unknown" })
+    expect(byId.get("a")).toEqual({ id: "a", name: "A", frequency: "unknown" })
+    expect(byId.get("missing")).toBeUndefined()
   })
 })
