@@ -36,6 +36,13 @@ export interface Category {
   name: string
   /** How often items in this category are typically bought. */
   frequency: CategoryFrequency
+  /**
+   * Stable palette slot (index into the active palette's `colors`) used to color
+   * this category. Assigned sequentially at dataset init / category creation so
+   * categories stay distinct up to the palette size; undefined (or on the
+   * `uncategorized` sentinel) means "no categorical color" (neutral).
+   */
+  color?: number
 }
 
 export interface CatalogItem {

@@ -10,8 +10,10 @@ import { generateShoppingHistory, getDataset, resolveDatasetId } from "seed"
 import { $catalog } from "./catalog"
 import {
   $categories,
+  assignCategoryColors,
   ensureUncategorizedExists,
   normalizeCategoryFrequencies,
+  normalizeCategoryColors,
 } from "./categories"
 import { $history } from "./history"
 import { $list } from "./list"
@@ -88,6 +90,8 @@ export function initStores(): void {
   ensureUncategorizedExists()
   // Backfill `frequency` onto any category persisted before this field existed.
   normalizeCategoryFrequencies()
+  // Backfill `color` slots so categories stay distinct in the categorical palette.
+  normalizeCategoryColors()
 }
 
 // Finalizes onboarding: persists the chosen profile + dataset, seeds the catalog
@@ -127,14 +131,16 @@ export function seedFromDataset(
   $history.set([])
   $user.set(profile ?? randomUser())
 
-  $categories.set([
-    {
-      id: UNCATEGORIZED_ID,
-      name: UNCATEGORIZED_NAME,
-      frequency: "unknown",
-    },
-    ...categories,
-  ])
+  $categories.set(
+    assignCategoryColors([
+      {
+        id: UNCATEGORIZED_ID,
+        name: UNCATEGORIZED_NAME,
+        frequency: "unknown",
+      },
+      ...categories,
+    ])
+  )
   $catalog.set(catalog)
 
   if (import.meta.env?.PUBLIC_SEED_HISTORY !== "0") {

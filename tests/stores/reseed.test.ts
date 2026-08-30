@@ -34,10 +34,11 @@ test("seedFromDataset overwrites the catalog/categories with the chosen dataset"
 
   // Catalog is replaced wholesale, not merged.
   expect($catalog.get()).toEqual(catalog)
-  // Categories include the uncategorized sentinel plus the dataset's categories.
+  // Categories include the uncategorized sentinel plus the dataset's categories,
+  // each assigned a distinct sequential palette slot (0-based, in dataset order).
   expect($categories.get()).toEqual([
     { id: UNCATEGORIZED_ID, name: UNCATEGORIZED_NAME, frequency: "unknown" },
-    ...categories,
+    ...categories.map((c, i) => ({ ...c, color: i })),
   ])
 })
 

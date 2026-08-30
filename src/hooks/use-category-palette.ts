@@ -16,6 +16,7 @@ import {
   type ItemPaletteSlot,
 } from "@/lib/category-palette"
 import { getPalette, PALETTE_POOL, type Palette } from "@/lib/palettes"
+import { getCategory } from "@/stores/categories"
 import { $activePaletteId } from "@/stores/palette"
 
 export function useCategoryPalette(
@@ -26,5 +27,9 @@ export function useCategoryPalette(
   useStore($activePaletteId)
   const palette: Palette =
     getPalette($activePaletteId.get()) ?? PALETTE_POOL.palettes[0]
-  return categoryPalette(key, overrideSlot, palette)
+  // Prefer the category's stored sequential slot (distinct within the palette);
+  // fall back to the key-derived hash only for ad-hoc keys (e.g. palette
+  // preview names) that aren't real categories.
+  const slot = overrideSlot ?? getCategory(key)?.color
+  return categoryPalette(key, slot, palette)
 }
