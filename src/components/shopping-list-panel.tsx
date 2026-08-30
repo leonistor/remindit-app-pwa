@@ -113,7 +113,7 @@ export const ShoppingListPanel = () => {
         className={
           isEmpty
             ? "mt-3 flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-4 text-center text-muted-foreground text-sm"
-            : "mt-3 flex min-h-0 flex-1 flex-wrap justify-start gap-2 overflow-y-auto"
+            : "mt-3 flex min-h-0 flex-1 flex-wrap content-start justify-start gap-2 overflow-y-auto"
         }
       >
         {isEmpty ? (
