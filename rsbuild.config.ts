@@ -62,9 +62,13 @@ export default defineConfig({
           // which throws at SW evaluation time if the URL is NOT in the
           // precache. The dev server's precache only contains the Workbox
           // suppression script, so we restrict this to production builds.
-          ...(!process.argv.includes("dev")
-            ? { navigateFallback: "/index.html" }
-            : {}),
+          // Detection uses NODE_ENV (set by Rsbuild to "development" in dev and
+          // "production" in build/preview, before this config is evaluated) —
+          // `process.argv` is unreliable here because the dev script runs the
+          // bare `rsbuild` binary, which lacks a "dev" token.
+          ...(process.env.NODE_ENV !== "production"
+            ? {}
+            : { navigateFallback: "/index.html" }),
         },
       },
     }),
