@@ -1,72 +1,62 @@
 import { expect, type Page, test } from "@playwright/test"
+import { onboard } from "./helpers"
 
-// Mirrors the navLinks config in src/components/menu.tsx. The home route renders
-// with the label "Shopping list" on desktop and is excluded from the mobile
-// dropdown (it has its own dedicated link on mobile).
-const DESKTOP_LINKS = [
-  "Shopping list",
-  "Profile",
-  "Catalog",
-  "History",
-  "About",
-  "Help",
-]
-// Mobile dropdown omits the home route (see MOBILE_NAV_LINKS in menu.tsx).
-const MOBILE_LINKS = DESKTOP_LINKS.filter((label) => label !== "Shopping list")
+// The menu is a single hamburger for every viewport (src/components/menu.tsx).
+// "Shopping list" stays an always-visible direct link; the remaining routes live
+// in the dropdown (the home route is excluded from the dropdown — see
+// MOBILE_NAV_LINKS). This spec asserts that current behavior on both viewports.
+const DROPDOWN_LINKS = ["Profile", "Catalog", "History", "About", "Help"]
 
-const desktopNavLink = (page: Page, name: string) =>
-  page.locator("nav").locator("a").getByText(name, { exact: true })
-
+const hamburger = (page: Page) => page.locator('button[aria-label="Open menu"]')
+const closeButton = (page: Page) => page.locator('button[aria-label="Close menu"]')
 const dropdownLink = (page: Page, name: string) =>
-  page
-    .locator('[data-slot="menu-content"]')
-    .locator("a")
-    .getByText(name, { exact: true })
+  page.locator('[data-slot="menu-content"]').locator("a").getByText(name, {
+    exact: true,
+  })
 
-test.describe("Responsive top menu", () => {
-  test("desktop: all nav links are visible and the hamburger is hidden", async ({
+test.describe("Single hamburger menu", () => {
+  // The app gates on onboarding, so a fresh context would land on /onboarding and
+  // never render the menu. Seed the onboarded flag before every test.
+  test.beforeEach(async ({ page }) => {
+    await onboard(page)
+  })
+
+  test("the direct 'Shopping list' link is visible and the hamburger opens the dropdown", async ({
     page,
   }) => {
     await page.goto("/")
 
-    await expect(page.locator("nav").locator("a")).toHaveCount(
-      DESKTOP_LINKS.length
-    )
-    for (const name of DESKTOP_LINKS) {
-      await expect(desktopNavLink(page, name)).toBeVisible()
+    // The dedicated home link renders as a direct link.
+    await expect(
+      page.locator("a").getByText("Shopping list", { exact: true })
+    ).toBeVisible()
+
+    // Hamburger is present and the dropdown is initially closed.
+    await expect(hamburger(page)).toBeVisible()
+    await expect(page.locator('[data-slot="menu-content"]')).toBeHidden()
+
+    await hamburger(page).click()
+    await expect(closeButton(page)).toBeVisible()
+
+    // Every non-home link appears inside the dropdown.
+    for (const name of DROPDOWN_LINKS) {
+      await expect(dropdownLink(page, name)).toBeVisible()
     }
-    // Hamburger is desktop-hidden
-    await expect(page.locator('button[aria-label="Open menu"]')).toBeHidden()
   })
 
-  test("mobile: hamburger opens a dropdown of links; tapping one navigates and closes", async ({
+  test("mobile uses the same hamburger and a dropdown link navigates and closes it", async ({
     page,
   }) => {
-    // Below the md (768px) breakpoint
+    // Below the md (768px) breakpoint.
     await page.setViewportSize({ width: 375, height: 667 })
     await page.goto("/")
 
-    // Desktop nav is collapsed on mobile
-    for (const name of ["Catalog", "History", "Profile"]) {
-      await expect(desktopNavLink(page, name)).toBeHidden()
-    }
+    // Same single hamburger on mobile.
+    await expect(hamburger(page)).toBeVisible()
+    await hamburger(page).click()
 
-    const hamburger = page.locator('button[aria-label="Open menu"]')
-    await expect(hamburger).toBeVisible()
-    await expect(page.locator('[data-slot="menu-content"]')).toBeHidden()
-
-    // Open the dropdown
-    await hamburger.click()
-    await expect(page.locator('button[aria-label="Close menu"]')).toBeVisible()
-
-    // All (non-home) links appear inside the dropdown
-    for (const name of MOBILE_LINKS) {
-      await expect(dropdownLink(page, name)).toBeVisible()
-    }
-
-    // Navigating via the dropdown closes it and updates the URL
     await dropdownLink(page, "Catalog").click()
     await expect(page).toHaveURL(/\/catalog$/)
-    await expect(page.locator('button[aria-label="Open menu"]')).toBeVisible()
+    await expect(hamburger(page)).toBeVisible()
   })
 })

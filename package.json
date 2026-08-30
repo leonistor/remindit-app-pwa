@@ -15,7 +15,12 @@
     "screenshot:gallery": "bun run build && bun scripts/generate-mobile-screenshot.ts",
     "generate:palettes": "bun scripts/generate-palettes.ts",
     "test": "rstest",
-    "test:watch": "rstest --watch"
+    "test:quick": "rstest -c rstest.quick.config.ts",
+    "test:changed": "rstest --changed",
+    "test:watch": "rstest --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:prod": "bun run build && playwright test -c playwright.prod.config.ts",
+    "test:pre": "bun run test && bun run test:e2e && bun run test:e2e:prod"
   },
   "dependencies": {
     "@ark-ui/react": "^5.39.0",

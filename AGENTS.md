@@ -28,8 +28,15 @@ Our primary UI framework is **Shark UI** — a shadcn-style registry built on to
 
 ### Rstest
 
-- Run `bun run test` to run tests
-- Run `bun run test:watch` to run tests in watch mode
+Progressive test suites — pick the one that matches the moment (see `docs/DEV.md` §Testing):
+
+- `bun run test:quick` — fast unit layer (`src/lib` + `tests/stores`). Use in the dev loop after a change.
+- `bun run test` — every Rstest test. Use pre-commit.
+- `bun run test:changed` — change-aware: runs tests related to changed files (falls back to the full suite when no related set resolves).
+- `bun run test:watch` — watch mode.
+- `bun run test:e2e` — Playwright against the dev server (`e2e/`).
+- `bun run test:e2e:prod` — Playwright against a production preview (`e2e-prod/`); builds first.
+- `bun run test:pre` — all Rstest + both Playwright suites (release gate).
 
 ### Biome
 

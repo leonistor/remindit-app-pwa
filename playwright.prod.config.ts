@@ -1,7 +1,9 @@
 import { defineConfig, devices } from "@playwright/test"
 
-// Validates real offline behavior against the production build, where the
-// service worker actually precaches the app shell (dev mode does not).
+// Runs the PRODUCTION precache specs (e2e-prod/offline.spec.ts) against a local
+// `rsbuild preview` so the service worker's precache/offline fallback is tested
+// on a real bundle (not the dev server). Requires a prior `bun run build` — the
+// `test:e2e:prod` npm script handles that. See docs/DEV.md §Testing.
 export default defineConfig({
   testDir: "./e2e-prod",
   timeout: 60_000,
@@ -13,12 +15,7 @@ export default defineConfig({
     baseURL: "http://127.0.0.1:5181",
     trace: "on-first-retry",
   },
-  projects: [
-    {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
-    },
-  ],
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     command: "bunx rsbuild preview --port 5181 --host 127.0.0.1",
     url: "http://127.0.0.1:5181",

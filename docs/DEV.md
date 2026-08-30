@@ -266,9 +266,20 @@ function ShoppingList() {
 
 ## Testing
 
-- **Component unit tests are intentionally postponed** until they are actually required. While the UI is actively evolving (e.g. refactoring panels), maintaining per-component unit tests is churn with little payoff — delete or skip them rather than keeping them in sync with each change.
-- **Before any version bump / release**, make sure both are in place and green:
-  - component tests for the critical UI (`src/components/**/*.test.tsx`), and
-  - end-to-end tests (Playwright, `e2e/`).
-- The store layer in `src/stores/**` should keep its unit tests — that layer is stable and cheap to test.
+Progressive suites — cheap tests run often, expensive ones at the gates. Pick the one that matches the moment:
+
+| Suite | Runs | Command | When |
+|---|---|---|---|
+| **quick** | Pure helpers (`src/lib/**`) + store/command/selector layer (`tests/stores/**`) — the data model & core logic, no UI rendering | `bun run test:quick` | Dev loop after a logic change |
+| **all** | Every Rstest test (adds `src/components/**`, `src/hooks/**`, `tests/index`, `tests/seed*`) | `bun run test` | Pre-commit / CI |
+| **pre-release** | `all` + Playwright dev (`e2e/`) + production precache (`e2e-prod/`) | `bun run test:pre` | Release / main CI |
+
+- `bun run test:changed` is change-aware — it runs Rstest tests related to changed files, falling back to the full suite when the related set can't be resolved. (In this Rspack setup it currently runs the full suite, so use `test:quick` for the reliable fast dev gate.)
+- `bun run test:e2e` runs Playwright against the dev server; `bun run test:e2e:prod` runs the offline-precache specs against a production `preview` (so it **builds first** — the `e2e-prod/` specs need a real bundle, not the dev server).
+- The quick config (`rstest.quick.config.ts`) reuses the base Rstest config and only narrows `include`, so it can't drift on environment/setup.
+
+Guidance:
+
+- **Keep the store layer `tests/stores/**` unit-tested** — it is stable and cheap to test, and is the core of the `quick` gate.
+- **Component unit tests are intentionally postponed** until they are actually required. While the UI is actively evolving (e.g. refactoring panels), maintaining per-component unit tests is churn with little payoff — delete or skip them rather than keeping them in sync with each change. The component/App render tests that exist today (`src/components/**/*.test.tsx`, `tests/index.test.tsx`) run in the `all` suite.
 ```
