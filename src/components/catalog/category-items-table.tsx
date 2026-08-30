@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table"
 import {
   type CatalogByCategoryItem,
-  removeCatalogItem,
+  deleteCatalogItemWithCascade,
   renameCatalogItem,
 } from "@/stores"
 import { InlineEditableName } from "./inline-editable-name"
@@ -53,7 +53,7 @@ export const CategoryItemsTable = ({ items }: CategoryItemsTableProps) => {
                 variant="ghost"
                 size="icon-sm"
                 aria-label={`Delete ${item.name}`}
-                onClick={() => removeCatalogItem(item.id)}
+                onClick={() => deleteCatalogItemWithCascade(item.id)}
               >
                 <TrashIcon />
               </Button>

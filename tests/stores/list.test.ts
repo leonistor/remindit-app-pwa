@@ -10,13 +10,12 @@
 // timestamps, since those are generated at runtime.
 
 import { beforeEach, describe, expect, test } from "@rstest/core"
-import { $catalog, addCatalogItem } from "@/stores/catalog"
+import { addCatalogItem } from "@/stores/catalog"
 import { $history } from "@/stores/history"
 import {
   $list,
   addToList,
   clearList,
-  createItemAndAddToList,
   removeFromList,
   removeListEntriesForItem,
   setEntryChecked,
@@ -105,23 +104,6 @@ describe("list store", () => {
     expect($list.get()).toEqual([])
     // The two 'add' events remain untouched.
     expect($history.get()).toHaveLength(2)
-  })
-
-  test("createItemAndAddToList creates a catalog item, adds an entry, and logs one 'add'", () => {
-    createItemAndAddToList("Banana", "cat-produce")
-
-    expect($catalog.get()).toHaveLength(1)
-    expect($catalog.get()[0].name).toBe("Banana")
-    expect($catalog.get()[0].categoryId).toBe("cat-produce")
-
-    expect($list.get()).toHaveLength(1)
-    expect($list.get()[0].itemId).toBe($catalog.get()[0].id)
-
-    const events = $history.get()
-    expect(events).toHaveLength(1)
-    expect(events[0].action).toBe("add")
-    expect(events[0].itemName).toBe("Banana")
-    expect(events[0].categoryId).toBe("cat-produce")
   })
 
   test("removeListEntriesForItem drops matching entries without writing history", () => {

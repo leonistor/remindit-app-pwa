@@ -1,8 +1,9 @@
-// Category definitions. Deleting a category reassigns its catalog items to the
-// "uncategorized" sentinel rather than dropping them, and must NOT write
-// history.
+// Category definitions. Single-resource store: every action here only mutates
+// `$categories`. Deleting a category reassigns its catalog items to the
+// "uncategorized" sentinel rather than dropping them, and must NOT write history
+// — that cross-store flow lives in `deleteCategoryWithReassign` in
+// `./commands.ts`.
 
-import { reassignItemsToCategory } from "./catalog"
 import { jsonStore, STORAGE_KEYS } from "./persistence"
 import { PALETTE_SLOT_COUNT } from "@/lib/category-palette"
 import type { Category, CategoryFrequency } from "./types"
@@ -131,14 +132,6 @@ export function updateCategory(
     ...(patch.frequency !== undefined ? { frequency: patch.frequency } : {}),
   }
   $categories.set(next)
-}
-
-// Deletes a category and reassigns its catalog items to "uncategorized".
-// No history write. The sentinel category itself cannot be deleted.
-export function removeCategory(id: string): void {
-  if (id === UNCATEGORIZED_ID) return
-  reassignItemsToCategory(id, UNCATEGORIZED_ID)
-  $categories.set($categories.get().filter((c) => c.id !== id))
 }
 
 export function ensureUncategorizedExists(): void {

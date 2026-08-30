@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/custom/button"
 import {
   type CatalogByCategoryAllGroup,
-  removeCategory,
+  deleteCategoryWithReassign,
   renameCategory,
   UNCATEGORIZED_ID,
 } from "@/stores"
@@ -87,7 +87,7 @@ export const CategorySection = ({ group, onAddItem }: CategorySectionProps) => {
                   title={`Delete "${group.categoryName}"?`}
                   description="Its items will be moved to Uncategorized. This cannot be undone."
                   confirmLabel="Delete category"
-                  onConfirm={() => removeCategory(group.categoryId)}
+                  onConfirm={() => deleteCategoryWithReassign(group.categoryId)}
                 >
                   <Button
                     variant="ghost"

@@ -1,13 +1,9 @@
 // Master pool of every known shopping item, grouped by category.
-// Editing or deleting a catalog item must NOT touch history; only the active
-// list's add/remove events are logged.
-//
-// Lazy cross-import contract: `./list` imports action functions from here and we
-// import `removeListEntriesForItem` from `./list`, but each reference lives
-// inside a function body (see `removeCatalogItem`) — never at module top level.
-// That keeps the circular dependency from tripping a TDZ error at evaluation.
+// Single-resource store: every action here only mutates `$catalog`. Editing or
+// deleting a catalog item must NOT touch history; only the active list's
+// add/remove events are logged. Cross-store compositing (catalog deletion with
+// a list cascade) lives in `./commands.ts`.
 
-import { removeListEntriesForItem } from "./list"
 import { jsonStore, STORAGE_KEYS } from "./persistence"
 import type { CatalogItem } from "./types"
 
@@ -57,16 +53,10 @@ export function renameCatalogItem(id: string, name: string): void {
   updateCatalogItem(id, { name: trimmed })
 }
 
-// Removing a catalog item also drops any active list entries referencing it.
-// Deliberately does NOT write history.
-export function removeCatalogItem(id: string): void {
-  $catalog.set($catalog.get().filter((item) => item.id !== id))
-  removeListEntriesForItem(id)
-}
-
 // Reassigns every catalog item currently in `fromId` to `toId`. Exposed so a
 // category can be deleted without the categories store reaching into `$catalog`
-// directly (see `removeCategory`). Does NOT write history.
+// directly (see `deleteCategoryWithReassign` in `./commands.ts`). Does NOT write
+// history.
 export function reassignItemsToCategory(fromId: string, toId: string): void {
   const catalog = $catalog.get()
   const next = catalog.map((item) =>

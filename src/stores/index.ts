@@ -169,6 +169,7 @@ export function setupDevLogging(): void {
 
 export * from "./catalog"
 export * from "./categories"
+export * from "./commands"
 export * from "./history"
 export * from "./list"
 export * from "./onboarding"

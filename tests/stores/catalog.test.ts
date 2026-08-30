@@ -10,13 +10,10 @@ import { beforeEach, describe, expect, test } from "@rstest/core"
 import {
   $catalog,
   addCatalogItem,
-  removeCatalogItem,
   renameCatalogItem,
   updateCatalogItem,
 } from "@/stores/catalog"
-import { $history } from "@/stores/history"
 import { $list, removeListEntriesForItem } from "@/stores/list"
-import type { HistoryEvent } from "@/stores/types"
 import { resetStores } from "../fixtures/reset"
 
 describe("catalog store", () => {
@@ -68,47 +65,6 @@ describe("catalog store", () => {
 
     // The total number of items is unchanged across updates.
     expect($catalog.get()).toHaveLength(1)
-  })
-
-  test("removeCatalogItem removes the item and cascades to drop referencing $list entries without writing history", () => {
-    const item = addCatalogItem("Bread", "cat-bakery")
-
-    // Seed a list entry that references the item, plus one unrelated entry.
-    $list.set([
-      { id: "entry-1", itemId: item.id, checked: false, addedAt: Date.now() },
-      {
-        id: "entry-2",
-        itemId: "other-item",
-        checked: false,
-        addedAt: Date.now(),
-      },
-    ])
-
-    // Seed one history event so we can prove removal writes no history.
-    const seededHistory: HistoryEvent = {
-      id: "hist-1",
-      action: "add",
-      itemId: "item-x",
-      itemName: "Cheese",
-      categoryId: "cat-dairy",
-      timestamp: Date.now(),
-    }
-    $history.set([seededHistory])
-
-    removeCatalogItem(item.id)
-
-    // The catalog item is gone.
-    expect($catalog.get()).toHaveLength(0)
-    expect($catalog.get().find((i) => i.id === item.id)).toBeUndefined()
-
-    // Only the referencing list entry is dropped; the unrelated one remains.
-    const list = $list.get()
-    expect(list).toHaveLength(1)
-    expect(list[0].id).toBe("entry-2")
-
-    // History is untouched — removal must NOT log anything.
-    expect($history.get()).toHaveLength(1)
-    expect($history.get()[0]).toBe(seededHistory)
   })
 
   test("removeListEntriesForItem drops only the entries referencing the given item", () => {

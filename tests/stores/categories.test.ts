@@ -7,14 +7,11 @@
 // `localStorage` are available without extra setup.
 
 import { beforeEach, describe, expect, test } from "@rstest/core"
-import { $catalog, addCatalogItem } from "@/stores/catalog"
 import {
   $categories,
   addCategory,
-  removeCategory,
   renameCategory,
 } from "@/stores/categories"
-import { $history } from "@/stores/history"
 import type { CategoryFrequency } from "@/stores/types"
 import { UNCATEGORIZED_ID } from "@/stores/types"
 import { resetStores } from "../fixtures/reset"
@@ -72,37 +69,4 @@ describe("categories store", () => {
     expect(sentinel?.name).toBe("Uncategorized")
   })
 
-  test("removeCategory reassigns catalog items to UNCATEGORIZED and drops the category (no history)", () => {
-    const category = addCategory("Produce")
-    const item = addCatalogItem("Apple", category.id)
-
-    // Record history length before deletion so we can assert it is unchanged.
-    const historyBefore = $history.get().length
-
-    removeCategory(category.id)
-
-    // The catalog item now points at the sentinel category.
-    const updatedItem = $catalog.get().find((i) => i.id === item.id)
-    expect(updatedItem?.categoryId).toBe(UNCATEGORIZED_ID)
-
-    // The category itself is gone from the list.
-    expect($categories.get().some((c) => c.id === category.id)).toBe(false)
-
-    // Deleting a category must NOT write history.
-    expect($history.get()).toHaveLength(historyBefore)
-  })
-
-  test("removing UNCATEGORIZED_ID is a no-op (sentinel stays present)", () => {
-    $categories.set([
-      { id: UNCATEGORIZED_ID, name: "Uncategorized", frequency: "unknown" },
-      { id: "cat-produce", name: "Produce", frequency: "unknown" },
-    ])
-
-    removeCategory(UNCATEGORIZED_ID)
-
-    const categories = $categories.get()
-    expect(categories.some((c) => c.id === UNCATEGORIZED_ID)).toBe(true)
-    // The other category is untouched.
-    expect(categories.some((c) => c.id === "cat-produce")).toBe(true)
-  })
 })

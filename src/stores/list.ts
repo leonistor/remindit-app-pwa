@@ -1,13 +1,12 @@
 // Active shopping list. Adding/removing entries is the ONLY thing that writes
 // history (via logHistory in ./history).
 //
-// Lazy cross-import contract: this module imports action functions from
-// `./catalog` and `./catalog` imports `removeListEntriesForItem` from here, but
-// each is only ever referenced *inside* a function body — never at module top
-// level. That keeps the circular dependency between the two stores from tripping
-// a temporal-dead-zone error at evaluation time.
+// Single outgoing edge, no cycle: `getCatalogItem` is read from `./catalog` so
+// the add/remove flows can snapshot the item name/categoryId into history. The
+// catalog store never imports back into this module — cross-store compositing
+// (e.g. `createItemAndAddToList`) lives in `./commands.ts`.
 
-import { addCatalogItem, getCatalogItem } from "./catalog"
+import { getCatalogItem } from "./catalog"
 import { logHistory } from "./history"
 import { jsonStore, STORAGE_KEYS } from "./persistence"
 import type { ListEntry } from "./types"
@@ -76,13 +75,6 @@ export function setEntryChecked(entryId: string, checked: boolean): void {
 
 export function clearList(): void {
   $list.set([])
-}
-
-// Convenience: create a brand-new catalog item and immediately add it to the
-// active list (e.g. quick-add from the UI).
-export function createItemAndAddToList(name: string, categoryId: string): void {
-  const item = addCatalogItem(name, categoryId)
-  addToList(item.id)
 }
 
 export { $list }
