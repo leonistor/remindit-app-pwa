@@ -43,12 +43,14 @@ function Layout() {
         <div className="flex h-full w-full flex-col gap-4">
           <Menu />
           <div className="flex min-h-0 grow flex-col overflow-y-auto">
-            <Outlet />
-            {!isHome && (
-              <div className="mt-auto">
-                <Footer />
-              </div>
-            )}
+            <main className="flex min-h-0 grow flex-col">
+              <Outlet />
+              {!isHome && (
+                <div className="mt-auto">
+                  <Footer />
+                </div>
+              )}
+            </main>
           </div>
         </div>
       </div>
