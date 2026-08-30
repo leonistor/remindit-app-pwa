@@ -2,29 +2,12 @@ import { jsonStore, STORAGE_KEYS } from "./persistence"
 
 export type SelectedSort = "default" | "category-name" | "last-added"
 
-// Whether the category Badge is shown on each selected-item chip.
-export const $selectedCategoriesVisible = jsonStore<boolean>(
-  STORAGE_KEYS.selectedCategoriesVisible,
-  true
-)
-
 // Ordering of the selected-items panel. "default" preserves list insertion
 // order; the other two modes are mutually exclusive sort strategies.
 export const $selectedSort = jsonStore<SelectedSort>(
   STORAGE_KEYS.selectedSort,
   "default"
 )
-
-export function setSelectedCategoriesVisible(visible: boolean): void {
-  $selectedCategoriesVisible.set(visible)
-}
-
-// Toggles the category-badge visibility on the selected-items chips. Components
-// call this on the toggle's change instead of diffing the current value, so the
-// UI store owns the boolean flip rather than the view.
-export function toggleCategoriesVisible(): void {
-  $selectedCategoriesVisible.set(!$selectedCategoriesVisible.get())
-}
 
 export function setSelectedSort(sort: SelectedSort): void {
   $selectedSort.set(sort)

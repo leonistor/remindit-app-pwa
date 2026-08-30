@@ -15,7 +15,6 @@ export const STORAGE_KEYS = {
   catalog: "remindit:catalog",
   categories: "remindit:categories",
   user: "remindit:user",
-  selectedCategoriesVisible: "remindit:selected-categories-visible",
   selectedSort: "remindit:selected-sort",
   accordionOpen: "remindit:accordion-open",
   theme: "remindit:theme",

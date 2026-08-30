@@ -1,24 +1,18 @@
 import { useStore } from "@nanostores/react"
 import {
-  $selectedCategoriesVisible,
   $selectedOrdered,
   $selectedSort,
   removeFromList,
   type SelectedSort,
   type SelectedViewEntry,
-  toggleCategoriesVisible,
   toggleSelectedSort,
 } from "@/stores"
 
 export interface UseShoppingList {
   /** Active list, ordered per the user's chosen sort. */
   items: SelectedViewEntry[]
-  /** Whether category badges are shown on the selected-item chips. */
-  categoriesVisible: boolean
   /** Active sort mode. */
   sort: SelectedSort
-  /** Flip the category-badge visibility. */
-  toggleCategoriesVisible: () => void
   /** Mutually-exclusive toggle of a sort mode. */
   toggleSelectedSort: (sort: SelectedSort) => void
   /** Remove a list entry by its id. */
@@ -29,13 +23,10 @@ export interface UseShoppingList {
 // store internals directly, which keeps them easy to mock in tests.
 export function useShoppingList(): UseShoppingList {
   const items = useStore($selectedOrdered)
-  const categoriesVisible = useStore($selectedCategoriesVisible)
   const sort = useStore($selectedSort)
   return {
     items,
-    categoriesVisible,
     sort,
-    toggleCategoriesVisible,
     toggleSelectedSort,
     removeFromList,
   }

@@ -1,4 +1,4 @@
-import { ClockIcon, SortAscendingIcon, TagIcon } from "@phosphor-icons/react"
+import { ClockIcon, SortAscendingIcon } from "@phosphor-icons/react"
 import { useCallback, useRef, useState } from "react"
 import { ShoppingItem } from "@/components/shopping-item"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -9,19 +9,18 @@ import {
   useShoppingList,
 } from "@/stores"
 
-// Renders the active list ($selectedOrdered) as success-colored item chips that
+// Renders the active list ($selectedOrdered) as color-coded item chips that
 // wrap like the available-items grid in ItemCatalog. Each chip shows just the
-// item name; clicking it removes that entry from the list.
+// item name, tinted by its category color; clicking it removes that entry from
+// the list.
 //
-// A ToggleGroup above the list drives display + ordering: an independent
-// show/hide-categories toggle and two mutually exclusive sort modes (category +
-// name, or last-added-first). Preferences persist via the ui store.
+// A ToggleGroup above the list drives ordering via two mutually exclusive sort
+// modes (category + name, or last-added-first). Preferences persist via the ui
+// store.
 export const ShoppingListPanel = () => {
   const {
     items: selectedView,
-    categoriesVisible,
     sort,
-    toggleCategoriesVisible,
     toggleSelectedSort,
     removeFromList,
   } = useShoppingList()
@@ -59,11 +58,8 @@ export const ShoppingListPanel = () => {
     [removeFromList, runTravel, isSupported]
   )
 
-  // Build the controlled ToggleGroup value from the two pieces of UI state.
-  const groupValue = [
-    categoriesVisible ? "categories" : "",
-    sort !== "default" ? sort : "",
-  ].filter(Boolean)
+  // Build the controlled ToggleGroup value from the sort UI state.
+  const groupValue = [sort !== "default" ? sort : ""].filter(Boolean)
 
   // The ToggleGroup reports the full resulting value set on each toggle. We
   // diff it against the current store values (no `.get()` reads needed) and
@@ -71,9 +67,6 @@ export const ShoppingListPanel = () => {
   const handleGroupChange = useCallback(
     (details: { value: string[] }) => {
       const next = new Set(details.value)
-      if (next.has("categories") !== categoriesVisible)
-        toggleCategoriesVisible()
-
       const SORTS: SelectedSort[] = ["category-name", "last-added"]
       const clickedSort = SORTS.find((s) => next.has(s) && s !== sort)
       if (clickedSort) {
@@ -83,7 +76,7 @@ export const ShoppingListPanel = () => {
         toggleSelectedSort(sort)
       }
     },
-    [categoriesVisible, sort, toggleCategoriesVisible, toggleSelectedSort]
+    [sort, toggleSelectedSort]
   )
 
   const isEmpty = selectedView.length === 0
@@ -100,13 +93,6 @@ export const ShoppingListPanel = () => {
           className="absolute end-0.5 top-1/2 -translate-y-1/2"
           aria-label="Selected items display and ordering"
         >
-          <ToggleGroupItem
-            value="categories"
-            aria-label="Show or hide categories"
-            title="Show/hide categories"
-          >
-            <TagIcon aria-hidden />
-          </ToggleGroupItem>
           <ToggleGroupItem
             value="category-name"
             aria-label="Sort by category then item name"
@@ -146,9 +132,8 @@ export const ShoppingListPanel = () => {
               >
                 <ShoppingItem
                   name={entry.name}
-                  categoryName={entry.categoryName}
                   categoryId={entry.categoryId}
-                  showCategory={categoriesVisible}
+                  showCategory={false}
                   travelTargetId={entry.itemId}
                   onClick={(e) => handleRemove(entry, e.currentTarget)}
                   disabled={isRemoving}
