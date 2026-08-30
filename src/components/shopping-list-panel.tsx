@@ -8,6 +8,7 @@ import {
 import { useCallback, useRef, useState } from "react"
 import { ShoppingItem } from "@/components/shopping-item"
 import { Button } from "@/components/ui/custom/button"
+import { Float } from "@/components/ui/float"
 import { useItemTravelTransition } from "@/hooks/use-item-travel-transition"
 import {
   type SelectedSort,
@@ -77,18 +78,22 @@ export const ShoppingListPanel = () => {
 
   return (
     <div className="relative flex h-full min-h-0 flex-col px-4 py-3">
-      <div className="relative h-10 shrink-0">
+      <Float
+        placement="top-end"
+        // Cancel Float's corner-straddle (the panel clips overflow) and inset
+        // the button just inside the top-right edge instead.
+        className="!top-1 !inset-e-1 !translate-x-0 !-translate-y-0"
+      >
         <Button
-          variant="ghost"
+          variant="secondary"
           size="icon-lg"
-          className="absolute end-1 top-1"
           aria-label={`Sort: ${label}. Click to change.`}
           title={`Sort: ${label}`}
           onClick={cycleSelectedSort}
         >
           <Icon size={16} aria-hidden />
         </Button>
-      </div>
+      </Float>
       <div
         className={
           isEmpty
