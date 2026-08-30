@@ -45,6 +45,7 @@ Progressive test suites — pick the one that matches the moment (see `docs/DEV.
 
 - Run `bun run lint` to lint your code
 - Run `bun run format` to format your code
+- Run `bun run check` to lint, format, and organize imports (applies fixes with `--write --unsafe`; see `biome.json: assist.actions.source.organizeImports`)
 
 ## Skills
 

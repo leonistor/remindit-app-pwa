@@ -243,6 +243,12 @@ Beyond the build-time `PUBLIC_DATASET` first run, the app offers a user-initiate
 
 In dev builds (`import.meta.env.DEV`), every store is attached to `@nanostores/logger` for console inspection.
 
+### Code quality (Biome)
+
+- `bun run lint` — lint only (`biome lint`).
+- `bun run format` — format only (`biome format --write`).
+- `bun run check` — full fix: `biome check --write --unsafe` — lints, formats, **organizes imports** (`biome.json: assist.actions.source.organizeImports: "on"`), and sorts Tailwind classes (`linter.domains.tailwind`). Use this before committing after import changes; `lint` alone does not fix imports.
+
 ### Usage in React
 
 ```tsx
