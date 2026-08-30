@@ -12,7 +12,7 @@ import {
 import { useCategoryPalette } from "@/hooks/use-category-palette"
 import { BackButton } from "@/components/back-button"
 import { formatDayHeading, groupByDay } from "@/lib/history-view"
-import { $categories, $history, UNCATEGORIZED_NAME } from "@/stores"
+import { $history, UNCATEGORIZED_NAME } from "@/stores"
 import type { HistoryEvent } from "@/stores/types"
 
 const timeFormatter = new Intl.DateTimeFormat(undefined, {
@@ -27,7 +27,7 @@ const HistoryRow = ({ event }: { event: HistoryEvent }) => {
       <TableCell>{event.itemName}</TableCell>
       <TableCell>
         <Badge pill className={palette.badge}>
-          {event.categoryId ? event.categoryName : UNCATEGORIZED_NAME}
+          {event.categoryName || UNCATEGORIZED_NAME}
         </Badge>
       </TableCell>
       <TableCell>
@@ -44,17 +44,11 @@ const HistoryRow = ({ event }: { event: HistoryEvent }) => {
 
 const HistoryView = () => {
   const history = useStore($history)
-  const categories = useStore($categories)
 
-  const eventsByName = useMemo(() => {
-    const nameById = new Map(categories.map((c) => [c.id, c.name]))
-    return history.map((event) => ({
-      ...event,
-      categoryName: nameById.get(event.categoryId) ?? "",
-    }))
-  }, [history, categories])
-
-  const groups = useMemo(() => groupByDay(eventsByName), [eventsByName])
+  // Events carry a stored `categoryName` snapshot (see `logHistory`), so we
+  // render it as-is — a deleted category keeps its label and a renamed one shows
+  // the name it had at event time rather than the live category.
+  const groups = useMemo(() => groupByDay(history), [history])
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-8 py-8">

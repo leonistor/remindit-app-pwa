@@ -16,8 +16,8 @@ import {
   type ItemPaletteSlot,
 } from "@/lib/category-palette"
 import { getPalette, PALETTE_POOL, type Palette } from "@/lib/palettes"
-import { getCategory } from "@/stores/categories"
 import { $activePaletteId } from "@/stores/palette"
+import { $categoryById } from "@/stores/selectors"
 
 export function useCategoryPalette(
   key: string,
@@ -25,11 +25,14 @@ export function useCategoryPalette(
 ): ItemPalette {
   // Subscribe so the component re-renders when the active palette changes.
   useStore($activePaletteId)
+  // Subscribe to $categories (via the cached Map) so a category's color slot
+  // change recolors mounted chips rather than leaving a stale hue.
+  const categoryById = useStore($categoryById)
   const palette: Palette =
     getPalette($activePaletteId.get()) ?? PALETTE_POOL.palettes[0]
   // Prefer the category's stored sequential slot (distinct within the palette);
   // fall back to the key-derived hash only for ad-hoc keys (e.g. palette
   // preview names) that aren't real categories.
-  const slot = overrideSlot ?? getCategory(key)?.color
+  const slot = overrideSlot ?? categoryById.get(key)?.color
   return categoryPalette(key, slot, palette)
 }

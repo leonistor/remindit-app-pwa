@@ -27,7 +27,11 @@ export interface ItemPalette {
   style: CSSProperties
   /** Resting tint for an item/category chip. */
   button: string
-  /** Emphasized tint (selected / in-list). Includes a colored ring. */
+  /**
+   * Emphasized tint (selected / in-list). For real palette slots it is the same
+   * solid hue as `button`; the `ring` token is reserved for a future emphasis
+   * ring, so there is no ring in the current build.
+   */
   buttonSelected: string
   /** Tint for a small category label badge. */
   badge: string
