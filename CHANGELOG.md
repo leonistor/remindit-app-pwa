@@ -2,6 +2,23 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v3.5.0 — 2026-08-30
+
+_Catalog editing goes tactile — dialogs, swipe gestures, and a smarter quick-add with category pills._
+
+### ✨ New Features
+
+- **Category Pills in Quick Add**: When creating a new item, category pills appear below the autocomplete results — tap a pill to create the item immediately in that category, or press **Enter** to create with the selected pill (requires at least 3 letters). Selecting a pill when the name is too short just picks the category
+- **Alphabetically Sorted Catalog**: Items within each category are now sorted alphabetically (A–Z) via locale-aware comparison, so renames and adds stay scannable
+- **Contextual Catalog Legend**: A tailored legend at the top of the Catalog page explains how to edit (double-click on desktop / tap on mobile), swipe-to-reveal delete on mobile, the **⋯** kebab menu, and confirmation dialogs — adapting via mobile detection
+- **Dialog + Swipe-to-Reveal Editing**: Double-click (desktop) or single tap (mobile) opens Item/Category dialogs for renaming; categories expose a kebab menu for discoverability and items expose a mobile swipe-to-reveal **Delete** with `AlertDialog` confirmation. Desktop keeps the Table layout while mobile uses stacked swipeable cards
+
+### 🔧 Improvements
+
+- **Quick Add in the Shopping List**: The **+** quick-add button moved from the global menu header into the Shopping List's floating row beside the sort control (unified `icon-lg`, primary) — so it lives where you actually build your list
+- **Outline Add Buttons**: **Add category** now uses the outline variant like **Add item** for visual consistency — both header actions are secondary
+- **Help & About**: Documentation updated to cover dialog editing, swipe-to-reveal, the catalog legend, alphabetical sorting, the floating quick-add row, and category pills
+
 ## v3.4.0 — 2026-08-30
 
 _Your list gets lighter and more distinct — alphabetical sorting, distinct category colors, and a faster, more accessible shopping experience._

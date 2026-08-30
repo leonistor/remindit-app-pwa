@@ -46,14 +46,44 @@ const HelpView = () => (
         </li>
         <li>
           Your list is grouped by category. Check items off as you put them in
-          the cart. Use the floating sort button above the list to cycle between
-          category, most-recent, and alphabetical (A–Z) order.
+          the cart. Use the floating sort button in the top-right of your list
+          (next to <strong>+</strong>) to cycle between category, most-recent,
+          and alphabetical (A–Z) order — your choice is remembered and items
+          within each Catalog category are themselves alphabetically sorted.
         </li>
         <li>
-          Need something that isn&rsquo;t in the catalog yet? Tap the{" "}
-          <strong>+</strong> button in the menu to open quick add — a grouped
-          autocomplete suggests items by category and surfaces your
-          recommendations as you type.
+          Need something that isn&rsquo;t in the catalog yet? Tap{" "}
+          <strong>+</strong> in the floating row at the top of your list to open
+          quick add — a grouped autocomplete suggests items by category and
+          surfaces your recommendations as you type. When creating a new item,
+          category pills appear below the results: tap a pill to create the item
+          in that category immediately, or press <strong>Enter</strong> to
+          create with the selected pill (at least 3 letters).
+        </li>
+      </ul>
+    </section>
+
+    <section className="flex flex-col gap-2">
+      <h2 className="font-semibold text-lg">Catalog</h2>
+      <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
+        <li>
+          Open <strong>Catalog</strong> from the menu to manage every item and
+          category — categories are collapsible sections sorted by how often you
+          reach for them, with items alphabetically sorted (A–Z) inside each.
+        </li>
+        <li>
+          A contextual legend at the top explains the affordances: double-click
+          (desktop) or tap (mobile) a category or item name to rename via
+          dialog, use the <strong>⋯</strong> menu to edit or delete a category,
+          and swipe an item left on mobile to reveal <strong>Delete</strong>{" "}
+          (confirmed in a dialog). You can also press <strong>Enter</strong>{" "}
+          while focused to edit via keyboard.
+        </li>
+        <li>
+          Both <strong>Add item</strong> and <strong>Add category</strong> are
+          outline buttons in the Catalog header. Deleting a category moves its
+          items to <strong>Uncategorized</strong>; deleting an item also removes
+          it from your shopping list. Both actions ask for confirmation.
         </li>
       </ul>
     </section>

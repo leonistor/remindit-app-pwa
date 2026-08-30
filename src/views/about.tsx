@@ -43,14 +43,26 @@ const AboutView = () => (
           is grouped by category and you can check items off as you shop.
         </li>
         <li>
-          <strong>Quick add</strong>: tap the <strong>+</strong> button in the
-          menu to add a new item on the fly. A grouped autocomplete suggests
-          items by category and surfaces your recommendations as you type.
+          <strong>Quick add</strong>: tap <strong>+</strong> in the floating row
+          at the top of your list to add a new item — a grouped autocomplete
+          suggests items by category and surfaces your recommendations as you
+          type. When creating a new item, category pills appear below the
+          results: tap a pill to create in that category immediately, or press{" "}
+          <strong>Enter</strong> to create with the selected pill (at least 3
+          letters).
         </li>
         <li>
-          <strong>Catalog</strong>: browse and search your items, rename them in
-          place, and add or delete items and categories in collapsible sections
-          sorted by how often you reach for them.
+          <strong>Catalog</strong>: manage items and categories in collapsible
+          sections sorted by how often you reach for them, with items
+          alphabetically sorted (A–Z) within each category. A contextual legend
+          at the top explains the affordances: double-click (desktop) or tap
+          (mobile) a name to rename via dialog, use the <strong>⋯</strong> menu
+          to edit or delete a category, and swipe an item left on mobile to
+          reveal <strong>Delete</strong> (confirmed in a dialog). Both{" "}
+          <strong>Add item</strong> and <strong>Add category</strong> are
+          outline buttons in the header — deleting a category moves its items to{" "}
+          <strong>Uncategorized</strong>; deleting an item also removes it from
+          your list.
         </li>
         <li>
           <strong>Smart recommendations</strong>: colored pips mark items that
@@ -68,9 +80,10 @@ const AboutView = () => (
           items consistently across the app.
         </li>
         <li>
-          <strong>Ordering controls</strong>: a floating sort button cycles your
-          list between category/name, most-recently-added, and alphabetical
-          (A–Z) — your choice is remembered.
+          <strong>Ordering controls</strong>: a floating sort button in the
+          top-right of your list (next to <strong>+</strong>) cycles your list
+          between category/name, most-recently-added, and alphabetical (A–Z) —
+          your choice is remembered.
         </li>
         <li>
           <strong>Theme</strong>: pick dark, light, or system and your
