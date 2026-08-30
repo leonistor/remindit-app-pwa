@@ -19,7 +19,7 @@ export default function ItemCatalog() {
     setAccordionOpen,
   } = useCatalog()
   const { runTravel } = useItemTravelTransition()
-  const openValue = open ?? groups.map((g) => g.categoryId)
+  const openValue = open ?? (groups[0] ? [groups[0].categoryId] : [])
 
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-3">
