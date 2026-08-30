@@ -1,19 +1,11 @@
-import { InfoIcon } from "@phosphor-icons/react"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Button } from "@/components/ui/custom/button"
 import { ItemButton } from "@/components/ui/custom/item-button"
-import {
-  ToggleTooltip,
-  ToggleTooltipContent,
-  ToggleTooltipTrigger,
-} from "@/components/ui/custom/toggle-tooltip"
 import { useItemTravelTransition } from "@/hooks/use-item-travel-transition"
-import { LEGEND_TIERS, RECOMMENDATION_TIERS } from "@/lib/recommendation-tiers"
 import { useCatalog } from "@/stores"
 
 export default function ItemCatalog() {
@@ -31,37 +23,6 @@ export default function ItemCatalog() {
 
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-3">
-      <div className="relative flex items-center justify-center">
-        <ToggleTooltip>
-          <ToggleTooltipTrigger asChild>
-            <Button
-              aria-label="Recommendation colour codes"
-              size="icon-sm"
-              variant="ghost"
-              className="absolute inset-e-0.5 top-[52.5%] -translate-y-1/2"
-            >
-              <InfoIcon aria-hidden />
-            </Button>
-          </ToggleTooltipTrigger>
-          <ToggleTooltipContent className="max-w-56">
-            <p className="font-medium">Recommendation codes</p>
-            <div className="mt-2 flex flex-col gap-2">
-              {LEGEND_TIERS.map((tier) => (
-                <div key={tier} className="flex items-center gap-2">
-                  <span
-                    className={`size-2 rounded-full ${RECOMMENDATION_TIERS[tier].dotColor}`}
-                    aria-hidden
-                  />
-                  <span>
-                    {RECOMMENDATION_TIERS[tier].label} —{" "}
-                    {RECOMMENDATION_TIERS[tier].description}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </ToggleTooltipContent>
-        </ToggleTooltip>
-      </div>
       <Accordion
         multiple
         value={openValue}
