@@ -1,6 +1,10 @@
 import { jsonStore, STORAGE_KEYS } from "./persistence"
 
-export type SelectedSort = "default" | "category-name" | "last-added"
+export type SelectedSort =
+  | "default"
+  | "category-name"
+  | "name"
+  | "last-added"
 
 // Ordering of the selected-items panel. "default" preserves list insertion
 // order; the other two modes are mutually exclusive sort strategies.
@@ -10,11 +14,12 @@ export const $selectedSort = jsonStore<SelectedSort>(
 )
 
 // Cycle order for the single sort button in the shopping panel. "default"
-// preserves list insertion order; the other two are mutually exclusive sort
-// strategies.
+// preserves list insertion order; the rest are mutually exclusive sort
+// strategies (category + name, name only, then last-added-first).
 export const SELECTED_SORT_ORDER: SelectedSort[] = [
   "default",
   "category-name",
+  "name",
   "last-added",
 ]
 

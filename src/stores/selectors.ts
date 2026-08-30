@@ -127,8 +127,8 @@ export const $selectedView = computed(
 )
 
 // $selectedView reordered per the user's chosen sort ($selectedSort). "default"
-// keeps list insertion order; the two sort modes are mutually exclusive in the
-// UI. Components that need the raw, unsorted list read $selectedView directly.
+// keeps list insertion order; the other modes are mutually exclusive in the UI.
+// Components that need the raw, unsorted list read $selectedView directly.
 export const $selectedOrdered = computed(
   [$selectedView, $selectedSort],
   (view, sort) => {
@@ -139,6 +139,9 @@ export const $selectedOrdered = computed(
         const byCategory = a.categoryName.localeCompare(b.categoryName)
         return byCategory !== 0 ? byCategory : a.name.localeCompare(b.name)
       })
+    } else if (sort === "name") {
+      // Alphabetical by item name (A–Z).
+      copy.sort((a, b) => a.name.localeCompare(b.name))
     } else {
       // "last-added" — most recently added first.
       copy.sort((a, b) => b.addedAt - a.addedAt)

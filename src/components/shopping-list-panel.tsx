@@ -3,6 +3,7 @@ import {
   ListBulletsIcon,
   type Icon,
   SortAscendingIcon,
+  TextAaIcon,
 } from "@phosphor-icons/react"
 import { useCallback, useRef, useState } from "react"
 import { ShoppingItem } from "@/components/shopping-item"
@@ -19,6 +20,7 @@ import {
 const OPTIONS: Record<SelectedSort, { label: string; Icon: Icon }> = {
   default: { label: "Insertion order", Icon: ListBulletsIcon },
   "category-name": { label: "Category, then name", Icon: SortAscendingIcon },
+  name: { label: "Name (A–Z)", Icon: TextAaIcon },
   "last-added": { label: "Last added first", Icon: ClockIcon },
 }
 
@@ -28,7 +30,7 @@ const OPTIONS: Record<SelectedSort, { label: string; Icon: Icon }> = {
 // the list.
 //
 // A single button in the top-right cycles the sort order (default → category +
-// name → last-added). The preference persists via the ui store.
+// name → name only → last-added). The preference persists via the ui store.
 export const ShoppingListPanel = () => {
   const {
     items: selectedView,
