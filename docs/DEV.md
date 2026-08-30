@@ -89,7 +89,7 @@ Each category carries a stable `color` slot (`Category.color`, a palette index) 
 The **active palette** is a persisted user choice:
 
 - `src/stores/palette.ts` — `$activePaletteId` (a `@nanostores/persistent` `jsonStore`, persisted under `remindit:active-palette`), plus `setActivePalette(id)` / `getActivePalette()`. Defaults to `defaultPaletteId` from the pool.
-- `src/hooks/use-category-palette.ts` — `useCategoryPalette(key, overrideSlot?)` subscribes to the active palette and returns `categoryPalette(...)` for it, so any consumer recolors live when the choice changes. It resolves the category's stored slot via `getCategory(key)?.color` (falling back to the key hash for non-category keys) and passes it as `overrideSlot`. `ItemButton` and `ShoppingItem` use this hook.
+- `src/hooks/use-category-palette.ts` — `useCategoryPalette(key, overrideSlot?)` subscribes to the active palette and returns `categoryPalette(...)` for it, so any consumer recolors live when the choice changes. It resolves the category's stored slot via the `$categoryById` Map selector (falling back to the key hash for non-category keys) and passes it as `overrideSlot`; subscribing to `$categories` means a color-slot change recolors mounted chips. `ItemButton` and `ShoppingItem` use this hook.
 - Pick the active palette in **Settings** via `PaletteChooser` (`src/components/palette-chooser.tsx`): an inline Shark `Listbox` of the pool with a 12-swatch preview per option and a live sample-chip preview above the list. Selection calls `setActivePalette`.
 - **`ItemCatalog`** (`src/components/item-catalog.tsx`) — the right-hand browse/select panel. Renders an Ark UI `Accordion` (multiple, only the first category open by default) of `ItemButton`s grouped by category from `$catalogByCategory`. Clicking toggles list membership via `addToList` / `removeFromList` (resolving item id → entry id through `$selectedView`).
 
@@ -131,18 +131,23 @@ All collections are persisted to `localStorage` with `@nanostores/persistent` (k
 | File            | Exposes                                                                                                                                                 |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `types.ts`      | Shared types + `UNCATEGORIZED_ID` / naming constants                                                                                                    |
-| `categories.ts` | `$categories`, `addCategory`, `renameCategory`, `removeCategory`, `getCategory`, `ensureUncategorizedExists`                                            |
-| `catalog.ts`    | `$catalog`, `addCatalogItem`, `updateCatalogItem`, `removeCatalogItem`, `getCatalogItem`                                                                |
-| `list.ts`       | `$list`, `addToList`, `removeFromList`, `setEntryChecked`, `clearList`, `createItemAndAddToList`, `removeListEntriesForItem`                            |
+| `categories.ts` | `$categories`, `addCategory`, `renameCategory`, `updateCategory`, `getCategory`, `ensureUncategorizedExists`                                            |
+| `catalog.ts`    | `$catalog`, `addCatalogItem`, `updateCatalogItem`, `renameCatalogItem`, `reassignItemsToCategory`, `getCatalogItem`                                     |
+| `list.ts`       | `$list`, `addToList`, `removeFromList`, `removeFromListByItemId`, `setEntryChecked`, `clearList`, `removeListEntriesForItem`                            |
 | `history.ts`    | `$history`, `logHistory`, `clearHistory`                                                                                                                |
+| `commands.ts`   | Cross-store flows — `deleteCategoryWithReassign`, `deleteCatalogItemWithCascade`, `createItemAndAddToList` (see below)                                  |
 | `user.ts`       | `$user`, `getUser`, `updateUser`, `randomUser`                                                                                                          |
-| `selectors.ts`  | computed `$itemsByCategory`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$listItemIds`, `$catalogByCategory`, `$recommendations` |
+| `selectors.ts`  | computed `$itemsByCategory`, `$categoryById`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$listItemIds`, `$catalogByCategory`, `$recommendations` |
 | `recommender.ts`| `computeItemStats`, `getExpectedInterval`, `scoreItem`, `computeRecommendations`, `FREQ_TO_DAYS` |
 | `ui.ts`         | UI-preference state — `$accordionOpen`, `setAccordionOpen` (persists the available-items panel's accordion open-state to `localStorage`) |
 | `palette.ts`    | Active categorical-palette selection — `$activePaletteId`, `getActivePalette`, `setActivePalette` (persisted to `localStorage` under `remindit:active-palette`) |
 | `index.ts`      | Barrel exports + `initStores()` (seeds sample data, random user, dev logger)                                                                    |
 
-Import everything from the barrel: `import { $list, addToList } from "@/stores"`.
+Import store atoms/actions from the barrel: `import { $list, addToList } from "@/stores"`.
+
+**Cross-store flows live in `commands.ts`.** Store modules own a *single resource* and never import a sibling store's action functions; anything that composes two or more stores for one user action lives in `src/stores/commands.ts` (e.g. deleting a category reassigns its items, deleting a catalog item cascades list entries). This keeps the store call graph acyclic.
+
+**React hooks are NOT exported from the barrel.** `useCatalog`, `useShoppingList`, `usePwaInstall` live in `src/hooks/` (importing store atoms), and `useDrawer` comes from `src/components/drawer-context.tsx`. Import hooks directly: `import { useCatalog } from "@/hooks/use-catalog"` — never through `@/stores`.
 
 ### Invariants
 
