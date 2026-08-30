@@ -46,8 +46,8 @@ const HelpView = () => (
         </li>
         <li>
           Your list is grouped by category. Check items off as you put them in
-          the cart. Use the floating sort button above the list to cycle
-          between category, most-recent, and alphabetical (A–Z) order.
+          the cart. Use the floating sort button above the list to cycle between
+          category, most-recent, and alphabetical (A–Z) order.
         </li>
         <li>
           Need something that isn&rsquo;t in the catalog yet? Tap the{" "}

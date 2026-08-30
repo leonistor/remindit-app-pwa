@@ -2,8 +2,8 @@
 // stored color slot, and that it recolors mounted chips when $categories changes
 // (the slot lookup is now backed by the $categoryById Map selector).
 
-import { act, cleanup, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test } from "@rstest/core"
+import { act, cleanup, render, screen } from "@testing-library/react"
 import { $categories } from "@/stores/categories"
 import { useCategoryPalette } from "./use-category-palette"
 
@@ -16,10 +16,7 @@ afterEach(cleanup)
 function Harness() {
   const palette = useCategoryPalette("cat-1")
   return (
-    <div
-      data-testid="palette"
-      style={palette.style}
-    >
+    <div data-testid="palette" style={palette.style}>
       {palette.hex}
     </div>
   )

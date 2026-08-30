@@ -1,5 +1,6 @@
 import { useStore } from "@nanostores/react"
 import { useMemo } from "react"
+import { BackButton } from "@/components/back-button"
 import { Badge } from "@/components/ui/badge"
 import {
   Table,
@@ -10,7 +11,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useCategoryPalette } from "@/hooks/use-category-palette"
-import { BackButton } from "@/components/back-button"
 import { formatDayHeading, groupByDay } from "@/lib/history-view"
 import { $history, UNCATEGORIZED_NAME } from "@/stores"
 import type { HistoryEvent } from "@/stores/types"

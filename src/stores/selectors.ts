@@ -18,8 +18,9 @@ import { $selectedSort } from "./ui"
 
 // Category lookup by id, cached so components (e.g. useCategoryPalette) resolve a
 // category's color slot in O(1) and re-render when `$categories` changes.
-export const $categoryById = computed($categories, (categories) =>
-  new Map(categories.map((c) => [c.id, c]))
+export const $categoryById = computed(
+  $categories,
+  (categories) => new Map(categories.map((c) => [c.id, c]))
 )
 
 export interface GroupedItem {

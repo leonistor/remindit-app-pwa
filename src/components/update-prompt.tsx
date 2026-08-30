@@ -1,6 +1,6 @@
 import { ArrowClockwise } from "@phosphor-icons/react"
-import { useServiceWorkerUpdate } from "@/hooks/use-sw-update"
 import { Button } from "@/components/ui/custom/button"
+import { useServiceWorkerUpdate } from "@/hooks/use-sw-update"
 
 /**
  * Shows a non-blocking "update available" prompt once a new service worker is

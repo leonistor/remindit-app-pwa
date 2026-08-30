@@ -29,16 +29,39 @@ describe("buildItems", () => {
     const items = buildItems(false, [], catalogGroups, new Map())
 
     expect(items).toEqual([
-      { value: "i1", label: "Apple", categoryId: "cat-produce", categoryName: "Produce" },
-      { value: "i2", label: "Banana", categoryId: "cat-produce", categoryName: "Produce" },
-      { value: "i3", label: "Milk", categoryId: "cat-dairy", categoryName: "Dairy" },
+      {
+        value: "i1",
+        label: "Apple",
+        categoryId: "cat-produce",
+        categoryName: "Produce",
+      },
+      {
+        value: "i2",
+        label: "Banana",
+        categoryId: "cat-produce",
+        categoryName: "Produce",
+      },
+      {
+        value: "i3",
+        label: "Milk",
+        categoryId: "cat-dairy",
+        categoryName: "Dairy",
+      },
     ])
   })
 
   test("groups recommendations by category in the given rank order", () => {
     const recs = [
-      { item: { id: "r1", name: "Oat", categoryId: "cat-dairy" }, categoryName: "Dairy", score: 2 },
-      { item: { id: "r2", name: "Onion", categoryId: "cat-produce" }, categoryName: "Produce", score: 1 },
+      {
+        item: { id: "r1", name: "Oat", categoryId: "cat-dairy" },
+        categoryName: "Dairy",
+        score: 2,
+      },
+      {
+        item: { id: "r2", name: "Onion", categoryId: "cat-produce" },
+        categoryName: "Produce",
+        score: 1,
+      },
     ]
     const rank = new Map([
       ["cat-produce", 1],
@@ -52,8 +75,16 @@ describe("buildItems", () => {
 
   test("flattens recommendations in source order when no rank is supplied", () => {
     const recs = [
-      { item: { id: "r1", name: "Oat", categoryId: "cat-dairy" }, categoryName: "Dairy", score: 2 },
-      { item: { id: "r2", name: "Onion", categoryId: "cat-produce" }, categoryName: "Produce", score: 1 },
+      {
+        item: { id: "r1", name: "Oat", categoryId: "cat-dairy" },
+        categoryName: "Dairy",
+        score: 2,
+      },
+      {
+        item: { id: "r2", name: "Onion", categoryId: "cat-produce" },
+        categoryName: "Produce",
+        score: 1,
+      },
     ]
 
     const items = buildItems(true, recs, catalogGroups, new Map())

@@ -19,7 +19,10 @@ const dayFormatter = new Intl.DateTimeFormat(undefined, {
 // Human heading for a day key. Relative labels ("Today"/"Yesterday") are
 // computed against `now` so the logic is deterministic and testable; other days
 // fall back to a locale short date.
-export function formatDayHeading(key: string, now: number = Date.now()): string {
+export function formatDayHeading(
+  key: string,
+  now: number = Date.now()
+): string {
   const [year, month, day] = key.split("-").map(Number)
   const date = new Date(year, month, day)
   const today = new Date(now)

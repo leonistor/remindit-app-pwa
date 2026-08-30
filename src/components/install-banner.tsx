@@ -2,11 +2,7 @@ import { DownloadSimple } from "@phosphor-icons/react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/custom/button"
 import { usePwaInstall } from "@/hooks/use-pwa-install"
-import {
-  dismissInstall,
-  dismissLater,
-  installApp,
-} from "@/stores/pwa-install"
+import { dismissInstall, dismissLater, installApp } from "@/stores/pwa-install"
 
 // Non-blocking prompt for Chromium browsers that offer a native install. Hidden
 // once installed, dismissed forever ("No"), or dismissed for this session

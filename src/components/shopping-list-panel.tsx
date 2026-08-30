@@ -1,7 +1,7 @@
 import {
   ClockIcon,
-  ListBulletsIcon,
   type Icon,
+  ListBulletsIcon,
   PlusIcon,
   SortAscendingIcon,
   TextAaIcon,

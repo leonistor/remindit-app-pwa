@@ -87,7 +87,9 @@ describe("assignCategoryColors", () => {
     const slots = next.map((c) => c.color)
     expect(slots).toHaveLength(PALETTE_SLOT_COUNT)
     expect(new Set(slots).size).toBe(PALETTE_SLOT_COUNT)
-    expect(slots).toEqual(Array.from({ length: PALETTE_SLOT_COUNT }, (_, i) => i))
+    expect(slots).toEqual(
+      Array.from({ length: PALETTE_SLOT_COUNT }, (_, i) => i)
+    )
   })
 
   test("leaves the uncategorized sentinel without a color", () => {

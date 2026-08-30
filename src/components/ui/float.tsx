@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { ark } from "@ark-ui/react/factory";
-import type React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
-import { cn } from "@/lib/utils";
+import { ark } from "@ark-ui/react/factory"
+import type React from "react"
+import { tv, type VariantProps } from "tailwind-variants"
+import { cn } from "@/lib/utils"
 
 const floatVariants = tv({
   base: ["pointer-events-auto absolute z-10"],
@@ -23,14 +23,14 @@ const floatVariants = tv({
   defaultVariants: {
     placement: "top-end",
   },
-});
+})
 
 interface FloatProps
   extends React.ComponentProps<typeof ark.div>,
     VariantProps<typeof floatVariants> {}
 
 export const Float = (props: FloatProps) => {
-  const { placement = "top-end", className, ...rest } = props;
+  const { placement = "top-end", className, ...rest } = props
 
   return (
     <ark.div
@@ -39,5 +39,5 @@ export const Float = (props: FloatProps) => {
       data-slot="float"
       {...rest}
     />
-  );
-};
+  )
+}

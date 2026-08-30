@@ -1,10 +1,6 @@
 import { jsonStore, STORAGE_KEYS } from "./persistence"
 
-export type SelectedSort =
-  | "default"
-  | "category-name"
-  | "name"
-  | "last-added"
+export type SelectedSort = "default" | "category-name" | "name" | "last-added"
 
 // Ordering of the selected-items panel. "default" preserves list insertion
 // order; the other two modes are mutually exclusive sort strategies.

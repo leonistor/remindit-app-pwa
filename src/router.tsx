@@ -11,9 +11,9 @@ import { DrawerProvider } from "./components/drawer-context"
 import { Footer } from "./components/footer"
 import { InstallBanner } from "./components/install-banner"
 import { ItemDetailDrawer } from "./components/item-detail-drawer"
-import { UpdatePrompt } from "./components/update-prompt"
 import Menu from "./components/menu"
 import ShoppingPanels from "./components/shopping-panels"
+import { UpdatePrompt } from "./components/update-prompt"
 import OnboardingView from "./views/onboarding"
 
 // Secondary routes are code-split so the main shopping view (the LCP) ships
@@ -47,7 +47,13 @@ function Layout() {
           <Menu />
           <div className="flex min-h-0 grow flex-col overflow-y-auto">
             <main className="flex min-h-0 grow flex-col">
-              <Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Loading…</div>}>
+              <Suspense
+                fallback={
+                  <div className="p-4 text-muted-foreground text-sm">
+                    Loading…
+                  </div>
+                }
+              >
                 <Outlet />
               </Suspense>
               {!isHome && (

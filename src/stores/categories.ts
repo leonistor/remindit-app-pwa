@@ -4,8 +4,8 @@
 // — that cross-store flow lives in `deleteCategoryWithReassign` in
 // `./commands.ts`.
 
-import { jsonStore, STORAGE_KEYS } from "./persistence"
 import { PALETTE_SLOT_COUNT } from "@/lib/category-palette"
+import { jsonStore, STORAGE_KEYS } from "./persistence"
 import type { Category, CategoryFrequency } from "./types"
 import {
   CATEGORY_FREQUENCIES,
@@ -34,7 +34,10 @@ function usedColorSlots(categories: Category[]): Set<number> {
   for (const c of categories) {
     if (c.id === UNCATEGORIZED_ID) continue
     if (typeof c.color === "number") {
-      used.add(((c.color % PALETTE_SLOT_COUNT) + PALETTE_SLOT_COUNT) % PALETTE_SLOT_COUNT)
+      used.add(
+        ((c.color % PALETTE_SLOT_COUNT) + PALETTE_SLOT_COUNT) %
+          PALETTE_SLOT_COUNT
+      )
     }
   }
   return used
@@ -52,7 +55,9 @@ export function assignCategoryColors(categories: Category[]): Category[] {
   return categories.map((c) => {
     if (c.id === UNCATEGORIZED_ID) return c
     if (typeof c.color === "number") {
-      const slot = ((c.color % PALETTE_SLOT_COUNT) + PALETTE_SLOT_COUNT) % PALETTE_SLOT_COUNT
+      const slot =
+        ((c.color % PALETTE_SLOT_COUNT) + PALETTE_SLOT_COUNT) %
+        PALETTE_SLOT_COUNT
       return c.color === slot ? c : { ...c, color: slot }
     }
     const slot = nextColorSlot(used)

@@ -2,9 +2,13 @@
 // Editing, deleting, or renaming catalog items / categories must never write
 // here — those callers simply do not invoke logHistory().
 
-import { jsonStore, STORAGE_KEYS } from "./persistence"
 import { $categories } from "./categories"
-import { UNCATEGORIZED_NAME, type HistoryAction, type HistoryEvent } from "./types"
+import { jsonStore, STORAGE_KEYS } from "./persistence"
+import {
+  type HistoryAction,
+  type HistoryEvent,
+  UNCATEGORIZED_NAME,
+} from "./types"
 
 const $history = jsonStore<HistoryEvent[]>(STORAGE_KEYS.history, [])
 
@@ -18,9 +22,8 @@ export interface LogHistoryInput {
 /** Append a shopping event. Returns the created event. */
 export function logHistory(input: LogHistoryInput): HistoryEvent {
   const categoryName =
-    $categories
-      .get()
-      .find((c) => c.id === input.categoryId)?.name ?? UNCATEGORIZED_NAME
+    $categories.get().find((c) => c.id === input.categoryId)?.name ??
+    UNCATEGORIZED_NAME
   const event: HistoryEvent = {
     id: crypto.randomUUID(),
     timestamp: Date.now(),

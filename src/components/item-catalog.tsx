@@ -5,8 +5,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { ItemButton } from "@/components/ui/custom/item-button"
-import { useItemTravelTransition } from "@/hooks/use-item-travel-transition"
 import { useCatalog } from "@/hooks/use-catalog"
+import { useItemTravelTransition } from "@/hooks/use-item-travel-transition"
 
 export default function ItemCatalog() {
   const {

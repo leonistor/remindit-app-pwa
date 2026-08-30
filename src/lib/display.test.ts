@@ -6,7 +6,11 @@ import { avatarInitials, initials } from "@/lib/display"
 describe("avatarInitials", () => {
   test("uses the first and last name initials", () => {
     expect(
-      avatarInitials({ firstName: "Ada", lastName: "Lovelace", username: "ada" })
+      avatarInitials({
+        firstName: "Ada",
+        lastName: "Lovelace",
+        username: "ada",
+      })
     ).toBe("AL")
   })
 
@@ -17,9 +21,9 @@ describe("avatarInitials", () => {
   })
 
   test("falls back to '?' when there is no name or username", () => {
-    expect(
-      avatarInitials({ firstName: "", lastName: "", username: "" })
-    ).toBe("?")
+    expect(avatarInitials({ firstName: "", lastName: "", username: "" })).toBe(
+      "?"
+    )
   })
 })
 

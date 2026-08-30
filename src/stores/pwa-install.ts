@@ -83,5 +83,3 @@ export const $showInstallBanner = computed(
   (canInstall, installed, dismissed, later) =>
     canInstall && !installed && !dismissed && !later
 )
-
-

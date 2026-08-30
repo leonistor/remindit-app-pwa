@@ -17,8 +17,8 @@ import {
   $categoryById,
   $checkedCount,
   $itemsByCategory,
-  $listItemIds,
   $listCount,
+  $listItemIds,
   $selectedView,
 } from "@/stores/selectors"
 import type { CatalogItem, Category, ListEntry } from "@/stores/types"

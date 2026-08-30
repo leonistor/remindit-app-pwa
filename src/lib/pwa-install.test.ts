@@ -1,7 +1,11 @@
 // Unit tests for the PWA installability detection (src/lib/pwa-install).
 
 import { afterEach, describe, expect, test } from "@rstest/core"
-import { detectPlatform, isStandalone, type ManualInstallPlatform } from "@/lib/pwa-install"
+import {
+  detectPlatform,
+  isStandalone,
+  type ManualInstallPlatform,
+} from "@/lib/pwa-install"
 
 const nav = navigator as Navigator & {
   userAgent: string
@@ -20,7 +24,11 @@ function setNav(overrides: {
 }) {
   for (const key of ["userAgent", "platform", "maxTouchPoints"] as const) {
     const value = overrides[key] ?? (key === "userAgent" ? "" : 0)
-    Object.defineProperty(nav, key, { value, configurable: true, writable: true })
+    Object.defineProperty(nav, key, {
+      value,
+      configurable: true,
+      writable: true,
+    })
     stubbed.add(key)
   }
 }
@@ -50,12 +58,20 @@ const cases: {
   { name: "iPad", overrides: { userAgent: IPAD_UA }, expected: "ios" },
   {
     name: "iPadOS (Mac reporting with touch)",
-    overrides: { userAgent: MAC_SAFARI_UA, platform: "MacIntel", maxTouchPoints: 5 },
+    overrides: {
+      userAgent: MAC_SAFARI_UA,
+      platform: "MacIntel",
+      maxTouchPoints: 5,
+    },
     expected: "ios",
   },
   {
     name: "macOS Safari",
-    overrides: { userAgent: MAC_SAFARI_UA, platform: "MacIntel", maxTouchPoints: 0 },
+    overrides: {
+      userAgent: MAC_SAFARI_UA,
+      platform: "MacIntel",
+      maxTouchPoints: 0,
+    },
     expected: "mac-safari",
   },
   {

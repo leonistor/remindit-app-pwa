@@ -8,7 +8,8 @@ import { onboard } from "./helpers"
 const DROPDOWN_LINKS = ["Profile", "Catalog", "History", "About", "Help"]
 
 const hamburger = (page: Page) => page.locator('button[aria-label="Open menu"]')
-const closeButton = (page: Page) => page.locator('button[aria-label="Close menu"]')
+const closeButton = (page: Page) =>
+  page.locator('button[aria-label="Close menu"]')
 const dropdownLink = (page: Page, name: string) =>
   page.locator('[data-slot="menu-content"]').locator("a").getByText(name, {
     exact: true,

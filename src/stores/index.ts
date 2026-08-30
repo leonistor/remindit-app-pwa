@@ -12,8 +12,8 @@ import {
   $categories,
   assignCategoryColors,
   ensureUncategorizedExists,
-  normalizeCategoryFrequencies,
   normalizeCategoryColors,
+  normalizeCategoryFrequencies,
 } from "./categories"
 import { $history } from "./history"
 import { $list } from "./list"

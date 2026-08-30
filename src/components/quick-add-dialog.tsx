@@ -11,8 +11,8 @@ import {
   AutocompleteItem,
   AutocompleteList,
 } from "@/components/ui/autocomplete"
-import { Button } from "@/components/ui/custom/button"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/custom/button"
 import {
   Dialog,
   DialogBody,
@@ -23,6 +23,14 @@ import {
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import {
+  buildItems,
+  isNewValue,
+  NEW_CATEGORY_ID,
+  NEW_VALUE_PREFIX,
+  type QuickAddItem,
+  RECS_ONLY_THRESHOLD,
+} from "@/lib/quick-add"
+import {
   $catalogByCategory,
   $categories,
   $recommendations,
@@ -31,14 +39,6 @@ import {
   UNCATEGORIZED_ID,
 } from "@/stores"
 import { frequencyRank } from "@/stores/types"
-import {
-  buildItems,
-  isNewValue,
-  NEW_CATEGORY_ID,
-  NEW_VALUE_PREFIX,
-  RECS_ONLY_THRESHOLD,
-  type QuickAddItem,
-} from "@/lib/quick-add"
 
 interface QuickAddDialogProps {
   open: boolean
@@ -107,8 +107,6 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
     itemToString: (item) => item.label,
   })
 
-
-
   // Keep the collection in sync with the source list and the current filter.
   useEffect(() => {
     set(allItems)
@@ -130,7 +128,8 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
     setNewItemCategoryId(
       hasUncategorized
         ? UNCATEGORIZED_ID
-        : ((categories[0] as { id: string } | undefined)?.id ?? UNCATEGORIZED_ID)
+        : ((categories[0] as { id: string } | undefined)?.id ??
+            UNCATEGORIZED_ID)
     )
     // Focus the input once the dialog content has mounted and the dialog's own
     // focus-on-open handling has settled.
@@ -146,10 +145,11 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
   const createNewItem = (overrideCategoryId?: string) => {
     if (trimmed.length < 3 || !canCreate) return false
     const rawTarget = overrideCategoryId ?? newItemCategoryId
-    const targetCategoryId =
-      categories.some((c: { id: string }) => c.id === rawTarget)
-        ? rawTarget
-        : UNCATEGORIZED_ID
+    const targetCategoryId = categories.some(
+      (c: { id: string }) => c.id === rawTarget
+    )
+      ? rawTarget
+      : UNCATEGORIZED_ID
     createItemAndAddToList(trimmed, targetCategoryId)
     commitAndClose()
     return true
@@ -177,19 +177,24 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
     const selected = details.value[0]
     if (!selected) return
     if (isNewValue(selected)) {
-      const targetCategoryId =
-        categories.some((c: { id: string }) => c.id === newItemCategoryId)
-          ? newItemCategoryId
-          : UNCATEGORIZED_ID
-      createItemAndAddToList(selected.slice(NEW_VALUE_PREFIX.length), targetCategoryId)
+      const targetCategoryId = categories.some(
+        (c: { id: string }) => c.id === newItemCategoryId
+      )
+        ? newItemCategoryId
+        : UNCATEGORIZED_ID
+      createItemAndAddToList(
+        selected.slice(NEW_VALUE_PREFIX.length),
+        targetCategoryId
+      )
     } else if (baseItems.some((item) => item.value === selected)) {
       addToList(selected)
     } else {
       // Fallback for any other custom value (e.g. Enter on a free-typed name).
-      const targetCategoryId =
-        categories.some((c: { id: string }) => c.id === newItemCategoryId)
-          ? newItemCategoryId
-          : UNCATEGORIZED_ID
+      const targetCategoryId = categories.some(
+        (c: { id: string }) => c.id === newItemCategoryId
+      )
+        ? newItemCategoryId
+        : UNCATEGORIZED_ID
       createItemAndAddToList(selected, targetCategoryId)
     }
     commitAndClose()

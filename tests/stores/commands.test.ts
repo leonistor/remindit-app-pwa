@@ -59,7 +59,12 @@ describe("stores commands", () => {
 
     $list.set([
       { id: "entry-1", itemId: item.id, checked: false, addedAt: Date.now() },
-      { id: "entry-2", itemId: "other-item", checked: false, addedAt: Date.now() },
+      {
+        id: "entry-2",
+        itemId: "other-item",
+        checked: false,
+        addedAt: Date.now(),
+      },
     ])
 
     const seededHistory: HistoryEvent = {
