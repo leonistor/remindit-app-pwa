@@ -20,6 +20,9 @@ Our primary UI framework is **Shark UI** — a shadcn-style registry built on to
 
 ## Docs
 
+- [DESIGN.md](DESIGN.md) — design system (contributors, current look as shipped)
+- [docs/DEV.md](docs/DEV.md) — development & state architecture
+- [docs/DEV-COMPONENTS.md](docs/DEV-COMPONENTS.md) — Shark UI registry vs custom split
 - Rsbuild: https://rsbuild.rs/llms.txt
 - Rspack: https://rspack.rs/llms.txt
 - Rstest: https://rstest.rs/llms.txt

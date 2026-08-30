@@ -1,6 +1,6 @@
 # UI components — registry vs. custom
 
-This document supplements [`DEV.md`](./DEV.md) and explains how our Shark UI components are
+This document supplements [`DEV.md`](./DEV.md) and [`DESIGN.md`](../DESIGN.md) (§6) and explains how our Shark UI components are
 split between **registry-managed** primitives and **hand-maintained / derived** components,
 plus the findings from the latest upstream update check.
 

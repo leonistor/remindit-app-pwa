@@ -26,7 +26,7 @@ This project is a Progressive Web App (PWA) to manage a personal shopping list.
 
 ## [ ] Version 4
 
-- [ ] DESIGN.md
+- [x] [DESIGN.md](../DESIGN.md) — design system as shipped (contributors, text-only)
 - [ ] Help content: text, videos; update onboarding; tour
 - [ ] add license
 - [ ] app website

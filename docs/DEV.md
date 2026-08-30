@@ -1,5 +1,7 @@
 # development
 
+> Design reference: [`DESIGN.md`](../DESIGN.md) — visual system as shipped (tokens, palettes, layout, motion, a11y). This doc covers architecture & state.
+
 ## Application Layout
 
 The app uses a single-route layout (`src/router.tsx`) with a top menu bar, a content area (`<Outlet />`), and a discreet version footer (hidden on the main shopping view).
@@ -44,6 +46,8 @@ A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Lay
 The installable web manifest is defined in `pwa-manifest.config.ts` (the `WEB_APP_MANIFEST` object), **not** inline in `rsbuild.config.ts`. Brand color for both the manifest and the generated icons lives in that same file as `PWA_THEME_COLOR` / `PWA_BACKGROUND_COLOR` — both default to the **neutral app primary** (`#262626`, background `#ffffff`), reconciled with the neutral UI chrome. `scripts/generate-favicons.ts` imports those same constants when regenerating icons, so the manifest and favicons stay in sync. The master icon SVGs (`public/remindit-icon.svg`, `public/remindit-icon-maskable.svg`) carry the same `#262626` fill.
 
 ## UI components (Shark UI)
+
+> Visual details (palettes, semantic tokens, item-chip rules, motion) live in [`DESIGN.md` §4–8](../DESIGN.md). Below is the implementation view.
 
 Our primary UI framework is **Shark UI** — a shadcn-style component registry built on top of [Ark UI](https://ark-ui.com). Shark UI is the framework; Ark UI is only its internal foundation. Components live in `src/components/ui/*` and are added from the registry with the shadcn CLI:
 
@@ -104,7 +108,7 @@ The header `+` button opens a `QuickAddDialog` (`src/components/quick-add-dialog
 
 ## Typography
 
-The application uses the self-hosted **Atkinson Hyperlegible Next** variable font from Fontsource. The font is imported from `src/index.tsx` and its `200–800` weight range is exposed through the global `font-sans` theme token in `src/styles/globals.css`. The `body` applies `font-sans`, so feature components inherit the application font without local font declarations.
+The application uses the self-hosted **Atkinson Hyperlegible Next** variable font from Fontsource. The font is imported from `src/index.tsx` and its `200–800` weight range is exposed through the global `font-sans` theme token in `src/styles/globals.css`. The `body` applies `font-sans`, so feature components inherit the application font without local font declarations. Full type scale and conventions: [`DESIGN.md` §3](../DESIGN.md).
 
 Install or update it with:
 
