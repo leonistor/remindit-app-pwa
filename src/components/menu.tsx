@@ -22,24 +22,11 @@ import {
   MenuTrigger,
 } from "@/components/ui/menu"
 import { usePwaInstall } from "@/hooks/use-pwa-install"
+import { avatarInitials } from "@/lib/display"
 import { $user, installApp } from "@/stores"
 import { InstallInstructionsDialog } from "./install-instructions-dialog"
 import { QuickAddDialog } from "./quick-add-dialog"
 import { ThemeMenu } from "./theme-menu"
-
-const avatarInitials = (user: {
-  firstName: string
-  lastName: string
-  username: string
-}) => {
-  const fromName = `${user.firstName} ${user.lastName}`.trim()
-  const source = fromName || user.username
-  const parts = source.split(/\s+/).filter(Boolean)
-  if (parts.length > 1) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-  }
-  return (parts[0]?.slice(0, 2) ?? "?").toUpperCase()
-}
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `text-sm transition-colors hover:text-foreground ${isActive ? "font-medium text-foreground" : "text-muted-foreground"}`

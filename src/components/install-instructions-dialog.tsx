@@ -7,7 +7,7 @@ import {
   DialogFooter,
   DialogHeader,
 } from "@/components/ui/dialog"
-import type { ManualInstallPlatform } from "@/stores/pwa-install"
+import type { ManualInstallPlatform } from "@/lib/pwa-install"
 
 const INSTRUCTIONS: Record<
   ManualInstallPlatform,

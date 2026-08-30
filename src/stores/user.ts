@@ -5,6 +5,7 @@
 // generator lives in `src/lib/profile-generator.ts` and is loaded lazily so it
 // stays out of the main bundle.
 
+import { initials } from "@/lib/display"
 import { jsonStore, STORAGE_KEYS } from "./persistence"
 import type { UserProfile } from "./types"
 
@@ -31,12 +32,7 @@ export function updateUser(patch: Partial<UserProfile>): void {
 // app stays fully local-first. Used as the fallback when the DiceBear generator
 // is not in play (e.g. a sync reseed without a generated profile).
 export function localAvatar(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  const initials = (
-    parts.length > 1
-      ? parts[0][0] + parts[parts.length - 1][0]
-      : (parts[0]?.slice(0, 2) ?? "")
-  ).toUpperCase()
+  const initialsStr = initials(name)
 
   let hash = 0
   for (let i = 0; i < name.length; i++) {
@@ -44,7 +40,7 @@ export function localAvatar(name: string): string {
   }
   const hue = hash % 360
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150"><rect width="150" height="150" rx="24" fill="hsl(${hue}, 55%, 45%)"/><text x="50%" y="50%" dy=".35em" text-anchor="middle" fill="#ffffff" font-family="sans-serif" font-size="64" font-weight="600">${initials}</text></svg>`
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150"><rect width="150" height="150" rx="24" fill="hsl(${hue}, 55%, 45%)"/><text x="50%" y="50%" dy=".35em" text-anchor="middle" fill="#ffffff" font-family="sans-serif" font-size="64" font-weight="600">${initialsStr}</text></svg>`
 
   return `data:image/svg+xml,${encodeURIComponent(svg)}`
 }

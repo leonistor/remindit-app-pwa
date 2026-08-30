@@ -1,4 +1,5 @@
 import { useStore } from "@nanostores/react"
+import type { ManualInstallPlatform } from "@/lib/pwa-install"
 import {
   $canInstall,
   $installDismissed,
@@ -8,7 +9,6 @@ import {
   dismissInstall,
   dismissLater,
   installApp,
-  type ManualInstallPlatform,
 } from "@/stores/pwa-install"
 
 export interface UsePwaInstall {

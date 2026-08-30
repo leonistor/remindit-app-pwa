@@ -11,34 +11,14 @@ import {
 } from "@/components/ui/table"
 import { useCategoryPalette } from "@/hooks/use-category-palette"
 import { BackButton } from "@/components/back-button"
+import { formatDayHeading, groupByDay } from "@/lib/history-view"
 import { $categories, $history, UNCATEGORIZED_NAME } from "@/stores"
 import type { HistoryEvent } from "@/stores/types"
 
-const dayKey = (ts: number) => {
-  const d = new Date(ts)
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
-}
-
-const dayFormatter = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-})
 const timeFormatter = new Intl.DateTimeFormat(undefined, {
   hour: "2-digit",
   minute: "2-digit",
 })
-
-const formatDayHeading = (key: string) => {
-  const [year, month, day] = key.split("-").map(Number)
-  const date = new Date(year, month, day)
-  const today = new Date()
-  const yesterday = new Date()
-  yesterday.setDate(today.getDate() - 1)
-  if (dayKey(today.getTime()) === key) return "Today"
-  if (dayKey(yesterday.getTime()) === key) return "Yesterday"
-  return dayFormatter.format(date)
-}
 
 const HistoryRow = ({ event }: { event: HistoryEvent }) => {
   const palette = useCategoryPalette(event.categoryId)
@@ -74,21 +54,7 @@ const HistoryView = () => {
     }))
   }, [history, categories])
 
-  const groups = useMemo(() => {
-    const byDay = new Map<string, HistoryEvent[]>()
-    for (const event of eventsByName) {
-      const key = dayKey(event.timestamp)
-      const bucket = byDay.get(key)
-      if (bucket) bucket.push(event)
-      else byDay.set(key, [event])
-    }
-    return [...byDay.entries()]
-      .sort(([a], [b]) => (a < b ? 1 : -1))
-      .map(([key, events]) => ({
-        key,
-        events: events.sort((x, y) => y.timestamp - x.timestamp),
-      }))
-  }, [eventsByName])
+  const groups = useMemo(() => groupByDay(eventsByName), [eventsByName])
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-8 py-8">

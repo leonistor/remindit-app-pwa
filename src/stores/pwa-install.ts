@@ -13,6 +13,11 @@
 
 import { atom, computed } from "nanostores"
 import { pwaInstallHandler } from "pwa-install-handler"
+import {
+  detectPlatform,
+  isStandalone,
+  type ManualInstallPlatform,
+} from "@/lib/pwa-install"
 import { jsonStore, STORAGE_KEYS } from "./persistence"
 
 // True once the browser offers a native install (Chromium `beforeinstallprompt`).
@@ -33,39 +38,6 @@ export const $installLater = atom(false)
 export const $manualPlatform = atom<ManualInstallPlatform>("other")
 
 let initialized = false
-
-export type ManualInstallPlatform =
-  | "ios"
-  | "mac-safari"
-  | "android-nonchrome"
-  | "other"
-
-function detectPlatform(): ManualInstallPlatform {
-  if (typeof navigator === "undefined") return "other"
-  const ua = navigator.userAgent
-  const isIOS =
-    /iP(hone|ad|od)/.test(ua) ||
-    // iPadOS reports as Mac with touch support.
-    ((navigator.platform === "MacIntel" || /Macintosh/.test(ua)) &&
-      navigator.maxTouchPoints > 1)
-  const isMac = /Macintosh/.test(ua)
-  const isSafari = /^((?!chrome|android|crios|fxios|edg).)*safari/i.test(ua)
-  const isAndroid = /android/i.test(ua)
-  const isChrome = /chrome|crios|edg/i.test(ua)
-
-  if (isIOS) return "ios"
-  if (isMac && isSafari) return "mac-safari"
-  if (isAndroid && !isChrome) return "android-nonchrome"
-  return "other"
-}
-
-function isStandalone(): boolean {
-  if (typeof window === "undefined" || !window.matchMedia) return false
-  const mq = window.matchMedia("(display-mode: standalone)")
-  const navStandalone = (navigator as Navigator & { standalone?: boolean })
-    .standalone
-  return mq.matches || navStandalone === true
-}
 
 export function initPwaInstall(): void {
   if (initialized || typeof window === "undefined") return
