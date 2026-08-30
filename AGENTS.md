@@ -1,5 +1,10 @@
 # AGENTS.md
 
+## Rules
+
+- check [docs/DEV.md](docs/DEV.md) before making changes or adding new features
+- elvaluate the local project skills: [.opencode/skills](.opencode/skills)
+
 ## Commands
 
 - `bun run dev` - Start the dev server
@@ -46,7 +51,3 @@ Progressive test suites — pick the one that matches the moment (see `docs/DEV.
 - Run `bun run lint` to lint your code
 - Run `bun run format` to format your code
 - Run `bun run check` to lint, format, and organize imports (applies fixes with `--write --unsafe`; see `biome.json: assist.actions.source.organizeImports`)
-
-## Skills
-
-- see [.agents/skills](.agents/skills)
