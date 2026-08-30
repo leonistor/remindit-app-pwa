@@ -59,7 +59,7 @@ const CatalogView = () => {
             <PlusIcon />
             Add item
           </Button>
-          <Button onClick={openAddCategory}>
+          <Button variant="outline" onClick={openAddCategory}>
             <FolderPlusIcon />
             Add category
           </Button>
