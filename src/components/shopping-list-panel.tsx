@@ -2,10 +2,12 @@ import {
   ClockIcon,
   ListBulletsIcon,
   type Icon,
+  PlusIcon,
   SortAscendingIcon,
   TextAaIcon,
 } from "@phosphor-icons/react"
 import { useCallback, useRef, useState } from "react"
+import { QuickAddDialog } from "@/components/quick-add-dialog"
 import { ShoppingItem } from "@/components/shopping-item"
 import { Button } from "@/components/ui/custom/button"
 import { Float } from "@/components/ui/float"
@@ -38,6 +40,7 @@ export const ShoppingListPanel = () => {
   } = useShoppingList()
   const { runTravel, isSupported } = useItemTravelTransition()
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set())
+  const [quickAddOpen, setQuickAddOpen] = useState(false)
   const animationTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map()
   )
@@ -78,19 +81,30 @@ export const ShoppingListPanel = () => {
       <Float
         placement="top-end"
         // Cancel Float's corner-straddle (the panel clips overflow) and inset
-        // the button just inside the top-right edge instead.
+        // the row just inside the top-right edge instead.
         className="!top-1 !inset-e-1 !translate-x-0 !-translate-y-0"
       >
-        <Button
-          variant="secondary"
-          size="icon-lg"
-          aria-label={`Sort: ${label}. Click to change.`}
-          title={`Sort: ${label}`}
-          onClick={cycleSelectedSort}
-        >
-          <Icon size={16} aria-hidden />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="icon-lg"
+            aria-label={`Sort: ${label}. Click to change.`}
+            title={`Sort: ${label}`}
+            onClick={cycleSelectedSort}
+          >
+            <Icon size={16} aria-hidden />
+          </Button>
+          <Button
+            variant="default"
+            size="icon-lg"
+            aria-label="Add to shopping list"
+            onClick={() => setQuickAddOpen(true)}
+          >
+            <PlusIcon size={18} aria-hidden />
+          </Button>
+        </div>
       </Float>
+      <QuickAddDialog open={quickAddOpen} onOpenChange={setQuickAddOpen} />
       <div
         className={
           isEmpty

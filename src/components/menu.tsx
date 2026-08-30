@@ -4,7 +4,6 @@ import {
   DownloadSimple,
   Info,
   List,
-  Plus,
   Question,
   Rows,
   User,
@@ -25,7 +24,6 @@ import { usePwaInstall } from "@/hooks/use-pwa-install"
 import { avatarInitials } from "@/lib/display"
 import { $user, installApp } from "@/stores"
 import { InstallInstructionsDialog } from "./install-instructions-dialog"
-import { QuickAddDialog } from "./quick-add-dialog"
 import { ThemeMenu } from "./theme-menu"
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -66,7 +64,6 @@ const MOBILE_NAV_LINKS = navLinks.filter((l) => l.to !== "/")
 const Menu = () => {
   const [open, setOpen] = useState(false)
   const [installOpen, setInstallOpen] = useState(false)
-  const [quickAddOpen, setQuickAddOpen] = useState(false)
   const { canInstall, installed, platform } = usePwaInstall()
 
   const handleInstall = () => {
@@ -77,7 +74,7 @@ const Menu = () => {
   }
 
   return (
-    <div className="flex min-h-16 shrink-0 flex-row items-center gap-2 rounded-md border bg-accent px-4 pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-top,0px)]">
+    <div className="flex min-h-14 shrink-0 flex-row items-center gap-2 rounded-md border bg-accent px-4 pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-top,0px)] md:min-h-16">
       {/* Round logo links home; the wordmark is replaced by the user avatar
           (links to Profile) per the Phase 4 plan. */}
       <NavLink
@@ -135,15 +132,6 @@ const Menu = () => {
             <ThemeMenu />
           </MenuContent>
         </MenuRoot>
-        <Button
-          variant="default"
-          size="icon-md"
-          aria-label="Add to shopping list"
-          onClick={() => setQuickAddOpen(true)}
-        >
-          <Plus size={18} aria-hidden />
-        </Button>
-        <QuickAddDialog open={quickAddOpen} onOpenChange={setQuickAddOpen} />
       </div>
 
       <InstallInstructionsDialog
