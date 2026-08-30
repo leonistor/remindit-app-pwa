@@ -15,23 +15,27 @@ This project is a Progressive Web App (PWA) to manage a personal shopping list.
 - [x] Users will be able to add, edit, and remove items and categories.
 - [x] Display ordering options will be available for categories, items, and the shopping list.
 
-## [x] Version 3
+## [x] Version 3 — shipped as v3.1.0–v3.4.0
 
-- [x] Categorical color palettes will be available to the user to choose from. They will be used to color-code items in the list.
-- [x] a basic user profile
-- [x] Inspect history
-- [x] quick search+add item floating button
-- [x] automate screenshots in PWA manifest
-- [x] PWA checklist with recommended best practices
+Core PWA + personalization slice. All items below are live (see `CHANGELOG.md`).
+
+- [x] Categorical color palettes (pool in `seed/palettes.json`, picker in Profile, Van Gogh default) — distinct sequential slots, WCAG contrast, reactive `$categoryById`
+- [x] Basic user profile + first-run onboarding (2-step: rollable `generate-random-username` + DiceBear avatar, dataset picker, `/onboarding` gate, `src/stores/onboarding.ts`)
+- [x] Inspect history (`/history`, grouped by day, snapshot `categoryName`)
+- [x] Quick search+add (`+` → grouped `Autocomplete`, recommendation-aware, create-under-Uncategorized)
+- [x] Automate screenshots in PWA manifest (`scripts/generate-mobile-screenshot.ts`, light/dark gallery in `README.md`)
+- [x] PWA checklist & hardening — installability (manifest + SW `fetch` + HTTPS + maskable icons), offline shell, `navigateFallback`, safe-area, standalone mode, update prompt (`src/components/update-prompt.tsx`), `docs/PWA-CHECKLIST.md` / `docs/DEPLOY.md`
+- [x] App updates in browser (SW update flow, `UpdatePrompt` wired in `src/router.tsx`)
+- [x] Help content — text ( `src/views/help.tsx`, `src/views/about.tsx`, `src/views/onboarding.tsx` copy; updated for floating sort + alphabetical A–Z in v3.4)
+- [x] Internal hardening pre-V4 — hooks out of `src/stores` barrel, cross-store flows in `src/stores/commands.ts`, pure helpers in `src/lib/` (`quick-add`, `history-view`, `display`, `pwa-install`), palette seeding consolidation, history snapshot + palette reactivity fixes
 
 ## [ ] Version 4
 
 - [x] [DESIGN.md](../DESIGN.md) — design system as shipped (contributors, text-only)
-- [ ] Help content: text, videos; update onboarding; tour
-- [ ] add license
-- [ ] app website
-- [ ] app updates in browser
-- [ ] community of early adopters and feedback capture
+- [ ] Help content: videos + guided tour (text help is done; tour/videos pending)
+- [ ] Add license (`LICENSE` at repo root)
+- [ ] App website (standalone marketing/docs site beyond the deployed PWA at `https://remindit.parsedwink.com`)
+- [ ] Community of early adopters and feedback capture (see `docs/LINKS.md#feedback`)
 
 ## [ ] Version 5
 
@@ -41,14 +45,14 @@ This project is a Progressive Web App (PWA) to manage a personal shopping list.
 
 ## [ ] Version 6
 
-- [ ] basic AI features
-- [ ] integration with LLMs (MCP, skills)
+- [ ] Basic AI features
+- [ ] Integration with LLMs (MCP, skills)
 
 ---
 
-# Whishlist
+# Wishlist
 
 - [ ] Items might have attributes associated with them, such as photo, quantity, or price.
-- [ ] multi-language support
-- [ ] native application
-- [ ] notifications and live activities/updates
+- [ ] Multi-language support
+- [ ] Native application
+- [ ] Notifications and live activities/updates
