@@ -18,8 +18,8 @@ A resizable two-panel split (`ShoppingPanels`):
 
 | Panel | Content |
 |---|---|
-| Left (30%) | Items on the active shopping list (toggle group for display/ordering) |
-| Right (70%) | `ItemCatalog` — catalog items grouped by category (info tooltip for recommendation codes) |
+| Left (30%) | Items on the active shopping list (single cycling sort button that floats above the list via `@shark/float`) |
+| Right (70%) | `ItemCatalog` — catalog items grouped by category |
 
 Catalog items show recommendation badges (overdue/soon dots) based on the computed `$recommendations` store.
 
@@ -89,7 +89,7 @@ The **active palette** is a persisted user choice:
 - `src/stores/palette.ts` — `$activePaletteId` (a `@nanostores/persistent` `jsonStore`, persisted under `remindit:active-palette`), plus `setActivePalette(id)` / `getActivePalette()`. Defaults to `defaultPaletteId` from the pool.
 - `src/hooks/use-category-palette.ts` — `useCategoryPalette(key, overrideSlot?)` subscribes to the active palette and returns `categoryPalette(...)` for it, so any consumer recolors live when the choice changes. `ItemButton` and `ShoppingItem` use this hook.
 - Pick the active palette in **Settings** via `PaletteChooser` (`src/components/palette-chooser.tsx`): an inline Shark `Listbox` of the pool with a 12-swatch preview per option and a live sample-chip preview above the list. Selection calls `setActivePalette`.
-- **`ItemCatalog`** (`src/components/item-catalog.tsx`) — the right-hand browse/select panel. Renders an Ark UI `Accordion` (multiple, all categories open by default) of `ItemButton`s grouped by category from `$catalogByCategory`. Clicking toggles list membership via `addToList` / `removeFromList` (resolving item id → entry id through `$selectedView`). Shows a `ToggleTooltip` with recommendation colour codes.
+- **`ItemCatalog`** (`src/components/item-catalog.tsx`) — the right-hand browse/select panel. Renders an Ark UI `Accordion` (multiple, only the first category open by default) of `ItemButton`s grouped by category from `$catalogByCategory`. Clicking toggles list membership via `addToList` / `removeFromList` (resolving item id → entry id through `$selectedView`).
 
 ### Quick add
 

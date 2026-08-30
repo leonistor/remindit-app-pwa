@@ -62,11 +62,11 @@ drift as *"Formatting-only changes (spacing, quotes, semicolons)"*. shadcn has *
 
 Results:
 
-- **The registry components** (now including `autocomplete` and its peer primitives `combobox`,
-  `textarea`, `input`, `input-group`, `separator`, added via the CLI for the Quick Add feature) all
-  differ from HEAD **only in formatting** (trailing semicolons, quote style, spacing) — cosmetic biome
-  drift, **not** functional changes. There are no beneficial feature updates to apply. `autocomplete`
-  and its peers are CLI-tracked like the rest of `src/components/ui/*` and may be updated with
+- **The registry components** (now including `float`, added via the CLI for the floating sort button,
+  and the `autocomplete` feature's peer primitives `combobox`, `textarea`, `input`, `input-group`,
+  `separator`) all differ from HEAD **only in formatting** (trailing semicolons, quote style, spacing)
+  — cosmetic biome drift, **not** functional changes. There are no beneficial feature updates to apply.
+  These components are CLI-tracked like the rest of `src/components/ui/*` and may be updated with
   `bunx shadcn add @shark/<component>` (do **not** `--overwrite` `button` — see guardrail below).
 - **`button.tsx` is the only file with a real structural delta**, and it is a **regression**: the
   registry would delete `success`/`info` (see guardrail above). It lives in `ui/custom/`, not the
