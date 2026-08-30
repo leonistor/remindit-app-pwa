@@ -77,16 +77,18 @@ export const ShoppingListPanel = () => {
 
   return (
     <div className="relative flex h-full min-h-0 flex-col px-4 py-3">
-      <Button
-        variant="ghost"
-        size="icon-lg"
-        className="absolute end-3 top-3"
-        aria-label={`Sort: ${label}. Click to change.`}
-        title={`Sort: ${label}`}
-        onClick={cycleSelectedSort}
-      >
-        <Icon size={16} aria-hidden />
-      </Button>
+      <div className="relative h-10 shrink-0">
+        <Button
+          variant="ghost"
+          size="icon-lg"
+          className="absolute end-1 top-1"
+          aria-label={`Sort: ${label}. Click to change.`}
+          title={`Sort: ${label}`}
+          onClick={cycleSelectedSort}
+        >
+          <Icon size={16} aria-hidden />
+        </Button>
+      </div>
       <div
         className={
           isEmpty
