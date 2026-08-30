@@ -9,16 +9,21 @@ export const $selectedSort = jsonStore<SelectedSort>(
   "default"
 )
 
-export function setSelectedSort(sort: SelectedSort): void {
-  $selectedSort.set(sort)
-}
+// Cycle order for the single sort button in the shopping panel. "default"
+// preserves list insertion order; the other two are mutually exclusive sort
+// strategies.
+export const SELECTED_SORT_ORDER: SelectedSort[] = [
+  "default",
+  "category-name",
+  "last-added",
+]
 
-// Mutually-exclusive sort toggle. Clicking the active sort clears it back to
-// "default"; clicking the other sort switches to it. The state machine lives
-// here (not in the view) so components never read `$selectedSort.get()` to
-// decide what to toggle next, and the two sort modes can never both be on.
-export function toggleSelectedSort(sort: SelectedSort): void {
-  $selectedSort.set($selectedSort.get() === sort ? "default" : sort)
+// Advances $selectedSort through SELECTED_SORT_ORDER (wrapping). The store owns
+// the sort state machine, so the view only calls this on click rather than
+// reading `$selectedSort.get()` to decide what to toggle next.
+export function cycleSelectedSort(): void {
+  const i = SELECTED_SORT_ORDER.indexOf($selectedSort.get())
+  $selectedSort.set(SELECTED_SORT_ORDER[(i + 1) % SELECTED_SORT_ORDER.length])
 }
 
 // Open category accordion ids in the available-items (ItemsPanel) accordion.

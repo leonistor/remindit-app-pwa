@@ -2,10 +2,10 @@ import { useStore } from "@nanostores/react"
 import {
   $selectedOrdered,
   $selectedSort,
+  cycleSelectedSort,
   removeFromList,
   type SelectedSort,
   type SelectedViewEntry,
-  toggleSelectedSort,
 } from "@/stores"
 
 export interface UseShoppingList {
@@ -13,8 +13,8 @@ export interface UseShoppingList {
   items: SelectedViewEntry[]
   /** Active sort mode. */
   sort: SelectedSort
-  /** Mutually-exclusive toggle of a sort mode. */
-  toggleSelectedSort: (sort: SelectedSort) => void
+  /** Advance the sort mode through its cycle (default → category-name → last-added). */
+  cycleSelectedSort: () => void
   /** Remove a list entry by its id. */
   removeFromList: (entryId: string) => void
 }
@@ -27,7 +27,7 @@ export function useShoppingList(): UseShoppingList {
   return {
     items,
     sort,
-    toggleSelectedSort,
+    cycleSelectedSort,
     removeFromList,
   }
 }

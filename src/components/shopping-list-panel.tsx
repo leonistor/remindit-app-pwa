@@ -1,7 +1,12 @@
-import { ClockIcon, SortAscendingIcon } from "@phosphor-icons/react"
+import {
+  ClockIcon,
+  ListBulletsIcon,
+  type Icon,
+  SortAscendingIcon,
+} from "@phosphor-icons/react"
 import { useCallback, useRef, useState } from "react"
 import { ShoppingItem } from "@/components/shopping-item"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { Button } from "@/components/ui/custom/button"
 import { useItemTravelTransition } from "@/hooks/use-item-travel-transition"
 import {
   type SelectedSort,
@@ -9,19 +14,26 @@ import {
   useShoppingList,
 } from "@/stores"
 
+// Icon + label per sort mode, mirroring the theme toggle's OPTIONS map. The
+// single sort button renders the entry for the active mode.
+const OPTIONS: Record<SelectedSort, { label: string; Icon: Icon }> = {
+  default: { label: "Insertion order", Icon: ListBulletsIcon },
+  "category-name": { label: "Category, then name", Icon: SortAscendingIcon },
+  "last-added": { label: "Last added first", Icon: ClockIcon },
+}
+
 // Renders the active list ($selectedOrdered) as color-coded item chips that
 // wrap like the available-items grid in ItemCatalog. Each chip shows just the
 // item name, tinted by its category color; clicking it removes that entry from
 // the list.
 //
-// A ToggleGroup above the list drives ordering via two mutually exclusive sort
-// modes (category + name, or last-added-first). Preferences persist via the ui
-// store.
+// A single button in the top-right cycles the sort order (default → category +
+// name → last-added). The preference persists via the ui store.
 export const ShoppingListPanel = () => {
   const {
     items: selectedView,
     sort,
-    toggleSelectedSort,
+    cycleSelectedSort,
     removeFromList,
   } = useShoppingList()
   const { runTravel, isSupported } = useItemTravelTransition()
@@ -58,56 +70,22 @@ export const ShoppingListPanel = () => {
     [removeFromList, runTravel, isSupported]
   )
 
-  // Build the controlled ToggleGroup value from the sort UI state.
-  const groupValue = [sort !== "default" ? sort : ""].filter(Boolean)
-
-  // The ToggleGroup reports the full resulting value set on each toggle. We
-  // diff it against the current store values (no `.get()` reads needed) and
-  // delegate the flip to the ui store, which owns the sort state machine.
-  const handleGroupChange = useCallback(
-    (details: { value: string[] }) => {
-      const next = new Set(details.value)
-      const SORTS: SelectedSort[] = ["category-name", "last-added"]
-      const clickedSort = SORTS.find((s) => next.has(s) && s !== sort)
-      if (clickedSort) {
-        toggleSelectedSort(clickedSort)
-      } else if (!next.has(sort) && sort !== "default") {
-        // The active sort was just toggled off.
-        toggleSelectedSort(sort)
-      }
-    },
-    [sort, toggleSelectedSort]
-  )
-
   const isEmpty = selectedView.length === 0
+  const { label, Icon } = OPTIONS[sort]
 
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-3">
       <div className="relative flex items-center justify-center">
-        <ToggleGroup
-          multiple
+        <Button
           variant="ghost"
-          size="sm"
-          value={groupValue}
-          onValueChange={handleGroupChange}
+          size="icon-sm"
           className="absolute end-0.5 top-1/2 -translate-y-1/2"
-          aria-label="Selected items display and ordering"
+          aria-label={`Sort: ${label}. Click to change.`}
+          title={`Sort: ${label}`}
+          onClick={cycleSelectedSort}
         >
-          <ToggleGroupItem
-            value="category-name"
-            aria-label="Sort by category then item name"
-            title="Sort by category, then name"
-          >
-            <SortAscendingIcon aria-hidden />
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="last-added"
-            aria-label="Sort by last added first"
-            title="Sort by last added first"
-          >
-            <ClockIcon aria-hidden />
-          </ToggleGroupItem>
-        </ToggleGroup>
+          <Icon size={16} aria-hidden />
+        </Button>
       </div>
       <div
         className={
