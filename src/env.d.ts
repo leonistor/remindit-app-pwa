@@ -21,7 +21,7 @@ declare module "*.md" {
 
 /**
  * DiceBear avatar style definitions are imported as JSON subpaths
- * (e.g. `@dicebear/styles/cameo.json`). The package does not ship a typed
+ * (e.g. `@dicebear/styles/personas.json`). The package does not ship a typed
  * subpath export for every style, so we declare the wildcard here. The value is
  * only ever passed to `@dicebear/core`'s `Style` constructor.
  */

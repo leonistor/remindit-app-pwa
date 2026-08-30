@@ -13,11 +13,11 @@ function capitalize(value: string): string {
 }
 
 export async function generateRandomProfile(): Promise<UserProfile> {
-  const [{ default: generateRandomUsername }, core, cameoMod] =
+  const [{ default: generateRandomUsername }, core, personasMod] =
     await Promise.all([
       import("generate-random-username"),
       import("@dicebear/core"),
-      import("@dicebear/styles/cameo.json"),
+      import("@dicebear/styles/personas.json"),
     ])
 
   // generate-random-username yields a handle like "humble-shrew". We derive the
@@ -27,7 +27,9 @@ export async function generateRandomProfile(): Promise<UserProfile> {
   const [first, last] = username.split("-")
 
   const { Style, Avatar } = core
-  const style = new Style(cameoMod.default as ConstructorParameters<typeof Style>[0])
+  const style = new Style(
+    personasMod.default as ConstructorParameters<typeof Style>[0]
+  )
   // Inline SVG as a data URI — self-contained, no network, easy to persist.
   const avatar = new Avatar(style, { seed: username }).toDataUri()
 

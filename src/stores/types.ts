@@ -72,7 +72,7 @@ export interface HistoryEvent {
 // Single-user profile (Phase 4 slice). username is the only mandatory field and
 // defaults to a random value on first run (see profile-generator / onboarding).
 // email is reserved for future multi-user/sync work. avatar is a self-contained
-// inline SVG data URI (DiceBear cameo or a local initials fallback) so the
+// inline SVG data URI (DiceBear personas or a local initials fallback) so the
 // profile stays fully local-first with no network request.
 export interface UserProfile {
   username: string
