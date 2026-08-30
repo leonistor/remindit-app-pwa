@@ -6,7 +6,7 @@
 // happy-dom is configured globally, so `crypto.randomUUID()` and
 // `localStorage` are available without extra setup.
 
-import { beforeEach, describe, expect, it, test } from "@rstest/core"
+import { beforeEach, describe, expect, test } from "@rstest/core"
 import { PALETTE_SLOT_COUNT } from "@/lib/category-palette"
 import {
   $categories,
@@ -82,7 +82,7 @@ describe("categories store", () => {
 })
 
 describe("assignCategoryColors", () => {
-  it("assigns distinct sequential slots for <= palette-size categories", () => {
+  test("assigns distinct sequential slots for <= palette-size categories", () => {
     const next = assignCategoryColors(CATS(PALETTE_SLOT_COUNT))
     const slots = next.map((c) => c.color)
     expect(slots).toHaveLength(PALETTE_SLOT_COUNT)
@@ -90,7 +90,7 @@ describe("assignCategoryColors", () => {
     expect(slots).toEqual(Array.from({ length: PALETTE_SLOT_COUNT }, (_, i) => i))
   })
 
-  it("leaves the uncategorized sentinel without a color", () => {
+  test("leaves the uncategorized sentinel without a color", () => {
     const next = assignCategoryColors([
       { id: UNCATEGORIZED_ID, name: UNCATEGORIZED_NAME, frequency: "unknown" },
       ...CATS(3),
@@ -99,7 +99,7 @@ describe("assignCategoryColors", () => {
     expect(new Set(next.slice(1).map((c) => c.color)).size).toBe(3)
   })
 
-  it("keeps existing valid slots and only fills the gaps", () => {
+  test("keeps existing valid slots and only fills the gaps", () => {
     const input = [
       { id: "cat-a", name: "A", frequency: "weekly" as const, color: 2 },
       { id: "cat-b", name: "B", frequency: "weekly" as const },
@@ -112,7 +112,7 @@ describe("assignCategoryColors", () => {
     expect(rest).not.toContain(2)
   })
 
-  it("wraps once every slot is taken (palette ceiling)", () => {
+  test("wraps once every slot is taken (palette ceiling)", () => {
     const next = assignCategoryColors(CATS(PALETTE_SLOT_COUNT + 2))
     const slots = next.map((c) => c.color)
     // 12 distinct + 2 reused → 14 slots but only 12 unique values.
@@ -124,7 +124,7 @@ describe("assignCategoryColors", () => {
 describe("addCategory color slot", () => {
   beforeEach(() => $categories.set([]))
 
-  it("assigns an in-range, distinct color slot", () => {
+  test("assigns an in-range, distinct color slot", () => {
     const a = addCategory("A")
     const b = addCategory("B")
     expect(a.color).toBeGreaterThanOrEqual(0)
@@ -136,7 +136,7 @@ describe("addCategory color slot", () => {
 describe("normalizeCategoryColors", () => {
   beforeEach(() => $categories.set([]))
 
-  it("backfills missing slots without overwriting existing ones", () => {
+  test("backfills missing slots without overwriting existing ones", () => {
     $categories.set([
       { id: "cat-a", name: "A", frequency: "weekly", color: 5 },
       { id: "cat-b", name: "B", frequency: "weekly" },

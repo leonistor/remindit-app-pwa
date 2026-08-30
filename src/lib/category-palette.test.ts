@@ -6,17 +6,17 @@
 // uncategorized, resolve real hexes from the default palette, and honor an
 // explicit override slot (the future user-assigned color seam).
 
-import { describe, expect, it } from "@rstest/core"
+import { describe, expect, test } from "@rstest/core"
 import { categoryPalette, PALETTE_SLOT_COUNT } from "@/lib/category-palette"
 import { defaultPalette } from "@/lib/palettes"
 
 describe("categoryPalette", () => {
-  it("is deterministic for the same key", () => {
+  test("is deterministic for the same key", () => {
     expect(categoryPalette("dairy").hex).toBe(categoryPalette("dairy").hex)
     expect(categoryPalette("Produce").hex).toBe(categoryPalette("produce").hex)
   })
 
-  it("returns a neutral, var-free palette for uncategorized / empty keys", () => {
+  test("returns a neutral, var-free palette for uncategorized / empty keys", () => {
     const neutral = categoryPalette("Uncategorized")
     expect(neutral.hex).toBe("")
     expect(neutral.button).toContain("bg-muted")
@@ -25,7 +25,7 @@ describe("categoryPalette", () => {
     expect(categoryPalette("").button).toContain("bg-muted")
   })
 
-  it("resolves a real hex from the default palette and spreads across slots", () => {
+  test("resolves a real hex from the default palette and spreads across slots", () => {
     const seen = new Set<string>()
     for (let i = 0; i < 200; i++) {
       seen.add(categoryPalette(`category-${i}`).hex)
@@ -36,7 +36,7 @@ describe("categoryPalette", () => {
     expect(seen.size).toBeLessThanOrEqual(PALETTE_SLOT_COUNT)
   })
 
-  it("exposes tokens that read the --cat / --cat-ink CSS vars", () => {
+  test("exposes tokens that read the --cat / --cat-ink CSS vars", () => {
     const palette = categoryPalette("dairy")
     expect(palette.button).toContain("var(--cat)")
     expect(palette.button).toContain("var(--cat-ink)")
@@ -46,7 +46,7 @@ describe("categoryPalette", () => {
     )
   })
 
-  it("exposes a theme-aware muted 'dimmed' token with its own contrast vars", () => {
+  test("exposes a theme-aware muted 'dimmed' token with its own contrast vars", () => {
     const palette = categoryPalette("dairy")
     expect(palette.dimmed).toContain("var(--cat-dim)")
     expect(palette.dimmed).toContain("var(--cat-dim-dark)")
@@ -55,7 +55,7 @@ describe("categoryPalette", () => {
     expect(style["--cat-dim-dark"]).toMatch(/^#[0-9a-f]{6}$/)
   })
 
-  it("honors an explicit override slot and wraps out-of-range values", () => {
+  test("honors an explicit override slot and wraps out-of-range values", () => {
     const slotZero = defaultPalette.colors[0].hex
     expect(categoryPalette("dairy", 0).hex).toBe(slotZero)
     expect(categoryPalette("dairy", PALETTE_SLOT_COUNT).hex).toBe(slotZero)
@@ -64,7 +64,7 @@ describe("categoryPalette", () => {
     )
   })
 
-  it("exposes a fixed slot count matching the default palette", () => {
+  test("exposes a fixed slot count matching the default palette", () => {
     expect(PALETTE_SLOT_COUNT).toBe(defaultPalette.colors.length)
     expect(PALETTE_SLOT_COUNT).toBe(12)
   })

@@ -9,7 +9,7 @@
 // unrelated side effects, and we avoid `vi` (it is neither a static export of
 // `@rstest/core` nor an auto-injected global in this project's config).
 
-import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
+import { afterEach, beforeEach, describe, expect, test } from "@rstest/core"
 import { $theme, initTheme, type ThemeMode } from "@/stores/theme"
 
 // Controllable OS dark-mode flag read by the mocked matchMedia.
@@ -55,11 +55,11 @@ afterEach(() => {
 })
 
 describe("$theme", () => {
-  it("defaults to 'system' when nothing is persisted", () => {
+  test("defaults to 'system' when nothing is persisted", () => {
     expect($theme.get()).toBe("system")
   })
 
-  it("round-trips a value through localStorage", () => {
+  test("round-trips a value through localStorage", () => {
     setMode("dark")
     expect($theme.get()).toBe("dark")
 
@@ -82,7 +82,7 @@ describe("initTheme", () => {
   // $theme.set re-applies the theme, so we can drive all scenarios through
   // the store + the mocked OS preference without re-invoking initTheme.
 
-  it("applies light mode without the .dark class", () => {
+  test("applies light mode without the .dark class", () => {
     setMode("light")
     initTheme()
 
@@ -90,7 +90,7 @@ describe("initTheme", () => {
     expect(document.documentElement.style.colorScheme).toBe("light")
   })
 
-  it("applies dark mode with the .dark class", () => {
+  test("applies dark mode with the .dark class", () => {
     setMode("dark")
     initTheme()
 
@@ -98,7 +98,7 @@ describe("initTheme", () => {
     expect(document.documentElement.style.colorScheme).toBe("dark")
   })
 
-  it("treats system mode as dark when the OS prefers dark", () => {
+  test("treats system mode as dark when the OS prefers dark", () => {
     osPrefersDark = true
     setMode("system")
     initTheme()
@@ -106,7 +106,7 @@ describe("initTheme", () => {
     expect(document.documentElement.classList.contains("dark")).toBe(true)
   })
 
-  it("treats system mode as light when the OS prefers light", () => {
+  test("treats system mode as light when the OS prefers light", () => {
     osPrefersDark = false
     setMode("system")
     initTheme()

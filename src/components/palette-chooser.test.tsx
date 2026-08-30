@@ -4,7 +4,7 @@
 // updates the persisted active-palette store, and that the live preview recolors
 // to reflect the active palette's colors.
 
-import { afterEach, describe, expect, it } from "@rstest/core"
+import { afterEach, describe, expect, test } from "@rstest/core"
 import { act, cleanup, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { PaletteChooser } from "@/components/palette-chooser"
@@ -34,12 +34,12 @@ afterEach(() => {
 })
 
 describe("PaletteChooser", () => {
-  it("renders one option per palette in the pool", () => {
+  test("renders one option per palette in the pool", () => {
     render(<PaletteChooser />)
     expect(screen.getAllByRole("option")).toHaveLength(POOL_IDS.length)
   })
 
-  it("updates the active palette store when an option is chosen", async () => {
+  test("updates the active palette store when an option is chosen", async () => {
     render(<PaletteChooser />)
     expect($activePaletteId.get()).toBe(PALETTE_POOL.palettes[0].id)
 
@@ -48,13 +48,13 @@ describe("PaletteChooser", () => {
     expect($activePaletteId.get()).toBe("paired")
   })
 
-  it("shows the live preview chips", () => {
+  test("shows the live preview chips", () => {
     render(<PaletteChooser />)
     expect(screen.getByText("Produce")).toBeInTheDocument()
     expect(screen.getByText("Dairy")).toBeInTheDocument()
   })
 
-  it("recolors the live preview when the active palette changes", async () => {
+  test("recolors the live preview when the active palette changes", async () => {
     render(<PaletteChooser />)
     const chip = screen.getByText("Produce") as HTMLElement
     const before = chip.style.getPropertyValue("--cat")

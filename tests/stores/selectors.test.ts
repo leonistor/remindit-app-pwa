@@ -6,7 +6,7 @@
 // happy-dom is configured globally, so `localStorage` and `crypto.randomUUID()`
 // are available without extra setup (see tests/stores/history.test.ts).
 
-import { beforeEach, describe, expect, it, test } from "@rstest/core"
+import { beforeEach, describe, expect, test } from "@rstest/core"
 import { $catalog } from "@/stores/catalog"
 import { $categories } from "@/stores/categories"
 import { $list, addToList, setEntryChecked } from "@/stores/list"
@@ -132,7 +132,7 @@ describe("$catalogView", () => {
     $list.set(SEED_LIST)
   })
 
-  it("enriches every catalog item with its category name", () => {
+  test("enriches every catalog item with its category name", () => {
     const view = $catalogView.get()
 
     expect(view).toHaveLength(3)
@@ -150,7 +150,7 @@ describe("$catalogView", () => {
     })
   })
 
-  it("falls back to 'Uncategorized' for items with a missing category", () => {
+  test("falls back to 'Uncategorized' for items with a missing category", () => {
     const view = $catalogView.get()
     expect(view[2]).toEqual({
       id: "item-3",
@@ -168,7 +168,7 @@ describe("$selectedView", () => {
     $list.set(SEED_LIST)
   })
 
-  it("joins each list entry to its catalog item and category", () => {
+  test("joins each list entry to its catalog item and category", () => {
     const view = $selectedView.get()
 
     expect(view).toHaveLength(2)
@@ -192,7 +192,7 @@ describe("$selectedView", () => {
     })
   })
 
-  it("preserves the order of $list", () => {
+  test("preserves the order of $list", () => {
     $list.set([
       { id: "entry-3", itemId: "item-2", checked: false, addedAt: 300 },
       { id: "entry-4", itemId: "item-1", checked: true, addedAt: 400 },
@@ -204,12 +204,12 @@ describe("$selectedView", () => {
 })
 
 describe("$catalogByCategory", () => {
-  it("returns an empty array when the catalog is empty", () => {
+  test("returns an empty array when the catalog is empty", () => {
     $catalog.set([])
     expect($catalogByCategory.get()).toEqual([])
   })
 
-  it("groups a single category's items under one entry", () => {
+  test("groups a single category's items under one entry", () => {
     $catalog.set([
       { id: "item-1", name: "Apple", categoryId: "cat-1" },
       { id: "item-2", name: "Banana", categoryId: "cat-1" },
@@ -229,7 +229,7 @@ describe("$catalogByCategory", () => {
     ])
   })
 
-  it("keeps multiple categories in first-appearance order", () => {
+  test("keeps multiple categories in first-appearance order", () => {
     $catalog.set([
       { id: "item-1", name: "Apple", categoryId: "cat-1" },
       { id: "item-2", name: "Milk", categoryId: "cat-2" },
@@ -246,7 +246,7 @@ describe("$catalogByCategory", () => {
     expect(groups[1].items).toHaveLength(1)
   })
 
-  it("uses categoryName from the catalog item and omits empty categories", () => {
+  test("uses categoryName from the catalog item and omits empty categories", () => {
     $catalog.set([
       { id: "item-1", name: "Apple", categoryId: "cat-1" },
       { id: "item-2", name: "Orphan", categoryId: "missing-cat" },
@@ -276,7 +276,7 @@ describe("$listItemIds", () => {
     $list.set(SEED_LIST)
   })
 
-  it("contains the itemIds currently on the list", () => {
+  test("contains the itemIds currently on the list", () => {
     const ids = $listItemIds.get()
 
     expect(ids).toBeInstanceOf(Set)
@@ -286,7 +286,7 @@ describe("$listItemIds", () => {
     expect(ids.has("item-3")).toBe(false)
   })
 
-  it("updates when the list changes", () => {
+  test("updates when the list changes", () => {
     expect($listItemIds.get().has("item-1")).toBe(true)
 
     $list.set([{ id: "entry-9", itemId: "item-3", checked: false, addedAt: 9 }])

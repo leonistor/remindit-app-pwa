@@ -4,7 +4,7 @@
 // computed store. Stores are seeded directly via $store.set() in beforeEach,
 // avoiding initStores() side effects.
 
-import { beforeEach, describe, expect, it } from "@rstest/core"
+import { beforeEach, describe, expect, test } from "@rstest/core"
 import { $catalog } from "@/stores/catalog"
 import { $categories } from "@/stores/categories"
 import { $history } from "@/stores/history"
@@ -83,7 +83,7 @@ const SEED_CATALOG: CatalogItem[] = [
 // ---------------------------------------------------------------------------
 
 describe("FREQ_TO_DAYS", () => {
-  it("maps every CategoryFrequency slug to a positive number", () => {
+  test("maps every CategoryFrequency slug to a positive number", () => {
     const slugs = [
       "daily",
       "every-2-3-days",
@@ -100,7 +100,7 @@ describe("FREQ_TO_DAYS", () => {
     }
   })
 
-  it("orders frequencies from shortest to longest interval", () => {
+  test("orders frequencies from shortest to longest interval", () => {
     expect(FREQ_TO_DAYS.daily).toBeLessThan(FREQ_TO_DAYS.weekly)
     expect(FREQ_TO_DAYS.weekly).toBeLessThan(FREQ_TO_DAYS.monthly)
     expect(FREQ_TO_DAYS.monthly).toBeLessThan(FREQ_TO_DAYS["every-3-months"])
@@ -112,14 +112,14 @@ describe("FREQ_TO_DAYS", () => {
 // ---------------------------------------------------------------------------
 
 describe("computeItemStats", () => {
-  it("returns zeroed stats when no history exists for the item", () => {
+  test("returns zeroed stats when no history exists for the item", () => {
     const stats = computeItemStats([], "item-milk", NOW)
     expect(stats.purchaseCount).toBe(0)
     expect(stats.daysSinceLastAdded).toBe(0)
     expect(stats.medianInterval).toBeNull()
   })
 
-  it("computes single-purchase stats", () => {
+  test("computes single-purchase stats", () => {
     const history = [addEvent("item-milk", "cat-fridge", 5, NOW)]
     const stats = computeItemStats(history, "item-milk", NOW)
 
@@ -128,7 +128,7 @@ describe("computeItemStats", () => {
     expect(stats.medianInterval).toBeNull()
   })
 
-  it("computes median interval from multiple purchases", () => {
+  test("computes median interval from multiple purchases", () => {
     // Purchases at days ago: 28, 24, 20, 16, 12 → intervals: 4, 4, 4, 4
     const history = [
       addEvent("item-milk", "cat-fridge", 28, NOW),
@@ -144,7 +144,7 @@ describe("computeItemStats", () => {
     expect(stats.medianInterval).toBeCloseTo(4, 0)
   })
 
-  it("handles odd number of intervals for median", () => {
+  test("handles odd number of intervals for median", () => {
     // Purchases at days ago: 30, 25, 20, 15 → intervals: 5, 5, 5
     const history = [
       addEvent("item-milk", "cat-fridge", 30, NOW),
@@ -156,7 +156,7 @@ describe("computeItemStats", () => {
     expect(stats.medianInterval).toBeCloseTo(5, 0)
   })
 
-  it("handles even number of intervals for median", () => {
+  test("handles even number of intervals for median", () => {
     // Purchases at days ago: 20, 15, 10, 5 → intervals: 5, 5, 5
     const history = [
       addEvent("item-milk", "cat-fridge", 20, NOW),
@@ -168,7 +168,7 @@ describe("computeItemStats", () => {
     expect(stats.medianInterval).toBeCloseTo(5, 0)
   })
 
-  it("ignores remove events in purchase count", () => {
+  test("ignores remove events in purchase count", () => {
     const history = [
       addEvent("item-milk", "cat-fridge", 10, NOW),
       removeEvent("item-milk", "cat-fridge", 8, NOW),
@@ -180,7 +180,7 @@ describe("computeItemStats", () => {
     expect(stats.daysSinceLastAdded).toBeCloseTo(5, 0)
   })
 
-  it("ignores events belonging to other items", () => {
+  test("ignores events belonging to other items", () => {
     const history = [
       addEvent("item-eggs", "cat-fridge", 3, NOW),
       addEvent("item-milk", "cat-fridge", 7, NOW),
@@ -192,7 +192,7 @@ describe("computeItemStats", () => {
     expect(stats.daysSinceLastAdded).toBeCloseTo(7, 0)
   })
 
-  it("is robust against same-day purchases (zero-length intervals)", () => {
+  test("is robust against same-day purchases (zero-length intervals)", () => {
     // Purchases at days ago: 10, 10, 5 → intervals: 0, 5 → median = 2.5
     const history = [
       addEvent("item-milk", "cat-fridge", 10, NOW),
@@ -210,7 +210,7 @@ describe("computeItemStats", () => {
 // ---------------------------------------------------------------------------
 
 describe("getExpectedInterval", () => {
-  it("uses item's median interval when purchase count >= 3", () => {
+  test("uses item's median interval when purchase count >= 3", () => {
     const stats = {
       itemId: "item-milk",
       purchaseCount: 5,
@@ -220,7 +220,7 @@ describe("getExpectedInterval", () => {
     expect(getExpectedInterval(stats, "weekly")).toBe(4)
   })
 
-  it("falls back to category frequency when purchase count < 3", () => {
+  test("falls back to category frequency when purchase count < 3", () => {
     const stats = {
       itemId: "item-milk",
       purchaseCount: 2,
@@ -230,7 +230,7 @@ describe("getExpectedInterval", () => {
     expect(getExpectedInterval(stats, "weekly")).toBe(FREQ_TO_DAYS.weekly)
   })
 
-  it("falls back to category frequency when median is null", () => {
+  test("falls back to category frequency when median is null", () => {
     const stats = {
       itemId: "item-milk",
       purchaseCount: 1,
@@ -240,7 +240,7 @@ describe("getExpectedInterval", () => {
     expect(getExpectedInterval(stats, "monthly")).toBe(FREQ_TO_DAYS.monthly)
   })
 
-  it("uses global default for unknown frequency", () => {
+  test("uses global default for unknown frequency", () => {
     const stats = {
       itemId: "item-milk",
       purchaseCount: 1,
@@ -256,7 +256,7 @@ describe("getExpectedInterval", () => {
 // ---------------------------------------------------------------------------
 
 describe("scoreItem", () => {
-  it("returns null for items with zero purchases", () => {
+  test("returns null for items with zero purchases", () => {
     const stats = {
       itemId: "item-milk",
       purchaseCount: 0,
@@ -266,7 +266,7 @@ describe("scoreItem", () => {
     expect(scoreItem(stats, "weekly")).toBeNull()
   })
 
-  it("scores an overdue item with due_ratio > 1", () => {
+  test("scores an overdue item with due_ratio > 1", () => {
     // Bought every 7 days (weekly), last bought 10 days ago → due_ratio = 10/7 ≈ 1.43
     const stats = {
       itemId: "item-milk",
@@ -280,7 +280,7 @@ describe("scoreItem", () => {
     expect(result?.dueRatio).toBeCloseTo(10 / 7, 2)
   })
 
-  it("scores a 'soon' item with due_ratio between 0.7 and 1.0", () => {
+  test("scores a 'soon' item with due_ratio between 0.7 and 1.0", () => {
     // Bought every 7 days, last bought 6 days ago → due_ratio = 6/7 ≈ 0.86
     const stats = {
       itemId: "item-milk",
@@ -293,7 +293,7 @@ describe("scoreItem", () => {
     expect(result?.tier).toBe("soon")
   })
 
-  it("scores a 'frequent' item with due_ratio <= 0.7", () => {
+  test("scores a 'frequent' item with due_ratio <= 0.7", () => {
     // Bought every 7 days, last bought 3 days ago → due_ratio = 3/7 ≈ 0.43
     const stats = {
       itemId: "item-milk",
@@ -306,7 +306,7 @@ describe("scoreItem", () => {
     expect(result?.tier).toBe("frequent")
   })
 
-  it("applies confidence penalty for low purchase counts", () => {
+  test("applies confidence penalty for low purchase counts", () => {
     // 1 purchase → confidence = 0.2, due_ratio = 10/7 ≈ 1.43
     const stats = {
       itemId: "item-milk",
@@ -320,7 +320,7 @@ describe("scoreItem", () => {
     expect(result?.score).toBeCloseTo((10 / 7) * 0.2, 2)
   })
 
-  it("reaches full confidence at 5+ purchases", () => {
+  test("reaches full confidence at 5+ purchases", () => {
     const statsA = {
       itemId: "item-milk",
       purchaseCount: 5,
@@ -348,25 +348,25 @@ describe("computeRecommendations", () => {
   const categories = SEED_CATEGORIES
   const catalog = SEED_CATALOG
 
-  it("returns empty array when history is empty", () => {
+  test("returns empty array when history is empty", () => {
     const recs = computeRecommendations([], catalog, categories, [], NOW)
     expect(recs).toEqual([])
   })
 
-  it("excludes items with 'seldom' frequency", () => {
+  test("excludes items with 'seldom' frequency", () => {
     const history = [addEvent("item-rare", "cat-seldom", 5, NOW)]
     const recs = computeRecommendations(history, catalog, categories, [], NOW)
     expect(recs.find((r) => r.item.id === "item-rare")).toBeUndefined()
   })
 
-  it("excludes items currently on the active list", () => {
+  test("excludes items currently on the active list", () => {
     const history = [addEvent("item-milk", "cat-fridge", 10, NOW)]
     const list = [{ itemId: "item-milk", id: "e1", checked: false, addedAt: 0 }]
     const recs = computeRecommendations(history, catalog, categories, list, NOW)
     expect(recs.find((r) => r.item.id === "item-milk")).toBeUndefined()
   })
 
-  it("sorts results by score descending", () => {
+  test("sorts results by score descending", () => {
     const history = [
       // Milk: overdue (14 days since last, weekly interval)
       addEvent("item-milk", "cat-fridge", 14, NOW),
@@ -382,7 +382,7 @@ describe("computeRecommendations", () => {
     expect(recs[0].score).toBeGreaterThanOrEqual(recs[1].score)
   })
 
-  it("includes categoryName from the matching category", () => {
+  test("includes categoryName from the matching category", () => {
     const history = [
       addEvent("item-milk", "cat-fridge", 10, NOW),
       addEvent("item-milk", "cat-fridge", 5, NOW),
@@ -393,7 +393,7 @@ describe("computeRecommendations", () => {
     expect(milk?.categoryName).toBe("Fridge")
   })
 
-  it("falls back to 'Uncategorized' for missing category", () => {
+  test("falls back to 'Uncategorized' for missing category", () => {
     const orphanItem: CatalogItem = {
       id: "item-orphan",
       name: "Orphan",
@@ -425,11 +425,11 @@ describe("$recommendations", () => {
     $list.set([])
   })
 
-  it("starts empty with no history", () => {
+  test("starts empty with no history", () => {
     expect($recommendations.get()).toEqual([])
   })
 
-  it("returns recommendations when history exists", () => {
+  test("returns recommendations when history exists", () => {
     const history = [
       addEvent("item-milk", "cat-fridge", 10, Date.now()),
       addEvent("item-milk", "cat-fridge", 5, Date.now()),
@@ -441,7 +441,7 @@ describe("$recommendations", () => {
     expect(recs[0].item.id).toBe("item-milk")
   })
 
-  it("excludes items on the list", () => {
+  test("excludes items on the list", () => {
     $history.set([
       addEvent("item-milk", "cat-fridge", 10, Date.now()),
       addEvent("item-milk", "cat-fridge", 5, Date.now()),

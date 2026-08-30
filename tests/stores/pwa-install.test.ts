@@ -5,7 +5,7 @@
 // banner-visibility contract (banner only shows for a native install that hasn't
 // been installed or dismissed) plus the install/dismiss actions.
 
-import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
+import { afterEach, beforeEach, describe, expect, test } from "@rstest/core"
 import { pwaInstallHandler } from "pwa-install-handler"
 import {
   $canInstall,
@@ -43,11 +43,11 @@ afterEach(() => {
 })
 
 describe("pwa install store", () => {
-  it("hides the banner by default", () => {
+  test("hides the banner by default", () => {
     expect($showInstallBanner.get()).toBe(false)
   })
 
-  it("shows the banner only when installable and not installed or dismissed", () => {
+  test("shows the banner only when installable and not installed or dismissed", () => {
     $canInstall.set(true)
     expect($showInstallBanner.get()).toBe(true)
 
@@ -59,14 +59,14 @@ describe("pwa install store", () => {
     expect($showInstallBanner.get()).toBe(false)
   })
 
-  it("persists dismissal and never shows the banner again", () => {
+  test("persists dismissal and never shows the banner again", () => {
     $canInstall.set(true)
     dismissInstall()
     expect($installDismissed.get()).toBe(true)
     expect($showInstallBanner.get()).toBe(false)
   })
 
-  it("triggers the native prompt and marks installed on accept", async () => {
+  test("triggers the native prompt and marks installed on accept", async () => {
     pwaInstallHandler.canInstall = () => true
     pwaInstallHandler.install = (async () => {
       installCalled = true
@@ -80,7 +80,7 @@ describe("pwa install store", () => {
     expect($installed.get()).toBe(true)
   })
 
-  it("is a no-op when the platform has no native prompt", async () => {
+  test("is a no-op when the platform has no native prompt", async () => {
     pwaInstallHandler.canInstall = () => false
     pwaInstallHandler.install = (async () => {
       installCalled = true

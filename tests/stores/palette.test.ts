@@ -4,7 +4,7 @@
 // default, accepts valid pool ids, ignores unknown ids, and always resolves to a
 // real palette.
 
-import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
+import { afterEach, beforeEach, describe, expect, test } from "@rstest/core"
 import { DEFAULT_PALETTE_ID, PALETTE_POOL } from "@/lib/palettes"
 import {
   $activePaletteId,
@@ -26,32 +26,32 @@ afterEach(() => {
 })
 
 describe("active palette store", () => {
-  it("defaults to the seed default palette", () => {
+  test("defaults to the seed default palette", () => {
     expect(getActivePaletteId()).toBe(DEFAULT_PALETTE_ID)
     expect(getActivePalette().id).toBe(DEFAULT_PALETTE_ID)
   })
 
-  it("updates and persists a valid palette id", () => {
+  test("updates and persists a valid palette id", () => {
     setActivePalette("paired")
     expect(getActivePaletteId()).toBe("paired")
     expect(getActivePalette().id).toBe("paired")
     expect($activePaletteId.get()).toBe("paired")
   })
 
-  it("ignores unknown palette ids", () => {
+  test("ignores unknown palette ids", () => {
     setActivePalette("paired")
     setActivePalette("does-not-exist")
     expect(getActivePaletteId()).toBe("paired")
   })
 
-  it("always resolves to an id present in the pool", () => {
+  test("always resolves to an id present in the pool", () => {
     for (const id of POOL_IDS) {
       setActivePalette(id)
       expect(POOL_IDS).toContain(getActivePaletteId())
     }
   })
 
-  it("initActivePalette resets a stale persisted id to the default", () => {
+  test("initActivePalette resets a stale persisted id to the default", () => {
     // The read helpers already fall back without writing; the bootstrap should
     // actually clear the invalid value from storage.
     $activePaletteId.set("removed-palette")
@@ -59,7 +59,7 @@ describe("active palette store", () => {
     expect($activePaletteId.get()).toBe(DEFAULT_PALETTE_ID)
   })
 
-  it("initActivePalette leaves a valid persisted id untouched", () => {
+  test("initActivePalette leaves a valid persisted id untouched", () => {
     $activePaletteId.set("paired")
     initActivePalette()
     expect($activePaletteId.get()).toBe("paired")

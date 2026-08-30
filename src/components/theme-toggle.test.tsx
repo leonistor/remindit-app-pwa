@@ -5,7 +5,7 @@
 // `$theme`. We assert it renders one button reflecting the store value and
 // that clicking advances the mode — using standard matchers only (no jest-dom).
 
-import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
+import { afterEach, beforeEach, describe, expect, test } from "@rstest/core"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { $theme, type ThemeMode } from "@/stores/theme"
@@ -22,7 +22,7 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe("ThemeToggle", () => {
-  it("renders a single button reflecting the active theme", () => {
+  test("renders a single button reflecting the active theme", () => {
     setMode("dark")
     render(<ThemeToggle />)
 
@@ -31,7 +31,7 @@ describe("ThemeToggle", () => {
     expect(button.getAttribute("aria-label")).toContain("Dark")
   })
 
-  it("cycles to the next theme when clicked", () => {
+  test("cycles to the next theme when clicked", () => {
     setMode("light")
     render(<ThemeToggle />)
 

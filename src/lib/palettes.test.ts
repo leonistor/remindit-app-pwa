@@ -3,7 +3,7 @@
 // chooser) depend on: exactly 5 palettes, a valid default, and every palette
 // having 12 distinct, well-formed colors.
 
-import { describe, expect, it } from "@rstest/core"
+import { describe, expect, test } from "@rstest/core"
 import {
   assignSequentialColor,
   DEFAULT_PALETTE_ID,
@@ -15,16 +15,16 @@ import {
 const HEX_RE = /^#[0-9a-f]{6}$/
 
 describe("palette pool", () => {
-  it("has exactly five palettes", () => {
+  test("has exactly five palettes", () => {
     expect(PALETTE_POOL.palettes).toHaveLength(5)
   })
 
-  it("points defaultPaletteId at an existing palette", () => {
+  test("points defaultPaletteId at an existing palette", () => {
     expect(getPalette(DEFAULT_PALETTE_ID)).toBeDefined()
     expect(defaultPalette.id).toBe(DEFAULT_PALETTE_ID)
   })
 
-  it("gives every palette exactly 12 colors that are valid, distinct, and named", () => {
+  test("gives every palette exactly 12 colors that are valid, distinct, and named", () => {
     for (const palette of PALETTE_POOL.palettes) {
       expect(palette.colors).toHaveLength(12)
       const hexes = new Set<string>()
@@ -38,14 +38,14 @@ describe("palette pool", () => {
     }
   })
 
-  it("keeps the d3 anchor colors for schemes that were already 12 long", () => {
+  test("keeps the d3 anchor colors for schemes that were already 12 long", () => {
     expect(getPalette("paired")?.colors[0].hex).toBe("#a6cee3")
     expect(getPalette("paired")?.colors[11].hex).toBe("#b15928")
     expect(getPalette("set3")?.colors[0].hex).toBe("#8dd3c7")
     expect(getPalette("set3")?.colors[11].hex).toBe("#ffed6f")
   })
 
-  it("assigns colors sequentially and wraps at the palette length", () => {
+  test("assigns colors sequentially and wraps at the palette length", () => {
     expect(assignSequentialColor(0)).toBe(defaultPalette.colors[0].hex)
     expect(assignSequentialColor(12)).toBe(defaultPalette.colors[0].hex)
     expect(assignSequentialColor(1)).toBe(defaultPalette.colors[1].hex)
@@ -55,7 +55,7 @@ describe("palette pool", () => {
     )
   })
 
-  it("exposes a description sourced from the d3 scheme", () => {
+  test("exposes a description sourced from the d3 scheme", () => {
     for (const palette of PALETTE_POOL.palettes) {
       expect(palette.description).toMatch(/^Based on d3 scheme/)
     }

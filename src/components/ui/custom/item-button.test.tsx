@@ -4,7 +4,7 @@
 // carries its categorical palette tint (not a `Button` semantic variant) and
 // the recommendation dot remains a distinct, semantic concern.
 
-import { afterEach, describe, expect, it } from "@rstest/core"
+import { afterEach, describe, expect, test } from "@rstest/core"
 import { cleanup, render, screen } from "@testing-library/react"
 import { ItemButton } from "@/components/ui/custom/item-button"
 
@@ -13,7 +13,7 @@ import { ItemButton } from "@/components/ui/custom/item-button"
 afterEach(cleanup)
 
 describe("ItemButton", () => {
-  it("renders the name and applies a categorical palette tint", () => {
+  test("renders the name and applies a categorical palette tint", () => {
     render(<ItemButton name="Milk" purpose="selectable" categoryKey="dairy" />)
 
     const button = screen.getByRole("button", { name: "Milk" })
@@ -25,7 +25,7 @@ describe("ItemButton", () => {
     expect(button.className).not.toContain("bg-info")
   })
 
-  it("dims a selected selectable item instead of emphasizing it", () => {
+  test("dims a selected selectable item instead of emphasizing it", () => {
     const { rerender } = render(
       <ItemButton
         name="Milk"
@@ -51,7 +51,7 @@ describe("ItemButton", () => {
     expect(selected.className).not.toContain("ring-2")
   })
 
-  it("renders a recommendation dot as a separate semantic concern", () => {
+  test("renders a recommendation dot as a separate semantic concern", () => {
     render(
       <ItemButton
         name="Eggs"

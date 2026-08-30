@@ -1,6 +1,6 @@
 // Unit tests for the PWA installability detection (src/lib/pwa-install).
 
-import { afterEach, describe, expect, it } from "@rstest/core"
+import { afterEach, describe, expect, test } from "@rstest/core"
 import { detectPlatform, isStandalone, type ManualInstallPlatform } from "@/lib/pwa-install"
 
 const nav = navigator as Navigator & {
@@ -72,7 +72,7 @@ const cases: {
 
 describe("detectPlatform", () => {
   for (const c of cases) {
-    it(`maps ${c.name} to ${c.expected}`, () => {
+    test(`maps ${c.name} to ${c.expected}`, () => {
       setNav(c.overrides)
       expect(detectPlatform()).toBe(c.expected)
     })
@@ -86,7 +86,7 @@ describe("isStandalone", () => {
     window.matchMedia = originalMatchMedia
   })
 
-  it("is true in standalone display mode", () => {
+  test("is true in standalone display mode", () => {
     window.matchMedia = ((query: string) => ({
       matches: true,
       media: query,
@@ -101,7 +101,7 @@ describe("isStandalone", () => {
     expect(isStandalone()).toBe(true)
   })
 
-  it("is false in a normal browser tab", () => {
+  test("is false in a normal browser tab", () => {
     window.matchMedia = ((query: string) => ({
       matches: false,
       media: query,

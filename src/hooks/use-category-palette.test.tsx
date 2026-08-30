@@ -3,7 +3,7 @@
 // (the slot lookup is now backed by the $categoryById Map selector).
 
 import { act, cleanup, render, screen } from "@testing-library/react"
-import { afterEach, beforeEach, describe, expect, it } from "@rstest/core"
+import { afterEach, beforeEach, describe, expect, test } from "@rstest/core"
 import { $categories } from "@/stores/categories"
 import { useCategoryPalette } from "./use-category-palette"
 
@@ -32,13 +32,13 @@ describe("useCategoryPalette", () => {
     ])
   })
 
-  it("resolves the category's stored color slot to a real palette color", () => {
+  test("resolves the category's stored color slot to a real palette color", () => {
     render(<Harness />)
     // Slot 0 -> first palette color (a non-empty hex).
     expect(screen.getByTestId("palette").textContent).not.toBe("")
   })
 
-  it("recolors mounted chips when the category slot changes", () => {
+  test("recolors mounted chips when the category slot changes", () => {
     render(<Harness />)
     const before = screen.getByTestId("palette").textContent
 

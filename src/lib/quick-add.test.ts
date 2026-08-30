@@ -1,6 +1,6 @@
 // Unit tests for the quick-add source-list builder (src/lib/quick-add).
 
-import { describe, expect, it } from "@rstest/core"
+import { describe, expect, test } from "@rstest/core"
 import {
   buildItems,
   isNewValue,
@@ -25,7 +25,7 @@ const catalogGroups = [
 ]
 
 describe("buildItems", () => {
-  it("mirrors the catalog groups in order when not recommended-only", () => {
+  test("mirrors the catalog groups in order when not recommended-only", () => {
     const items = buildItems(false, [], catalogGroups, new Map())
 
     expect(items).toEqual([
@@ -35,7 +35,7 @@ describe("buildItems", () => {
     ])
   })
 
-  it("groups recommendations by category in the given rank order", () => {
+  test("groups recommendations by category in the given rank order", () => {
     const recs = [
       { item: { id: "r1", name: "Oat", categoryId: "cat-dairy" }, categoryName: "Dairy", score: 2 },
       { item: { id: "r2", name: "Onion", categoryId: "cat-produce" }, categoryName: "Produce", score: 1 },
@@ -50,7 +50,7 @@ describe("buildItems", () => {
     expect(items.map((i) => i.value)).toEqual(["r1", "r2"])
   })
 
-  it("flattens recommendations in source order when no rank is supplied", () => {
+  test("flattens recommendations in source order when no rank is supplied", () => {
     const recs = [
       { item: { id: "r1", name: "Oat", categoryId: "cat-dairy" }, categoryName: "Dairy", score: 2 },
       { item: { id: "r2", name: "Onion", categoryId: "cat-produce" }, categoryName: "Produce", score: 1 },
@@ -62,14 +62,14 @@ describe("buildItems", () => {
 })
 
 describe("isNewValue", () => {
-  it("recognizes only the create-new prefix", () => {
+  test("recognizes only the create-new prefix", () => {
     expect(isNewValue(`${NEW_VALUE_PREFIX}Apple`)).toBe(true)
     expect(isNewValue("Apple")).toBe(false)
   })
 })
 
 describe("sentinel constants", () => {
-  it("exposes the create-new category id", () => {
+  test("exposes the create-new category id", () => {
     expect(NEW_CATEGORY_ID).toBe("__new__")
   })
 })
