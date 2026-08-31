@@ -2,6 +2,23 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v4.1.0 — 2026-08-31
+
+_The catalog now shows how many recommendations each category holds — and the Help page got more accurate._
+
+### ✨ New Features
+
+- **Recommended-count badge**: each category header in the catalog shows a small count of its recommended items (overdue or due soon). It's reactive: add a recommended item to your list and the count drops — putting the item back won't inflate it again, since only items still waiting to be acted on are counted
+
+### 🔧 Improvements
+
+- **Autoplaying help videos**: the demo videos on the Help page now autoplay muted while in view, pause when you scroll away, and loop — falling back to native controls when your device prefers reduced motion
+- **About stays in sync**: the About page now mentions the recommended-count badge
+
+### 🐛 Fixes
+
+- **Accurate Help copy**: removed a stale reference to a catalog-legend info icon that no longer exists — the pip legend lives right on the Help page — and corrected the quick-add description to match its real behavior
+
 ## v4.0.0 — 2026-08-31
 
 _Share your list as an image, watch demo videos right inside the app, and take full control of your local data._

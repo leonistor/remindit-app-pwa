@@ -70,7 +70,9 @@ const AboutView = () => (
         <li>
           <strong>Smart recommendations</strong>: colored pips mark items that
           are overdue or due soon based on how often you buy them, and learn
-          from your history the more you shop.
+          from your history the more you shop. A count next to each category
+          name in the catalog tells you how many of its items are recommended
+          right now.
         </li>
         <li>
           <strong>History</strong>: review your recent shopping in the History
