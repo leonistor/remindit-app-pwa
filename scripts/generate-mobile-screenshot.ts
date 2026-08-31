@@ -73,7 +73,14 @@ async function capture(page: Page, outputs: string[]) {
 
 async function completeOnboarding(page: Page) {
   const usernameInput = page.locator("#username")
-  if (!(await usernameInput.count())) return
+  // Fresh installs open on the welcome step (video + Next); the profile
+  // fields only render after advancing past it. No markers at all means the
+  // app is already onboarded.
+  if (!(await usernameInput.count())) {
+    const welcomeNext = page.getByRole("button", { name: "Next" })
+    if (!(await welcomeNext.count())) return
+    await welcomeNext.click()
+  }
   await page.waitForFunction(
     () => {
       const el = document.querySelector<HTMLInputElement>("#username")
