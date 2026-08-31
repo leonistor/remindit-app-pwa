@@ -6,6 +6,7 @@ import {
   List,
   Question,
   Rows,
+  ShareNetwork,
   User,
   X,
 } from "@phosphor-icons/react"
@@ -34,6 +35,7 @@ const navLinks = [
   { to: "/profile", label: "Profile", icon: User },
   { to: "/catalog", label: "Catalog", icon: Rows },
   { to: "/history", label: "History", icon: Clock },
+  { to: "/share", label: "Share", icon: ShareNetwork },
   { to: "/about", label: "About", icon: Info },
   { to: "/help", label: "Help", icon: Question },
 ]

@@ -5,7 +5,14 @@ import { onboard } from "./helpers"
 // "Shopping list" stays an always-visible direct link; the remaining routes live
 // in the dropdown (the home route is excluded from the dropdown — see
 // MOBILE_NAV_LINKS). This spec asserts that current behavior on both viewports.
-const DROPDOWN_LINKS = ["Profile", "Catalog", "History", "About", "Help"]
+const DROPDOWN_LINKS = [
+  "Profile",
+  "Catalog",
+  "History",
+  "Share",
+  "About",
+  "Help",
+]
 
 const hamburger = (page: Page) => page.locator('button[aria-label="Open menu"]')
 const closeButton = (page: Page) =>

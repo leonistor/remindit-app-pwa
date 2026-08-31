@@ -29,9 +29,10 @@ Core PWA + personalization slice. All items below are live (see `CHANGELOG.md`).
 - [x] Help content — text ( `src/views/help.tsx`, `src/views/about.tsx`, `src/views/onboarding.tsx` copy; updated for floating sort + alphabetical A–Z in v3.4)
 - [x] Internal hardening pre-V4 — hooks out of `src/stores` barrel, cross-store flows in `src/stores/commands.ts`, pure helpers in `src/lib/` (`quick-add`, `history-view`, `display`, `pwa-install`), palette seeding consolidation, history snapshot + palette reactivity fixes
 
-## [ ] Version 4
+## [ ] Version 4 — in progress
 
 - [x] [DESIGN.md](../DESIGN.md) — design system as shipped (contributors, text-only)
+- [ ] Share page (`/share`): export the current shopping list as a PNG image — light-theme branded card, unchecked items grouped by category, download + copy-to-clipboard (`@zumer/snapdom`)
 - [ ] Help content: videos + guided tour (text help is done; tour/videos pending)
 - [ ] Add license (`LICENSE` at repo root)
 - [ ] App website (standalone marketing/docs site beyond the deployed PWA at `https://remindit.parsedwink.com`)

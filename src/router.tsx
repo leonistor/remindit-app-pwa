@@ -24,6 +24,7 @@ const ChangelogView = lazy(() => import("@/views/changelog"))
 const HelpView = lazy(() => import("@/views/help"))
 const HistoryView = lazy(() => import("@/views/history"))
 const ProfileView = lazy(() => import("@/views/profile"))
+const ShareView = lazy(() => import("@/views/share"))
 
 function Layout() {
   const { pathname } = useLocation()
@@ -80,6 +81,7 @@ export const router = createBrowserRouter([
       { path: "/catalog", element: <CatalogView /> },
       { path: "/history", element: <HistoryView /> },
       { path: "/profile", element: <ProfileView /> },
+      { path: "/share", element: <ShareView /> },
       { path: "/about", element: <AboutView /> },
       { path: "/changelog", element: <ChangelogView /> },
       { path: "/help", element: <HelpView /> },
