@@ -4,71 +4,29 @@ import path from "node:path";
 
 // Generates the numbered demo-video set in scripts/demos/ — one video per
 // feature, recorded as a single chronological user journey (state carries
-// through localStorage between scenarios). Spec: docs/demo-recording-plan.md.
+// through localStorage between scenarios). The whole set is generated per
+// theme variant (light + dark), filenames suffixed accordingly. Spec:
+// docs/demo-recording-plan.md.
 const OUT_DIR = path.join(import.meta.dir, "demos");
 const BASE = "http://localhost:3000";
+
+type Theme = "light" | "dark";
+// Optional CLI filter: `bun scripts/demo-scenarios.ts dark` records only the
+// dark variant; default records both.
+const variantArg = process.argv[2];
+const variants: Theme[] =
+  variantArg === "dark" || variantArg === "light"
+    ? [variantArg]
+    : ["light", "dark"];
 
 const browser = await chromium.launch({
   headless: false,
   args: ["--force-device-scale-factor=1"],
 });
-const context = await browser.newContext({
-  viewport: { width: 400, height: 720 },
-  deviceScaleFactor: 1,
-});
-const page = await context.newPage();
 
-// Cursor overlay + screencast keep-alive. Injected once before the first
-// navigation; they persist for the whole session. See
-// docs/demo-recording-script.md for why both are needed.
-await page.addInitScript(() => {
-  const mount = () => {
-    const dot = document.createElement("div");
-    Object.assign(dot.style, {
-      position: "fixed",
-      width: "28px",
-      height: "28px",
-      borderRadius: "50%",
-      background: "rgba(220, 38, 38, 0.7)",
-      border: "3px solid rgba(255, 255, 255, 0.9)",
-      pointerEvents: "none",
-      zIndex: "2147483647",
-      transform: "translate(-50%, -50%)",
-      transition: "left 0.05s, top 0.05s",
-    });
-    document.addEventListener(
-      "mousemove",
-      (e) => {
-        dot.style.left = `${e.clientX}px`;
-        dot.style.top = `${e.clientY}px`;
-      },
-      { passive: true },
-    );
-    document.body.appendChild(dot);
-
-    const keepalive = document.createElement("div");
-    Object.assign(keepalive.style, {
-      position: "fixed",
-      left: "0",
-      top: "0",
-      width: "2px",
-      height: "2px",
-      pointerEvents: "none",
-      zIndex: "2147483647",
-      background: "#fff",
-    });
-    keepalive.animate(
-      [{ opacity: "1" }, { opacity: "0.99" }, { opacity: "1" }],
-      { duration: 1000, iterations: Infinity },
-    );
-    document.body.appendChild(keepalive);
-  };
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", mount, { once: true });
-  } else {
-    mount();
-  }
-});
+// Reassigned per variant — the humanized helpers operate on the live page.
+let context: Awaited<ReturnType<typeof browser.newContext>>;
+let page: Page;
 
 // --- Humanized input (see docs/demo-recording-plan.md) ----------------------
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
@@ -87,7 +45,7 @@ async function humanMove(x: number, y: number) {
   await page.waitForTimeout(rand(40, 120));
 }
 
-async function humanClick(locator: Locator) {
+async function humanClick(locator: Locator, opts: { direct?: boolean } = {}) {
   // locator.click() auto-scrolls; raw-coordinate clicks don't. Without this,
   // targets below the fold get clicked at stale off-screen coordinates.
   await locator.scrollIntoViewIfNeeded();
@@ -95,7 +53,15 @@ async function humanClick(locator: Locator) {
   if (!box) throw new Error(`click target not visible: ${locator}`);
   const x = box.x + box.width * rand(0.3, 0.7);
   const y = box.y + box.height * rand(0.3, 0.7);
-  await humanMove(x, y);
+  if (opts.direct) {
+    // Hover-sensitive containers (zag menus close when the pointer wanders
+    // outside them) — move straight to the target, no arc waypoint.
+    const steps = Math.max(4, Math.round(Math.hypot(x - cursor.x, y - cursor.y) / 14));
+    await page.mouse.move(x, y, { steps });
+  } else {
+    await humanMove(x, y);
+  }
+  cursor = { x, y };
   await page.mouse.down();
   await page.waitForTimeout(rand(60, 130));
   await page.mouse.up();
@@ -166,8 +132,8 @@ interface Scenario {
   file: string;
   /** Unrecorded prep (navigation, settling) — runs before the recorder attaches. */
   prepare?: (page: Page) => Promise<void>;
-  /** The recorded take. */
-  run: (page: Page) => Promise<void>;
+  /** The recorded take. `theme` is the variant's base theme. */
+  run: (page: Page, theme: Theme) => Promise<void>;
 }
 
 const scenarios: Scenario[] = [
@@ -292,18 +258,33 @@ const scenarios: Scenario[] = [
   // --- 05 — theme selection ---------------------------------------------------
   {
     file: "05-theme",
-    run: async (p) => {
+    // The demo flip: show the OPPOSITE of the variant's base theme, then
+    // return to it — so every other video in the set keeps the variant's look
+    // (light set stays light, dark set stays dark).
+    run: async (p, theme) => {
+      const flipTo = theme === "light" ? "Dark" : "Light";
+      const backTo = theme === "light" ? "Light" : "Dark";
       await openMenu();
-      await humanClick(p.getByRole("menuitem", { name: "Theme" }));
+      await humanClick(p.getByRole("menuitem", { name: "Theme" }), {
+        direct: true,
+      });
       await think(400, 700);
-      await humanClick(p.getByRole("menuitemradio", { name: "Dark" }));
+      // Submenu radios: direct click — the arc's waypoint can exit the
+      // submenu bounds, which closes the menu and strands the click on the
+      // page behind it.
+      await humanClick(p.getByRole("menuitemradio", { name: flipTo }), {
+        direct: true,
+      });
       await think(900, 1500);
 
-      // Flip back so the set's remaining look stays light.
       await openMenu();
-      await humanClick(p.getByRole("menuitem", { name: "Theme" }));
+      await humanClick(p.getByRole("menuitem", { name: "Theme" }), {
+        direct: true,
+      });
       await think(400, 700);
-      await humanClick(p.getByRole("menuitemradio", { name: "Light" }));
+      await humanClick(p.getByRole("menuitemradio", { name: backTo }), {
+        direct: true,
+      });
       await think(700, 1200);
       // Close the menu if the radio select kept it open.
       const closeMenu = p.getByRole("button", { name: "Close menu" });
@@ -322,7 +303,7 @@ const scenarios: Scenario[] = [
       await openMenu();
       // Menu nav links render as menuitem (Zag MenuItem asChild overrides the
       // anchor's implicit link role) — not getByRole("link").
-      await humanClick(p.getByRole("menuitem", { name: "Catalog" }));
+      await humanClick(p.getByRole("menuitem", { name: "Catalog" }), { direct: true });
       await p.getByRole("heading", { name: "Catalog" }).waitFor({
         timeout: 5000,
       });
@@ -405,7 +386,7 @@ const scenarios: Scenario[] = [
       });
       await think(500, 900);
       await openMenu();
-      await humanClick(p.getByRole("menuitem", { name: "Install Remindit" }));
+      await humanClick(p.getByRole("menuitem", { name: "Install Remindit" }), { direct: true });
       const dialog = p.getByRole("dialog");
       await dialog.waitFor({ state: "visible", timeout: 3000 });
       await think(1200, 2000);
@@ -423,25 +404,93 @@ const scenarios: Scenario[] = [
 ];
 
 // --- Runner -------------------------------------------------------------------
-let current: Awaited<ReturnType<typeof attachRecorder>> | undefined;
-try {
-  for (const scenario of scenarios) {
-    // Settle before attaching: the recorder's one-shot size validation races
-    // the window resize if the first screencast frame arrives too early.
-    await scenario.prepare?.(page);
-    current = await attachRecorder(page, {
-      path: path.join(OUT_DIR, `${scenario.file}.mp4`),
-    });
-    await scenario.run(page);
-    await current.stop();
-    current = undefined;
-    console.log(`✓ ${scenario.file}.mp4`);
+// One fresh context per theme variant: the theme is seeded before the app's
+// first paint (init script re-applies it on every navigation, so scenario 01's
+// localStorage wipe can't lose it) and scenario 05 flips back to it.
+for (const variant of variants) {
+  context = await browser.newContext({
+    viewport: { width: 400, height: 720 },
+    deviceScaleFactor: 1,
+  });
+  page = await context.newPage();
+
+  await page.addInitScript((theme) => {
+    localStorage.setItem("remindit:theme", JSON.stringify(theme));
+  }, variant);
+
+  // Cursor overlay + screencast keep-alive. Injected before the first
+  // navigation; they persist for the whole session. See
+  // docs/demo-recording-script.md for why both are needed.
+  await page.addInitScript(() => {
+    const mount = () => {
+      const dot = document.createElement("div");
+      Object.assign(dot.style, {
+        position: "fixed",
+        width: "28px",
+        height: "28px",
+        borderRadius: "50%",
+        background: "rgba(220, 38, 38, 0.7)",
+        border: "3px solid rgba(255, 255, 255, 0.9)",
+        pointerEvents: "none",
+        zIndex: "2147483647",
+        transform: "translate(-50%, -50%)",
+        transition: "left 0.05s, top 0.05s",
+      });
+      document.addEventListener(
+        "mousemove",
+        (e) => {
+          dot.style.left = `${e.clientX}px`;
+          dot.style.top = `${e.clientY}px`;
+        },
+        { passive: true },
+      );
+      document.body.appendChild(dot);
+
+      const keepalive = document.createElement("div");
+      Object.assign(keepalive.style, {
+        position: "fixed",
+        left: "0",
+        top: "0",
+        width: "2px",
+        height: "2px",
+        pointerEvents: "none",
+        zIndex: "2147483647",
+        background: "#fff",
+      });
+      keepalive.animate(
+        [{ opacity: "1" }, { opacity: "0.99" }, { opacity: "1" }],
+        { duration: 1000, iterations: Infinity },
+      );
+      document.body.appendChild(keepalive);
+    };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", mount, { once: true });
+    } else {
+      mount();
+    }
+  });
+
+  let current: Awaited<ReturnType<typeof attachRecorder>> | undefined;
+  try {
+    for (const scenario of scenarios) {
+      // Settle before attaching: the recorder's one-shot size validation
+      // races the window resize if the first screencast frame arrives too
+      // early.
+      await scenario.prepare?.(page);
+      current = await attachRecorder(page, {
+        path: path.join(OUT_DIR, `${scenario.file}-${variant}.mp4`),
+      });
+      await scenario.run(page, variant);
+      await current.stop();
+      current = undefined;
+      console.log(`✓ ${scenario.file}-${variant}.mp4`);
+    }
+  } finally {
+    if (current) {
+      await current.stop().catch(() => {});
+      await current.finalized.catch(() => {});
+    }
+    await context.close();
   }
-} finally {
-  if (current) {
-    await current.stop().catch(() => {});
-    await current.finalized.catch(() => {});
-  }
-  await context.close();
-  await browser.close();
 }
+await browser.close();

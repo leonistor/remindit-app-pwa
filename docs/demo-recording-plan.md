@@ -7,18 +7,27 @@
 
 ## Goal
 
-One script, one browser session, producing a numbered set of feature videos in
-`scripts/demos/`:
+One script, one browser journey per theme variant, producing a numbered set of
+feature videos in `scripts/demos/` — **each video in a light and a dark
+variant** (`{file}-{light|dark}.mp4`; 14 files total):
 
-| # | File | Feature | ~Len | Exit state |
+| # | File (suffix `-light`/`-dark`) | Feature | ~Len | Exit state |
 |---|------|---------|------|------------|
-| 01 | `01-onboarding.mp4` | First-run profile + dataset | 12s | Onboarded as **Jane Doe**, Minimal catalog, seeded history |
-| 02 | `02-install-banner.mp4` | PWA install banner | 5s | Banner dismissed via "Maybe later" (session-only) |
-| 03 | `03-add-items.mp4` | Catalog → shopping list | 8s | 4 chips on list (eggs, pasta, yogurt, crackers) |
-| 04 | `04-quick-add.mp4` | Quick add dialog | 10s | +Milk (existing) +Apple→fridge (new) |
-| 05 | `05-theme.mp4` | Theme picker | 8s | Theme flipped Dark → back to Light |
-| 06 | `06-edit-catalog.mp4` | Catalog CRUD | 18s | Catalog unchanged (add → rename → delete) |
-| 07 | `07-install.mp4` | Install instructions dialog | 6s | Dialog opened & closed, not installed |
+| 01 | `01-onboarding` | First-run profile + dataset | 12s | Onboarded as **Jane Doe**, Minimal catalog, seeded history |
+| 02 | `02-install-banner` | PWA install banner | 4s | Banner dismissed via "Maybe later" (session-only) |
+| 03 | `03-add-items` | Catalog → shopping list | 8s | 4 chips on list (eggs, pasta, yogurt, crackers) |
+| 04 | `04-quick-add` | Quick add dialog | 10s | +Milk (existing) +Apple→fridge (new) |
+| 05 | `05-theme` | Theme picker | 8s | Flip to the OPPOSITE theme → back to the variant's base |
+| 06 | `06-edit-catalog` | Catalog CRUD | 18s | Catalog unchanged (add → rename → delete) |
+| 07 | `07-install` | Install instructions dialog | 6s | Dialog opened & closed, not installed |
+
+**Theme variants:** the runner loops over `["light", "dark"]` (CLI filter:
+`bun scripts/demo-scenarios.ts dark`). Each variant gets a fresh browser
+context; the theme is seeded via `addInitScript` writing
+`localStorage["remindit:theme"]` before the app boots — re-applied on every
+navigation, so scenario 01's localStorage wipe can't lose it. Scenario 05's
+flip mirrors per variant (light set: Dark→Light; dark set: Light→Dark) so
+every other video keeps the variant's look.
 
 Numbering = chronological user journey. The install banner lands at **02**
 (not 07) because it appears ~1.5s after onboarding completes — that's when a
@@ -167,15 +176,20 @@ display-mode not standalone (headful default ✓).
 - **`humanClick` calls `scrollIntoViewIfNeeded()` before measuring** — raw
   coordinate clicks don't auto-scroll like `locator.click()`, so below-the-fold
   targets otherwise get clicked at stale off-screen coordinates.
-- All delays randomized (`rand(min, max)`) — every run differs; total set
-  ~1.5 min.
+- **Menu items need `{ direct: true }`** — the arc waypoint can exit the
+  (sub)menu's bounds; zag closes menus when the pointer leaves them, so the
+  click then strands on the page behind it (this silently swallowed the theme
+  radio click in the dark variant).
+- All delays randomized (`rand(min, max)`) — every run differs; each variant
+  set runs ~1 min.
 
 ## Workflow
 
 ```sh
 bun run dev &                      # port 3000
 mkdir -p scripts/demos             # ffmpeg needs the output dir to exist
-bun scripts/demo-scenarios.ts      # regenerates scripts/demos/*.mp4
+bun scripts/demo-scenarios.ts      # regenerates scripts/demos/*-{light,dark}.mp4
+bun scripts/demo-scenarios.ts dark # single variant
 ```
 
 Preview: open `scripts/demo-preview.html` (untracked, local-only). Verify
