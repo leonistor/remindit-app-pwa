@@ -78,6 +78,12 @@ const AboutView = () => (
           see what you&rsquo;ve picked up and what&rsquo;s still pending.
         </li>
         <li>
+          <strong>Share</strong>: turn the list you still need into a polished
+          image from the menu — items grouped by category with their colors,
+          ready to <strong>Copy image</strong> or <strong>Download PNG</strong>{" "}
+          and send to whoever&rsquo;s shopping with you.
+        </li>
+        <li>
           <strong>Color palettes</strong>: choose a categorical palette (Van
           Gogh is the default) with a live preview; it colors categories and
           items consistently across the app.

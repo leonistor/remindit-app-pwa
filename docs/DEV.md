@@ -42,6 +42,7 @@ A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Lay
 | `/catalog` | CatalogView | Manage catalog items |
 | `/history` | HistoryView | View shopping history |
 | `/profile` | ProfileView | User profile, catalog link, palette, reset & reseed |
+| `/share` | ShareView | Share the pending shopping list as a PNG image |
 | `/about` | AboutView | About the app |
 | `/changelog` | ChangelogView | Version history (linked from the footer version) |
 | `/help` | HelpView | Usage help |

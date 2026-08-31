@@ -163,6 +163,26 @@ const HelpView = () => (
     </section>
 
     <section className="flex flex-col gap-2">
+      <h2 className="font-semibold text-lg">Share</h2>
+      <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
+        <li>
+          Open <strong>Share</strong> from the menu to preview your list as a
+          card image — today&rsquo;s date and the items still on it, grouped by
+          category with their colors.
+        </li>
+        <li>
+          <strong>Copy image</strong> puts the card on your clipboard (where
+          your browser supports it) and <strong>Download PNG</strong> saves a
+          file — send it to whoever&rsquo;s shopping with you.
+        </li>
+        <li>
+          Checked-off items never make it onto the card, and the image always
+          uses light colors so it reads well in any chat — even in dark mode.
+        </li>
+      </ul>
+    </section>
+
+    <section className="flex flex-col gap-2">
       <h2 className="font-semibold text-lg">Your data</h2>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
         <li>
