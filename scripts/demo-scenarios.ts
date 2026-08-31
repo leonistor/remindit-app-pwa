@@ -177,11 +177,17 @@ const scenarios: Scenario[] = [
       // rather than addInitScript, which would wipe state on EVERY load.
       await p.evaluate(() => localStorage.clear())
       await p.goto(BASE)
+      // First-run lands on the welcome step (autoplaying demo video + Next);
+      // the profile dice only appears after advancing past it.
       await p
-        .getByRole("button", { name: "Roll a new random name and avatar" })
+        .getByRole("button", { name: "Next" })
         .waitFor({ state: "visible", timeout: 15_000 })
     },
     run: async (p) => {
+      // Let the welcome video play for a beat, then advance to the profile.
+      await think(1600, 2400)
+      await humanClick(p.getByRole("button", { name: "Next" }))
+      await think(600, 1100)
       const dice = p.getByRole("button", {
         name: "Roll a new random name and avatar",
       })

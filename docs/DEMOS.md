@@ -40,7 +40,7 @@ Order mirrors what a real user does:
 
 | # | Scenario | Shows | ~Len |
 |---|----------|-------|------|
-| 01 | onboarding | Dice-roll profile (**Jane Doe**), Minimal dataset, Finish | 12s |
+| 01 | onboarding | Welcome video → Next, dice-roll profile (**Jane Doe**), Minimal dataset, Finish | 16s |
 | 02 | install-banner | Mocked `beforeinstallprompt` → banner → "Maybe later" | 4s |
 | 03 | add-items | Fridge/Snacks accordions → 4 catalog chips onto the list | 8s |
 | 04 | quick-add | Header-`+` dialog: pick existing "Milk", create "apple" → fridge via category pill | 10s |
