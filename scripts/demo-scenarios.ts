@@ -1,6 +1,6 @@
-import { chromium, type Locator, type Page } from "playwright";
-import { attachRecorder } from "playwright-recorder-plus";
-import path from "node:path";
+import { chromium, type Locator, type Page } from "playwright"
+import { attachRecorder } from "playwright-recorder-plus"
+import path from "node:path"
 
 // Generates the numbered demo-video set into public/demos/ — one video per
 // feature per theme variant (light + dark), recorded as a single chronological
@@ -14,22 +14,22 @@ import path from "node:path";
 // (server delivers e.g. 400x257) that the recorder rejects. Keep
 // --force-device-scale-factor=1 in the launch args below when resizing; see
 // docs/DEMOS.md §Gotchas for why.
-const DEMO_WIDTH = 400;
-const DEMO_HEIGHT = 720;
-const DEMO_VIEWPORT = { width: DEMO_WIDTH, height: DEMO_HEIGHT };
+const DEMO_WIDTH = 400
+const DEMO_HEIGHT = 720
+const DEMO_VIEWPORT = { width: DEMO_WIDTH, height: DEMO_HEIGHT }
 
 // Videos land in public/demos so the built app serves them as static assets.
-const OUT_DIR = path.join(import.meta.dir, "..", "public", "demos");
-const BASE = "http://localhost:3000";
+const OUT_DIR = path.join(import.meta.dir, "..", "public", "demos")
+const BASE = "http://localhost:3000"
 
-type Theme = "light" | "dark";
+type Theme = "light" | "dark"
 // Optional CLI filter: `bun scripts/demo-scenarios.ts dark` records only the
 // dark variant; default records both.
-const variantArg = process.argv[2];
+const variantArg = process.argv[2]
 const variants: Theme[] =
   variantArg === "dark" || variantArg === "light"
     ? [variantArg]
-    : ["light", "dark"];
+    : ["light", "dark"]
 
 // The generator drives the app on the dev server (headed). It intentionally
 // does NOT start its own server: rsbuild dev on :3000 (or an equivalent) must
@@ -42,75 +42,78 @@ try {
 }
 if (!baseAlive?.ok) {
   console.error(
-    `No dev server responding at ${BASE}. Start it first:\n\n  bun run dev\n`,
-  );
-  process.exit(1);
+    `No dev server responding at ${BASE}. Start it first:\n\n  bun run dev\n`
+  )
+  process.exit(1)
 }
 
 const browser = await chromium.launch({
   headless: false,
   args: ["--force-device-scale-factor=1"],
-});
+})
 
 // Reassigned per variant — the humanized helpers operate on the live page.
-let context: Awaited<ReturnType<typeof browser.newContext>>;
-let page: Page;
+let context: Awaited<ReturnType<typeof browser.newContext>>
+let page: Page
 
 // --- Humanized input (see docs/demo-recording-plan.md) ----------------------
-const rand = (min: number, max: number) => min + Math.random() * (max - min);
-const think = (min: number, max: number) => page.waitForTimeout(rand(min, max));
+const rand = (min: number, max: number) => min + Math.random() * (max - min)
+const think = (min: number, max: number) => page.waitForTimeout(rand(min, max))
 
-let cursor = { x: 0, y: 0 };
+let cursor = { x: 0, y: 0 }
 
 async function humanMove(x: number, y: number) {
-  const distance = Math.hypot(x - cursor.x, y - cursor.y);
-  const midX = (cursor.x + x) / 2 + rand(-40, 40);
-  const midY = (cursor.y + y) / 2 + rand(-40, 40);
-  const steps = Math.max(6, Math.round(distance / rand(10, 18)));
-  await page.mouse.move(midX, midY, { steps: Math.ceil(steps / 2) });
-  await page.mouse.move(x, y, { steps: Math.ceil(steps / 2) });
-  cursor = { x, y };
-  await page.waitForTimeout(rand(40, 120));
+  const distance = Math.hypot(x - cursor.x, y - cursor.y)
+  const midX = (cursor.x + x) / 2 + rand(-40, 40)
+  const midY = (cursor.y + y) / 2 + rand(-40, 40)
+  const steps = Math.max(6, Math.round(distance / rand(10, 18)))
+  await page.mouse.move(midX, midY, { steps: Math.ceil(steps / 2) })
+  await page.mouse.move(x, y, { steps: Math.ceil(steps / 2) })
+  cursor = { x, y }
+  await page.waitForTimeout(rand(40, 120))
 }
 
 async function humanClick(locator: Locator, opts: { direct?: boolean } = {}) {
   // locator.click() auto-scrolls; raw-coordinate clicks don't. Without this,
   // targets below the fold get clicked at stale off-screen coordinates.
-  await locator.scrollIntoViewIfNeeded();
-  const box = await locator.boundingBox();
-  if (!box) throw new Error(`click target not visible: ${locator}`);
-  const x = box.x + box.width * rand(0.3, 0.7);
-  const y = box.y + box.height * rand(0.3, 0.7);
+  await locator.scrollIntoViewIfNeeded()
+  const box = await locator.boundingBox()
+  if (!box) throw new Error(`click target not visible: ${locator}`)
+  const x = box.x + box.width * rand(0.3, 0.7)
+  const y = box.y + box.height * rand(0.3, 0.7)
   if (opts.direct) {
     // Hover-sensitive containers (zag menus close when the pointer wanders
     // outside them) — move straight to the target, no arc waypoint.
-    const steps = Math.max(4, Math.round(Math.hypot(x - cursor.x, y - cursor.y) / 14));
-    await page.mouse.move(x, y, { steps });
+    const steps = Math.max(
+      4,
+      Math.round(Math.hypot(x - cursor.x, y - cursor.y) / 14)
+    )
+    await page.mouse.move(x, y, { steps })
   } else {
-    await humanMove(x, y);
+    await humanMove(x, y)
   }
-  cursor = { x, y };
-  await page.mouse.down();
-  await page.waitForTimeout(rand(60, 130));
-  await page.mouse.up();
+  cursor = { x, y }
+  await page.mouse.down()
+  await page.waitForTimeout(rand(60, 130))
+  await page.mouse.up()
 }
 
 /** Click into the field like a human, then type with per-char cadence. */
 async function humanType(
   locator: Locator,
   text: string,
-  opts: { replace?: boolean } = {},
+  opts: { replace?: boolean } = {}
 ) {
-  await humanClick(locator);
+  await humanClick(locator)
   if (opts.replace) {
     // Select existing content AFTER the focus click (clicking would collapse
     // an earlier selection) so typing overwrites it.
-    await page.keyboard.press("ControlOrMeta+A");
+    await page.keyboard.press("ControlOrMeta+A")
   }
   for (const ch of text) {
-    await page.keyboard.type(ch, { delay: rand(60, 160) });
+    await page.keyboard.type(ch, { delay: rand(60, 160) })
     // Occasional longer hesitation between keystrokes.
-    if (Math.random() < 0.15) await page.waitForTimeout(rand(120, 350));
+    if (Math.random() < 0.15) await page.waitForTimeout(rand(120, 350))
   }
 }
 
@@ -120,48 +123,48 @@ async function humanType(
  * raw touch events via CDP — a mouse drag would be ignored.
  */
 async function humanSwipeLeft(locator: Locator) {
-  await locator.scrollIntoViewIfNeeded();
-  const box = await locator.boundingBox();
-  if (!box) throw new Error(`swipe target not visible: ${locator}`);
-  const y = box.y + box.height / 2;
-  const startX = box.x + box.width * 0.8;
-  const endX = box.x + box.width * 0.1;
-  const cdp = await context.newCDPSession(page);
+  await locator.scrollIntoViewIfNeeded()
+  const box = await locator.boundingBox()
+  if (!box) throw new Error(`swipe target not visible: ${locator}`)
+  const y = box.y + box.height / 2
+  const startX = box.x + box.width * 0.8
+  const endX = box.x + box.width * 0.1
+  const cdp = await context.newCDPSession(page)
   await cdp.send("Input.dispatchTouchEvent", {
     type: "touchStart",
     touchPoints: [{ x: startX, y }],
-  });
+  })
   // A flick with fingers: fast, slightly non-linear.
-  const midX = (startX + endX) / 2;
+  const midX = (startX + endX) / 2
   const steps = [
     [midX, y + rand(-6, 6)],
     [endX, y],
-  ] as const;
+  ] as const
   for (const [x, py] of steps) {
     await cdp.send("Input.dispatchTouchEvent", {
       type: "touchMove",
       touchPoints: [{ x, y: py }],
-    });
-    await page.waitForTimeout(rand(25, 60));
+    })
+    await page.waitForTimeout(rand(25, 60))
   }
   await cdp.send("Input.dispatchTouchEvent", {
     type: "touchEnd",
     touchPoints: [],
-  });
+  })
 }
 
 // Menu chrome is shared by several scenarios.
 const openMenu = async () => {
-  await humanClick(page.getByRole("button", { name: "Open menu" }));
-  await think(300, 600);
-};
+  await humanClick(page.getByRole("button", { name: "Open menu" }))
+  await think(300, 600)
+}
 
 interface Scenario {
-  file: string;
+  file: string
   /** Unrecorded prep (navigation, settling) — runs before the recorder attaches. */
-  prepare?: (page: Page) => Promise<void>;
+  prepare?: (page: Page) => Promise<void>
   /** The recorded take. `theme` is the variant's base theme. */
-  run: (page: Page, theme: Theme) => Promise<void>;
+  run: (page: Page, theme: Theme) => Promise<void>
 }
 
 const scenarios: Scenario[] = [
@@ -169,35 +172,37 @@ const scenarios: Scenario[] = [
   {
     file: "01-onboarding",
     prepare: async (p) => {
-      await p.goto(BASE);
+      await p.goto(BASE)
       // One-time wipe for a genuine first run. Done via evaluate + reload
       // rather than addInitScript, which would wipe state on EVERY load.
-      await p.evaluate(() => localStorage.clear());
-      await p.goto(BASE);
+      await p.evaluate(() => localStorage.clear())
+      await p.goto(BASE)
       await p
         .getByRole("button", { name: "Roll a new random name and avatar" })
-        .waitFor({ state: "visible", timeout: 15_000 });
+        .waitFor({ state: "visible", timeout: 15_000 })
     },
     run: async (p) => {
       const dice = p.getByRole("button", {
         name: "Roll a new random name and avatar",
-      });
-      await think(600, 1200);
+      })
+      await think(600, 1200)
       for (let i = 0; i < 3; i++) {
-        await humanClick(dice);
-        await think(700, 1400);
+        await humanClick(dice)
+        await think(700, 1400)
       }
-      await humanType(p.getByLabel("First name"), "Jane");
-      await think(300, 700);
-      await humanType(p.getByLabel("Last name"), "Doe");
-      await think(400, 900);
-      await humanClick(p.getByRole("button", { name: "Next" }));
-      await think(600, 1100);
-      await humanClick(p.getByRole("radio", { name: "Minimal (starter)" }));
-      await think(400, 800);
-      await humanClick(p.getByRole("button", { name: "Finish" }));
-      await p.getByText("Tap items below to add to the shopping list.").waitFor();
-      await think(600, 1000);
+      await humanType(p.getByLabel("First name"), "Jane")
+      await think(300, 700)
+      await humanType(p.getByLabel("Last name"), "Doe")
+      await think(400, 900)
+      await humanClick(p.getByRole("button", { name: "Next" }))
+      await think(600, 1100)
+      await humanClick(p.getByRole("radio", { name: "Minimal (starter)" }))
+      await think(400, 800)
+      await humanClick(p.getByRole("button", { name: "Finish" }))
+      await p
+        .getByText("Tap items below to add to the shopping list.")
+        .waitFor()
+      await think(600, 1000)
     },
   },
 
@@ -208,22 +213,25 @@ const scenarios: Scenario[] = [
       // No real beforeinstallprompt in a Playwright context — dispatch a mock.
       // pwa-install-handler's window listener persists post-load.
       await p.evaluate(() => {
-        const e = new Event("beforeinstallprompt", { cancelable: true });
+        const e = new Event("beforeinstallprompt", { cancelable: true })
         const mock = e as Event & {
-          prompt: () => Promise<void>;
-          userChoice: Promise<{ outcome: string; platform: string }>;
-        };
-        mock.prompt = async () => {};
-        mock.userChoice = Promise.resolve({ outcome: "accepted", platform: "web" });
-        window.dispatchEvent(mock);
-      });
-      const later = p.getByRole("button", { name: "Maybe later" });
+          prompt: () => Promise<void>
+          userChoice: Promise<{ outcome: string; platform: string }>
+        }
+        mock.prompt = async () => {}
+        mock.userChoice = Promise.resolve({
+          outcome: "accepted",
+          platform: "web",
+        })
+        window.dispatchEvent(mock)
+      })
+      const later = p.getByRole("button", { name: "Maybe later" })
       // Banner has a built-in 1.5s mount delay after canInstall flips.
-      await later.waitFor({ state: "visible", timeout: 6000 });
-      await think(900, 1600);
-      await humanClick(later);
-      await later.waitFor({ state: "detached", timeout: 3000 });
-      await think(500, 900);
+      await later.waitFor({ state: "visible", timeout: 6000 })
+      await think(900, 1600)
+      await humanClick(later)
+      await later.waitFor({ state: "detached", timeout: 3000 })
+      await think(500, 900)
     },
   },
 
@@ -231,20 +239,20 @@ const scenarios: Scenario[] = [
   {
     file: "03-add-items",
     run: async (p) => {
-      await humanClick(p.getByRole("button", { name: /fridge/i }));
-      await think(500, 1000);
-      await humanClick(p.getByRole("button", { name: /snacks/i }));
-      await think(400, 900);
+      await humanClick(p.getByRole("button", { name: /fridge/i }))
+      await think(500, 1000)
+      await humanClick(p.getByRole("button", { name: /snacks/i }))
+      await think(400, 900)
       // Scope to catalog chips: after adding, the same item name also exists
       // in the list panel and getByRole alone would multi-match.
       for (const item of ["eggs", "pasta", "yogurt", "crackers"]) {
         const chip = p
           .getByRole("button", { name: item })
-          .and(p.locator('[data-testid="catalog-item"]'));
-        await humanClick(chip);
-        await think(500, 1200);
+          .and(p.locator('[data-testid="catalog-item"]'))
+        await humanClick(chip)
+        await think(500, 1200)
       }
-      await think(600, 1000);
+      await think(600, 1000)
     },
   },
 
@@ -252,34 +260,32 @@ const scenarios: Scenario[] = [
   {
     file: "04-quick-add",
     run: async (p) => {
-      const plus = p.getByRole("button", { name: "Add to shopping list" });
-      const input = p.getByPlaceholder("Add an item…");
-      const done = p.getByRole("button", { name: "Done", exact: true });
+      const plus = p.getByRole("button", { name: "Add to shopping list" })
+      const input = p.getByPlaceholder("Add an item…")
+      const done = p.getByRole("button", { name: "Done", exact: true })
 
       // Existing item via autocomplete.
-      await humanClick(plus);
-      await input.waitFor({ state: "visible", timeout: 3000 });
-      await think(400, 800);
-      await humanType(input, "milk");
-      await think(300, 600);
-      await humanClick(p.getByRole("option", { name: "Milk" }));
-      await done.waitFor({ state: "detached", timeout: 3000 });
-      await think(600, 1100);
+      await humanClick(plus)
+      await input.waitFor({ state: "visible", timeout: 3000 })
+      await think(400, 800)
+      await humanType(input, "milk")
+      await think(300, 600)
+      await humanClick(p.getByRole("option", { name: "Milk" }))
+      await done.waitFor({ state: "detached", timeout: 3000 })
+      await think(600, 1100)
 
       // New item: type a novel name, then one-tap create via the category
       // pill — the pill IS the create action (creates + closes the dialog).
       // (The separate "Add “apple”" create-row is the Enter-key path.)
-      await humanClick(plus);
-      await input.waitFor({ state: "visible", timeout: 3000 });
-      await think(400, 800);
-      await humanType(input, "apple");
-      await think(300, 600);
+      await humanClick(plus)
+      await input.waitFor({ state: "visible", timeout: 3000 })
+      await think(400, 800)
+      await humanType(input, "apple")
+      await think(300, 600)
       // Curly quotes are part of the exact label format.
-      await humanClick(
-        p.getByRole("button", { name: "Add “apple” to Fridge" }),
-      );
-      await done.waitFor({ state: "detached", timeout: 3000 });
-      await think(600, 1000);
+      await humanClick(p.getByRole("button", { name: "Add “apple” to Fridge" }))
+      await done.waitFor({ state: "detached", timeout: 3000 })
+      await think(600, 1000)
     },
   },
 
@@ -290,36 +296,36 @@ const scenarios: Scenario[] = [
     // return to it — so every other video in the set keeps the variant's look
     // (light set stays light, dark set stays dark).
     run: async (p, theme) => {
-      const flipTo = theme === "light" ? "Dark" : "Light";
-      const backTo = theme === "light" ? "Light" : "Dark";
-      await openMenu();
+      const flipTo = theme === "light" ? "Dark" : "Light"
+      const backTo = theme === "light" ? "Light" : "Dark"
+      await openMenu()
       await humanClick(p.getByRole("menuitem", { name: "Theme" }), {
         direct: true,
-      });
-      await think(400, 700);
+      })
+      await think(400, 700)
       // Submenu radios: direct click — the arc's waypoint can exit the
       // submenu bounds, which closes the menu and strands the click on the
       // page behind it.
       await humanClick(p.getByRole("menuitemradio", { name: flipTo }), {
         direct: true,
-      });
-      await think(900, 1500);
+      })
+      await think(900, 1500)
 
-      await openMenu();
+      await openMenu()
       await humanClick(p.getByRole("menuitem", { name: "Theme" }), {
         direct: true,
-      });
-      await think(400, 700);
+      })
+      await think(400, 700)
       await humanClick(p.getByRole("menuitemradio", { name: backTo }), {
         direct: true,
-      });
-      await think(700, 1200);
+      })
+      await think(700, 1200)
       // Close the menu if the radio select kept it open.
-      const closeMenu = p.getByRole("button", { name: "Close menu" });
+      const closeMenu = p.getByRole("button", { name: "Close menu" })
       if (await closeMenu.isVisible().catch(() => false)) {
-        await humanClick(closeMenu);
+        await humanClick(closeMenu)
       }
-      await think(400, 800);
+      await think(400, 800)
     },
   },
 
@@ -328,74 +334,72 @@ const scenarios: Scenario[] = [
     file: "06-edit-catalog",
     // 400px viewport = mobile layout: rows are tap-to-edit, swipe-to-delete.
     run: async (p) => {
-      await openMenu();
+      await openMenu()
       // Menu nav links render as menuitem (Zag MenuItem asChild overrides the
       // anchor's implicit link role) — not getByRole("link").
-      await humanClick(p.getByRole("menuitem", { name: "Catalog" }), { direct: true });
+      await humanClick(p.getByRole("menuitem", { name: "Catalog" }), {
+        direct: true,
+      })
       await p.getByRole("heading", { name: "Catalog" }).waitFor({
         timeout: 5000,
-      });
-      await think(600, 1100);
+      })
+      await think(600, 1100)
 
       // Add "Honey" to Fridge. exact:true — "Add item" also substring-matches
       // every per-category "Add item to {name}" button.
-      await humanClick(
-        p.getByRole("button", { name: "Add item", exact: true }),
-      );
-      const dialog = p.getByRole("dialog");
-      await dialog.waitFor({ state: "visible", timeout: 3000 });
-      await think(400, 800);
+      await humanClick(p.getByRole("button", { name: "Add item", exact: true }))
+      const dialog = p.getByRole("dialog")
+      await dialog.waitFor({ state: "visible", timeout: 3000 })
+      await think(400, 800)
       // getByLabel is broken in this dialog (labels lack htmlFor) — use the
       // placeholder.
-      await humanType(dialog.getByPlaceholder("e.g. Milk"), "Honey");
-      await think(300, 600);
-      await humanClick(dialog.locator('[data-slot="select-trigger"]'));
-      await think(300, 600);
-      await humanClick(p.getByRole("option", { name: "Fridge" }));
-      await think(300, 600);
-      await humanClick(
-        dialog.getByRole("button", { name: "Add", exact: true }),
-      );
-      await dialog.waitFor({ state: "detached", timeout: 3000 });
-      await think(700, 1200);
+      await humanType(dialog.getByPlaceholder("e.g. Milk"), "Honey")
+      await think(300, 600)
+      await humanClick(dialog.locator('[data-slot="select-trigger"]'))
+      await think(300, 600)
+      await humanClick(p.getByRole("option", { name: "Fridge" }))
+      await think(300, 600)
+      await humanClick(dialog.getByRole("button", { name: "Add", exact: true }))
+      await dialog.waitFor({ state: "detached", timeout: 3000 })
+      await think(700, 1200)
 
       // Rename via tap-to-edit (mobile verb).
-      const row = p.getByRole("button", { name: /Edit Honey/ });
-      await row.waitFor({ state: "visible", timeout: 3000 });
-      await humanClick(row);
-      const editDialog = p.getByRole("dialog");
-      await editDialog.waitFor({ state: "visible", timeout: 3000 });
-      await think(400, 700);
-      const nameInput = editDialog.getByPlaceholder("e.g. Milk");
-      await nameInput.waitFor({ state: "visible", timeout: 3000 });
-      await humanType(nameInput, "Raw Honey", { replace: true });
+      const row = p.getByRole("button", { name: /Edit Honey/ })
+      await row.waitFor({ state: "visible", timeout: 3000 })
+      await humanClick(row)
+      const editDialog = p.getByRole("dialog")
+      await editDialog.waitFor({ state: "visible", timeout: 3000 })
+      await think(400, 700)
+      const nameInput = editDialog.getByPlaceholder("e.g. Milk")
+      await nameInput.waitFor({ state: "visible", timeout: 3000 })
+      await humanType(nameInput, "Raw Honey", { replace: true })
       await humanClick(
-        editDialog.getByRole("button", { name: "Save", exact: true }),
-      );
-      await editDialog.waitFor({ state: "detached", timeout: 3000 });
-      await think(700, 1100);
+        editDialog.getByRole("button", { name: "Save", exact: true })
+      )
+      await editDialog.waitFor({ state: "detached", timeout: 3000 })
+      await think(700, 1100)
 
       // Delete via swipe-left → revealed Delete button → confirm dialog.
-      const renamedRow = p.getByRole("button", { name: /Edit Raw Honey/ });
-      await renamedRow.waitFor({ state: "visible", timeout: 3000 });
-      await humanSwipeLeft(renamedRow);
-      await think(300, 600);
-      await humanClick(p.getByRole("button", { name: "Delete Raw Honey" }));
-      const confirm = p.getByRole("alertdialog");
-      await confirm.waitFor({ state: "visible", timeout: 3000 });
-      await think(400, 800);
-      await humanClick(confirm.getByRole("button", { name: "Delete item" }));
-      await confirm.waitFor({ state: "detached", timeout: 3000 });
-      await think(600, 1000);
+      const renamedRow = p.getByRole("button", { name: /Edit Raw Honey/ })
+      await renamedRow.waitFor({ state: "visible", timeout: 3000 })
+      await humanSwipeLeft(renamedRow)
+      await think(300, 600)
+      await humanClick(p.getByRole("button", { name: "Delete Raw Honey" }))
+      const confirm = p.getByRole("alertdialog")
+      await confirm.waitFor({ state: "visible", timeout: 3000 })
+      await think(400, 800)
+      await humanClick(confirm.getByRole("button", { name: "Delete item" }))
+      await confirm.waitFor({ state: "detached", timeout: 3000 })
+      await think(600, 1000)
 
       // Back to the main view for the next scenario. (The list has items at
       // this point, so wait for chrome that's always visible, not the
       // empty-state text.)
-      await humanClick(p.getByRole("button", { name: "Go back" }));
+      await humanClick(p.getByRole("button", { name: "Go back" }))
       await p
         .getByRole("button", { name: "Add to shopping list" })
-        .waitFor({ timeout: 5000 });
-      await think(400, 800);
+        .waitFor({ timeout: 5000 })
+      await think(400, 800)
     },
   },
 
@@ -410,26 +414,28 @@ const scenarios: Scenario[] = [
       // — and handleInstall then takes the manual-instructions path instead
       // of the invisible native prompt.
       await p.evaluate(() => {
-        window.dispatchEvent(new Event("appinstalled"));
-      });
-      await think(500, 900);
-      await openMenu();
-      await humanClick(p.getByRole("menuitem", { name: "Install Remindit" }), { direct: true });
-      const dialog = p.getByRole("dialog");
-      await dialog.waitFor({ state: "visible", timeout: 3000 });
-      await think(1200, 2000);
+        window.dispatchEvent(new Event("appinstalled"))
+      })
+      await think(500, 900)
+      await openMenu()
+      await humanClick(p.getByRole("menuitem", { name: "Install Remindit" }), {
+        direct: true,
+      })
+      const dialog = p.getByRole("dialog")
+      await dialog.waitFor({ state: "visible", timeout: 3000 })
+      await think(1200, 2000)
       // Two close triggers exist (footer "Close" + icon X with aria-label
       // "Close") — pick the footer one by text.
       await humanClick(
         dialog
           .locator('[data-slot="dialog-close-trigger"]')
-          .filter({ hasText: "Close" }),
-      );
-      await dialog.waitFor({ state: "detached", timeout: 3000 });
-      await think(500, 900);
+          .filter({ hasText: "Close" })
+      )
+      await dialog.waitFor({ state: "detached", timeout: 3000 })
+      await think(500, 900)
     },
   },
-];
+]
 
 // --- Runner -------------------------------------------------------------------
 // One fresh context per theme variant: the theme is seeded before the app's
@@ -439,19 +445,19 @@ for (const variant of variants) {
   context = await browser.newContext({
     viewport: DEMO_VIEWPORT,
     deviceScaleFactor: 1,
-  });
-  page = await context.newPage();
+  })
+  page = await context.newPage()
 
   await page.addInitScript((theme) => {
-    localStorage.setItem("remindit:theme", JSON.stringify(theme));
-  }, variant);
+    localStorage.setItem("remindit:theme", JSON.stringify(theme))
+  }, variant)
 
   // Cursor overlay + screencast keep-alive. Injected before the first
   // navigation; they persist for the whole session. See
   // docs/demo-recording-script.md for why both are needed.
   await page.addInitScript(() => {
     const mount = () => {
-      const dot = document.createElement("div");
+      const dot = document.createElement("div")
       Object.assign(dot.style, {
         position: "fixed",
         width: "28px",
@@ -463,18 +469,18 @@ for (const variant of variants) {
         zIndex: "2147483647",
         transform: "translate(-50%, -50%)",
         transition: "left 0.05s, top 0.05s",
-      });
+      })
       document.addEventListener(
         "mousemove",
         (e) => {
-          dot.style.left = `${e.clientX}px`;
-          dot.style.top = `${e.clientY}px`;
+          dot.style.left = `${e.clientX}px`
+          dot.style.top = `${e.clientY}px`
         },
-        { passive: true },
-      );
-      document.body.appendChild(dot);
+        { passive: true }
+      )
+      document.body.appendChild(dot)
 
-      const keepalive = document.createElement("div");
+      const keepalive = document.createElement("div")
       Object.assign(keepalive.style, {
         position: "fixed",
         left: "0",
@@ -484,41 +490,41 @@ for (const variant of variants) {
         pointerEvents: "none",
         zIndex: "2147483647",
         background: "#fff",
-      });
+      })
       keepalive.animate(
         [{ opacity: "1" }, { opacity: "0.99" }, { opacity: "1" }],
-        { duration: 1000, iterations: Infinity },
-      );
-      document.body.appendChild(keepalive);
-    };
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", mount, { once: true });
-    } else {
-      mount();
+        { duration: 1000, iterations: Infinity }
+      )
+      document.body.appendChild(keepalive)
     }
-  });
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", mount, { once: true })
+    } else {
+      mount()
+    }
+  })
 
-  let current: Awaited<ReturnType<typeof attachRecorder>> | undefined;
+  let current: Awaited<ReturnType<typeof attachRecorder>> | undefined
   try {
     for (const scenario of scenarios) {
       // Settle before attaching: the recorder's one-shot size validation
       // races the window resize if the first screencast frame arrives too
       // early.
-      await scenario.prepare?.(page);
+      await scenario.prepare?.(page)
       current = await attachRecorder(page, {
         path: path.join(OUT_DIR, `${scenario.file}-${variant}.mp4`),
-      });
-      await scenario.run(page, variant);
-      await current.stop();
-      current = undefined;
-      console.log(`✓ ${scenario.file}-${variant}.mp4`);
+      })
+      await scenario.run(page, variant)
+      await current.stop()
+      current = undefined
+      console.log(`✓ ${scenario.file}-${variant}.mp4`)
     }
   } finally {
     if (current) {
-      await current.stop().catch(() => {});
-      await current.finalized.catch(() => {});
+      await current.stop().catch(() => {})
+      await current.finalized.catch(() => {})
     }
-    await context.close();
+    await context.close()
   }
 }
-await browser.close();
+await browser.close()
