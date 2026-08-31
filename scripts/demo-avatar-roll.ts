@@ -11,22 +11,48 @@ const context = await browser.newContext({
 });
 const page = await context.newPage();
 
-const recorder = await attachRecorder(page, {
-  path: OUTPUT,
-  size: { width: 400, height: 700 },
-});
+const recorder = await attachRecorder(page, { path: OUTPUT });
 
 try {
   await page.goto("http://localhost:3000");
 
-  const diceButton = page.locator(
-    'button[aria-label="Roll a new random name and avatar"]',
-  );
+  // --- Onboarding: pick avatar ---
+  const diceButton = page.getByRole("button", {
+    name: "Roll a new random name and avatar",
+  });
   await diceButton.waitFor({ state: "visible", timeout: 10_000 });
 
   for (let i = 0; i < 3; i++) {
     await diceButton.click();
     await page.waitForTimeout(500);
+  }
+
+  // --- Onboarding: accept name & avatar ---
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.waitForTimeout(300);
+
+  // --- Onboarding: accept Minimal catalog ---
+  await page.getByRole("button", { name: "Finish" }).click();
+
+  // --- Dismiss install banner (if it appears) ---
+  const noButton = page.getByRole("button", { name: "No" });
+  try {
+    await noButton.waitFor({ state: "visible", timeout: 3000 });
+    await noButton.click();
+  } catch {
+    // banner didn't appear — continue
+  }
+
+  // --- Open Fridge and Snacks accordions ---
+  await page.getByRole("button", { name: "fridge" }).click();
+  await page.waitForTimeout(300);
+  await page.getByRole("button", { name: "snacks" }).click();
+  await page.waitForTimeout(300);
+
+  // --- Add items to shopping list ---
+  for (const item of ["eggs", "pasta", "yogurt", "crackers"]) {
+    await page.getByRole("button", { name: item }).click();
+    await page.waitForTimeout(400);
   }
 
   await page.waitForTimeout(1000);
