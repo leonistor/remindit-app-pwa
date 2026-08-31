@@ -6,7 +6,7 @@ const OUTPUT = path.join(import.meta.dir, "demo-avatar-roll.mp4");
 
 const browser = await chromium.launch({ headless: false });
 const context = await browser.newContext({
-  viewport: { width: 400, height: 700 },
+  viewport: { width: 400, height: 720 },
   deviceScaleFactor: 1,
 });
 const page = await context.newPage();
