@@ -50,9 +50,10 @@ const HelpView = () => (
         </li>
         <li>
           Tap <strong>+</strong> for quick add: suggestions grouped by category
-          with your recommendations surfaced as pips. Category pills create the
-          item and close immediately; press <strong>Enter</strong> to create
-          under the selected pill (at least 3 letters).
+          — once you have enough shopping history, quick add suggests only your
+          recommended items. Category pills create the item and close
+          immediately; press <strong>Enter</strong> to create under the selected
+          pill (at least 3 letters).
         </li>
       </ul>
       <DemoVideo
@@ -137,8 +138,11 @@ const HelpView = () => (
             className={`mr-1 inline-block size-2 -translate-y-px rounded-full ${RECOMMENDATION_TIERS.soon.dotColor} align-middle`}
           />
           An <strong>amber</strong> pip means it&rsquo;s{" "}
-          <strong>due soon</strong>. Tap the info icon in the catalog title for
-          the full legend.
+          <strong>due soon</strong>.
+        </li>
+        <li>
+          The count next to a category name in the catalog is how many of its
+          items are recommended right now — add one and the count drops.
         </li>
         <li>
           RemindIt learns your shopping rhythm by remembering when you add each
