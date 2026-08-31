@@ -107,7 +107,7 @@ export function computeItemStats(
  * Determine the expected reorder interval for an item.
  *
  * Hierarchy:
- *   item's median interval (if ≥3 purchases)
+ *   item's median interval (if ≥3 purchases, and positive/finite)
  *   → category's frequency default
  *   → global default (14 days)
  */
@@ -115,7 +115,14 @@ export function getExpectedInterval(
   stats: ItemStats,
   categoryFrequency: CategoryFrequency
 ): number {
-  if (stats.purchaseCount >= 3 && stats.medianInterval !== null) {
+  // A zero or non-finite median (e.g. 3+ adds sharing one timestamp) carries no
+  // cycle information → fall through to the next precedence level.
+  if (
+    stats.purchaseCount >= 3 &&
+    stats.medianInterval !== null &&
+    Number.isFinite(stats.medianInterval) &&
+    stats.medianInterval > 0
+  ) {
     return stats.medianInterval
   }
   return FREQ_TO_DAYS[categoryFrequency] ?? GLOBAL_DEFAULT_INTERVAL
@@ -144,6 +151,12 @@ export function scoreItem(
 
   const expectedInterval = getExpectedInterval(stats, categoryFrequency)
   const dueRatio = stats.daysSinceLastAdded / expectedInterval
+
+  // Defense-in-depth: a non-finite ratio (degenerate interval or elapsed time)
+  // can't be ranked fairly and would pin the item as top "overdue" forever.
+  // Skipping (like the no-history case) is safer than clamping, since e.g.
+  // daysSinceLastAdded = 0 would also poison a clamped ratio.
+  if (!Number.isFinite(dueRatio)) return null
 
   // confidence_factor ramps from 0.2 (1 purchase) to 1.0 (5+ purchases).
   const confidenceFactor = Math.min(

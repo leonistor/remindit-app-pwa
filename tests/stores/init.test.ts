@@ -1,10 +1,12 @@
 // Verifies that `initStores()` triggers first-run seeding, including the
-// generated 6-month shopping history (not just catalog/categories).
+// generated 6-month shopping history (not just catalog/categories), and that
+// it never re-seeds an onboarded user's emptied data.
 
 import { expect, test } from "@rstest/core"
 import { initStores, setOnboarded } from "@/stores"
 import { $catalog } from "@/stores/catalog"
 import { $history } from "@/stores/history"
+import { $list } from "@/stores/list"
 
 test("initStores seeds a non-empty catalog and a generated history on first run", () => {
   // initStores only seeds once the user is onboarded (first-run seeding is
@@ -21,4 +23,20 @@ test("initStores seeds a non-empty catalog and a generated history on first run"
     expect(typeof e.itemId).toBe("string")
     expect(e.itemId.length).toBeGreaterThan(0)
   }
+})
+
+test("initStores does not re-seed an onboarded user who emptied their data", () => {
+  setOnboarded(true)
+  // Reset only the data stores: each `.set([])` persists an explicit empty
+  // record, mimicking a user who deleted everything. (resetStores() would
+  // localStorage.clear() and erase the records, making this look like a fresh
+  // install instead.)
+  $catalog.set([])
+  $list.set([])
+  $history.set([])
+  initStores()
+  // User data is authoritative — nothing is resurrected.
+  expect($catalog.get()).toEqual([])
+  expect($list.get()).toEqual([])
+  expect($history.get()).toEqual([])
 })

@@ -25,7 +25,12 @@ export function InstallBanner() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
-      <div className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-2xl border bg-popover px-4 py-3 text-popover-foreground shadow-lg">
+      {/* role="status" + aria-live announce the banner when it appears 1.5s after mount. */}
+      <div
+        role="status"
+        aria-live="polite"
+        className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-2xl border bg-popover px-4 py-3 text-popover-foreground shadow-lg"
+      >
         <DownloadSimple size={20} className="shrink-0 text-primary" />
         <div className="flex-1 text-sm">
           <p className="font-medium">Install Remindit</p>

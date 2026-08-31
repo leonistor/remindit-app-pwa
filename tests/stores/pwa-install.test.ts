@@ -92,4 +92,25 @@ describe("pwa install store", () => {
     expect(installCalled).toBe(false)
     expect(result).toBe(false)
   })
+
+  // Regression: the captured beforeinstallprompt can be consumed between the
+  // canInstall() check and install() ("Not allowed to prompt."), making the
+  // native call throw. Callers fire-and-forget (`void installApp()`), so the
+  // rejection must be swallowed and mapped to the failure shape (false).
+  test("returns failure without unhandled rejection when the prompt throws", async () => {
+    pwaInstallHandler.canInstall = () => true
+    $canInstall.set(true)
+    pwaInstallHandler.install = (async () => {
+      installCalled = true
+      throw new Error("Not allowed to prompt.")
+    }) as unknown as typeof pwaInstallHandler.install
+
+    const result = await installApp()
+
+    expect(installCalled).toBe(true)
+    expect(result).toBe(false)
+    expect($installed.get()).toBe(false)
+    // Failure must not change installability/install state semantics.
+    expect($showInstallBanner.get()).toBe(true)
+  })
 })

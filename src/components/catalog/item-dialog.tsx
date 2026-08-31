@@ -1,9 +1,9 @@
+import { useStore } from "@nanostores/react"
+import { useEffect, useState } from "react"
 import {
   type ListCollection,
   useListCollection,
-} from "@ark-ui/react/collection"
-import { useStore } from "@nanostores/react"
-import { useEffect, useState } from "react"
+} from "@/components/ui/custom/collection"
 import { FormDialog } from "@/components/ui/custom/form-dialog"
 import { ValidatedField } from "@/components/ui/custom/validated-field"
 import { FieldGroup } from "@/components/ui/field"

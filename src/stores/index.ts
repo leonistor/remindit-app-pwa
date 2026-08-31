@@ -24,6 +24,7 @@ import {
   setSelectedDataset,
 } from "./onboarding"
 import { initActivePalette } from "./palette"
+import { STORAGE_KEYS } from "./persistence"
 import { initTheme } from "./theme"
 import type { Category, UserProfile } from "./types"
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
@@ -56,10 +57,10 @@ function seedCategories(categories: Category[]): Category[] {
   ])
 }
 
-// Seed the catalog + categories on first run (empty persistent stores) from the
-// dataset selected by the user during onboarding (persisted as `selectedDataset`,
-// falling back to the build-time PUBLIC_DATASET, then the default dataset id).
-// Safe to call multiple times; acts only when stores are empty.
+// Seed the catalog + categories on first run from the dataset selected by the
+// user during onboarding (persisted as `selectedDataset`, falling back to the
+// build-time PUBLIC_DATASET, then the default dataset id). Safe to call
+// multiple times; only never-seeded storage gets the seed (see below).
 //
 // When the user is NOT yet onboarded we intentionally do nothing here: the
 // catalog/history/profile are seeded later by `completeOnboarding` once the
@@ -73,12 +74,19 @@ export function initStores(): void {
 
   if (!isOnboarded()) return
 
-  if ($catalog.get().length === 0) {
+  // Emptiness is no longer the first-run marker: a user who deletes every
+  // catalog item persists an explicitly empty catalog, so re-seeding on
+  // emptiness would resurrect the dataset on every reload. Only storage with
+  // no catalog record at all is first-run storage.
+  if (
+    $catalog.get().length === 0 &&
+    localStorage.getItem(STORAGE_KEYS.catalog) === null
+  ) {
     const datasetId = resolveSelectedDataset()
     const { categories, catalog } = getDataset(datasetId)
-    if ($categories.get().length === 0) {
-      $categories.set(seedCategories(categories))
-    }
+    // Categories always ship with the catalog so seeded items can never end up
+    // with dangling categoryIds against the user's remaining categories.
+    $categories.set(seedCategories(categories))
     $catalog.set(catalog)
 
     // First-run history seed: a realistic 6-month shopping history so the

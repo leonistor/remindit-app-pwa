@@ -1,4 +1,3 @@
-import { useFilter, useListCollection } from "@ark-ui/react"
 import { useStore } from "@nanostores/react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/autocomplete"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/custom/button"
+import { useFilter, useListCollection } from "@/components/ui/custom/collection"
 import {
   Dialog,
   DialogBody,
@@ -166,7 +166,19 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
     createNewItem(categoryId)
   }
 
+  /**
+   * Enter-to-create handler, attached ONLY to the input (not the Autocomplete
+   * root). Ark composes input-level user handlers ahead of its own keymap, and
+   * the combobox's keydown handler bails on `defaultPrevented`, so:
+   * - a successful create here prevents Ark's Enter-select from also firing
+   *   (which would duplicate the commit), while
+   * - a no-op here (value already matches the catalog, or < 3 chars) lets Ark's
+   *   normal select flow proceed for the highlighted option.
+   * The `defaultPrevented` guard additionally keeps this handler idempotent if
+   * another handler already consumed the key, regardless of composition order.
+   */
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.defaultPrevented) return
     if (e.key === "Enter" && createNewItem()) {
       e.preventDefault()
       e.stopPropagation()
@@ -216,7 +228,6 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
             onValueChange={handleValueChange}
             inputValue={inputValue}
             onInputValueChange={(details) => setInputValue(details.inputValue)}
-            onKeyDown={handleKeyDown}
           >
             <AutocompleteInput
               autoFocus

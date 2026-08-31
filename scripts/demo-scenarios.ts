@@ -1,6 +1,6 @@
+import path from "node:path"
 import { chromium, type Locator, type Page } from "playwright"
 import { attachRecorder } from "playwright-recorder-plus"
-import path from "node:path"
 
 // Generates the numbered demo-video set into public/demos/ — one video per
 // feature per theme variant (light + dark), recorded as a single chronological
@@ -238,6 +238,12 @@ const scenarios: Scenario[] = [
   // --- 03 — add items to shopping list --------------------------------------
   {
     file: "03-add-items",
+    // Fragility note: the catalog accordion opens only the FIRST category
+    // group by default (item-catalog.tsx), so chips clicked below must be
+    // visible — eggs/pasta live in that first group (cooking, ranked first by
+    // frequency), while the fridge/snacks trigger clicks open their groups.
+    // A dataset edit that reshuffles the ranking or moves these items
+    // silently breaks this scenario.
     run: async (p) => {
       await humanClick(p.getByRole("button", { name: /fridge/i }))
       await think(500, 1000)
@@ -276,7 +282,9 @@ const scenarios: Scenario[] = [
 
       // New item: type a novel name, then one-tap create via the category
       // pill — the pill IS the create action (creates + closes the dialog).
-      // (The separate "Add “apple”" create-row is the Enter-key path.)
+      // (The "Add “apple”" row is an ordinary autocomplete option — click or
+      // keyboard-select; the Enter-on-input path is separate and creates the
+      // typed value under the selected category pill.)
       await humanClick(plus)
       await input.waitFor({ state: "visible", timeout: 3000 })
       await think(400, 800)
@@ -351,8 +359,9 @@ const scenarios: Scenario[] = [
       const dialog = p.getByRole("dialog")
       await dialog.waitFor({ state: "visible", timeout: 3000 })
       await think(400, 800)
-      // getByLabel is broken in this dialog (labels lack htmlFor) — use the
-      // placeholder.
+      // The placeholder is used for robustness/simplicity — not because
+      // labels are broken: Ark Field auto-associates label and control (no
+      // manual htmlFor needed), so getByLabel works here too.
       await humanType(dialog.getByPlaceholder("e.g. Milk"), "Honey")
       await think(300, 600)
       await humanClick(dialog.locator('[data-slot="select-trigger"]'))

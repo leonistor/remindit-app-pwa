@@ -14,8 +14,10 @@ const event = (id: string, timestamp: number): HistoryEvent => ({
 })
 
 describe("dayKey", () => {
-  test("builds a YYYY-M-D key with a 0-indexed month", () => {
-    expect(dayKey(new Date(2026, 0, 15).getTime())).toBe("2026-0-15")
+  test("builds a zero-padded YYYY-MM-DD key with a 0-indexed month", () => {
+    expect(dayKey(new Date(2026, 0, 15).getTime())).toBe("2026-00-15")
+    expect(dayKey(new Date(2026, 8, 2).getTime())).toBe("2026-08-02")
+    expect(dayKey(new Date(2026, 9, 30).getTime())).toBe("2026-09-30")
   })
 })
 
@@ -23,15 +25,15 @@ describe("formatDayHeading", () => {
   const now = new Date(2026, 0, 15, 12, 0).getTime()
 
   test("labels the current day as Today", () => {
-    expect(formatDayHeading("2026-0-15", now)).toBe("Today")
+    expect(formatDayHeading("2026-00-15", now)).toBe("Today")
   })
 
   test("labels the previous day as Yesterday", () => {
-    expect(formatDayHeading("2026-0-14", now)).toBe("Yesterday")
+    expect(formatDayHeading("2026-00-14", now)).toBe("Yesterday")
   })
 
   test("formats older days as a short date", () => {
-    const heading = formatDayHeading("2026-0-12", now)
+    const heading = formatDayHeading("2026-00-12", now)
     const expected = new Intl.DateTimeFormat(undefined, {
       month: "short",
       day: "numeric",
@@ -53,8 +55,49 @@ describe("groupByDay", () => {
     const groups = groupByDay([previous, newest, older])
 
     expect(groups).toEqual([
-      { key: "2026-0-15", events: [newest, older] },
-      { key: "2026-0-14", events: [previous] },
+      { key: "2026-00-15", events: [newest, older] },
+      { key: "2026-00-14", events: [previous] },
     ])
+  })
+
+  test("orders single- and double-digit days correctly across months", () => {
+    const sept1 = new Date(2026, 8, 1, 10).getTime()
+    const sept30 = new Date(2026, 8, 30, 10).getTime()
+    const oct1 = new Date(2026, 9, 1, 10).getTime()
+    const oct15 = new Date(2026, 9, 15, 10).getTime()
+
+    const groups = groupByDay([
+      event("a", oct15),
+      event("b", sept1),
+      event("c", oct1),
+      event("d", sept30),
+    ])
+
+    expect(groups.map((g) => g.key)).toEqual([
+      "2026-09-15",
+      "2026-09-01",
+      "2026-08-30",
+      "2026-08-01",
+    ])
+  })
+
+  test("groups multiple events of the same day into one bucket", () => {
+    const d = new Date(2026, 8, 30, 10).getTime()
+    const e1 = event("a", d)
+    const e2 = event("b", d - 1000)
+    const e3 = event("c", d - 2000)
+
+    const groups = groupByDay([e3, e1, e2])
+
+    expect(groups).toEqual([{ key: "2026-08-30", events: [e1, e2, e3] }])
+  })
+
+  test("orders the 10th before the 2nd of the same month", () => {
+    const second = new Date(2026, 8, 2, 10).getTime()
+    const tenth = new Date(2026, 8, 10, 10).getTime()
+
+    const groups = groupByDay([event("a", second), event("b", tenth)])
+
+    expect(groups.map((g) => g.key)).toEqual(["2026-08-10", "2026-08-02"])
   })
 })

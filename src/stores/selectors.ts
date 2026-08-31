@@ -303,28 +303,55 @@ export interface ItemDetail {
 
 const $itemDetailCache = new Map<string, ReadableAtom<ItemDetail>>()
 
+// Cap on memoized detail stores: every ever-viewed itemId used to pin one
+// computed forever, so long sessions with many items grew the map unbounded.
+// Past the cap we drop the least-recently-used entry (Map insertion order acts
+// as the access-order list: re-insertion on touch moves entries to the end).
+const ITEM_DETAIL_CACHE_MAX = 50
+
 // `computed` needs its dependency list, so null is cached under a sentinel key
 // and the lookup is guarded inside the callback.
 const NULL_ID = ""
 
+// Evict entries whose item no longer exists whenever the catalog changes —
+// deletion would otherwise leave stale memoized stores cached forever. The
+// computed recompute trigger already handles yielding `{ item: null }` for
+// live subscribers; this only prunes the cache map itself.
+$catalog.subscribe((catalog) => {
+  const itemIds = new Set(catalog.map((item) => item.id))
+  for (const key of $itemDetailCache.keys()) {
+    if (key !== NULL_ID && !itemIds.has(key)) $itemDetailCache.delete(key)
+  }
+})
+
 export function $itemDetail(itemId: string | null) {
   const key = itemId ?? NULL_ID
   let store = $itemDetailCache.get(key)
-  if (!store) {
-    store = computed<ItemDetail, [typeof $catalog, typeof $categories]>(
-      [$catalog, $categories],
-      (catalog, categories) => {
-        if (itemId === null) return { item: null, categoryName: "" }
-        const item = catalog.find((i) => i.id === itemId) ?? null
-        if (!item) return { item: null, categoryName: "" }
-        const categoryName =
-          categories.find((c) => c.id === item.categoryId)?.name ??
-          UNCATEGORIZED_NAME
-        return { item, categoryName }
-      }
-    )
+  if (store) {
+    // LRU touch: re-insert so this entry moves to the most-recently-used end.
+    $itemDetailCache.delete(key)
     $itemDetailCache.set(key, store)
+    return store
   }
+  store = computed<ItemDetail, [typeof $catalog, typeof $categories]>(
+    [$catalog, $categories],
+    (catalog, categories) => {
+      if (itemId === null) return { item: null, categoryName: "" }
+      const item = catalog.find((i) => i.id === itemId) ?? null
+      if (!item) return { item: null, categoryName: "" }
+      const categoryName =
+        categories.find((c) => c.id === item.categoryId)?.name ??
+        UNCATEGORIZED_NAME
+      return { item, categoryName }
+    }
+  )
+  while ($itemDetailCache.size >= ITEM_DETAIL_CACHE_MAX) {
+    // First key in Map order = least-recently-used entry.
+    const lru = $itemDetailCache.keys().next().value
+    if (lru === undefined) break
+    $itemDetailCache.delete(lru)
+  }
+  $itemDetailCache.set(key, store)
   return store
 }
 

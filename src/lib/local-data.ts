@@ -1,12 +1,14 @@
 // Helpers for the "My local data" card in Profile.
 //
 // Download: serializes every persisted store into a single JSON envelope.
-// Erase: wipes all `remindit:` data from localStorage and resets the in-memory
-// stores so the onboarding guard (router.tsx) redirects to /onboarding.
+// Erase: delegates to `wipeAllData()` (src/stores/commands.ts) — the cross-store
+// reset lives with the other store commands; this module only shapes the UI
+// surface. The wipe clears all `remindit:` data and resets the in-memory stores
+// so the onboarding guard (router.tsx) redirects to /onboarding.
 
-import { DEFAULT_PALETTE_ID } from "@/lib/palettes"
 import { $catalog } from "@/stores/catalog"
 import { $categories } from "@/stores/categories"
+import { wipeAllData } from "@/stores/commands"
 import { $history } from "@/stores/history"
 import { $list } from "@/stores/list"
 import { $onboarded, $selectedDatasetId } from "@/stores/onboarding"
@@ -80,36 +82,11 @@ export function downloadLocalData(): void {
   URL.revokeObjectURL(url)
 }
 
-const EMPTY_USER = {
-  username: "",
-  firstName: "",
-  lastName: "",
-  email: "",
-  avatar: "",
-}
-
 /**
- * Erase all local data: reset every store to its initial value and clear
- * the persisted `localStorage`. This is a full factory wipe — including the
- * theme preference. The caller should navigate or let the onboarding guard
- * (`src/router.tsx` Layout) redirect to /onboarding via `$onboarded = false`.
+ * Erase all local data. A thin wrapper over `wipeAllData()` (the cross-store
+ * command in src/stores/commands.ts) kept here so Profile's call site and the
+ * "My local data" naming stay stable.
  */
 export function eraseLocalData(): void {
-  $catalog.set([])
-  $categories.set([])
-  $list.set([])
-  $history.set([])
-  $user.set(EMPTY_USER)
-  $theme.set("system")
-  $activePaletteId.set(DEFAULT_PALETTE_ID)
-  $selectedSort.set("default")
-  $accordionOpen.set(null)
-  $onboarded.set(false)
-  $selectedDatasetId.set("")
-  $installDismissed.set(false)
-
-  // Remove the persisted entries. Iterate via STORAGE_KEYS semantics but
-  // `clear()` guarantees no `remindit:` residue and matches
-  // `tests/fixtures/reset.ts` behaviour for a full wipe.
-  localStorage.clear()
+  wipeAllData()
 }

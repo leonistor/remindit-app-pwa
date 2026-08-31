@@ -71,9 +71,16 @@ export function dismissLater(): void {
 // it. Resolves true when the user accepted the install.
 export async function installApp(): Promise<boolean> {
   if (!pwaInstallHandler.canInstall()) return false
-  const installed = await pwaInstallHandler.install()
-  if (installed) $installed.set(true)
-  return installed
+  try {
+    const installed = await pwaInstallHandler.install()
+    if (installed) $installed.set(true)
+    return installed
+  } catch {
+    // The captured event can be consumed between the canInstall() check and
+    // install() ("Not allowed to prompt."). Callers never catch (menu fires
+    // `void installApp()`), so surface the same failure shape as the no-op path.
+    return false
+  }
 }
 
 // Banner shows only for the native-prompt path and only while not installed or

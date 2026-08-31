@@ -1,6 +1,11 @@
 // Active shopping list. Adding/removing entries is the ONLY thing that writes
 // history (via logHistory in ./history).
 //
+// DOCUMENTED EXCEPTION to the cross-store rule: the `logHistory` import below
+// is the one sanctioned action-level edge — history logging is intrinsic to
+// list mutation, so it stays in this module rather than being pushed into
+// `./commands.ts`. No other sibling-store action imports are permitted here.
+//
 // Single outgoing edge, no cycle: `getCatalogItem` is read from `./catalog` so
 // the add/remove flows can snapshot the item name/categoryId into history. The
 // catalog store never imports back into this module — cross-store compositing

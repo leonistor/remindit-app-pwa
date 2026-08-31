@@ -112,8 +112,12 @@ export const SwipeableItemRow = ({
       // Ensure vertical scroll isn't blocked
       style={{ touchAction: "pan-y" }}
     >
-      {/* Delete layer behind */}
-      <div className="absolute inset-y-0 right-0 flex w-[80px] items-center justify-center bg-destructive">
+      {/* Delete layer behind. Hidden from AT while closed — it is fully
+          covered by the foreground and its button is unfocusable then. */}
+      <div
+        aria-hidden={!revealed}
+        className="absolute inset-y-0 right-0 flex w-[80px] items-center justify-center bg-destructive"
+      >
         <Button
           variant="ghost"
           size="sm"

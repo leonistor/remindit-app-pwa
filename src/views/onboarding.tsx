@@ -1,6 +1,6 @@
 import { useStore } from "@nanostores/react"
 import { DiceFive, User } from "@phosphor-icons/react"
-import { useEffect, useState, type FocusEvent, type MouseEvent } from "react"
+import { type FocusEvent, type MouseEvent, useEffect, useState } from "react"
 import { Navigate, useNavigate } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"

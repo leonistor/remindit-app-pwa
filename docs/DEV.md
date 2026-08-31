@@ -4,15 +4,20 @@
 
 ## Application Layout
 
-The app uses a single-route layout (`src/router.tsx`) with a top menu bar, a content area (`<Outlet />`), and a discreet version footer (hidden on the main shopping view).
+The app is a multi-route SPA (`src/router.tsx`, `createBrowserRouter`): one shared `Layout` hosts the main routes, and `/onboarding` is a chrome-less top-level route. The `Layout` renders a top menu bar, a content area (`<Outlet />`), and a discreet version footer (hidden on the main shopping view). A first-run gate redirects to `/onboarding` while `$onboarded` is false (`<Navigate to="/onboarding" replace />`), so the menu never shows during onboarding.
 
 ```
 DrawerProvider
-├── Menu (h-16 bar: logo, profile avatar, quick-add (+) button, hamburger menu with theme picker)
+├── Menu (min-h-14 md:min-h-16 bar: logo, profile avatar, "Shopping list" link,
+│   hamburger menu with nav links + install item + theme picker — no quick-add (+) button)
 ├── <Outlet /> (page content)
 ├── ItemDetailDrawer (context-managed, hidden by default)
-└── Footer (hidden on "/")
+├── InstallBanner (fixed bottom, mounts 1.5s after the app becomes installable)
+├── UpdatePrompt (fixed bottom, while a service worker is waiting)
+└── Footer (version → /changelog; hidden on "/")
 ```
+
+The quick-add `+` button lives in the shopping-list panel's floating button group (`src/components/shopping-list-panel.tsx`, next to the sort button) — not in the menu.
 
 ### Main view (`/`)
 
@@ -27,7 +32,7 @@ Catalog items show recommendation badges (overdue/soon dots) based on the comput
 
 ### Item detail drawer
 
-A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Layout level. `openDrawer(itemId)` (via `useDrawer()` / `useDrawerContext()`) is **reserved for Phase 3** and is intentionally not wired into the item UI yet — `ItemDetailDrawer` currently renders placeholder content. Phase 3 will populate it with item attributes (photo, quantity, price).
+A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Layout level. `openDrawer(itemId)` (via `useDrawerContext()`, `src/components/drawer-context.tsx`) is **reserved for Phase 3** and is intentionally not wired into the item UI yet — `ItemDetailDrawer` currently renders placeholder content. Phase 3 will populate it with item attributes (photo, quantity, price).
 
 ### Routes
 
@@ -38,12 +43,20 @@ A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Lay
 | `/history` | HistoryView | View shopping history |
 | `/profile` | ProfileView | User profile, catalog link, palette, reset & reseed |
 | `/about` | AboutView | About the app |
+| `/changelog` | ChangelogView | Version history (linked from the footer version) |
 | `/help` | HelpView | Usage help |
 | `/onboarding` | OnboardingView | First-run profile + dataset setup (no menu chrome) |
 
 ### PWA manifest
 
 The installable web manifest is defined in `pwa-manifest.config.ts` (the `WEB_APP_MANIFEST` object), **not** inline in `rsbuild.config.ts`. Brand color for both the manifest and the generated icons lives in that same file as `PWA_THEME_COLOR` / `PWA_BACKGROUND_COLOR` — both default to the **neutral app primary** (`#262626`, background `#ffffff`), reconciled with the neutral UI chrome. `scripts/generate-favicons.ts` imports those same constants when regenerating icons, so the manifest and favicons stay in sync. The master icon SVGs (`public/remindit-icon.svg`, `public/remindit-icon-maskable.svg`) carry the same `#262626` fill.
+
+### PWA install & update
+
+Two independent prompts, both rendered at the `Layout` level (`src/router.tsx`):
+
+- **Install banner** (`src/components/install-banner.tsx`) — fixed bottom; mounts **1.5s after** `$showInstallBanner` flips true so it never pops on first paint. `src/stores/pwa-install.ts` wraps `pwa-install-handler` (captures the browser's `beforeinstallprompt`) into `$canInstall` / `$installed`, plus the computed `$showInstallBanner`; `initPwaInstall()` wires the listeners exactly once (called from the `Layout` effect). "No" persists `remindit:install-dismissed` forever (`dismissInstall`); "Maybe later" is session-only (`$installLater`). Non-Chromium platforms never see the banner — the menu's "Install Remindit" item routes them to manual "Add to Home Screen" instructions instead (`src/lib/pwa-install.ts` `detectPlatform()` → `InstallInstructionsDialog`).
+- **Update prompt** (`src/components/update-prompt.tsx` + `src/hooks/use-sw-update.ts`) — shows while a service worker is `waiting`; "Reload" posts `SKIP_WAITING` to the Workbox-generated worker and reloads on activation.
 
 ## UI components (Shark UI)
 
@@ -95,17 +108,25 @@ The **active palette** is a persisted user choice:
 
 - `src/stores/palette.ts` — `$activePaletteId` (a `@nanostores/persistent` `jsonStore`, persisted under `remindit:active-palette`), plus `setActivePalette(id)` / `getActivePalette()`. Defaults to `defaultPaletteId` from the pool.
 - `src/hooks/use-category-palette.ts` — `useCategoryPalette(key, overrideSlot?)` subscribes to the active palette and returns `categoryPalette(...)` for it, so any consumer recolors live when the choice changes. It resolves the category's stored slot via the `$categoryById` Map selector (falling back to the key hash for non-category keys) and passes it as `overrideSlot`; subscribing to `$categories` means a color-slot change recolors mounted chips. `ItemButton` and `ShoppingItem` use this hook.
-- Pick the active palette in **Settings** via `PaletteChooser` (`src/components/palette-chooser.tsx`): an inline Shark `Listbox` of the pool with a 12-swatch preview per option and a live sample-chip preview above the list. Selection calls `setActivePalette`.
-- **`ItemCatalog`** (`src/components/item-catalog.tsx`) — the right-hand browse/select panel. Renders an Ark UI `Accordion` (multiple, only the first category open by default) of `ItemButton`s grouped by category from `$catalogByCategory`. Clicking toggles list membership via `addToList` / `removeFromList` (resolving item id → entry id through `$selectedView`).
+- Pick the active palette in **Profile** via `PaletteChooser` (`src/components/palette-chooser.tsx`): an inline Shark `Listbox` of the pool with a 12-swatch preview per option and a live sample-chip preview above the list. Selection calls `setActivePalette`.
+- **`ItemCatalog`** (`src/components/item-catalog.tsx`) — the right-hand browse/select panel. Renders the Shark `Accordion` wrapper (`src/components/ui/accordion`; multiple, only the first category open by default) of `ItemButton`s grouped by category from `$catalogByCategory`, all wired through the `useCatalog` hook (`src/hooks/use-catalog.ts`). Clicking toggles list membership via `addToList` / `removeFromListByItemId` — the itemId → entryId resolution lives inside `list.ts`, not the panel — and each toggle runs an item-travel View Transition (see [Item-travel View Transitions](#item-travel-view-transitions)).
 
 ### Quick add
 
-The header `+` button opens a `QuickAddDialog` (`src/components/quick-add-dialog.tsx`) — a Shark UI `Dialog` containing a grouped `Autocomplete` (`@shark/autocomplete`, added via the registry) for fast list entry.
+The shopping-list panel's floating `+` button opens a `QuickAddDialog` (`src/components/quick-add-dialog.tsx`) — a Shark UI `Dialog` containing a grouped `Autocomplete` (`@shark/autocomplete`, added via the registry) for fast list entry.
 
 - **Source list** — built from the same stores the available-items panel uses, so ordering matches: categories ordered by `frequencyRank` (most-frequent first), items in catalog order (`$catalogByCategory`). When `$recommendations.length >= 10` it shows **only** recommended items (grouped by category, ordered by recommendation score within the category); otherwise it shows the full catalog.
 - **Grouping** — one `AutocompleteGroup` per category (`heading` = category name); choices are `AutocompleteItem`s keyed by item **id** (not the label) so selection adds the correct item via `addToList`.
-- **Create new item** — always available: when the typed value matches no catalog item, an "Add \"<name>\"" row appears and creates the item under `UNCATEGORIZED_ID` via `createItemAndAddToList`, then adds it to the list. A hint below the input reminds users to reach 10 items to unlock personalized recommendations.
+- **Create new item** — always available when the typed value (≥3 chars, enforced guard) matches no catalog item: an `Add "<name>"` row appears (an ordinary autocomplete option — click or keyboard-select), and a category-pill row below the list (`Add "<name>" to <Category>`) lets the user pick the target category. The create target is the **user-chosen** category (defaults to `uncategorized`, or the first category when the sentinel is absent) — not a fixed id. Tapping a creatable pill creates + closes immediately; pressing Enter on the input creates from the typed value under the selected pill. All paths run `createItemAndAddToList` (create + add to list). A hint below the input reminds users to reach 10 items to unlock personalized recommendations.
 - **Closing** — selecting any item (or creating one) adds it to the list and closes the dialog; the input is auto-focused when the dialog opens.
+
+### Item-travel View Transitions
+
+`src/hooks/use-item-travel-transition.ts` drives a shared-element morph between the catalog panel and the shopping list with the native View Transitions API (used directly — the catalog keeps every item mounted, so React's delete+insert share detection never fires). Chips on both sides carry a `travelTargetId` prop (the itemId) rendered as `data-vt-catalog` / `data-vt-list` attributes; `runTravel(itemId, sourceEl, mutate)` tags the source node with a `view-transition-name`, runs the store mutation inside `startViewTransition` (`flushSync`), tags the opposite-side target, and clears the names afterwards. When the API is unavailable or `prefers-reduced-motion` is set, `isSupported` is false and callers fall back to their own CSS enter/exit animations (`shopping-list-panel.tsx`).
+
+### Catalog management UI
+
+`/catalog` (`src/views/catalog.tsx`) renders every category — including empty ones and the `uncategorized` sentinel — from `$catalogByCategoryAll` as `CategorySection`s from `src/components/catalog/`. Adding/editing goes through `ItemDialog` / `CategoryDialog` (name, category reassignment, purchase frequency via `category-frequency-menu.tsx`). Deletion differs by input modality: on mobile, rows are `swipeable-item-row.tsx` (swipe left to reveal Delete — touch only, `trackMouse: false` — with a confirm `AlertDialog`); on desktop, tap/double-click to edit and the per-row `⋯` menu to delete. All destructive flows go through the `commands.ts` cascades (see Invariants).
 
 ## Typography
 
@@ -127,32 +148,52 @@ All collections are persisted to `localStorage` with `@nanostores/persistent` (k
 
 - **Catalog** (`$catalog`) — the master pool of every known item `{ id, name, categoryId }`.
 - **List** (`$list`) — the currently active shopping list. Each entry `{ id, itemId, checked, addedAt }` references a catalog item and tracks a `checked` state for shopping progress.
-- **Categories** (`$categories`) — `{ id, name, frequency }`. An `uncategorized` sentinel category always exists and is the destination when another category is deleted (so items are never orphaned). `frequency` records how often the category is typically bought (see below).
-- **History** (`$history`) — a pure log of shopping events `{ id, action: 'add' | 'remove', itemId, itemName, categoryId, timestamp }`.
-- **User** (`$user`) — `UserProfile { username, firstName, lastName, email, avatar }`. `username` is the only mandatory field and defaults to a random value (`generate-random-username`); `email` is reserved for future multi-user/sync work. `avatar` is a **self-contained inline SVG** (`data:` URI) generated by DiceBear (`cameo` style) during onboarding via `src/lib/profile-generator.ts`, or a local initials fallback from `randomUser()` in `user.ts` — no network request, in keeping with the local-first positioning.
+- **Categories** (`$categories`) — `{ id, name, frequency, color? }`. An `uncategorized` sentinel category always exists and is the destination when another category is deleted (so items are never orphaned). `frequency` records how often the category is typically bought (see below); `color` is the stable palette slot assigned by `assignCategoryColors` (see the categorical palette section).
+- **History** (`$history`) — a pure log of shopping events `{ id, action: 'add' | 'remove', itemId, itemName, categoryId, categoryName, timestamp }`. `categoryName` is a snapshot of the category's display name taken at log time (falls back to `"Uncategorized"`).
+- **User** (`$user`) — `UserProfile { username, firstName, lastName, email, avatar }`. `username` is the only mandatory field and defaults to a random value (`generate-random-username`); `email` is reserved for future multi-user/sync work. `avatar` is a **self-contained inline SVG** (`data:` URI) generated by DiceBear (`personas` style) during onboarding via `src/lib/profile-generator.ts`, or a local initials fallback (`localAvatar` in `user.ts`, used by `randomUser()`) — no network request, in keeping with the local-first positioning.
 
 ### Store modules (`src/stores/`)
 
-| File            | Exposes                                                                                                                                                 |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `types.ts`      | Shared types + `UNCATEGORIZED_ID` / naming constants                                                                                                    |
-| `categories.ts` | `$categories`, `addCategory`, `renameCategory`, `updateCategory`, `getCategory`, `ensureUncategorizedExists`                                            |
-| `catalog.ts`    | `$catalog`, `addCatalogItem`, `updateCatalogItem`, `renameCatalogItem`, `reassignItemsToCategory`, `getCatalogItem`                                     |
-| `list.ts`       | `$list`, `addToList`, `removeFromList`, `removeFromListByItemId`, `setEntryChecked`, `clearList`, `removeListEntriesForItem`                            |
-| `history.ts`    | `$history`, `logHistory`, `clearHistory`                                                                                                                |
-| `commands.ts`   | Cross-store flows — `deleteCategoryWithReassign`, `deleteCatalogItemWithCascade`, `createItemAndAddToList` (see below)                                  |
-| `user.ts`       | `$user`, `getUser`, `updateUser`, `randomUser`                                                                                                          |
-| `selectors.ts`  | computed `$itemsByCategory`, `$categoryById`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$listItemIds`, `$catalogByCategory`, `$recommendations` |
-| `recommender.ts`| `computeItemStats`, `getExpectedInterval`, `scoreItem`, `computeRecommendations`, `FREQ_TO_DAYS` |
-| `ui.ts`         | UI-preference state — `$accordionOpen`, `setAccordionOpen` (persists the available-items panel's accordion open-state to `localStorage`) |
-| `palette.ts`    | Active categorical-palette selection — `$activePaletteId`, `getActivePalette`, `setActivePalette` (persisted to `localStorage` under `remindit:active-palette`) |
-| `index.ts`      | Barrel exports + `initStores()` (seeds sample data, random user, dev logger)                                                                    |
+| File             | Exposes                                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `types.ts`       | Shared types + `UNCATEGORIZED_ID` / naming constants                                                                                                    |
+| `persistence.ts` | `STORAGE_KEYS` (every `remindit:*` localStorage key) + `jsonStore` (shared `persistentJSON` factory — see [Persistence layer](#persistence-layer))      |
+| `categories.ts`  | `$categories`, `addCategory`, `renameCategory`, `updateCategory`, `getCategory`, `ensureUncategorizedExists`, `assignCategoryColors` / `normalizeCategoryColors` (palette color slots), `normalizeCategoryFrequencies` |
+| `catalog.ts`     | `$catalog`, `addCatalogItem`, `updateCatalogItem`, `renameCatalogItem`, `reassignItemsToCategory`, `getCatalogItem`                                     |
+| `list.ts`        | `$list`, `addToList`, `removeFromList`, `removeFromListByItemId`, `setEntryChecked`, `clearList`, `removeListEntriesForItem`                            |
+| `history.ts`     | `$history`, `logHistory`, `clearHistory`                                                                                                                |
+| `commands.ts`    | Cross-store flows — `deleteCategoryWithReassign`, `deleteCatalogItemWithCascade`, `createItemAndAddToList`, full factory wipe `wipeAllData` (used by the local-data erase; see below) |
+| `user.ts`        | `$user`, `getUser`, `updateUser`, `randomUser` (offline initials fallback via `localAvatar`)                                                            |
+| `selectors.ts`   | computed `$itemsByCategory`, `$categoryById`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$selectedOrdered`, `$listItemIds`, `$catalogByCategory`, `$catalogByCategoryAll`, `$recommendations`, `$recommendationsByItemId`, `$itemDetail(itemId)` |
+| `recommender.ts` | `computeItemStats`, `getExpectedInterval`, `scoreItem`, `computeRecommendations`, `FREQ_TO_DAYS`                                                        |
+| `ui.ts`          | UI-preference state — `$accordionOpen`, `setAccordionOpen` (persists the available-items panel's accordion open-state) + list sort — `SelectedSort`, `$selectedSort`, `SELECTED_SORT_ORDER`, `cycleSelectedSort` (see [List sort feature](#list-sort-feature)) |
+| `palette.ts`     | Active categorical-palette selection — `$activePaletteId`, `getActivePalette`, `setActivePalette` (persisted to `localStorage` under `remindit:active-palette`) |
+| `onboarding.ts`  | Onboarding/dataset state — `$onboarded`, `$selectedDatasetId`, `isOnboarded`, `setOnboarded`, `getSelectedDatasetId`, `setSelectedDataset`, `resolveSelectedDataset` |
+| `pwa-install.ts` | Install-prompt state — `$canInstall`, `$installed`, `$installDismissed`, `$installLater`, `$manualPlatform`, `$showInstallBanner`, `initPwaInstall`, `installApp`, `dismissInstall`, `dismissLater` |
+| `theme.ts`       | `$theme` (`ThemeMode`: `light \| dark \| system`), `initTheme` (see [Theme store](#theme-store))                                                        |
+| `index.ts`       | Barrel exports (no side effects) + the bootstrap API: `initStores()`, `completeOnboarding()`, `setupDevLogging()`                                       |
 
 Import store atoms/actions from the barrel: `import { $list, addToList } from "@/stores"`.
 
-**Cross-store flows live in `commands.ts`.** Store modules own a *single resource* and never import a sibling store's action functions; anything that composes two or more stores for one user action lives in `src/stores/commands.ts` (e.g. deleting a category reassigns its items, deleting a catalog item cascades list entries). This keeps the store call graph acyclic.
+**Cross-store flows live in `commands.ts`.** Store modules own a *single resource* and never import a sibling store's action functions; anything that composes two or more stores for one user action lives in `src/stores/commands.ts` (e.g. deleting a category reassigns its items, deleting a catalog item cascades list entries). This keeps the store call graph acyclic. **One sanctioned exception:** `list.ts` imports `logHistory` from `./history` — history logging is intrinsic to list add/remove (the list is the only history writer), as documented in the `list.ts` header.
 
-**React hooks are NOT exported from the barrel.** `useCatalog`, `useShoppingList`, `usePwaInstall` live in `src/hooks/` (importing store atoms), and `useDrawer` comes from `src/components/drawer-context.tsx`. Import hooks directly: `import { useCatalog } from "@/hooks/use-catalog"` — never through `@/stores`.
+**React hooks are NOT exported from the barrel.** `useCatalog`, `useShoppingList`, `usePwaInstall` live in `src/hooks/` (importing store atoms), and `useDrawerContext` comes from `src/components/drawer-context.tsx` (the `useDrawer` name is a local alias inside `item-detail-drawer.tsx`). Import hooks directly: `import { useCatalog } from "@/hooks/use-catalog"` — never through `@/stores`.
+
+### Persistence layer
+
+`src/stores/persistence.ts` centralizes storage wiring: `STORAGE_KEYS` maps every `remindit:*` localStorage key (a rename touches exactly one file), and `jsonStore(key, initial)` wraps `@nanostores/persistent`'s `persistentJSON` so every data store shares one serialization strategy. Store modules import these instead of calling `@nanostores/persistent` directly or hardcoding key literals; `theme.ts` is the one raw-`persistentAtom` user (same keys, legacy-tolerant decode).
+
+### Theme store
+
+`src/stores/theme.ts` — `$theme` (`ThemeMode`: `light | dark | system`, persisted under `remindit:theme`). `initTheme()` applies the active theme to `<html>` (class + `colorScheme`), subscribes to store changes, and tracks the OS `prefers-color-scheme` while in `system` mode. `src/index.tsx` calls `initTheme()` explicitly **before first paint** to avoid a flash of the wrong palette. The theme menu (`src/components/theme-menu.tsx`) writes through `$theme.set` (wrapped locally as `setTheme` in `theme-toggle.tsx`).
+
+### Onboarding gate
+
+`src/stores/onboarding.ts` — `$onboarded` (persisted `remindit:onboarded`) and `$selectedDatasetId` (persisted `remindit:selected-dataset`), with `isOnboarded` / `setOnboarded` / `getSelectedDatasetId` / `setSelectedDataset` / `resolveSelectedDataset` (stored choice → build-time `PUBLIC_DATASET` → registered default). The router's `Layout` redirects to `/onboarding` while not onboarded; `completeOnboarding(profile, datasetId)` in `src/stores/index.ts` seeds, persists the profile + dataset choice, and flips the flag. The local-data erase path resets `$onboarded` so the gate re-engages.
+
+### List sort feature
+
+`src/stores/ui.ts` — `$selectedSort` (persisted under `remindit:selected-sort`) with 4 modes in `SELECTED_SORT_ORDER`: `default` (list insertion order), `category-name`, `name`, `last-added`. `cycleSelectedSort` advances the single floating sort button in the shopping-list panel (the store owns the state machine; the view just calls it). `$selectedOrdered` (`selectors.ts`) applies the active mode to `$selectedView`; the button's icon/label map lives in `shopping-list-panel.tsx`.
 
 ### Invariants
 
@@ -175,7 +216,7 @@ Each category carries a `frequency` (`CategoryFrequency`, exported from `types.t
 | `seldom`         | rarely             |
 | `unknown`        | not yet classified |
 
-`addCategory(name, frequency?)` defaults to `"unknown"`. The sentinel and all sample-seeded categories start as `"unknown"`. `normalizeCategoryFrequencies()` (called by `initStores()`) backfills a valid `frequency` onto any category persisted before this field existed, so legacy `localStorage` data stays well-formed.
+`addCategory(name, frequency?)` defaults to `"unknown"`, as does the sentinel. Seeded categories get their `frequency` from the dataset loader: the **English dataset carries curated values** (`FREQUENCY_BY_CATEGORY` in `seed/index.ts`); other datasets fall back to `"unknown"` (see below). `normalizeCategoryFrequencies()` (called by `initStores()`) backfills a valid `frequency` onto any category persisted before this field existed, so legacy `localStorage` data stays well-formed.
 
 ### Recommendations
 
@@ -192,22 +233,22 @@ Where:
 - `expected_interval` = item's median purchase interval (if ≥3 purchases) → category's frequency default → 14-day global fallback
 - `confidence_factor` = `min(purchase_count / 5, 1)` — penalizes sparse history
 
-**Exclusions:** items in `seldom`-frequency categories and items currently on the active list are never recommended.
+**Exclusions:** items in `seldom`-frequency categories, items currently on the active list, and items with **zero purchase history** are never recommended.
 
-**Tiers:** `"overdue"` (due_ratio > 1.0), `"soon"` (0.7–1.0), `"frequent"` (<0.7).
+**Tiers:** `"overdue"` (due_ratio > 1.0), `"soon"` (due_ratio > 0.7), `"frequent"` (everything else) — so an item at exactly 0.7 is still `frequent`.
 
 Pure functions in `recommender.ts` are framework-agnostic and independently testable. `$recommendations` (in `selectors.ts`) auto-recomputes when `$history`, `$catalog`, `$categories`, or `$list` change.
 
 ### Seeding
 
-On first run the app shows **onboarding** instead of seeding. `initStores()` (called automatically when `src/stores/index.ts` is imported) is a no-op until the user is **onboarded** (`remindit:onboarded`); once onboarded it seeds `$categories`/`$catalog` from the dataset selected during onboarding (`remindit:selected-dataset`), falling back to the `PUBLIC_DATASET` env var, then `DEFAULT_DATASET_ID` = `minimal`. The catalog stays empty until onboarding completes via `completeOnboarding(profile, datasetId)` (in `src/stores/index.ts`), which seeds the catalog/history, persists the profile, and flips the onboarded flag. Re-running `initStores` is a no-op once populated.
+On first run the app shows **onboarding** instead of seeding. `initStores()` is an explicit bootstrap call made once from `src/index.tsx` (the `src/stores/index.ts` barrel has **no side effects** — importing a store never triggers seeding or logging). It is a no-op until the user is **onboarded** (`remindit:onboarded`); once onboarded, it seeds `$categories`/`$catalog` only when **no persisted catalog record exists** (`remindit:catalog` absent from `localStorage` — persisted-record absence, not store emptiness, is the first-run marker, so a user who deletes every catalog item is not re-seeded on reload). The dataset comes from `resolveSelectedDataset()` — the persisted onboarding choice (`remindit:selected-dataset`), falling back to the `PUBLIC_DATASET` env var, then `DEFAULT_DATASET_ID` = `minimal`. `initStores` never seeds a user. Onboarding completes via `completeOnboarding(profile, datasetId)` (in `src/stores/index.ts`), which seeds the catalog/history, persists the profile, and flips the onboarded flag.
 
 #### Seed datasets
 
 The repo-root `seed/` directory is a tracked, extensible registry of sample catalogs (`seed/index.ts`):
 
 - `DATASETS: DatasetMeta[]` — each entry is `{ id, name, file }` (stable key, human label, seed-relative filename).
-- `DEFAULT_DATASET_ID` — the starter dataset (`minimal`) onboarding preselects and the fallback `initStores()` seeds from when `PUBLIC_DATASET` is unset/invalid.
+- `DEFAULT_DATASET_ID` — the starter dataset (`minimal`) onboarding preselects, and the final fallback of the resolution chain (stored choice → `PUBLIC_DATASET` → default).
 - `resolveDatasetId(raw)` — validates a raw dataset id (typically from `PUBLIC_DATASET`) against `DATASETS`, returning it or falling back to `DEFAULT_DATASET_ID` with a warning.
 - `getDataset(id)` — returns `{ rawItems, categories, catalog }` for any registered dataset.
 
@@ -217,17 +258,17 @@ The repo-root `seed/` directory is a tracked, extensible registry of sample cata
 
 #### Selecting the seeded dataset
 
-The catalog is seeded from the dataset named by the `PUBLIC_DATASET` env var — a **public** variable (Rsbuild exposes any `PUBLIC_`-prefixed var to client code via `import.meta.env`) defined in a `.env` file at the project root. Copy `.env.example` to `.env` and set:
+The catalog is seeded from the **persisted dataset choice** (`remindit:selected-dataset`, set during onboarding or reset & reseed). `PUBLIC_DATASET` is only the **fallback** for when no choice is persisted (fresh installs). It is a **public** variable (Rsbuild exposes any `PUBLIC_`-prefixed var to client code via `import.meta.env`) defined in a `.env` file at the project root. Copy `.env.example` to `.env` and set:
 
 ```sh
 PUBLIC_DATASET=rick_morty
 ```
 
-Valid values are the `id`s registered in `DATASETS`: `items_categories`, `leo_romanian`, `rick_morty`. An empty or unknown value falls back to `DEFAULT_DATASET_ID` and prints a warning. Because Rsbuild inlines env vars at build time, **restart the dev server (or rebuild) after changing the dataset.**
+Valid values are the `id`s registered in `DATASETS`: `minimal`, `items_categories`, `leo_romanian`, `rick_morty`. An empty or unknown value falls back to `DEFAULT_DATASET_ID` and prints a warning. Because Rsbuild inlines env vars at build time, **restart the dev server (or rebuild) after changing the dataset.**
 
 #### Seeding history (first run)
 
-In addition to the catalog, `initStores()` seeds a simulated **6-month shopping history** into `$history` on first run (when history is empty), so the recommender has data to surface for new users. Always on; disable by setting `PUBLIC_SEED_HISTORY=0` in `.env`.
+In addition to the catalog, both seeding paths (`initStores` first-run and `seedFromDataset`) generate a simulated **6-month shopping history** into `$history`, so the recommender has data to surface for new users (`initStores` only does this while history is empty). Always on; disable by setting `PUBLIC_SEED_HISTORY=0` in `.env`.
 
 The generator lives in `seed/history.ts` (`generateShoppingHistory`) and is **frequency-aware** and **reproducible** (seeded `mulberry32` PRNG, default seed `42`):
 
@@ -238,11 +279,18 @@ The generator lives in `seed/history.ts` (`generateShoppingHistory`) and is **fr
 
 #### Reset & reseed (runtime)
 
-Beyond the build-time `PUBLIC_DATASET` first run, the app offers a user-initiated **reset & reseed** from **Profile** (`/` → Profile). It wipes all user data — `$list`, `$history`, `$catalog`, `$categories` — then repopulates `$catalog`/`$categories` from a dataset the user picks at reset time (one of the four registered in `seed/index.ts`), regenerating a fresh first-run history. The theme preference (`remindit:theme`) and the user's profile are deliberately preserved. This is powered by `seedFromDataset(datasetId, profile?)` in `src/stores/index.ts`, which always overwrites (unlike `initStores`, which only acts when stores are empty); when given a `profile` it becomes the new `$user`, otherwise a synchronous offline fallback profile is used.
+Beyond the build-time `PUBLIC_DATASET` fallback, the app offers a user-initiated **reset & reseed** from **Profile**. It wipes all user data — `$list`, `$history`, `$catalog`, `$categories` — then repopulates `$catalog`/`$categories` from a dataset the user picks at reset time (one of the four registered in `seed/index.ts`), regenerating a fresh first-run history. The theme preference (`remindit:theme`) is deliberately preserved. This is powered by `seedFromDataset(datasetId, profile?)` in `src/stores/index.ts`, which **always overwrites** — including `$user`, which it sets to `profile ?? randomUser()`. The Profile path keeps the user's profile by passing `getUser()` back in (`seedFromDataset(dataset, getUser())`); calls without a profile get a synchronous offline fallback profile (`randomUser`).
+
+### Local data download & erase
+
+The "My local data" card in **Profile** (`src/views/profile.tsx`) exposes `src/lib/local-data.ts`:
+
+- **Download** — `downloadLocalData()` serializes every persisted store into a versioned JSON envelope (`LocalDataEnvelope`, app version + ISO timestamp) and triggers a browser download via Blob/object URL.
+- **Erase** — `eraseLocalData()` is a full factory wipe: resets every store atom (including theme, palette, sort, and `$onboarded`) and calls `localStorage.clear()` so no `remindit:` residue survives; the onboarding gate in `router.tsx` then redirects to `/onboarding`. The wipe lives in the store layer as `wipeAllData()` in `commands.ts` (`local-data.ts` is a thin wrapper over it).
 
 ### Dev tooling
 
-In dev builds (`import.meta.env.DEV`), every store is attached to `@nanostores/logger` for console inspection.
+In dev builds (`import.meta.env.DEV`), `setupDevLogging()` — called from `src/index.tsx` — attaches the **five** core data stores (`$catalog`, `$list`, `$categories`, `$history`, `$user`) to `@nanostores/logger` for console inspection.
 
 ### Demo videos
 
@@ -278,6 +326,7 @@ function ShoppingList() {
     </section>
   ));
 }
+```
 
 ## Testing
 
@@ -297,4 +346,3 @@ Guidance:
 
 - **Keep the store layer `tests/stores/**` unit-tested** — it is stable and cheap to test, and is the core of the `quick` gate.
 - **Component unit tests are intentionally postponed** until they are actually required. While the UI is actively evolving (e.g. refactoring panels), maintaining per-component unit tests is churn with little payoff — delete or skip them rather than keeping them in sync with each change. The component/App render tests that exist today (`src/components/**/*.test.tsx`, `tests/index.test.tsx`) run in the `all` suite.
-```

@@ -6,12 +6,21 @@
 // Imports of `$catalog` / `$categories` are atom reads that let the commands
 // drive the individual store *set*s directly (single-resource mutations stay in
 // their owning module). No command writes history — add/remove from the list is
-// the only history writer (see `./list`).
+// the only history writer (see `./list`); `wipeAllData` resets the `$history`
+// atom directly, which is a reset, not a history event.
 
+import { DEFAULT_PALETTE_ID } from "@/lib/palettes"
 import { $catalog, addCatalogItem, reassignItemsToCategory } from "./catalog"
 import { $categories } from "./categories"
-import { addToList, removeListEntriesForItem } from "./list"
+import { $history } from "./history"
+import { $list, addToList, removeListEntriesForItem } from "./list"
+import { $onboarded, $selectedDatasetId } from "./onboarding"
+import { $activePaletteId } from "./palette"
+import { $installDismissed } from "./pwa-install"
+import { $theme } from "./theme"
 import { UNCATEGORIZED_ID } from "./types"
+import { $accordionOpen, $selectedSort } from "./ui"
+import { $user } from "./user"
 
 // Deletes a category and reassigns its catalog items to the "uncategorized"
 // sentinel. No history write. The sentinel itself cannot be deleted.
@@ -33,4 +42,37 @@ export function deleteCatalogItemWithCascade(id: string): void {
 export function createItemAndAddToList(name: string, categoryId: string): void {
   const item = addCatalogItem(name, categoryId)
   addToList(item.id)
+}
+
+// Blank profile used by the factory wipe (moved here from lib/local-data.ts so
+// the full reset lives with the other cross-store flows).
+const EMPTY_USER = {
+  username: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  avatar: "",
+}
+
+// Full factory wipe across every persisted store: resets each atom to its
+// initial value, then clears all `remindit:` localStorage entries in one
+// `clear()` (matching tests/fixtures/reset.ts — guarantees no residue). The
+// theme preference is deliberately wiped too, unlike seedFromDataset/reset &
+// reseed which preserve it. Callers should navigate or rely on the onboarding
+// guard (router.tsx) redirecting to /onboarding once `$onboarded` is false.
+export function wipeAllData(): void {
+  $catalog.set([])
+  $categories.set([])
+  $list.set([])
+  $history.set([])
+  $user.set(EMPTY_USER)
+  $theme.set("system")
+  $activePaletteId.set(DEFAULT_PALETTE_ID)
+  $selectedSort.set("default")
+  $accordionOpen.set(null)
+  $onboarded.set(false)
+  $selectedDatasetId.set("")
+  $installDismissed.set(false)
+
+  localStorage.clear()
 }

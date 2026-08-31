@@ -240,6 +240,27 @@ describe("getExpectedInterval", () => {
     expect(getExpectedInterval(stats, "monthly")).toBe(FREQ_TO_DAYS.monthly)
   })
 
+  test("falls back to category frequency when median is zero", () => {
+    // 3+ adds sharing one timestamp → every interval is 0 → median 0.
+    const stats = {
+      itemId: "item-milk",
+      purchaseCount: 3,
+      daysSinceLastAdded: 10,
+      medianInterval: 0,
+    }
+    expect(getExpectedInterval(stats, "weekly")).toBe(FREQ_TO_DAYS.weekly)
+  })
+
+  test("falls back to category frequency when median is non-finite", () => {
+    const stats = {
+      itemId: "item-milk",
+      purchaseCount: 3,
+      daysSinceLastAdded: 10,
+      medianInterval: Number.NaN,
+    }
+    expect(getExpectedInterval(stats, "weekly")).toBe(FREQ_TO_DAYS.weekly)
+  })
+
   test("uses global default for unknown frequency", () => {
     const stats = {
       itemId: "item-milk",
@@ -338,6 +359,40 @@ describe("scoreItem", () => {
     // Both have confidence = 1.0, so scores are identical.
     expect(resultA?.score).toBeCloseTo(resultB?.score, 4)
   })
+
+  test("produces a finite score when all purchases share one timestamp", () => {
+    // Identical timestamps → zero-length intervals → median 0; the item must
+    // fall back to the category default instead of dividing by zero.
+    const history = [
+      addEvent("item-milk", "cat-fridge", 10, NOW),
+      addEvent("item-milk", "cat-fridge", 10, NOW),
+      addEvent("item-milk", "cat-fridge", 10, NOW),
+    ]
+    const stats = computeItemStats(history, "item-milk", NOW)
+    expect(stats.medianInterval).toBe(0)
+
+    const result = scoreItem(stats, "weekly")
+    expect(result).not.toBeNull()
+    // 10 days / weekly default (7) → overdue, not NaN/Infinity.
+    expect(Number.isFinite(result?.score)).toBe(true)
+    expect(Number.isFinite(result?.dueRatio)).toBe(true)
+    expect(result?.tier).toBe("overdue")
+    expect(result?.dueRatio).toBeCloseTo(10 / 7, 2)
+  })
+
+  test("scores sanely when re-added immediately with a degenerate interval", () => {
+    // daysSinceLastAdded = 0 with a zero median → previously 0/0 = NaN.
+    const stats = {
+      itemId: "item-milk",
+      purchaseCount: 3,
+      daysSinceLastAdded: 0,
+      medianInterval: 0,
+    }
+    const result = scoreItem(stats, "weekly")
+    expect(result).not.toBeNull()
+    expect(Number.isFinite(result?.score)).toBe(true)
+    expect(result?.tier).toBe("frequent")
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -379,6 +434,29 @@ describe("computeRecommendations", () => {
     ]
     const recs = computeRecommendations(history, catalog, categories, [], NOW)
     expect(recs.length).toBeGreaterThanOrEqual(2)
+    expect(recs[0].score).toBeGreaterThanOrEqual(recs[1].score)
+  })
+
+  test("keeps ordering defined when all adds share one timestamp", () => {
+    // Milk's zero median must fall back to the weekly default, keeping every
+    // score finite and the descending sort deterministic (no NaN comparator).
+    const history = [
+      addEvent("item-milk", "cat-fridge", 10, NOW),
+      addEvent("item-milk", "cat-fridge", 10, NOW),
+      addEvent("item-milk", "cat-fridge", 10, NOW),
+      // Eggs has a real 7-day cadence and is less overdue.
+      addEvent("item-eggs", "cat-fridge", 20, NOW),
+      addEvent("item-eggs", "cat-fridge", 13, NOW),
+      addEvent("item-eggs", "cat-fridge", 6, NOW),
+    ]
+    const recs = computeRecommendations(history, catalog, categories, [], NOW)
+    expect(recs).toHaveLength(2)
+    for (const rec of recs) {
+      expect(Number.isFinite(rec.score)).toBe(true)
+      expect(Number.isFinite(rec.dueRatio)).toBe(true)
+    }
+    expect(recs[0].item.id).toBe("item-milk")
+    expect(recs[1].item.id).toBe("item-eggs")
     expect(recs[0].score).toBeGreaterThanOrEqual(recs[1].score)
   })
 

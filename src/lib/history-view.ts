@@ -4,10 +4,13 @@
 
 import type { HistoryEvent } from "@/stores/types"
 
-// Day key in the form YYYY-M-D (month is 0-indexed, matching Date#getMonth).
+// Day key in the form YYYY-MM-DD (zero-padded so lexicographic order matches
+// chronological order; month is 0-indexed, matching Date#getMonth).
 export function dayKey(ts: number): string {
   const d = new Date(ts)
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+  return `${d.getFullYear()}-${String(d.getMonth()).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`
 }
 
 const dayFormatter = new Intl.DateTimeFormat(undefined, {
