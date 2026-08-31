@@ -53,8 +53,7 @@ const stubMatchMedia = (reducedMotion: boolean) => {
   })) as unknown as typeof window.matchMedia
 }
 
-const renderedVideo = () =>
-  document.querySelector("video") as HTMLVideoElement
+const renderedVideo = () => document.querySelector("video") as HTMLVideoElement
 
 beforeEach(() => {
   localStorage.clear()
