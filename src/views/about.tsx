@@ -27,11 +27,14 @@ const AboutView = () => (
 
     <section className="flex flex-col gap-2">
       <h2 className="font-semibold text-lg">What&rsquo;s included today</h2>
+      <p className="text-muted-foreground text-sm">
+        Everything shipping in the current release, at a glance.
+      </p>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
         <li>
-          <strong>First-run onboarding</strong>: a quick 2-step setup rolls a
-          random profile (avatar + handle) and lets you pick a starter catalog
-          before landing on your list.
+          <strong>First-run onboarding</strong>: a quick 3-step setup shows you
+          the app in action, rolls a random profile (avatar + handle), and lets
+          you pick a starter catalog before landing on your list.
         </li>
         <li>
           <strong>Profile</strong>: manage your name and username, switch your
@@ -99,6 +102,9 @@ const AboutView = () => (
 
     <section className="flex flex-col gap-2">
       <h2 className="font-semibold text-lg">What&rsquo;s coming</h2>
+      <p className="text-muted-foreground text-sm">
+        A peek at what we&rsquo;re building next.
+      </p>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
         <li>
           Item attributes (photo, quantity, price) — the remaining piece of
