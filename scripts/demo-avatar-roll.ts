@@ -13,6 +13,32 @@ const page = await context.newPage();
 
 const recorder = await attachRecorder(page, { path: OUTPUT });
 
+// Inject a visible cursor overlay (screencast doesn't capture system cursor)
+await page.addInitScript(() => {
+  const dot = document.createElement("div");
+  Object.assign(dot.style, {
+    position: "fixed",
+    width: "14px",
+    height: "14px",
+    borderRadius: "50%",
+    background: "rgba(0,0,0,0.4)",
+    border: "2px solid rgba(255,255,255,0.8)",
+    pointerEvents: "none",
+    zIndex: "2147483647",
+    transform: "translate(-50%, -50%)",
+    transition: "left 0.05s, top 0.05s",
+  });
+  document.addEventListener(
+    "mousemove",
+    (e) => {
+      dot.style.left = `${e.clientX}px`;
+      dot.style.top = `${e.clientY}px`;
+    },
+    { passive: true },
+  );
+  document.body.appendChild(dot);
+});
+
 try {
   await page.goto("http://localhost:3000");
 
