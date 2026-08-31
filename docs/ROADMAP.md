@@ -39,6 +39,8 @@ Core PWA + personalization slice. All items below are live (see `CHANGELOG.md`).
 
 ## [ ] Version 5 — in progress
 
+> Restructuring proposal for v5–v6 (Bun workspace, modules, big bang vs gradual): [WORKSPACE-PLAN.md](./WORKSPACE-PLAN.md) — pending decision.
+
 - [ ] Multi-user support will be added, allowing multiple users to share the same list and collaborate in real-time.
 - [ ] Sync with the server will be implemented to allow the list to be saved and loaded across devices.
 - [ ] The primary use case will be family shopping lists, where multiple users can share and collaborate on a single list.
