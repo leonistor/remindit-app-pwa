@@ -2,6 +2,28 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v4.0.0 — 2026-08-31
+
+_Share your list as an image, watch demo videos right inside the app, and take full control of your local data._
+
+### ✨ New Features
+
+- **Share your list**: a new Share page (menu → Share) turns the items you still need into a polished card image — grouped by category with their colors, ready to copy to your clipboard or download as a PNG and send to whoever's shopping with you. Checked-off items stay off the card, and it always renders in light colors so it reads well anywhere
+- **Watch it in action**: first-run onboarding now opens with a short demo video of building a list, and the Help page embeds demo videos next to the tips they illustrate — each picking the variant that matches your theme (light/dark)
+- **My local data**: Profile gains a "My local data" section — download everything Remindit has stored as a single JSON file, or erase it all and start fresh
+
+### 🔧 Improvements
+
+- **Suggested names, instantly yours**: the profile fields in onboarding pre-select their suggestions on focus, so your first keystroke replaces them
+- **About page refreshed**: reorganized with section subtitles and now covering the Share page
+
+### 🐛 Fixes
+
+- **No accidental duplicates**: hammering Enter in quick-add can no longer create the same item twice
+- **History across months**: history day groups now sort correctly at month boundaries
+- **Chip hover ring**: the desktop hover ring on item chips stays visible at panel edges and against the page background
+- **Calmer install prompt**: a blocked native install prompt no longer throws — the manual instructions dialog takes over
+
 ## v3.5.0 — 2026-08-30
 
 _Catalog editing goes tactile — dialogs, swipe gestures, and a smarter quick-add with category pills._
