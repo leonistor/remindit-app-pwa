@@ -23,19 +23,26 @@ export default function ItemCatalog() {
 
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-3">
+      {/* The 2px hover ring draws outside each chip, so the scroll box needs
+          breathing room or it clips at its edges. `-mx-1 px-1` widens the
+          scroll box by 4px per side while padding keeps every trigger and chip
+          at its previous position; AccordionContent gets the same -mx-1 so its
+          own overflow-hidden clip edge moves out too — but because the chip
+          grid stretches to fill that widened box, it needs a compensating
+          `px-1` of its own or the chips stay flush with the clip edge. */}
       <Accordion
         multiple
         value={openValue}
         onValueChange={(details) => setAccordionOpen(details.value)}
-        className="mt-3 min-h-0 flex-1 overflow-y-auto"
+        className="-mx-1 mt-3 min-h-0 flex-1 overflow-y-auto px-1"
       >
         {groups.map((group) => (
           <AccordionItem key={group.categoryId} value={group.categoryId}>
             <AccordionTrigger className="font-semibold text-xs uppercase tracking-wide">
               {group.categoryName}
             </AccordionTrigger>
-            <AccordionContent>
-              <div className="flex flex-wrap gap-2 pt-2">
+            <AccordionContent className="-mx-1">
+              <div className="flex flex-wrap gap-2 px-1 pt-2">
                 {group.items.map((item) => {
                   const isSelected = selected.has(item.id)
                   return (

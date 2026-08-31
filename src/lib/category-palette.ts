@@ -134,9 +134,13 @@ function paletteForHex(hex: string): ItemPalette {
     dimmed:
       "bg-[var(--cat-dim)] text-[color:var(--cat-dim-ink)] dark:bg-[var(--cat-dim-dark)] dark:text-[color:var(--cat-dim-dark-ink)]",
     border: "",
-    // Emphasis ring (desktop hover). Uses the WCAG-picked contrast ink so it
-    // always reads against the solid categorical fill in both themes.
-    ring: "ring-[color:var(--cat-ink)]",
+    // Emphasis ring (desktop hover). The ring is drawn *outside* the chip,
+    // against the page/panel background — not against the chip fill — so it
+    // must contrast the page in both themes. The theme-aware `foreground`
+    // token does that; `--cat-ink` (contrast vs the fill) would vanish
+    // whenever it matches the page background (white-on-white in light mode
+    // for dark fills, black-on-dark in dark mode for light fills).
+    ring: "ring-foreground",
     dot: "bg-[var(--cat)]",
   }
 }

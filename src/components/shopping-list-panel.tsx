@@ -109,7 +109,12 @@ export const ShoppingListPanel = () => {
         className={
           isEmpty
             ? "mt-3 flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-4 text-center text-muted-foreground text-sm"
-            : "mt-3 flex min-h-0 flex-1 flex-wrap content-start justify-start gap-2 overflow-y-auto"
+            : // The 2px hover ring draws outside each chip, so the scroll box
+              // needs breathing room or it clips at its edges. `-mx-1 px-1` +
+              // `mt-2 pt-1` (8+4 = the old mt-3) and `pb-1` keep the chips at
+              // their previous position while giving the ring 4px inside the
+              // scroll box on every side.
+              "-mx-1 mt-2 flex min-h-0 flex-1 flex-wrap content-start justify-start gap-2 overflow-y-auto px-1 pt-1 pb-1"
         }
       >
         {isEmpty ? (
