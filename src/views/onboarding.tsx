@@ -12,6 +12,13 @@ import {
   SegmentGroupItem,
   SegmentGroupItemText,
 } from "@/components/ui/segment-group"
+import {
+  Steps,
+  StepsIndicator,
+  StepsItem,
+  StepsList,
+  StepsSeparator,
+} from "@/components/ui/steps"
 import { generateRandomProfile } from "@/lib/profile-generator"
 import { $onboarded, completeOnboarding } from "@/stores"
 import type { UserProfile } from "@/stores/types"
@@ -57,10 +64,17 @@ const OnboardingView = () => {
   const navigate = useNavigate()
   const onboarded = useStore($onboarded)
 
-  const [step, setStep] = useState<1 | 2>(1)
+  const [step, setStep] = useState<1 | 2 | 3>(1)
   const [profile, setProfile] = useState<UserProfile>(EMPTY_PROFILE)
   const [dataset, setDataset] = useState<string>(DEFAULT_DATASET_ID)
   const [busy, setBusy] = useState(false)
+
+  // React does not reliably render the `muted` ATTRIBUTE (it only sets the DOM
+  // property), and some browsers ignore property-only muting for autoplay
+  // policy — enforce it on mount so autoplay isn't blocked.
+  const welcomeVideoRef = (v: HTMLVideoElement | null) => {
+    if (v) v.muted = true
+  }
 
   // Generate the initial suggested profile on first mount.
   useEffect(() => {
@@ -97,14 +111,42 @@ const OnboardingView = () => {
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-8">
       <Card className="w-full max-w-xl">
-        <CardHeader
-          title="Welcome to RemindIt"
-          description={`Step ${step} of 2 — ${
-            step === 1 ? "your profile" : "choose a starter catalog"
-          }`}
-        />
+        <CardHeader title="Welcome to RemindIt" />
         <CardContent>
+          {/* Ark's controlled prop is `step` (0-based) in this version —
+              `value` would leak to the DOM and never update the machine. */}
+          <Steps className="mb-6" count={3} step={step - 1}>
+            <StepsList className="w-full">
+              <StepsItem index={0}>
+                <StepsIndicator>1</StepsIndicator>
+                <StepsSeparator />
+              </StepsItem>
+              <StepsItem index={1}>
+                <StepsIndicator>2</StepsIndicator>
+                <StepsSeparator />
+              </StepsItem>
+              <StepsItem index={2}>
+                <StepsIndicator>3</StepsIndicator>
+              </StepsItem>
+            </StepsList>
+          </Steps>
           {step === 1 ? (
+            <div className="flex flex-col items-center gap-6">
+              <p className="text-center text-muted-foreground text-sm">
+                Here's a quick look at adding items — then two short steps and
+                you're in.
+              </p>
+              <video
+                ref={welcomeVideoRef}
+                src="/demos/03-add-items-light.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="mx-auto max-h-96 w-auto rounded-lg border bg-white"
+              />
+            </div>
+          ) : step === 2 ? (
             <div className="flex flex-col items-center gap-6">
               <div className="flex flex-col items-center gap-3">
                 {profile.avatar ? (
@@ -199,20 +241,30 @@ const OnboardingView = () => {
         </CardContent>
         <CardFooter className="justify-between">
           {step === 1 ? (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setStep(2)}
-              disabled={busy || !profile.username.trim()}
-            >
+            <Button type="button" variant="outline" onClick={() => setStep(2)}>
               Next
             </Button>
           ) : (
-            <Button type="button" variant="outline" onClick={() => setStep(1)}>
+            <Button
+              type="button"
+              variant="outline"
+              // step - 1 widens to number; only steps 2/3 render Back.
+              onClick={() => setStep(step === 3 ? 2 : 1)}
+            >
               Back
             </Button>
           )}
           {step === 2 ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setStep(3)}
+              disabled={busy || !profile.username.trim()}
+            >
+              Next
+            </Button>
+          ) : null}
+          {step === 3 ? (
             <Button type="button" onClick={finish} disabled={busy}>
               <User size={16} />
               Finish

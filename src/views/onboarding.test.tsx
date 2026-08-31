@@ -1,7 +1,8 @@
 // Component test for the Onboarding view (src/views/onboarding.tsx):
-// initial + dice-rolled profile generation, the Next-button validation rule
-// (username must be non-empty — NOT first name), the step-2 dataset radios,
-// and Finish wiring `completeOnboarding` (flag flip + seeded catalog).
+// the step-1 welcome video, initial + dice-rolled profile generation, the
+// Next-button validation rule (username must be non-empty — NOT first name),
+// the step-3 dataset radios, the Steps indicator rail states, and Finish
+// wiring `completeOnboarding` (flag flip + seeded catalog).
 
 import { afterEach, beforeEach, describe, expect, test } from "@rstest/core"
 import { cleanup, render, screen, waitFor } from "@testing-library/react"
@@ -58,8 +59,23 @@ afterEach(() => {
 })
 
 describe("OnboardingView", () => {
+  test("starts on the welcome step: video renders without controls, Next reveals profile", async () => {
+    renderOnboarding()
+
+    // happy-dom doesn't decode/play videos — assert element + attributes only.
+    const video = document.querySelector('video[src*="03-add-items-light"]')
+    expect(video).not.toBeNull()
+    expect(video?.hasAttribute("controls")).toBe(false)
+
+    // Welcome step is the only step without the dice button; Next is the only
+    // visible footer action and it advances to the profile step.
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
+    expect(screen.getByLabelText(/First name/i)).toBeInTheDocument()
+  })
+
   test("generates a suggested profile and rerolls username + avatar on dice click", async () => {
     renderOnboarding()
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
     const dice = await awaitProfileReady()
     const avatar = screen.getByAltText("Avatar preview")
     // Attribute matchers reject RegExp here — assert via toMatch instead.
@@ -80,6 +96,7 @@ describe("OnboardingView", () => {
 
   test("Next stays disabled until the username is non-empty", async () => {
     renderOnboarding()
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
     await awaitProfileReady()
     const next = screen.getByRole("button", { name: "Next" })
     expect(next).toBeEnabled()
@@ -95,21 +112,35 @@ describe("OnboardingView", () => {
     expect(next).toBeEnabled()
   })
 
-  test("Next reveals step 2 with one radio per dataset, Minimal pre-selected", async () => {
-    renderOnboarding()
+  test("Next reveals the dataset step with one radio per dataset, Minimal pre-selected", async () => {
+    const { container } = renderOnboarding()
+    // Welcome → profile: rail shows welcome complete, profile current (the
+    // old "Step X of N" header text is gone). State attrs live on the
+    // Ark indicator elements, not on the item wrappers.
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
+    const indicator = (n: string) =>
+      Array.from(
+        container.querySelectorAll('[data-slot="steps-indicator"]')
+      ).find((el) => el.textContent === n)
+    expect(indicator("2")).toHaveAttribute("data-current")
+    expect(indicator("1")).toHaveAttribute("data-complete")
+
     await awaitProfileReady()
     await userEvent.click(screen.getByRole("button", { name: "Next" }))
 
-    expect(screen.getByText(/Step 2 of 2/)).toBeInTheDocument()
     expect(screen.getAllByRole("radio")).toHaveLength(DATASETS.length)
     // The starter dataset is the default selection.
     expect(
       screen.getByRole("radio", { name: "Minimal (starter)" })
     ).toBeChecked()
+    // Profile → dataset: rail shows profile complete, dataset current.
+    expect(indicator("3")).toHaveAttribute("data-current")
+    expect(indicator("2")).toHaveAttribute("data-complete")
   })
 
   test("Finish completes onboarding: flag persisted, profile + catalog seeded", async () => {
     renderOnboarding()
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
     await awaitProfileReady()
     const username = usernameInput().value
     await userEvent.click(screen.getByRole("button", { name: "Next" }))

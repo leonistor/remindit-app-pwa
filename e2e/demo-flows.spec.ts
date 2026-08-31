@@ -27,6 +27,10 @@ test.describe("Remindit demo flows (dev mode)", () => {
     // Fresh storage → the router gates the first run to /onboarding.
     await expect(page).toHaveURL(/\/onboarding$/)
 
+    // Welcome step (intro video + demo) — a single visible Next advances to
+    // the profile step.
+    await page.getByRole("button", { name: "Next" }).click()
+
     const dice = page.getByRole("button", {
       name: "Roll a new random name and avatar",
     })

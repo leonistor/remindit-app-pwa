@@ -15,20 +15,25 @@ export function seedTheme(page: Page, mode: "light" | "dark"): void {
 }
 
 /**
- * Walks the real onboarding UI (fresh storage → profile step → "Minimal
- * (starter)" → Finish) and waits for the seeded home view. Used by flows whose
- * assertions depend on the minimal dataset's catalog content (eggs, pasta,
- * milk…) — the localStorage-only `onboard()` helper would seed whatever
- * PUBLIC_DATASET the dev server was built with instead.
+ * Walks the real onboarding UI (fresh storage → welcome step → profile step →
+ * "Minimal (starter)" → Finish) and waits for the seeded home view. Used by
+ * flows whose assertions depend on the minimal dataset's catalog content
+ * (eggs, pasta, milk…) — the localStorage-only `onboard()` helper would seed
+ * whatever PUBLIC_DATASET the dev server was built with instead.
  */
 export async function onboardViaUi(page: Page): Promise<void> {
   seedTheme(page, "light")
   await page.goto("/")
 
-  // Dice button only renders on the onboarding step 1 (the router gates
-  // un-onboarded users there). Profile generation is async (lazy DiceBear
-  // chunk), so inputs stay `disabled` until it resolves — fill/click
-  // auto-wait for enabled, but the first locator needs to exist first.
+  // Welcome step: intro video + a single Next footer button — click it to
+  // reach the profile step.
+  await page.getByRole("button", { name: "Next" }).click()
+
+  // Dice button only renders on the onboarding profile step (now step 2,
+  // behind the welcome step; the router gates un-onboarded users there).
+  // Profile generation is async (lazy DiceBear chunk), so inputs stay
+  // `disabled` until it resolves — fill/click auto-wait for enabled, but the
+  // first locator needs to exist first.
   const dice = page.getByRole("button", {
     name: "Roll a new random name and avatar",
   })
