@@ -1,4 +1,4 @@
-import { chromium } from "playwright";
+import { chromium, type Locator } from "playwright";
 import { attachRecorder } from "playwright-recorder-plus";
 import path from "node:path";
 
@@ -21,7 +21,8 @@ const context = await browser.newContext({
 });
 const page = await context.newPage();
 
-const recorder = await attachRecorder(page, { path: OUTPUT });
+// Assigned once the app has settled (see inside the try block below).
+let recorder: Awaited<ReturnType<typeof attachRecorder>> | undefined;
 
 // Inject a visible cursor overlay (screencast doesn't capture system cursor).
 // Init scripts run at document-start when <body> doesn't exist yet, so defer
@@ -85,6 +86,49 @@ await page.addInitScript(() => {
   }
 });
 
+// --- Humanized input -------------------------------------------------------
+// Random think-time delays, curved pointer travel and click-point jitter so
+// the recording reads as a person performing the scenario instead of a test
+// runner teleporting between elements.
+const rand = (min: number, max: number) => min + Math.random() * (max - min);
+
+/** "Thinking" pause between scenario actions, in ms. */
+const think = (min: number, max: number) => page.waitForTimeout(rand(min, max));
+
+// Playwright doesn't expose the live pointer position; track it so moves can
+// arc from where the cursor actually is.
+let cursor = { x: 0, y: 0 };
+
+/** Move the pointer to (x, y) via an arced two-leg path with eased steps. */
+async function humanMove(x: number, y: number) {
+  const distance = Math.hypot(x - cursor.x, y - cursor.y);
+  // Arc waypoint: jitter off the straight-line midpoint so paths curve.
+  const midX = (cursor.x + x) / 2 + rand(-40, 40);
+  const midY = (cursor.y + y) / 2 + rand(-40, 40);
+  // Step density scales with distance (~10-18px per step) so long sweeps
+  // aren't visibly linear but short hops stay snappy.
+  const steps = Math.max(6, Math.round(distance / rand(10, 18)));
+  await page.mouse.move(midX, midY, { steps: Math.ceil(steps / 2) });
+  await page.mouse.move(x, y, { steps: Math.ceil(steps / 2) });
+  cursor = { x, y };
+  // Settle before acting — nobody clicks the instant the pointer arrives.
+  await page.waitForTimeout(rand(40, 120));
+}
+
+/** Humanized click: jitter within the element, arc over, press with duration. */
+async function humanClick(locator: Locator) {
+  const box = await locator.boundingBox();
+  if (!box) throw new Error(`click target not visible: ${locator}`);
+  // Aim inside the middle ~40% of the element — humans rarely hit dead-center.
+  const x = box.x + box.width * rand(0.3, 0.7);
+  const y = box.y + box.height * rand(0.3, 0.7);
+  await humanMove(x, y);
+  await page.mouse.down();
+  // Press-and-release takes a human ~60-130ms.
+  await page.waitForTimeout(rand(60, 130));
+  await page.mouse.up();
+}
+
 try {
   await page.goto("http://localhost:3000");
 
@@ -94,44 +138,61 @@ try {
   });
   await diceButton.waitFor({ state: "visible", timeout: 10_000 });
 
+  // Attach only after the app has settled. Attaching earlier races the
+  // window-manager resize: the first screencast frame can arrive while the
+  // headful window still has its pre-viewport size (400x257) and the
+  // recorder's one-shot size validation rejects it. Attaching here also keeps
+  // the blank page-load lead-in out of the video.
+  const attached = await attachRecorder(page, { path: OUTPUT });
+  recorder = attached;
+  await think(600, 1200);
+
   for (let i = 0; i < 3; i++) {
-    await diceButton.click();
-    await page.waitForTimeout(500);
+    await humanClick(diceButton);
+    // "Evaluating" the rolled avatar before rolling again.
+    await think(700, 1400);
   }
 
   // --- Onboarding: accept name & avatar ---
-  await page.getByRole("button", { name: "Next" }).click();
-  await page.waitForTimeout(300);
+  await think(400, 900);
+  await humanClick(page.getByRole("button", { name: "Next" }));
+  await think(500, 1100);
 
   // --- Onboarding: accept Minimal catalog ---
-  await page.getByRole("button", { name: "Finish" }).click();
+  await humanClick(page.getByRole("button", { name: "Finish" }));
 
   // --- Dismiss install banner (if it appears) ---
   const noButton = page.getByRole("button", { name: "No" });
   try {
     await noButton.waitFor({ state: "visible", timeout: 3000 });
-    await noButton.click();
+    await think(500, 1000);
+    await humanClick(noButton);
   } catch {
     // banner didn't appear — continue
   }
+  await think(800, 1500);
 
   // --- Open Fridge and Snacks accordions ---
-  await page.getByRole("button", { name: "fridge" }).click();
-  await page.waitForTimeout(300);
-  await page.getByRole("button", { name: "snacks" }).click();
-  await page.waitForTimeout(300);
+  await humanClick(page.getByRole("button", { name: "fridge" }));
+  await think(500, 1000);
+  await humanClick(page.getByRole("button", { name: "snacks" }));
+  await think(400, 900);
 
   // --- Add items to shopping list ---
   for (const item of ["eggs", "pasta", "yogurt", "crackers"]) {
-    await page.getByRole("button", { name: item }).click();
-    await page.waitForTimeout(400);
+    await humanClick(page.getByRole("button", { name: item }));
+    // Scanning for the next item between picks.
+    await think(500, 1200);
   }
 
-  await page.waitForTimeout(1000);
+  // Let the last action breathe before cutting the recording.
+  await think(1200, 2000);
 } finally {
-  await recorder.stop();
+  if (recorder) {
+    await recorder.stop();
+    await recorder.finalized;
+  }
   await context.close();
   await browser.close();
-  await recorder.finalized;
   console.log(`Video saved to ${OUTPUT}`);
 }

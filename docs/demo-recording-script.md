@@ -32,12 +32,24 @@ Install: `bun add -D playwright-recorder-plus playwright`
 
 Use **Bun**, not `bunx tsx`. `import.meta.dir` resolves natively in Bun; `tsx` (Node) doesn't support it.
 
+**Attach the recorder after the app has settled** (post-`goto`, post first-content wait). Attaching immediately after `newPage()` races the window-manager resize: the first screencast frame can arrive while the headful window still has its pre-viewport size (`400x257`) and the recorder's one-shot size validation rejects it. Side benefit: the blank page-load lead-in stays out of the video.
+
 ### Viewport & video size
 
 - **Viewport:** 400×720 (headless:false, deviceScaleFactor:1)
 - 720 height is required — 700 causes a CDP frame mismatch (`server delivered 400x257, expected 400x700`) which produces a blank video
 - The `size` option on `attachRecorder` defaults to `page.viewportSize()` — no need to set it explicitly
 - **Launch with `--force-device-scale-factor=1`.** On a Retina host the headful window's backing buffer is 800×1440 physical while the emulated `deviceScaleFactor: 1` viewport paints only into its top-left 400×720 — the recorder then scales the buffer down and the app content ends up quarter-size in the first quadrant of the video. Which display the window lands on varies per launch, so this appears intermittently without the flag.
+
+### Humanized input
+
+The scenario avoids `locator.click()` (teleports the pointer, fixed delays) in favor of small helpers in the script:
+
+- **`think(min, max)`** — randomized "thinking" pause between actions (dice rolls ~0.7–1.4s while "evaluating" the avatar, item picks ~0.5–1.2s, etc.).
+- **`humanMove(x, y)`** — two-leg arced path (jittered midpoint) instead of a straight teleport; step density scales with distance (~10–18px/step); small settle pause on arrival.
+- **`humanClick(locator)`** — aims inside the middle ~40% of the element (humans don't hit dead-center), arcs over, then holds the press ~60–130ms before releasing.
+
+The pointer position is tracked locally (`cursor`) because Playwright doesn't expose the live pointer location. All ranges are `Math.random`-based — every run of the same scenario produces a slightly different rhythm.
 
 ### Cursor overlay
 
