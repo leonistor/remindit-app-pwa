@@ -10,10 +10,21 @@
 // `@rstest/core` nor an auto-injected global in this project's config).
 
 import { afterEach, beforeEach, describe, expect, test } from "@rstest/core"
-import { $theme, initTheme, type ThemeMode } from "@/stores/theme"
+import {
+  $theme,
+  $themeVariant,
+  initTheme,
+  type ThemeMode,
+} from "@/stores/theme"
 
 // Controllable OS dark-mode flag read by the mocked matchMedia.
 let osPrefersDark = false
+
+// Listeners registered on the mocked dark-scheme media query. initTheme()
+// subscribes exactly once (module-level guard), so this stays populated for
+// the whole file — dispatching these is how tests simulate the OS flipping
+// its preference while the app is running.
+const changeListeners: Array<() => void> = []
 
 // Minimal MediaQueryList mock compatible with what initTheme() touches.
 function makeMatchMedia() {
@@ -21,12 +32,21 @@ function makeMatchMedia() {
     matches: query === "(prefers-color-scheme: dark)" ? osPrefersDark : false,
     media: query,
     onchange: null,
-    addEventListener: () => {},
+    addEventListener: (_type: string, listener: () => void) => {
+      changeListeners.push(listener)
+    },
     removeEventListener: () => {},
     addListener: () => {},
     removeListener: () => {},
     dispatchEvent: () => false,
   })
+}
+
+// Flips the mocked OS preference and fires the change listeners initTheme()
+// registered, exercising the same code path a real OS flip would take.
+function dispatchSystemDark(dark: boolean): void {
+  osPrefersDark = dark
+  for (const listener of changeListeners) listener()
 }
 
 const originalMatchMedia = window.matchMedia
@@ -112,5 +132,32 @@ describe("initTheme", () => {
     initTheme()
 
     expect(document.documentElement.classList.contains("dark")).toBe(false)
+  })
+})
+
+describe("$themeVariant", () => {
+  // initTheme() has already run in the describe above (module-level guard),
+  // so $systemDark is wired to the mocked matchMedia and updates via
+  // dispatchSystemDark, exactly like a real OS-preference flip.
+
+  test("resolves light and dark modes directly", () => {
+    setMode("light")
+    expect($themeVariant.get()).toBe("light")
+
+    setMode("dark")
+    expect($themeVariant.get()).toBe("dark")
+  })
+
+  test("system mode resolves from the OS preference", () => {
+    dispatchSystemDark(false)
+    setMode("system")
+    expect($themeVariant.get()).toBe("light")
+
+    dispatchSystemDark(true)
+    expect($themeVariant.get()).toBe("dark")
+
+    // Back to light so later tests don't inherit a dark-resolved variant.
+    dispatchSystemDark(false)
+    expect($themeVariant.get()).toBe("light")
   })
 })

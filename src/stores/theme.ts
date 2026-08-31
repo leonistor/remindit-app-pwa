@@ -1,4 +1,5 @@
 import { persistentAtom } from "@nanostores/persistent"
+import { atom, computed } from "nanostores"
 import { STORAGE_KEYS } from "./persistence"
 
 export type ThemeMode = "light" | "dark" | "system"
@@ -22,6 +23,21 @@ export const $theme = persistentAtom<ThemeMode>(STORAGE_KEYS.theme, "system", {
 let mediaQuery: MediaQueryList | null = null
 let initialized = false
 
+// Tracks the OS color-scheme preference. A plain computed off $theme alone
+// can't resolve "system" reactively: while in system mode an OS flip leaves
+// the store value unchanged and only the matchMedia listener fires, so the
+// resolved variant needs this second input to recompute.
+const $systemDark = atom(false)
+
+// The concrete light/dark variant the UI should render for the current mode +
+// OS preference. Components that care about the resolved look (e.g. picking a
+// theme-matched video asset) subscribe to this instead of $theme.
+export const $themeVariant = computed(
+  [$theme, $systemDark],
+  (mode, systemDark): "light" | "dark" =>
+    mode === "dark" || (mode === "system" && systemDark) ? "dark" : "light"
+)
+
 function getSystemDark(): boolean {
   return window.matchMedia(DARK_QUERY).matches
 }
@@ -43,7 +59,14 @@ export function initTheme(): void {
   if (initialized) return
   initialized = true
 
-  const apply = () => applyTheme($theme.get())
+  // One apply handles both inputs: store changes and OS-preference flips.
+  // Refreshing $systemDark here (not just applyTheme) is what keeps
+  // $themeVariant reactive in "system" mode — the store value is unchanged on
+  // an OS flip, so the $theme.subscribe below alone would never fire.
+  const apply = () => {
+    $systemDark.set(getSystemDark())
+    applyTheme($theme.get())
+  }
   apply()
   $theme.subscribe(apply)
 

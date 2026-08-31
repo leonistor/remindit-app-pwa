@@ -33,8 +33,8 @@ Core PWA + personalization slice. All items below are live (see `CHANGELOG.md`).
 
 - [x] [DESIGN.md](../DESIGN.md) — design system as shipped (contributors, text-only)
 - [ ] Share page (`/share`): export the current shopping list as a PNG image — light-theme branded card, unchecked items grouped by category, download + copy-to-clipboard (`@zumer/snapdom`)
-- [ ] Help content: videos + guided tour (text help is done; tour/videos pending)
-- [ ] Add license (`LICENSE` at repo root)
+- [ ] Help content: guided tour (videos shipped — Help page embeds 5 demo videos with theme-matched variants)
+- [x] Add license (AGPL-3 LICENSE.txt at repo root)
 - [ ] App website (standalone marketing/docs site beyond the deployed PWA at `https://remindit.parsedwink.com`)
 - [ ] Community of early adopters and feedback capture (see `docs/LINKS.md#feedback`)
 

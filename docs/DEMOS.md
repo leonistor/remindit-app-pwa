@@ -2,7 +2,9 @@
 
 Generates the numbered feature-demo video set shown below. The videos ship as
 app static assets (`public/demos/`) so they can be referenced from app content
-(Onboarding, Help page) and inspected manually.
+(Onboarding, Help page) and inspected manually. The Help page embeds scenarios
+01/03/04/05/06 inline (via the `DemoVideo` component, `src/components/demo-video.tsx`),
+picking the variant that matches the active theme.
 
 Generator: `scripts/demo-scenarios.ts` — Playwright (library API) +
 [`playwright-recorder-plus`](https://www.npmjs.com/package/playwright-recorder-plus)
