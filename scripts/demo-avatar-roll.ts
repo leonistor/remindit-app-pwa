@@ -4,7 +4,17 @@ import path from "node:path";
 
 const OUTPUT = path.join(import.meta.dir, "demo-avatar-roll.mp4");
 
-const browser = await chromium.launch({ headless: false });
+// --force-device-scale-factor=1 keeps the window's backing buffer at 1 device
+// pixel per CSS pixel. Without it, on a Retina host the headful window surface
+// is 800x1440 physical while the emulated viewport paints only 400x720 into
+// its top-left corner — the recorder then scales the buffer down and the app
+// content ends up quarter-size in the first quadrant of the video. Which
+// display the window lands on varies per launch, so this bug appears
+// intermittently without the flag.
+const browser = await chromium.launch({
+  headless: false,
+  args: ["--force-device-scale-factor=1"],
+});
 const context = await browser.newContext({
   viewport: { width: 400, height: 720 },
   deviceScaleFactor: 1,
@@ -18,14 +28,17 @@ const recorder = await attachRecorder(page, { path: OUTPUT });
 // mounting until DOMContentLoaded.
 await page.addInitScript(() => {
   const mount = () => {
+    // High-visibility cursor: 70%-opaque red fill pops against the colorful
+    // category chips; the near-solid white ring keeps it visible on white
+    // backgrounds.
     const dot = document.createElement("div");
     Object.assign(dot.style, {
       position: "fixed",
-      width: "14px",
-      height: "14px",
+      width: "28px",
+      height: "28px",
       borderRadius: "50%",
-      background: "rgba(0,0,0,0.4)",
-      border: "2px solid rgba(255,255,255,0.8)",
+      background: "rgba(220, 38, 38, 0.7)",
+      border: "3px solid rgba(255, 255, 255, 0.9)",
       pointerEvents: "none",
       zIndex: "2147483647",
       transform: "translate(-50%, -50%)",

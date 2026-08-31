@@ -37,10 +37,11 @@ Use **Bun**, not `bunx tsx`. `import.meta.dir` resolves natively in Bun; `tsx` (
 - **Viewport:** 400×720 (headless:false, deviceScaleFactor:1)
 - 720 height is required — 700 causes a CDP frame mismatch (`server delivered 400x257, expected 400x700`) which produces a blank video
 - The `size` option on `attachRecorder` defaults to `page.viewportSize()` — no need to set it explicitly
+- **Launch with `--force-device-scale-factor=1`.** On a Retina host the headful window's backing buffer is 800×1440 physical while the emulated `deviceScaleFactor: 1` viewport paints only into its top-left 400×720 — the recorder then scales the buffer down and the app content ends up quarter-size in the first quadrant of the video. Which display the window lands on varies per launch, so this appears intermittently without the flag.
 
 ### Cursor overlay
 
-Playwright's screencast does **not** capture the system cursor. The script injects a DOM-based cursor dot via `page.addInitScript()`. Gotcha: init scripts run at document-start, when `document.body` is still `null`, so the dot must be mounted in a `DOMContentLoaded` handler (or after a `readyState` check) — appending directly throws silently and the overlay never appears.
+Playwright's screencast does **not** capture the system cursor. The script injects a DOM-based cursor dot via `page.addInitScript()`: a 28px circle, red fill at 70% opacity (pops against category chips) with a 3px near-solid white ring (visible on white backgrounds). Init scripts run at document-start, when `document.body` is still `null`, so the dot must be mounted in a `DOMContentLoaded` handler (or after a `readyState` check) — appending directly throws silently and the overlay never appears.
 
 ### Install banner
 
