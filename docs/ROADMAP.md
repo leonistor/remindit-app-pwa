@@ -29,17 +29,15 @@ Core PWA + personalization slice. All items below are live (see `CHANGELOG.md`).
 - [x] Help content — text ( `src/views/help.tsx`, `src/views/about.tsx`, `src/views/onboarding.tsx` copy; updated for floating sort + alphabetical A–Z in v3.4)
 - [x] Internal hardening pre-V4 — hooks out of `src/stores` barrel, cross-store flows in `src/stores/commands.ts`, pure helpers in `src/lib/` (`quick-add`, `history-view`, `display`, `pwa-install`), palette seeding consolidation, history snapshot + palette reactivity fixes
 
-## [ ] Version 4 — in progress
+## [ ] Version 4
 
 - [x] [DESIGN.md](../DESIGN.md) — design system as shipped (contributors, text-only)
 - [x] Onboarding welcome step — intro + add-items demo video (autoplay, muted, looped, no controls) with a `Steps` indicator rail (new `@shark/steps` primitive)
 - [x] Share page (`/share`): export the current shopping list as a PNG image — light-theme branded card, unchecked items grouped by category, download + copy-to-clipboard (`@zumer/snapdom`)
-- [ ] Help content: guided tour (videos shipped — Help page embeds 5 demo videos with theme-matched variants)
+- [x] Help content: guided tour (videos shipped — Help page embeds 5 demo videos with theme-matched variants)
 - [x] Add license (AGPL-3 LICENSE.txt at repo root)
-- [ ] App website (standalone marketing/docs site beyond the deployed PWA at `https://remindit.parsedwink.com`)
-- [ ] Community of early adopters and feedback capture (see `docs/LINKS.md#feedback`)
 
-## [ ] Version 5
+## [ ] Version 5 — in progress
 
 - [ ] Multi-user support will be added, allowing multiple users to share the same list and collaborate in real-time.
 - [ ] Sync with the server will be implemented to allow the list to be saved and loaded across devices.
@@ -47,6 +45,8 @@ Core PWA + personalization slice. All items below are live (see `CHANGELOG.md`).
 
 ## [ ] Version 6
 
+- [ ] App website (standalone marketing/docs site beyond the deployed PWA at `https://remindit.parsedwink.com`)
+- [ ] Community of early adopters and feedback capture (see `docs/LINKS.md#feedback`)
 - [ ] Basic AI features
 - [ ] Integration with LLMs (MCP, skills)
 
