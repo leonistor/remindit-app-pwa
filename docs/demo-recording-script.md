@@ -2,6 +2,10 @@
 
 Helper script for generating feature demo videos using Playwright + `playwright-recorder-plus`.
 
+> Multi-video scenario set (onboarding → install, 7 numbered videos) is planned in
+> [`demo-recording-plan.md`](./demo-recording-plan.md) — the implementation spec for
+> `scripts/demo-scenarios.ts`.
+
 ## Files
 
 - `scripts/demo-avatar-roll.ts` — recording script

@@ -19,6 +19,7 @@ test-results/
 
 # Generated demo videos
 scripts/*.mp4
+scripts/demos/
 
 # Profile
 .rspack-profile-*/
