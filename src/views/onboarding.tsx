@@ -1,6 +1,6 @@
 import { useStore } from "@nanostores/react"
 import { DiceFive, User } from "@phosphor-icons/react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, type FocusEvent, type MouseEvent } from "react"
 import { Navigate, useNavigate } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
@@ -22,6 +22,35 @@ const EMPTY_PROFILE: UserProfile = {
   lastName: "",
   email: "",
   avatar: "",
+}
+
+// Tracks inputs that got a fresh focus so `keepSelectionOnClick` only suppresses
+// the single mouseup that ends a click-focus (which would otherwise collapse the
+// selection to the cursor), leaving later clicks free to position the caret.
+const selectionProtected = new WeakSet<HTMLElement>()
+
+// Select the pre-filled value on focus so typing replaces it in one go.
+// Keyboard focus works via `.select()` alone; see `keepSelectionOnClick` for the
+// mouse-click path.
+const selectAllOnFocus = (e: FocusEvent<HTMLInputElement>) => {
+  const input = e.currentTarget
+  input.select()
+  selectionProtected.add(input)
+}
+
+const keepSelectionOnClick = (e: MouseEvent<HTMLInputElement>) => {
+  const input = e.currentTarget
+  if (selectionProtected.delete(input)) e.preventDefault()
+}
+
+const clearSelectionProtection = (e: FocusEvent<HTMLInputElement>) => {
+  selectionProtected.delete(e.currentTarget)
+}
+
+const profileInputProps = {
+  onFocus: selectAllOnFocus,
+  onMouseUp: keepSelectionOnClick,
+  onBlur: clearSelectionProtection,
 }
 
 const OnboardingView = () => {
@@ -108,6 +137,7 @@ const OnboardingView = () => {
                   id="firstName"
                   value={profile.firstName}
                   disabled={busy}
+                  {...profileInputProps}
                   onChange={(e) =>
                     setProfile((p) => ({ ...p, firstName: e.target.value }))
                   }
@@ -120,6 +150,7 @@ const OnboardingView = () => {
                   id="lastName"
                   value={profile.lastName}
                   disabled={busy}
+                  {...profileInputProps}
                   onChange={(e) =>
                     setProfile((p) => ({ ...p, lastName: e.target.value }))
                   }
@@ -132,6 +163,7 @@ const OnboardingView = () => {
                   id="username"
                   value={profile.username}
                   disabled={busy}
+                  {...profileInputProps}
                   onChange={(e) =>
                     setProfile((p) => ({ ...p, username: e.target.value }))
                   }
