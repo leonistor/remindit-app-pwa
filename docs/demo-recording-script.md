@@ -40,11 +40,20 @@ Use **Bun**, not `bunx tsx`. `import.meta.dir` resolves natively in Bun; `tsx` (
 
 ### Cursor overlay
 
-Playwright's screencast does **not** capture the system cursor. The script injects a DOM-based cursor dot via `page.addInitScript()`. **This does not currently work** — the overlay isn't visible in the recording. Needs investigation (possibly the init script runs too late, or the screencast captures before the overlay mounts).
+Playwright's screencast does **not** capture the system cursor. The script injects a DOM-based cursor dot via `page.addInitScript()`. Gotcha: init scripts run at document-start, when `document.body` is still `null`, so the dot must be mounted in a `DOMContentLoaded` handler (or after a `readyState` check) — appending directly throws silently and the overlay never appears.
 
 ### Install banner
 
 The PWA install banner (`src/components/install-banner.tsx`) depends on `usePwaInstall().showBanner`. It may not appear in a Playwright context (no PWA install prompt available). The script wraps the "No" button click in a try/catch with a 3s timeout to handle this gracefully.
+
+### Blank stretches mid-video (screencast keep-alive)
+
+CDP screencast delivers frames **only on compositor damage**. Idle periods (waits, no interaction) produce no frames at all, and `playwright-recorder-plus` pads frame gaps by repeating the *last received* frame (`ingestFrame`). That turns two failure modes into visible blank stretches:
+
+1. A long main-thread task (e.g. the synchronous onboarding seeding after **Finish**) invalidates the content raster — the compositor delivers 1–3 **white frames** (only independently-composited layers like the cursor dot still draw). The white frame becomes the recorder's `_lastJpeg`.
+2. The next idle pause (e.g. the 3s install-banner wait) is padded by repeating that white frame → multi-second blank stretch.
+
+**Fix:** inject a 2px infinitely-animating overlay (`element.animate` opacity pulse) in the same init script as the cursor dot. Continuous compositor damage keeps frames flowing through idle pauses, so gaps never form and `_lastJpeg` is always real content. Worst case remains a <100ms blink during the seeding block itself — acceptable.
 
 ### Onboarding selectors
 
@@ -64,6 +73,6 @@ The PWA install banner (`src/components/install-banner.tsx`) depends on `usePwaI
 
 ## TODO
 
-- [ ] Fix cursor overlay visibility in recordings
+- [x] Fix cursor overlay visibility in recordings (defer mount to `DOMContentLoaded`)
 - [ ] Add more demo scenarios (different features)
-- [ ] Consider adding `scripts/demo-*.mp4` to `.gitignore`
+- [x] Add `scripts/demo-*.mp4` to `.gitignore`

@@ -13,30 +13,63 @@ const page = await context.newPage();
 
 const recorder = await attachRecorder(page, { path: OUTPUT });
 
-// Inject a visible cursor overlay (screencast doesn't capture system cursor)
+// Inject a visible cursor overlay (screencast doesn't capture system cursor).
+// Init scripts run at document-start when <body> doesn't exist yet, so defer
+// mounting until DOMContentLoaded.
 await page.addInitScript(() => {
-  const dot = document.createElement("div");
-  Object.assign(dot.style, {
-    position: "fixed",
-    width: "14px",
-    height: "14px",
-    borderRadius: "50%",
-    background: "rgba(0,0,0,0.4)",
-    border: "2px solid rgba(255,255,255,0.8)",
-    pointerEvents: "none",
-    zIndex: "2147483647",
-    transform: "translate(-50%, -50%)",
-    transition: "left 0.05s, top 0.05s",
-  });
-  document.addEventListener(
-    "mousemove",
-    (e) => {
-      dot.style.left = `${e.clientX}px`;
-      dot.style.top = `${e.clientY}px`;
-    },
-    { passive: true },
-  );
-  document.body.appendChild(dot);
+  const mount = () => {
+    const dot = document.createElement("div");
+    Object.assign(dot.style, {
+      position: "fixed",
+      width: "14px",
+      height: "14px",
+      borderRadius: "50%",
+      background: "rgba(0,0,0,0.4)",
+      border: "2px solid rgba(255,255,255,0.8)",
+      pointerEvents: "none",
+      zIndex: "2147483647",
+      transform: "translate(-50%, -50%)",
+      transition: "left 0.05s, top 0.05s",
+    });
+    document.addEventListener(
+      "mousemove",
+      (e) => {
+        dot.style.left = `${e.clientX}px`;
+        dot.style.top = `${e.clientY}px`;
+      },
+      { passive: true },
+    );
+    document.body.appendChild(dot);
+
+    // Screencast keep-alive. CDP screencast only delivers frames on compositor
+    // damage, and playwright-recorder-plus pads frame gaps by repeating the
+    // last received frame. If a long main-thread task (e.g. the synchronous
+    // onboarding seeding) invalidates the content raster, the recorder's last
+    // frame becomes a white capture and every subsequent idle pause is padded
+    // with it — a multi-second blank stretch in the video. A 2px, infinitely
+    // animating overlay keeps compositor frames flowing so gaps never form.
+    const keepalive = document.createElement("div");
+    Object.assign(keepalive.style, {
+      position: "fixed",
+      left: "0",
+      top: "0",
+      width: "2px",
+      height: "2px",
+      pointerEvents: "none",
+      zIndex: "2147483647",
+      background: "#fff",
+    });
+    keepalive.animate(
+      [{ opacity: "1" }, { opacity: "0.99" }, { opacity: "1" }],
+      { duration: 1000, iterations: Infinity },
+    );
+    document.body.appendChild(keepalive);
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mount, { once: true });
+  } else {
+    mount();
+  }
 });
 
 try {

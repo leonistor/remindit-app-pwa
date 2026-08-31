@@ -17,6 +17,9 @@ deploy/
 test-results/
 .playwright-mcp/
 
+# Generated demo videos
+scripts/*.mp4
+
 # Profile
 .rspack-profile-*/
 
