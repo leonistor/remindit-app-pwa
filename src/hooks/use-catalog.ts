@@ -4,6 +4,7 @@ import {
   $catalogByCategory,
   $listItemIds,
   $recommendationsByItemId,
+  $recommendedCountByCategoryId,
   addToList,
   type CatalogByCategoryGroup,
   type Recommendation,
@@ -18,6 +19,8 @@ export interface UseCatalog {
   selected: Set<string>
   /** Recommendations keyed by itemId (for the tier dot). */
   recommendationsByItemId: Map<string, Recommendation>
+  /** Category id → count of visibly recommended items (header badge). */
+  recommendedCountByCategoryId: Map<string, number>
   /** Open accordion category ids (null = fall back to all open). */
   open: string[] | null
   /** Add an item to the list. */
@@ -34,11 +37,13 @@ export function useCatalog(): UseCatalog {
   const groups = useStore($catalogByCategory)
   const selected = useStore($listItemIds)
   const recommendationsByItemId = useStore($recommendationsByItemId)
+  const recommendedCountByCategoryId = useStore($recommendedCountByCategoryId)
   const open = useStore($accordionOpen)
   return {
     groups,
     selected,
     recommendationsByItemId,
+    recommendedCountByCategoryId,
     open,
     addToList,
     removeFromListByItemId,

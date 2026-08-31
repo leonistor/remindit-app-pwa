@@ -9,7 +9,13 @@
 import { beforeEach, describe, expect, test } from "@rstest/core"
 import { $catalog } from "@/stores/catalog"
 import { $categories } from "@/stores/categories"
-import { $list, addToList, setEntryChecked } from "@/stores/list"
+import { $history } from "@/stores/history"
+import {
+  $list,
+  addToList,
+  removeFromListByItemId,
+  setEntryChecked,
+} from "@/stores/list"
 import {
   $activeCategoryIds,
   $catalogByCategory,
@@ -19,9 +25,16 @@ import {
   $itemsByCategory,
   $listCount,
   $listItemIds,
+  $recommendations,
+  $recommendedCountByCategoryId,
   $selectedView,
 } from "@/stores/selectors"
-import type { CatalogItem, Category, ListEntry } from "@/stores/types"
+import type {
+  CatalogItem,
+  Category,
+  HistoryEvent,
+  ListEntry,
+} from "@/stores/types"
 import { resetStores } from "../fixtures/reset"
 
 // Deterministic seed. NOTE: $categories is intentionally ordered [b, a] so that
@@ -294,5 +307,61 @@ describe("$listItemIds", () => {
     const ids = $listItemIds.get()
     expect(ids.has("item-1")).toBe(false)
     expect(ids.has("item-3")).toBe(true)
+  })
+})
+
+describe("$recommendedCountByCategoryId", () => {
+  const DAY_MS = 1000 * 60 * 60 * 24
+
+  // $recommendations scores against the real clock (Date.now()), so history
+  // timestamps must be relative to it — this is what decides the tier.
+  function addEvent(
+    itemId: string,
+    categoryId: string,
+    daysAgo: number
+  ): HistoryEvent {
+    return {
+      id: crypto.randomUUID(),
+      action: "add",
+      itemId,
+      itemName: "test",
+      categoryId,
+      categoryName: "",
+      timestamp: Date.now() - daysAgo * DAY_MS,
+    }
+  }
+
+  const countFor = (categoryId: string) =>
+    $recommendedCountByCategoryId.get().get(categoryId) ?? 0
+
+  beforeEach(() => {
+    resetStores()
+    $categories.set([{ id: "dairy", name: "Dairy", frequency: "weekly" }])
+    $catalog.set([{ id: "m1", name: "Milk", categoryId: "dairy" }])
+  })
+
+  test("counts a dotted-tier item, drops it while on the list, and stays down after restore", () => {
+    // 14 days since last add, weekly interval → due_ratio 2 → overdue (dot).
+    $history.set([addEvent("m1", "dairy", 14)])
+    expect(countFor("dairy")).toBe(1)
+
+    // Acting on the recommendation: the on-list exclusion removes it from
+    // $recommendations entirely.
+    addToList("m1")
+    expect(countFor("dairy")).toBe(0)
+
+    // Putting it back re-enters $recommendations, but the fresh add event pins
+    // due_ratio ≈ 0 → "frequent" (no dot) → the count must not re-inflate.
+    removeFromListByItemId("m1")
+    expect(countFor("dairy")).toBe(0)
+  })
+
+  test("never counts dotless 'frequent' items even though they are in $recommendations", () => {
+    // Bought 1 day ago, weekly interval → due_ratio ≈ 0.14 → frequent.
+    $history.set([addEvent("m1", "dairy", 1)])
+
+    // In the recommendation set but dotless — invisible to the badge.
+    expect($recommendations.get()).toHaveLength(1)
+    expect(countFor("dairy")).toBe(0)
   })
 })

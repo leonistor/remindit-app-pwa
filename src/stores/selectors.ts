@@ -2,6 +2,7 @@
 // read these instead of recomputing grouping logic themselves.
 
 import { computed, type ReadableAtom } from "nanostores"
+import { isRecommended } from "@/lib/recommendation-tiers"
 import { $catalog } from "./catalog"
 import { $categories } from "./categories"
 import { $history } from "./history"
@@ -291,6 +292,25 @@ export const $recommendations = computed(
 export const $recommendationsByItemId = computed(
   $recommendations,
   (recommendations) => new Map(recommendations.map((rec) => [rec.item.id, rec]))
+)
+
+// Category id → count of visibly recommended items (tiers that render a dot).
+// Filtered by isRecommended rather than mere membership in $recommendations:
+// an item bought and later put back re-enters as "frequent" (dotless), and
+// must not re-inflate the catalog's per-category count badge.
+export const $recommendedCountByCategoryId = computed(
+  $recommendations,
+  (recommendations) => {
+    const counts = new Map<string, number>()
+    for (const rec of recommendations) {
+      if (!isRecommended(rec.tier)) continue
+      counts.set(
+        rec.item.categoryId,
+        (counts.get(rec.item.categoryId) ?? 0) + 1
+      )
+    }
+    return counts
+  }
 )
 
 // A per-item detail selector. Components call `$itemDetail(itemId)` to get a

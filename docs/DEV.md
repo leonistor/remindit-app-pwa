@@ -28,7 +28,7 @@ A resizable two-panel split (`ShoppingPanels`):
 | Left (30%) | Items on the active shopping list (single cycling sort button that floats above the list via `@shark/float`) |
 | Right (70%) | `ItemCatalog` — catalog items grouped by category |
 
-Catalog items show recommendation badges (overdue/soon dots) based on the computed `$recommendations` store.
+Catalog items show recommendation badges (overdue/soon dots) based on the computed `$recommendations` store. Each category's accordion trigger also shows a neutral `Badge` (`variant="secondary"`, `size="sm"`) with the count of **visibly recommended** items in that category — exactly the tiers that render a dot (`overdue`/`soon`, via `isRecommended` in `src/lib/recommendation-tiers.ts`), counted reactively by `$recommendedCountByCategoryId` (`src/stores/selectors.ts`). The count tracks the acted-upon lifecycle: adding an item to the list removes it from `$recommendations` (badge drops); putting it back re-enters `$recommendations` but as dotless `frequent` (fresh add event → due_ratio ≈ 0), so the badge stays down.
 
 ### Item detail drawer
 

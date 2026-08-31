@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { Badge } from "@/components/ui/badge"
 import { ItemButton } from "@/components/ui/custom/item-button"
 import { useCatalog } from "@/hooks/use-catalog"
 import { useItemTravelTransition } from "@/hooks/use-item-travel-transition"
@@ -13,6 +14,7 @@ export default function ItemCatalog() {
     groups,
     selected,
     recommendationsByItemId,
+    recommendedCountByCategoryId,
     open,
     addToList,
     removeFromListByItemId,
@@ -36,48 +38,64 @@ export default function ItemCatalog() {
         onValueChange={(details) => setAccordionOpen(details.value)}
         className="-mx-1 mt-3 min-h-0 flex-1 overflow-y-auto px-1"
       >
-        {groups.map((group) => (
-          <AccordionItem key={group.categoryId} value={group.categoryId}>
-            <AccordionTrigger className="font-semibold text-xs uppercase tracking-wide">
-              {group.categoryName}
-            </AccordionTrigger>
-            <AccordionContent className="-mx-1">
-              <div className="flex flex-wrap gap-2 px-1 pt-2">
-                {group.items.map((item) => {
-                  const isSelected = selected.has(item.id)
-                  return (
-                    <ItemButton
-                      key={item.id}
-                      name={item.name}
-                      purpose="selectable"
-                      categoryKey={group.categoryId}
-                      isSelected={isSelected}
-                      recommendationTier={
-                        recommendationsByItemId.get(item.id)?.tier
-                      }
-                      travelTargetId={item.id}
-                      onClick={(e) => {
-                        // When removing, the visible "from" is the list chip
-                        // (even though we clicked the catalog button), so it
-                        // animates out of the shopping list rather than snapping.
-                        const sourceEl = isSelected
-                          ? (document.querySelector<HTMLElement>(
-                              `[data-vt-list="${item.id}"]`
-                            ) ?? e.currentTarget)
-                          : e.currentTarget
-                        runTravel(item.id, sourceEl, () =>
-                          isSelected
-                            ? removeFromListByItemId(item.id)
-                            : addToList(item.id)
-                        )
-                      }}
-                    />
-                  )
-                })}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
+        {groups.map((group) => {
+          // Store-derived and reactive: an item added to the list leaves the
+          // recommendation set (badge drops); putting it back lands it in the
+          // dotless "frequent" tier, so the badge stays down.
+          const recommendedCount =
+            recommendedCountByCategoryId.get(group.categoryId) ?? 0
+          return (
+            <AccordionItem key={group.categoryId} value={group.categoryId}>
+              <AccordionTrigger className="font-semibold text-xs uppercase tracking-wide">
+                {/* Wrapped so name + badge stay grouped on the trigger's left
+                    side (justify-between would otherwise push them apart). */}
+                <span className="flex items-center gap-2">
+                  {group.categoryName}
+                  {recommendedCount > 0 && (
+                    <Badge variant="secondary" size="sm">
+                      {recommendedCount}
+                    </Badge>
+                  )}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="-mx-1">
+                <div className="flex flex-wrap gap-2 px-1 pt-2">
+                  {group.items.map((item) => {
+                    const isSelected = selected.has(item.id)
+                    return (
+                      <ItemButton
+                        key={item.id}
+                        name={item.name}
+                        purpose="selectable"
+                        categoryKey={group.categoryId}
+                        isSelected={isSelected}
+                        recommendationTier={
+                          recommendationsByItemId.get(item.id)?.tier
+                        }
+                        travelTargetId={item.id}
+                        onClick={(e) => {
+                          // When removing, the visible "from" is the list chip
+                          // (even though we clicked the catalog button), so it
+                          // animates out of the shopping list rather than snapping.
+                          const sourceEl = isSelected
+                            ? (document.querySelector<HTMLElement>(
+                                `[data-vt-list="${item.id}"]`
+                              ) ?? e.currentTarget)
+                            : e.currentTarget
+                          runTravel(item.id, sourceEl, () =>
+                            isSelected
+                              ? removeFromListByItemId(item.id)
+                              : addToList(item.id)
+                          )
+                        }}
+                      />
+                    )
+                  })}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )
+        })}
       </Accordion>
     </div>
   )
