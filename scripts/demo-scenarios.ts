@@ -2,12 +2,24 @@ import { chromium, type Locator, type Page } from "playwright";
 import { attachRecorder } from "playwright-recorder-plus";
 import path from "node:path";
 
-// Generates the numbered demo-video set in scripts/demos/ — one video per
-// feature, recorded as a single chronological user journey (state carries
-// through localStorage between scenarios). The whole set is generated per
-// theme variant (light + dark), filenames suffixed accordingly. Spec:
-// docs/demo-recording-plan.md.
-const OUT_DIR = path.join(import.meta.dir, "demos");
+// Generates the numbered demo-video set into public/demos/ — one video per
+// feature per theme variant (light + dark), recorded as a single chronological
+// user journey (state carries through localStorage between scenarios). The
+// output folder is served by the app, so the videos can be referenced from app
+// content (e.g. /demos/01-onboarding-light.mp4). Docs: docs/DEMOS.md.
+
+// --- Recording window constants ---------------------------------------------
+// 400x720: mobile-ish portrait that fits the whole UI. Do not change the
+// height to <720 — shorter viewports trigger a CDP screencast frame mismatch
+// (server delivers e.g. 400x257) that the recorder rejects. Keep
+// --force-device-scale-factor=1 in the launch args below when resizing; see
+// docs/DEMOS.md §Gotchas for why.
+const DEMO_WIDTH = 400;
+const DEMO_HEIGHT = 720;
+const DEMO_VIEWPORT = { width: DEMO_WIDTH, height: DEMO_HEIGHT };
+
+// Videos land in public/demos so the built app serves them as static assets.
+const OUT_DIR = path.join(import.meta.dir, "..", "public", "demos");
 const BASE = "http://localhost:3000";
 
 type Theme = "light" | "dark";
@@ -18,6 +30,22 @@ const variants: Theme[] =
   variantArg === "dark" || variantArg === "light"
     ? [variantArg]
     : ["light", "dark"];
+
+// The generator drives the app on the dev server (headed). It intentionally
+// does NOT start its own server: rsbuild dev on :3000 (or an equivalent) must
+// already be running.
+let baseAlive: Response | undefined
+try {
+  baseAlive = await fetch(BASE)
+} catch {
+  // handled below
+}
+if (!baseAlive?.ok) {
+  console.error(
+    `No dev server responding at ${BASE}. Start it first:\n\n  bun run dev\n`,
+  );
+  process.exit(1);
+}
 
 const browser = await chromium.launch({
   headless: false,
@@ -409,7 +437,7 @@ const scenarios: Scenario[] = [
 // localStorage wipe can't lose it) and scenario 05 flips back to it.
 for (const variant of variants) {
   context = await browser.newContext({
-    viewport: { width: 400, height: 720 },
+    viewport: DEMO_VIEWPORT,
     deviceScaleFactor: 1,
   });
   page = await context.newPage();

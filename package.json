@@ -13,6 +13,7 @@
     "preview": "rsbuild preview",
     "screenshot:mobile": "bun run build && bun scripts/generate-mobile-screenshot.ts",
     "screenshot:gallery": "bun run build && bun scripts/generate-mobile-screenshot.ts",
+    "demos": "bun scripts/demo-scenarios.ts",
     "generate:palettes": "bun scripts/generate-palettes.ts",
     "test": "rstest",
     "test:quick": "rstest -c rstest.quick.config.ts",

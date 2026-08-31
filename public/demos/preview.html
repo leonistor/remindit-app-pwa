@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo Videos</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, sans-serif; background: #111; color: #eee; padding: 2rem; }
+      h1 { font-size: 1.25rem; margin-bottom: 0.25rem; opacity: 0.6; }
+      h1 + p { font-size: 0.8rem; opacity: 0.4; margin-bottom: 1.5rem; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+      .card { background: #222; border-radius: 8px; overflow: hidden; }
+      .card video { width: 100%; display: block; }
+      .card .name { padding: 0.75rem 1rem; font-size: 0.85rem; opacity: 0.7; }
+    </style>
+  </head>
+  <body>
+    <h1>Demo Videos</h1>
+    <p>
+      Regenerate with <code>bun run demos</code> (dev server on :3000). This page also
+      works at <code>/demos/preview.html</code> via the dev server.
+    </p>
+    <div class="grid" id="grid"></div>
+    <script>
+      const scenarios = [
+        "01-onboarding",
+        "02-install-banner",
+        "03-add-items",
+        "04-quick-add",
+        "05-theme",
+        "06-edit-catalog",
+        "07-install",
+      ];
+      const variants = ["light", "dark"];
+      const videos = scenarios.flatMap((s) => variants.map((v) => `${s}-${v}.mp4`));
+      const grid = document.getElementById("grid");
+      for (const src of videos) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `<video src="${src}" controls loop muted></video><div class="name">${src}</div>`;
+        grid.appendChild(card);
+      }
+    </script>
+  </body>
+</html>
