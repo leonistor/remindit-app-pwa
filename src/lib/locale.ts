@@ -25,7 +25,7 @@ export interface AppLocale {
 export const APP_LOCALES: readonly AppLocale[] = [
   { code: "en", nativeName: "English" },
   { code: "ro", nativeName: "Română" },
-  // Later: German, French, Ukrainian (see docs/I18N-PLAN.md)
+  // Later: German, French, Ukrainian
 ]
 
 /** The currently active locale, resolved through the strategy chain. */
@@ -35,8 +35,8 @@ export function getActiveLocale(): Locale {
 
 /**
  * Switch the UI language: persists the choice via the Paraglide strategy and
- * reloads the document in the new locale. Deliberate full reload (see
- * docs/I18N-PLAN.md) — the service-worker-served shell makes it fast and every
+ * reloads the document in the new locale. Deliberate full reload — the
+ * service-worker-served shell makes it fast and every
  * store is already persisted, so nothing is lost.
  */
 export function setAppLocale(locale: Locale): void {

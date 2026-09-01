@@ -38,11 +38,9 @@ All items below are live (see `CHANGELOG.md`).
 - [x] Share page (`/share`): export the current shopping list as a PNG image — light-theme branded card, unchecked items grouped by category, download + copy-to-clipboard (`@zumer/snapdom`)
 - [x] Help content: guided tour (videos shipped — Help page embeds 5 demo videos with theme-matched variants)
 - [x] Add license (AGPL-3 LICENSE.txt at repo root)
-- [x] Multi-language support — English (default) + Romanian first (German, French, Ukrainian later); language selection as the first onboarding step, UI language switchable in Profile; Paraglide JS, changelog stays English in v4 (shipped in v4.2.0; plan: [I18N-PLAN.md](./I18N-PLAN.md))
+- [x] Multi-language support — English (default) + Romanian first (German, French, Ukrainian later); language selection as the first onboarding step, UI language switchable in Profile; Paraglide JS, changelog stays English in v4 (shipped in v4.2.0)
 
 ## [ ] Version 5
-
-> Restructuring proposal for v5–v6 (Bun workspace, modules, big bang vs gradual): [WORKSPACE-PLAN.md](./WORKSPACE-PLAN.md) — decided: Plan B (gradual).
 
 - [ ] Multi-user support will be added, allowing multiple users to share the same list and collaborate in real-time.
 - [ ] Sync with the server will be implemented to allow the list to be saved and loaded across devices.
