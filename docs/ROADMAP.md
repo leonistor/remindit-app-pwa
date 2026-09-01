@@ -29,15 +29,16 @@ Core PWA + personalization slice. All items below are live (see `CHANGELOG.md`).
 - [x] Help content — text ( `src/views/help.tsx`, `src/views/about.tsx`, `src/views/onboarding.tsx` copy; updated for floating sort + alphabetical A–Z in v3.4)
 - [x] Internal hardening pre-V4 — hooks out of `src/stores` barrel, cross-store flows in `src/stores/commands.ts`, pure helpers in `src/lib/` (`quick-add`, `history-view`, `display`, `pwa-install`), palette seeding consolidation, history snapshot + palette reactivity fixes
 
-## [ ] Version 4
+## [ ] Version 4 — in progress
 
 - [x] [DESIGN.md](../DESIGN.md) — design system as shipped (contributors, text-only)
 - [x] Onboarding welcome step — intro + add-items demo video (autoplay, muted, looped, no controls) with a `Steps` indicator rail (new `@shark/steps` primitive)
 - [x] Share page (`/share`): export the current shopping list as a PNG image — light-theme branded card, unchecked items grouped by category, download + copy-to-clipboard (`@zumer/snapdom`)
 - [x] Help content: guided tour (videos shipped — Help page embeds 5 demo videos with theme-matched variants)
 - [x] Add license (AGPL-3 LICENSE.txt at repo root)
+- [ ] Multi-language support — English (default) + Romanian first (German, French, Ukrainian later); language selection as the first onboarding step, UI language switchable in Profile; Paraglide JS, changelog stays English in v4 (plan: [I18N-PLAN.md](./I18N-PLAN.md))
 
-## [ ] Version 5 — in progress
+## [ ] Version 5
 
 > Restructuring proposal for v5–v6 (Bun workspace, modules, big bang vs gradual): [WORKSPACE-PLAN.md](./WORKSPACE-PLAN.md) — pending decision.
 
@@ -57,6 +58,5 @@ Core PWA + personalization slice. All items below are live (see `CHANGELOG.md`).
 # Wishlist
 
 - [ ] Items might have attributes associated with them, such as photo, quantity, or price.
-- [ ] Multi-language support
 - [ ] Native application
 - [ ] Notifications and live activities/updates
