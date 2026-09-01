@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { BackButton } from "@/components/back-button"
+import { AvatarPicker } from "@/components/avatar-picker"
 import { LanguageChooser } from "@/components/language-chooser"
 import { PaletteChooser } from "@/components/palette-chooser"
 import {
@@ -126,13 +127,7 @@ const ProfileView = () => {
         />
         <CardContent className="flex flex-col gap-4">
           <div className="flex items-center gap-4">
-            {user.avatar ? (
-              <img
-                alt={m.profileAvatarAlt()}
-                className="size-16 rounded-full border"
-                src={user.avatar}
-              />
-            ) : null}
+            {user.avatar ? <AvatarPicker avatar={user.avatar} /> : null}
             <p className="text-muted-foreground text-sm">
               {m.profileAvatarHint()}
             </p>

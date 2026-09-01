@@ -12,6 +12,36 @@ function capitalize(value: string): string {
   return value ? value[0].toUpperCase() + value.slice(1) : value
 }
 
+// One avatar offering in the Profile picker: the seed is only the listbox
+// item value (identity within a batch); the dataUri is what gets persisted.
+export interface AvatarOption {
+  seed: string
+  dataUri: string
+}
+
+// Random avatar batch for the Profile picker. Seeds use crypto.randomUUID so
+// a batch can never contain duplicates (Math.random strings could collide in
+// principle) and every open/reroll yields a guaranteed-fresh set.
+export async function generateAvatarOptions(
+  count = 12
+): Promise<AvatarOption[]> {
+  const [core, personasMod] = await Promise.all([
+    import("@dicebear/core"),
+    import("@dicebear/styles/personas.json"),
+  ])
+
+  // The Style parse is done once per batch; each Avatar render is cheap.
+  const { Style, Avatar } = core
+  const style = new Style(
+    personasMod.default as ConstructorParameters<typeof Style>[0]
+  )
+
+  return Array.from({ length: count }, () => {
+    const seed = crypto.randomUUID()
+    return { seed, dataUri: new Avatar(style, { seed }).toDataUri() }
+  })
+}
+
 export async function generateRandomProfile(): Promise<UserProfile> {
   const [{ default: generateRandomUsername }, core, personasMod] =
     await Promise.all([
