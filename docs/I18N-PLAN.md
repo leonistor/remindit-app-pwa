@@ -37,7 +37,7 @@ Verdict: **Paraglide JS v2** (`@inlang/paraglide-js`, MIT). JSON messages diff w
 | Pre-choice default | **Auto-detect** browser language (Romanian browsers land in Romanian), English fallback |
 | Locale strategy | `["localStorage", "preferredLanguage", "baseLocale"]` with `localStorageKey: "remindit:locale"` |
 | Message layout | Flat `messages/{locale}.json` for now; split into namespaces only if a file grows unwieldy |
-| Compiler invocation | Programmatic `compile()` in `scripts/compile-i18n.ts` → outdir `src/paraglide/` (**gitignored**), `emitTsDeclarations: true` |
+| Compiler invocation | **`paraglideRspackPlugin` inside `rsbuild.config.ts`** (`tools.rspack.plugins`) — official plugin, dev watch-compiles message edits; plus programmatic `compile()` in `scripts/compile-i18n.ts` (shared `PARAGLIDE_COMPILER_OPTIONS`) chained into `typecheck`/`test*` scripts, which run outside the bundler |
 | Output structure | `message-modules` (default) — per-message tree-shaking |
 
 ## Phase plan
@@ -97,20 +97,28 @@ Version 4 header becomes `in progress`, gains the multi-language item (EN+RO now
 
 ## Gotchas & risks
 
-- **No compile watch under Rsbuild** — re-run `bun run i18n:compile` after editing `messages/` (pre-script chains cover dev/build/test entry points)
-- `emitTsDeclarations` needs TS ≥ 5.6 — repo is on the TS 7 native compiler, fine
-- `<html lang>` must be set at boot before paint (a11y + font/UA styling)
-- PWA manifest (`name`, `description`, screenshots) stays English in v4 — out of scope, not in the roadmap item
-- No URL-based locale routing in the PWA (client router, single origin); localized URLs are a website concern
-- Tests matching on English UI strings will break in the sweep — fix as part of each batch, not afterwards
+- **Plural syntax**: the inlang message-format plugin does **not** support the ICU `#` shorthand; plurals use the array-of-match variants syntax with the variable repeated (`{count, plural, …}` → `declarations`/`selectors`/`match` object). Verified by probe during setup.
+- `src/paraglide/` is generated + self-gitignored — `typecheck`/`test*` chain `i18n:compile` first because they run outside the bundler; `dev`/`build` are covered by the Rspack plugin.
+- `emitTsDeclarations` needs TS ≥ 5.6 — repo is on the TS 7 native compiler, fine; it also makes a missing/typo'd `m.key` a **type error**, which the merge of all sweep batches relied on.
+- `<html lang>` is set at boot before paint (a11y + font/UA styling).
+- PWA manifest (`name`, `description`, screenshots) stays English in v4 — out of scope, not in the roadmap item.
+- No URL-based locale routing in the PWA (client router, single origin); localized URLs are a website concern.
+- Tests matching on English UI strings were updated within their sweep batches to assert `m.*` (they run under the default `en` locale).
+- Some help/about messages are **prefix/suffix fragments** wrapped around inline JSX (`<Link>`, `<strong>`); they may begin with punctuation by design — Romanian translations move words across fragment boundaries so the joined sentence reads naturally.
 
 ## Session progress (update as work lands)
 
 - [x] Phase 0 — ROADMAP.md updated (v4 in progress, item moved from Wishlist; v5 waits)
-- [ ] Phase 1 — Paraglide infra (deps, settings, messages, compile script, pre-hooks)
-- [ ] Phase 2 — App wiring (html lang, `src/lib/locale.ts`)
-- [ ] Phase 3 — Onboarding language step
-- [ ] Phase 4 — Profile switcher
-- [ ] Phase 5 — String sweep (batches 1–5)
-- [ ] Phase 6 — Romanian translations complete
-- [ ] Phase 7 — Gates green (`typecheck`, `lint`, `test:pre`) + DEV.md §Internationalization
+- [x] Phase 1 — Paraglide infra (deps, settings, messages, compile script, Rspack plugin)
+- [x] Phase 2 — App wiring (html lang, `src/lib/locale.ts`)
+- [x] Phase 3 — Onboarding language step (4-step wizard)
+- [x] Phase 4 — Profile switcher
+- [x] Phase 5 — String sweep (batches 1–5, ~300 keys; en.json merged centrally)
+- [x] Phase 6 — Romanian translations complete (314 keys, `null`-free, placeholder parity verified)
+- [x] Phase 7 — Gates green (`typecheck`, `lint`, `test:pre` — all Rstest + dev/prod Playwright) + DEV.md §Internationalization
+
+### Review notes for Leo (Phase 6 sign-off)
+
+- `messages/ro.json` is AI-drafted in a consistent informal ("tu") register — a native review pass is expected before release.
+- A few help/about keys are deliberately fragment-shaped (prefix/suffix around inline JSX) — the **joined** sentence is what reads naturally, per locale.
+- `catalogUncategorized` intentionally stays "Uncategorized" in all locales (it names the data sentinel, like dataset names).

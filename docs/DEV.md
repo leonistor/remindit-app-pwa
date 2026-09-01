@@ -46,7 +46,7 @@ A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Lay
 | `/about` | AboutView | About the app |
 | `/changelog` | ChangelogView | Version history (linked from the footer version) |
 | `/help` | HelpView | Usage help |
-| `/onboarding` | OnboardingView | First-run profile + dataset setup (no menu chrome) |
+| `/onboarding` | OnboardingView | First-run language + profile + dataset setup (no menu chrome) |
 
 ### PWA manifest
 
@@ -190,7 +190,19 @@ Import store atoms/actions from the barrel: `import { $list, addToList } from "@
 
 ### Onboarding gate
 
-`src/stores/onboarding.ts` — `$onboarded` (persisted `remindit:onboarded`) and `$selectedDatasetId` (persisted `remindit:selected-dataset`), with `isOnboarded` / `setOnboarded` / `getSelectedDatasetId` / `setSelectedDataset` / `resolveSelectedDataset` (stored choice → build-time `PUBLIC_DATASET` → registered default). The router's `Layout` redirects to `/onboarding` while not onboarded; `completeOnboarding(profile, datasetId)` in `src/stores/index.ts` seeds, persists the profile + dataset choice, and flips the flag. The local-data erase path resets `$onboarded` so the gate re-engages.
+`src/stores/onboarding.ts` — `$onboarded` (persisted `remindit:onboarded`) and `$selectedDatasetId` (persisted `remindit:selected-dataset`), with `isOnboarded` / `setOnboarded` / `getSelectedDatasetId` / `setSelectedDataset` / `resolveSelectedDataset` (stored choice → build-time `PUBLIC_DATASET` → registered default). The router's `Layout` redirects to `/onboarding` while not onboarded; `completeOnboarding(profile, datasetId)` in `src/stores/index.ts` seeds, persists the profile + dataset choice, and flips the flag. The local-data erase path resets `$onboarded` so the gate re-engages. Onboarding is a 4-step wizard: **language** (step 1, `LanguageChooser` — see [Internationalization](#internationalization)) → welcome demo video → profile → dataset.
+
+### Internationalization (i18n)
+
+UI strings are managed with **Paraglide JS v2** (`@inlang/paraglide-js`, compiler-first i18n). Plan & decisions: [`I18N-PLAN.md`](./I18N-PLAN.md).
+
+- **Source of truth:** `messages/{locale}.json` (inlang message format, flat files — `en` is `baseLocale`, `ro` shipped). The compiler generates `src/paraglide/` (self-gitignored) into typed, tree-shakable ESM `m.*` functions.
+- **Compilation:** the official `paraglideRspackPlugin` runs inside `rsbuild.config.ts` (`tools.rspack.plugins`), so dev **watch-compiles** message edits; `bun run i18n:compile` (programmatic `compile()` in `scripts/compile-i18n.ts`, sharing `PARAGLIDE_COMPILER_OPTIONS`) covers entry points that run outside the bundler — it is chained into `typecheck`, `test`, `test:quick`, `test:changed`, and `test:watch`.
+- **Usage:** `import { m } from "@/paraglide/messages"` then `m.key({ param })` — no provider/context, works alongside nanostores. Resolve messages **inside render bodies or functions only** — a module-scope `m.*` call freezes the string at import time. Plurals use the array-of-match variants syntax (see `I18N-PLAN.md`); the ICU `#` shorthand is **not** supported — repeat the variable (`{count}`) inside variants.
+- **Locale resolution:** strategy chain `["localStorage", "preferredLanguage", "baseLocale"]` with `localStorageKey: "remindit:locale"` — persisted user choice first, then browser language, then English. `src/index.tsx` sets `document.documentElement.lang` before first paint (mirrors `initTheme()`).
+- **Language UX:** chosen in onboarding **step 1** and switchable in the **Profile** language card via `LanguageChooser` (`src/components/language-chooser.tsx`, locales listed in `APP_LOCALES` in `src/lib/locale.ts`). Switching persists the choice and performs a **full document reload** (deliberate — all state is persisted; the SW-served shell makes it fast). `localStorage.clear()` in the erase path wipes the choice, so erase re-triggers the language prompt.
+- **Data is not UI:** catalog item names, category names, dataset names, and the `uncategorized` sentinel stay **data** (seeded/user-entered) — never wrapped in messages. Locale native names in `APP_LOCALES` are likewise static.
+- **Adding a language** (e.g. German): add the code to `locales` in `project.inlang/settings.json`, create + translate `messages/{locale}.json`, add an `APP_LOCALES` entry, run `bun run i18n:compile`.
 
 ### List sort feature
 

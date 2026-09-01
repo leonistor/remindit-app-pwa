@@ -27,6 +27,11 @@ test.describe("Remindit demo flows (dev mode)", () => {
     // Fresh storage → the router gates the first run to /onboarding.
     await expect(page).toHaveURL(/\/onboarding$/)
 
+    // Language step (first): English resolves as the default (no stored
+    // choice); a single visible Next advances to the welcome step.
+    await expect(page.getByText("Choose your language")).toBeVisible()
+    await page.getByRole("button", { name: "Next" }).click()
+
     // Welcome step (intro video + demo) — a single visible Next advances to
     // the profile step.
     await page.getByRole("button", { name: "Next" }).click()
