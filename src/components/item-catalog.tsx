@@ -21,7 +21,10 @@ export default function ItemCatalog() {
     setAccordionOpen,
   } = useCatalog()
   const { runTravel } = useItemTravelTransition()
-  const openValue = open ?? (groups[0] ? [groups[0].categoryId] : [])
+  // Fresh visit (no persisted toggle state): the first two categories open so
+  // the panel reads as populated without overwhelming; afterwards the exact
+  // set the user chose is persisted and wins over this fallback.
+  const openValue = open ?? groups.slice(0, 2).map((group) => group.categoryId)
 
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-3">

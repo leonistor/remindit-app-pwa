@@ -28,9 +28,9 @@ export function cycleSelectedSort(): void {
 }
 
 // Open category accordion ids in the available-items (ItemsPanel) accordion.
-// `null` means uninitialized — the panel then falls back to "all open" on the
-// first visit, preserving the original default. Once the user toggles anything,
-// the exact open-id set is persisted so the layout is remembered across reloads.
+// `null` means uninitialized — the panel then falls back to the first two
+// categories open on the first visit. Once the user toggles anything, the
+// exact open-id set is persisted so the layout is remembered across reloads.
 // Keyed by categoryId so the remembered state survives catalog edits.
 export const $accordionOpen = jsonStore<string[] | null>(
   STORAGE_KEYS.accordionOpen,

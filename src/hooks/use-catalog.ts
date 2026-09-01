@@ -21,7 +21,7 @@ export interface UseCatalog {
   recommendationsByItemId: Map<string, Recommendation>
   /** Category id → count of visibly recommended items (header badge). */
   recommendedCountByCategoryId: Map<string, number>
-  /** Open accordion category ids (null = fall back to all open). */
+  /** Open accordion category ids (null = fall back to first two open). */
   open: string[] | null
   /** Add an item to the list. */
   addToList: (itemId: string) => void
