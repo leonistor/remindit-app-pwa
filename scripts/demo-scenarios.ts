@@ -244,17 +244,16 @@ const scenarios: Scenario[] = [
   // --- 03 — add items to shopping list --------------------------------------
   {
     file: "03-add-items",
-    // Fragility note: the catalog accordion opens only the FIRST category
-    // group by default (item-catalog.tsx), so chips clicked below must be
-    // visible — eggs/pasta live in that first group (cooking, ranked first by
-    // frequency), while the fridge/snacks trigger clicks open their groups.
-    // A dataset edit that reshuffles the ranking or moves these items
-    // silently breaks this scenario.
+    // Fragility note: the catalog accordion opens the FIRST TWO category
+    // groups by default (item-catalog.tsx) — with the current dataset that is
+    // cooking + fridge (both rank "weekly"; the stable sort keeps dataset
+    // order). eggs/pasta (cooking) and yogurt (fridge) are therefore already
+    // visible; the snacks trigger click opens the remaining group for
+    // crackers. A dataset edit that reshuffles the ranking or moves these
+    // items silently breaks this scenario.
     run: async (p) => {
-      await humanClick(p.getByRole("button", { name: /fridge/i }))
-      await think(500, 1000)
       await humanClick(p.getByRole("button", { name: /snacks/i }))
-      await think(400, 900)
+      await think(500, 1000)
       // Scope to catalog chips: after adding, the same item name also exists
       // in the list panel and getByRole alone would multi-match.
       for (const item of ["eggs", "pasta", "yogurt", "crackers"]) {

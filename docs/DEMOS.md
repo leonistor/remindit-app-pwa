@@ -42,7 +42,7 @@ Order mirrors what a real user does:
 |---|----------|-------|------|
 | 01 | onboarding | Welcome video → Next, dice-roll profile (**Jane Doe**), Minimal dataset, Finish | 16s |
 | 02 | install-banner | Mocked `beforeinstallprompt` → banner → "Maybe later" | 4s |
-| 03 | add-items | Fridge/Snacks accordions → 4 catalog chips onto the list | 8s |
+| 03 | add-items | Snacks accordion → 4 catalog chips onto the list | 8s |
 | 04 | quick-add | Header-`+` dialog: pick existing "Milk", create "apple" → fridge via category pill | 10s |
 | 05 | theme | Menu → Theme → flip to the opposite theme → back to the variant's base | 8s |
 | 06 | edit-catalog | `/catalog`: add "Honey" → rename → swipe-delete with confirm | 18s |
