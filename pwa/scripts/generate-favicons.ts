@@ -27,6 +27,7 @@ import {
   BRAND_COLOR,
   BRAND_LOGO_MASKABLE_SVG,
   BRAND_LOGO_SVG,
+  BRAND_NAME,
 } from "@remindit/common"
 import favicons from "favicons"
 
@@ -37,8 +38,8 @@ const MASKABLE_COPY = join(PUBLIC_DIR, "remindit-icon-maskable.svg")
 
 const configuration = {
   path: "/", // base path used in the generated html tags / manifest references
-  appName: "Remindit",
-  appShortName: "Remindit",
+  appName: BRAND_NAME,
+  appShortName: BRAND_NAME,
   appDescription: "Local-first reminders that work offline.",
   theme_color: BRAND_COLOR,
   background: BRAND_BACKGROUND_COLOR,

@@ -7,13 +7,17 @@
 // and consumed here and by `scripts/generate-favicons.ts`, so the manifest and
 // the generated icons stay in sync from a single source of truth.
 
-import { BRAND_BACKGROUND_COLOR, BRAND_COLOR } from "@remindit/common"
+import {
+  BRAND_BACKGROUND_COLOR,
+  BRAND_COLOR,
+  BRAND_NAME,
+} from "@remindit/common"
 
 const ANDROID_SIZES = [36, 48, 72, 96, 144, 192, 256, 384, 512] as const
 
 export const WEB_APP_MANIFEST = {
-  name: "Remindit",
-  short_name: "Remindit",
+  name: BRAND_NAME,
+  short_name: BRAND_NAME,
   description: "Local-first reminders that work offline.",
   theme_color: BRAND_COLOR,
   background_color: BRAND_BACKGROUND_COLOR,
