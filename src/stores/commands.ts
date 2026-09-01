@@ -87,13 +87,15 @@ export function wipeAllData(): void {
 }
 
 // Restore a downloaded backup (src/lib/local-data.ts): overwrite every
-// persisted store with the envelope snapshot, then re-run the same normalizers
-// the seeding paths use (initStores / seedFromDataset) so older backups land
-// well-formed — sentinel category, frequency + color backfills. $onboarded is
-// forced to true: a restored backup must never bounce the user back to the
-// onboarding gate. Deliberately no localStorage.clear() — each persistent atom
-// overwrites its own `remindit:` key on set, and clearing would also wipe the
-// locale choice the backup didn't capture.
+// persisted store with the envelope snapshot. Catalog/list/history rows arrive
+// already validated + typed (the parser in local-data.ts drops or coerces
+// them); this function only re-runs the category-level normalizers the seeding
+// paths use (initStores / seedFromDataset) — sentinel category, frequency +
+// color backfills. $onboarded is forced to true: a restored backup must never
+// bounce the user back to the onboarding gate. Deliberately no
+// localStorage.clear() — each persistent atom overwrites its own `remindit:`
+// key on set, and clearing would also wipe the locale choice the backup didn't
+// capture.
 export function restoreLocalData(envelope: LocalDataEnvelope): void {
   $catalog.set(envelope.data.catalog)
   $categories.set(envelope.data.categories)

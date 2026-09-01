@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/steps"
 import {
   formatExportedAt,
+  isNewerBackupVersion,
   type LocalDataEnvelope,
   readLocalDataFile,
 } from "@/lib/local-data"
@@ -99,6 +100,15 @@ const OnboardingView = () => {
     useState<LocalDataEnvelope | null>(null)
   const [restoreError, setRestoreError] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // "Latest pick wins" token for backup parsing: each pick bumps it, and a
+  // parse resolving after a newer pick started is discarded — otherwise a
+  // slow earlier file could swap the dialog's pending envelope underneath
+  // the user (they'd confirm file A believing it's B). Same pattern as
+  // batchToken in avatar-picker.tsx.
+  const parseToken = useRef(0)
+  // The restore's defer timer, kept in a ref so dialog close and unmount can
+  // cancel it — an abandoned flow must not run a late restore/redirect.
+  const restoreTimer = useRef<number | undefined>(undefined)
 
   // React does not reliably render the `muted` ATTRIBUTE (it only sets the DOM
   // property), and some browsers ignore property-only muting for autoplay
@@ -116,6 +126,16 @@ const OnboardingView = () => {
       .finally(() => active && setBusy(false))
     return () => {
       active = false
+    }
+  }, [])
+
+  // Unmount cancels a still-armed restore defer so no late restore+redirect
+  // fires into a dead view.
+  useEffect(() => {
+    return () => {
+      if (restoreTimer.current !== undefined) {
+        window.clearTimeout(restoreTimer.current)
+      }
     }
   }, [])
 
@@ -144,12 +164,17 @@ const OnboardingView = () => {
     // Reset the input so re-picking the same file fires onChange again.
     e.target.value = ""
     if (!file) return
+    // Bump before parsing: any resolution (or rejection) belonging to an
+    // older pick is stale and must not touch the dialog or the error line.
+    const token = ++parseToken.current
     setRestoreError(false)
     try {
       const envelope = await readLocalDataFile(file)
+      if (parseToken.current !== token) return
       setPendingEnvelope(envelope)
       setRestorePhase("confirm")
     } catch {
+      if (parseToken.current !== token) return
       setRestoreError(true)
     }
   }
@@ -157,11 +182,14 @@ const OnboardingView = () => {
   const confirmRestore = () => {
     if (restorePhase !== "confirm" || !pendingEnvelope) return
     const envelope = pendingEnvelope
+    if (restoreTimer.current !== undefined) {
+      window.clearTimeout(restoreTimer.current)
+    }
     setRestorePhase("busy")
     // restoreLocalData is one long synchronous block (sets all 12 stores);
     // defer a tick so the busy state actually paints before the main thread
     // freezes for the work.
-    window.setTimeout(() => {
+    restoreTimer.current = window.setTimeout(() => {
       restoreLocalData(envelope)
       setPendingEnvelope(null)
       setRestorePhase("idle")
@@ -260,7 +288,13 @@ const OnboardingView = () => {
                 onOpenChange={(details) => {
                   // Lock dismissal while the restore runs; closing discards
                   // the pending envelope so a re-open starts the flow fresh.
+                  // Close also cancels the defer timer (defensive: close is
+                  // blocked while busy, but never leave a restore behind).
                   if (!details.open && restorePhase === "busy") return
+                  if (restoreTimer.current !== undefined) {
+                    window.clearTimeout(restoreTimer.current)
+                    restoreTimer.current = undefined
+                  }
                   setRestorePhase(details.open ? "confirm" : "idle")
                   if (!details.open) setPendingEnvelope(null)
                 }}
@@ -277,7 +311,13 @@ const OnboardingView = () => {
                           ),
                         })}
                       />
-                      <DialogBody>
+                      <DialogBody className="flex flex-col gap-2">
+                        {isNewerBackupVersion(pendingEnvelope.version) && (
+                          <p className="flex items-center gap-2 text-destructive text-sm">
+                            <Warning size={18} weight="fill" />
+                            {m.importBackupNewerVersion()}
+                          </p>
+                        )}
                         <p className="flex items-center gap-2 text-destructive text-sm">
                           <Warning size={18} weight="fill" />
                           {m.importBackupWarning()}

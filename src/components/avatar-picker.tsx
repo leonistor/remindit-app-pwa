@@ -9,8 +9,8 @@
 
 import { PencilSimple, Shuffle } from "@phosphor-icons/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { createGridCollection } from "@/components/ui/custom/collection"
 import { Button } from "@/components/ui/custom/button"
+import { createGridCollection } from "@/components/ui/custom/collection"
 import {
   Dialog,
   DialogBody,
@@ -27,8 +27,8 @@ import {
 } from "@/components/ui/listbox"
 import { Spinner } from "@/components/ui/spinner"
 import {
-  generateAvatarOptions,
   type AvatarOption,
+  generateAvatarOptions,
 } from "@/lib/profile-generator"
 import { m } from "@/paraglide/messages"
 import { updateUser } from "@/stores"
@@ -40,6 +40,7 @@ const GRID_COLUMNS = 4
 export const AvatarPicker = ({ avatar }: { avatar: string }) => {
   const [open, setOpen] = useState(false)
   const [options, setOptions] = useState<AvatarOption[] | null>(null)
+  const [loadError, setLoadError] = useState(false)
   // "Latest load wins" token: reroll/close/unmount invalidate any in-flight
   // generation instead of racing it.
   const batchToken = useRef(0)
@@ -47,9 +48,16 @@ export const AvatarPicker = ({ avatar }: { avatar: string }) => {
   const loadBatch = useCallback(() => {
     const token = ++batchToken.current
     setOptions(null)
-    generateAvatarOptions().then((next) => {
-      if (batchToken.current === token) setOptions(next)
-    })
+    setLoadError(false)
+    generateAvatarOptions()
+      .then((next) => {
+        if (batchToken.current === token) setOptions(next)
+      })
+      .catch(() => {
+        // A stale rejection (rerolled/closed over) must not surface on the
+        // newer batch; the token guard covers that, same as the .then side.
+        if (batchToken.current === token) setLoadError(true)
+      })
   }, [])
 
   // A fresh batch per open; the cleanup bumps the token so a load that
@@ -117,7 +125,9 @@ export const AvatarPicker = ({ avatar }: { avatar: string }) => {
                   <ListboxItem
                     key={option.seed}
                     item={option}
-                    aria-label={m.profileAvatarOptionLabel({ index: index + 1 })}
+                    aria-label={m.profileAvatarOptionLabel({
+                      index: index + 1,
+                    })}
                     className="justify-center p-1.5"
                   >
                     <img
@@ -132,6 +142,12 @@ export const AvatarPicker = ({ avatar }: { avatar: string }) => {
                 ))}
               </ListboxContent>
             </Listbox>
+          ) : loadError ? (
+            <div className="flex justify-center py-8">
+              <p className="text-destructive text-sm" role="alert">
+                {m.profileAvatarLoadError()}
+              </p>
+            </div>
           ) : (
             <div className="flex justify-center py-8">
               <Spinner aria-label={m.loading()} />
@@ -139,7 +155,11 @@ export const AvatarPicker = ({ avatar }: { avatar: string }) => {
           )}
         </DialogBody>
         <DialogFooter>
-          <Button disabled={!options} onClick={loadBatch} variant="outline">
+          <Button
+            disabled={options === null && !loadError}
+            onClick={loadBatch}
+            variant="outline"
+          >
             <Shuffle size={16} />
             {m.profileAvatarReroll()}
           </Button>

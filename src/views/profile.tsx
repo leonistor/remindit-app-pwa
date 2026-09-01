@@ -7,11 +7,11 @@ import {
   UploadSimple,
   Warning,
 } from "@phosphor-icons/react"
-import { useEffect, useRef, useState, type ChangeEvent } from "react"
+import { type ChangeEvent, useEffect, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
-import { BackButton } from "@/components/back-button"
 import { AvatarPicker } from "@/components/avatar-picker"
+import { BackButton } from "@/components/back-button"
 import { LanguageChooser } from "@/components/language-chooser"
 import { PaletteChooser } from "@/components/palette-chooser"
 import {
@@ -43,8 +43,9 @@ import {
   downloadLocalData,
   eraseLocalData,
   formatExportedAt,
-  readLocalDataFile,
+  isNewerBackupVersion,
   type LocalDataEnvelope,
+  readLocalDataFile,
 } from "@/lib/local-data"
 import { m } from "@/paraglide/messages"
 import {
@@ -72,6 +73,14 @@ type ResetPhase = "idle" | "busy" | "done"
 // done (confirmation shown, auto-redirect armed).
 type ImportPhase = "idle" | "confirm" | "busy" | "done"
 
+// Cancel every timer armed by one flow. Module-level (not a component fn) so
+// the unmount-cleanup effect can reference it without tripping dependency
+// linting; the ids live in refs for exactly that purpose.
+const clearFlowTimers = (timers: { current: number[] }) => {
+  for (const id of timers.current) window.clearTimeout(id)
+  timers.current = []
+}
+
 const ProfileView = () => {
   const user = useStore($user)
   const navigate = useNavigate()
@@ -84,6 +93,17 @@ const ProfileView = () => {
     useState<LocalDataEnvelope | null>(null)
   const [importError, setImportError] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // "Latest pick wins" token for backup parsing: each pick bumps it, and a
+  // parse resolving after a newer pick started is discarded — otherwise a
+  // slow earlier file could swap the dialog's pending envelope underneath
+  // the user (they'd confirm file A believing it's B). Same pattern as
+  // batchToken in avatar-picker.tsx.
+  const parseToken = useRef(0)
+  // Armed defer/ack timer ids per flow, kept in refs so the dialogs' close
+  // paths and unmount can cancel them — dismissing the "done" dialog early
+  // must not leave the ack alive to yank the user home anyway.
+  const resetTimers = useRef<number[]>([])
+  const importTimers = useRef<number[]>([])
   const [form, setForm] = useState({
     firstName: user.firstName,
     lastName: user.lastName,
@@ -99,6 +119,15 @@ const ProfileView = () => {
     })
   }, [user.firstName, user.lastName, user.username])
 
+  // Unmount cancels any still-armed defer/ack timers so no late redirect
+  // fires into a dead view.
+  useEffect(() => {
+    return () => {
+      clearFlowTimers(resetTimers)
+      clearFlowTimers(importTimers)
+    }
+  }, [])
+
   const saveProfile = () => {
     const username = form.username.trim()
     if (!username) return
@@ -111,11 +140,12 @@ const ProfileView = () => {
 
   const handleReset = () => {
     if (resetPhase !== "idle") return
+    clearFlowTimers(resetTimers)
     setResetPhase("busy")
     // seedFromDataset is one long synchronous block (wipe + fresh 6-month
     // history generation); defer it a frame so the busy state actually paints
     // before the main thread freezes for the work.
-    window.setTimeout(() => {
+    const deferId = window.setTimeout(() => {
       // Reseed catalog/history/list from the chosen dataset, keeping the
       // current profile. Theme preference is preserved inside seedFromDataset.
       seedFromDataset(dataset, getUser())
@@ -123,12 +153,14 @@ const ProfileView = () => {
       setResetPhase("done")
       // Let the confirmation land, then take the user to the fresh list —
       // the visible "it worked" moment instead of a silent in-place swap.
-      window.setTimeout(() => {
+      const ackId = window.setTimeout(() => {
         setOpen(false)
         setResetPhase("idle")
         navigate("/")
       }, RESEED_ACK_MS)
+      resetTimers.current.push(ackId)
     }, 50)
+    resetTimers.current.push(deferId)
   }
 
   const handleErase = () => {
@@ -146,34 +178,42 @@ const ProfileView = () => {
     // Clear the selection so re-picking the same file re-fires onChange.
     event.target.value = ""
     if (!file) return
+    // Bump before parsing: any resolution (or rejection) belonging to an
+    // older pick is stale and must not touch the dialog or the error line.
+    const token = ++parseToken.current
+    setImportError(false)
     try {
       const envelope = await readLocalDataFile(file)
+      if (parseToken.current !== token) return
       setPendingEnvelope(envelope)
-      setImportError(false)
       setImportPhase("confirm")
     } catch {
       // Not a RemindIt backup: surface the inline error, keep the dialog shut.
+      if (parseToken.current !== token) return
       setImportError(true)
     }
   }
 
   const handleImportConfirm = () => {
     if (importPhase !== "confirm" || !pendingEnvelope) return
+    clearFlowTimers(importTimers)
     setImportPhase("busy")
     // restoreLocalData is one long synchronous block (all stores swap at
     // once); defer it a frame so the busy state actually paints before the
     // main thread freezes for the work.
-    window.setTimeout(() => {
+    const deferId = window.setTimeout(() => {
       restoreLocalData(pendingEnvelope)
       setImportPhase("done")
       // Let the confirmation land, then take the user to the restored list —
       // the same visible "it worked" moment as the reseed flow.
-      window.setTimeout(() => {
+      const ackId = window.setTimeout(() => {
         setImportPhase("idle")
         setPendingEnvelope(null)
         navigate("/")
       }, RESEED_ACK_MS)
+      importTimers.current.push(ackId)
     }, 50)
+    importTimers.current.push(deferId)
   }
 
   return (
@@ -337,9 +377,11 @@ const ProfileView = () => {
             onOpenChange={(details) => {
               // Lock the dialog while the restore runs (ESC/overlay can't
               // abandon a half-done import); closing always clears the
-              // transient state.
+              // transient state — timers included, so dismissing the "done"
+              // dialog early can't be followed by the ack redirect.
               if (!details.open && importPhase === "busy") return
               if (!details.open) {
+                clearFlowTimers(importTimers)
                 setImportPhase("idle")
                 setPendingEnvelope(null)
                 setImportError(false)
@@ -378,7 +420,14 @@ const ProfileView = () => {
                         : undefined
                     }
                   />
-                  <DialogBody>
+                  <DialogBody className="flex flex-col gap-2">
+                    {pendingEnvelope &&
+                      isNewerBackupVersion(pendingEnvelope.version) && (
+                        <p className="flex items-center gap-2 text-destructive text-sm">
+                          <Warning size={18} weight="fill" />
+                          {m.importBackupNewerVersion()}
+                        </p>
+                      )}
                     <p className="flex items-center gap-2 text-destructive text-sm">
                       <Warning size={18} />
                       {m.importBackupWarning()}
@@ -422,9 +471,12 @@ const ProfileView = () => {
             onOpenChange={(details) => {
               // Lock the dialog while the reseed runs (ESC/overlay can't
               // abandon a half-done wipe); re-opening always starts clean.
+              // Close also cancels armed timers (defensive: close is blocked
+              // while busy/done, but never leave an ack behind).
               if (!details.open && resetPhase !== "idle") return
               setOpen(details.open)
               if (details.open) setResetPhase("idle")
+              else clearFlowTimers(resetTimers)
             }}
           >
             <DialogTrigger asChild>

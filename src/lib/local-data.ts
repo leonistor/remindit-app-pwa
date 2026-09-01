@@ -17,7 +17,13 @@ import { $onboarded, $selectedDatasetId } from "@/stores/onboarding"
 import { $activePaletteId } from "@/stores/palette"
 import { $installDismissed } from "@/stores/pwa-install"
 import { $theme, type ThemeMode } from "@/stores/theme"
-import type { UserProfile } from "@/stores/types"
+import {
+  type CatalogItem,
+  type HistoryEvent,
+  type ListEntry,
+  UNCATEGORIZED_ID,
+  type UserProfile,
+} from "@/stores/types"
 import {
   $accordionOpen,
   $selectedSort,
@@ -114,31 +120,129 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 // STRICT on the collection itself (a non-array is not a RemindIt backup),
-// TOLERANT on its elements: rows that are not plain objects (null, numbers,
-// nested arrays) are dropped so one malformed entry can't poison a whole store.
-// The remaining rows are only shape-checked as objects here — item-level fields
-// stay as-is so exports from older versions (missing fields added later)
-// import cleanly and the store normalizers backfill them.
-function plainObjectArray<T>(value: unknown, field: string): T[] {
+// TOLERANT on its rows: rows that are not plain objects (null, numbers, nested
+// arrays) are dropped so one malformed entry can't poison a whole store, and
+// each surviving row goes through a per-collection coercer that either rebuilds
+// a fully typed row (coercing individual fields where safe) or returns null for
+// a row that is truly unusable.
+function parsedRows<T>(
+  value: unknown,
+  field: string,
+  coerceRow: (row: Record<string, unknown>) => T | null
+): T[] {
   if (!Array.isArray(value)) {
     throw new LocalDataValidationError(`data.${field} must be an array`)
   }
-  return value.filter(isRecord) as T[]
+  const rows: T[] = []
+  for (const entry of value) {
+    if (!isRecord(entry)) continue
+    const row = coerceRow(entry)
+    if (row !== null) rows.push(row)
+  }
+  return rows
 }
 
-// TOLERANT: any missing or non-string profile field becomes "" (via String()
-// with a null/undefined fallback) so the result always satisfies UserProfile
-// and the profile UI renders an editable blank instead of crashing.
+// Categories are the one collection without an item-level coercer here: rows
+// keep their shape as-is and restoreLocalData's downstream normalizers (sentinel
+// insertion, frequency + color backfills) repair what they can.
+function plainObjectArray<T>(value: unknown, field: string): T[] {
+  return parsedRows(value, field, (row) => row as T)
+}
+
+// TOLERANT string coercion shared by the profile and history snapshots:
+// anything non-string (null, numbers, objects) becomes "" via String()'s
+// null/undefined fallback.
+function coerceString(value: unknown): string {
+  return typeof value === "string" ? value : String(value ?? "")
+}
+
+// Numbers must be finite (JSON can't encode Infinity/NaN, but hand-edited
+// backups can); anything else falls back to what the owning store's writer
+// would have used.
+function coerceFiniteNumber(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback
+}
+
+// A catalog row is unusable without a non-empty id (identity for lookups and
+// deletion cascades) or name (rendered text and the sort key in selectors), so
+// either drops the row. An absent or non-string categoryId lands on the
+// "uncategorized" sentinel so the item still shows up after restore instead of
+// silently falling between category groups. Rows are rebuilt field-by-field, so
+// unknown extra fields never leak into the typed stores.
+function coerceCatalogRow(row: Record<string, unknown>): CatalogItem | null {
+  const id = row.id
+  const name = row.name
+  if (typeof id !== "string" || !id || typeof name !== "string" || !name) {
+    return null
+  }
+  const categoryId = row.categoryId
+  return {
+    id,
+    name,
+    categoryId:
+      typeof categoryId === "string" && categoryId
+        ? categoryId
+        : UNCATEGORIZED_ID,
+  }
+}
+
+// A list entry keys on its own id and the referenced item id; without either it
+// can't be toggled or deduplicated, so the row drops. checked coerces by
+// truthiness and addedAt mirrors the addToList writer (Date.now()) so an entry
+// with an unusable timestamp reads as "just imported" rather than "ancient".
+function coerceListRow(row: Record<string, unknown>): ListEntry | null {
+  const id = row.id
+  const itemId = row.itemId
+  if (typeof id !== "string" || !id || typeof itemId !== "string" || !itemId) {
+    return null
+  }
+  return {
+    id,
+    itemId,
+    checked: Boolean(row.checked),
+    addedAt: coerceFiniteNumber(row.addedAt, Date.now()),
+  }
+}
+
+// History rows are display-only snapshots, so they coerce harder than they
+// drop: only a missing id, an action outside "add"/"remove", or a missing
+// itemId makes a row unusable. The name/category text falls back to "" (same as
+// coerceUser) and an unusable timestamp falls back to 0 so the event sorts as
+// the oldest instead of pretending it happened just now.
+function coerceHistoryRow(row: Record<string, unknown>): HistoryEvent | null {
+  const id = row.id
+  if (typeof id !== "string" || !id) return null
+  const action = row.action
+  if (action !== "add" && action !== "remove") return null
+  const itemId = row.itemId
+  if (typeof itemId !== "string" || !itemId) return null
+  return {
+    id,
+    action,
+    itemId,
+    itemName: coerceString(row.itemName),
+    categoryId: coerceString(row.categoryId),
+    categoryName: coerceString(row.categoryName),
+    timestamp: coerceFiniteNumber(row.timestamp, 0),
+  }
+}
+
+// TOLERANT: any missing or non-string profile field becomes "" so the result
+// always satisfies UserProfile and the profile UI renders an editable blank
+// instead of crashing. The avatar is stricter by design (local-first): only
+// inline `data:image/` URIs survive; any other string (e.g. an https URL) would
+// issue a network request when rendered as <img src>, so it becomes "".
 function coerceUser(value: unknown): UserProfile {
   const src = isRecord(value) ? value : {}
-  const str = (v: unknown): string =>
-    typeof v === "string" ? v : String(v ?? "")
   return {
-    username: str(src.username),
-    firstName: str(src.firstName),
-    lastName: str(src.lastName),
-    email: str(src.email),
-    avatar: str(src.avatar),
+    username: coerceString(src.username),
+    firstName: coerceString(src.firstName),
+    lastName: coerceString(src.lastName),
+    email: coerceString(src.email),
+    avatar:
+      typeof src.avatar === "string" && src.avatar.startsWith("data:image/")
+        ? src.avatar
+        : "",
   }
 }
 
@@ -176,8 +280,9 @@ function coerceAccordionOpen(value: unknown): string[] | null {
  * shapes) — a file without them is not a RemindIt backup, so we fail fast.
  * TOLERANT on individual values so older exports import cleanly: theme /
  * palette / sort fall back to their defaults, user fields coerce to "", and
- * malformed array items are filtered out. Throws LocalDataValidationError with
- * a short reason otherwise.
+ * malformed collection rows are dropped or coerced into typed rows (see the
+ * per-collection coercers above). Throws LocalDataValidationError with a short
+ * reason otherwise.
  */
 export function parseLocalDataEnvelope(raw: string): LocalDataEnvelope {
   let parsed: unknown
@@ -205,18 +310,24 @@ export function parseLocalDataEnvelope(raw: string): LocalDataEnvelope {
     version,
     exportedAt,
     data: {
-      catalog: plainObjectArray<EnvelopeData["catalog"][number]>(
+      catalog: parsedRows<EnvelopeData["catalog"][number]>(
         data.catalog,
-        "catalog"
+        "catalog",
+        coerceCatalogRow
       ),
       categories: plainObjectArray<EnvelopeData["categories"][number]>(
         data.categories,
         "categories"
       ),
-      list: plainObjectArray<EnvelopeData["list"][number]>(data.list, "list"),
-      history: plainObjectArray<EnvelopeData["history"][number]>(
+      list: parsedRows<EnvelopeData["list"][number]>(
+        data.list,
+        "list",
+        coerceListRow
+      ),
+      history: parsedRows<EnvelopeData["history"][number]>(
         data.history,
-        "history"
+        "history",
+        coerceHistoryRow
       ),
       user: coerceUser(data.user),
       theme: coerceTheme(data.theme),
@@ -234,10 +345,37 @@ export function parseLocalDataEnvelope(raw: string): LocalDataEnvelope {
   }
 }
 
+// Leading-major extractor: "4.3.0" → 4; empty/garbage → null. Never throws —
+// parseInt on an anchored digit run is total.
+function parseMajorVersion(version: string): number | null {
+  const match = /^\s*(\d+)/.exec(version)
+  return match ? Number.parseInt(match[1], 10) : null
+}
+
+/**
+ * Forward-compat gate for the import UI: true only when the backup's MAJOR
+ * version is strictly greater than the running app's (a newer app may write
+ * fields this version can't restore). Unparseable versions on either side count
+ * as compatible (false).
+ */
+export function isNewerBackupVersion(version: string): boolean {
+  const backupMajor = parseMajorVersion(version)
+  const appMajor = parseMajorVersion(APP_VERSION)
+  if (backupMajor === null || appMajor === null) return false
+  return backupMajor > appMajor
+}
+
+// Largest backup file we are willing to read; anything this big is not a
+// plausible RemindIt export and would only spike memory while parsing.
+const MAX_BACKUP_FILE_BYTES = 10 * 1024 * 1024
+
 /** Read + parse a user-picked backup file. */
 export async function readLocalDataFile(
   file: File
 ): Promise<LocalDataEnvelope> {
+  if (file.size > MAX_BACKUP_FILE_BYTES) {
+    throw new LocalDataValidationError("backup file is too large (10 MB limit)")
+  }
   const raw = await file.text()
   return parseLocalDataEnvelope(raw)
 }
