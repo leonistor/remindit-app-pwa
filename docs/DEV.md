@@ -41,7 +41,7 @@ A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Lay
 | `/` | ShoppingPanels | Main shopping list + catalog |
 | `/catalog` | CatalogView | Manage catalog items |
 | `/history` | HistoryView | View shopping history |
-| `/profile` | ProfileView | User profile, catalog link, palette, reset & reseed |
+| `/profile` | ProfileView | User profile (avatar editing, backup import), catalog link, palette, reset & reseed |
 | `/share` | ShareView | Share the pending shopping list as a PNG image |
 | `/about` | AboutView | About the app |
 | `/changelog` | ChangelogView | Version history (linked from the footer version) |
@@ -84,8 +84,10 @@ Components are split between **registry-managed** primitives in `src/components/
 `src/components/ui/custom/*` that must never be regenerated from the CLI. The custom set currently
 holds `button` (our fork of the Shark button — adds `success`/`info`/`bare` variants; `bare` is a
 transparent base for components that supply their own color via the categorical palette, and does
-**not** force a hover background so palette-colored chips keep their fill), plus the
-project-specific `item-button` and `toggle-tooltip`. **Do not run `shadcn add @shark/button`** — the
+**not** force a hover background so palette-colored chips keep their fill), the project-specific
+`item-button`, `toggle-tooltip`, `form-dialog`, and `validated-field`, and `collection.ts` — the
+sanctioned `@ark-ui/react` re-export seam (feature code still never imports Ark directly; it imports
+Ark's collection helpers from `ui/custom/collection`). **Do not run `shadcn add @shark/button`** — the
 registry HEAD drops those variants and would break the build. Item/category color lives in
 `src/lib/category-palette.ts` (qualitative, colorblind-safe) and is intentionally distinct from the
 recommendation-tier colors in `src/lib/recommendation-tiers.ts`.
@@ -110,7 +112,7 @@ The **active palette** is a persisted user choice:
 - `src/stores/palette.ts` — `$activePaletteId` (a `@nanostores/persistent` `jsonStore`, persisted under `remindit:active-palette`), plus `setActivePalette(id)` / `getActivePalette()`. Defaults to `defaultPaletteId` from the pool.
 - `src/hooks/use-category-palette.ts` — `useCategoryPalette(key, overrideSlot?)` subscribes to the active palette and returns `categoryPalette(...)` for it, so any consumer recolors live when the choice changes. It resolves the category's stored slot via the `$categoryById` Map selector (falling back to the key hash for non-category keys) and passes it as `overrideSlot`; subscribing to `$categories` means a color-slot change recolors mounted chips. `ItemButton` and `ShoppingItem` use this hook.
 - Pick the active palette in **Profile** via `PaletteChooser` (`src/components/palette-chooser.tsx`): an inline Shark `Listbox` of the pool with a 12-swatch preview per option and a live sample-chip preview above the list. Selection calls `setActivePalette`.
-- **`ItemCatalog`** (`src/components/item-catalog.tsx`) — the right-hand browse/select panel. Renders the Shark `Accordion` wrapper (`src/components/ui/accordion`; multiple, only the first category open by default) of `ItemButton`s grouped by category from `$catalogByCategory`, all wired through the `useCatalog` hook (`src/hooks/use-catalog.ts`). Clicking toggles list membership via `addToList` / `removeFromListByItemId` — the itemId → entryId resolution lives inside `list.ts`, not the panel — and each toggle runs an item-travel View Transition (see [Item-travel View Transitions](#item-travel-view-transitions)).
+- **`ItemCatalog`** (`src/components/item-catalog.tsx`) — the right-hand browse/select panel. Renders the Shark `Accordion` wrapper (`src/components/ui/accordion`; multiple, only the first two categories open by default) of `ItemButton`s grouped by category from `$catalogByCategory`, all wired through the `useCatalog` hook (`src/hooks/use-catalog.ts`). Clicking toggles list membership via `addToList` / `removeFromListByItemId` — the itemId → entryId resolution lives inside `list.ts`, not the panel — and each toggle runs an item-travel View Transition (see [Item-travel View Transitions](#item-travel-view-transitions)).
 
 ### Quick add
 
@@ -151,7 +153,7 @@ All collections are persisted to `localStorage` with `@nanostores/persistent` (k
 - **List** (`$list`) — the currently active shopping list. Each entry `{ id, itemId, checked, addedAt }` references a catalog item and tracks a `checked` state for shopping progress.
 - **Categories** (`$categories`) — `{ id, name, frequency, color? }`. An `uncategorized` sentinel category always exists and is the destination when another category is deleted (so items are never orphaned). `frequency` records how often the category is typically bought (see below); `color` is the stable palette slot assigned by `assignCategoryColors` (see the categorical palette section).
 - **History** (`$history`) — a pure log of shopping events `{ id, action: 'add' | 'remove', itemId, itemName, categoryId, categoryName, timestamp }`. `categoryName` is a snapshot of the category's display name taken at log time (falls back to `"Uncategorized"`).
-- **User** (`$user`) — `UserProfile { username, firstName, lastName, email, avatar }`. `username` is the only mandatory field and defaults to a random value (`generate-random-username`); `email` is reserved for future multi-user/sync work. `avatar` is a **self-contained inline SVG** (`data:` URI) generated by DiceBear (`personas` style) during onboarding via `src/lib/profile-generator.ts`, or a local initials fallback (`localAvatar` in `user.ts`, used by `randomUser()`) — no network request, in keeping with the local-first positioning.
+- **User** (`$user`) — `UserProfile { username, firstName, lastName, email, avatar }`. `username` is the only mandatory field and defaults to a random value (`generate-random-username`); `email` is reserved for future multi-user/sync work. `avatar` is a **self-contained inline SVG** (`data:` URI) generated by DiceBear (`personas` style) during onboarding via `src/lib/profile-generator.ts`, or a local initials fallback (`localAvatar` in `user.ts`, used by `randomUser()`) — no network request, in keeping with the local-first positioning. The avatar stays editable after onboarding in **Profile** via `AvatarPicker` (`src/components/avatar-picker.tsx`): a 4×3 grid of 12 random DiceBear `personas` options with a reroll, each a self-contained `data:` URI.
 
 ### Store modules (`src/stores/`)
 
@@ -190,7 +192,7 @@ Import store atoms/actions from the barrel: `import { $list, addToList } from "@
 
 ### Onboarding gate
 
-`src/stores/onboarding.ts` — `$onboarded` (persisted `remindit:onboarded`) and `$selectedDatasetId` (persisted `remindit:selected-dataset`), with `isOnboarded` / `setOnboarded` / `getSelectedDatasetId` / `setSelectedDataset` / `resolveSelectedDataset` (stored choice → build-time `PUBLIC_DATASET` → registered default). The router's `Layout` redirects to `/onboarding` while not onboarded; `completeOnboarding(profile, datasetId)` in `src/stores/index.ts` seeds, persists the profile + dataset choice, and flips the flag. The local-data erase path resets `$onboarded` so the gate re-engages. Onboarding is a 4-step wizard: **language** (step 1, `LanguageChooser` — see [Internationalization](#internationalization)) → welcome demo video → profile → dataset.
+`src/stores/onboarding.ts` — `$onboarded` (persisted `remindit:onboarded`) and `$selectedDatasetId` (persisted `remindit:selected-dataset`), with `isOnboarded` / `setOnboarded` / `getSelectedDatasetId` / `setSelectedDataset` / `resolveSelectedDataset` (stored choice → build-time `PUBLIC_DATASET` → registered default). The router's `Layout` redirects to `/onboarding` while not onboarded; `completeOnboarding(profile, datasetId)` in `src/stores/index.ts` seeds, persists the profile + dataset choice, and flips the flag. The local-data erase path resets `$onboarded` so the gate re-engages. Onboarding is a 4-step wizard: **language** (step 1, `LanguageChooser` — see [Internationalization](#internationalization-i18n)) → welcome demo video → profile → dataset.
 
 ### Internationalization (i18n)
 
@@ -299,7 +301,7 @@ Beyond the build-time `PUBLIC_DATASET` fallback, the app offers a user-initiated
 The "My local data" card in **Profile** (`src/views/profile.tsx`) exposes `src/lib/local-data.ts`:
 
 - **Download** — `downloadLocalData()` serializes every persisted store into a versioned JSON envelope (`LocalDataEnvelope`, app version + ISO timestamp) and triggers a browser download via Blob/object URL.
-- **Import (restore from backup)** — `readLocalDataFile(file)` parses a user-picked JSON file via `parseLocalDataEnvelope()`, which is **strict on envelope structure** (version, exportedAt, `data` object, array-typed collections → anything else throws `LocalDataValidationError`) and **tolerant on values** so older exports import cleanly (theme/palette/sort fall back to defaults, user fields coerce to `""`, malformed array rows are dropped). On success the view opens a confirm dialog (export date + backup version, destructive warning) and runs `restoreLocalData(envelope)` — the cross-store command in `commands.ts` that overwrites all 12 atoms, **forces `$onboarded` to true** (a restored backup must never bounce to the gate), and re-runs the seeding normalizers (`ensureUncategorizedExists`, `normalizeCategoryFrequencies`, `normalizeCategoryColors`). It deliberately skips `localStorage.clear()` — each persistent atom overwrites its own key, and clearing would also wipe the locale choice the envelope doesn't capture (language is UI, not data). Profile shows a success ack then navigates home; **onboarding step 2** offers the same restore ("I have a backup file") which replaces the profile + dataset steps entirely.
+- **Import (restore from backup)** — `readLocalDataFile(file)` rejects files larger than **10 MB**, then parses the JSON via `parseLocalDataEnvelope()`, which is **strict on envelope structure** (version, exportedAt, `data` object, array-typed collections → anything else throws `LocalDataValidationError`) and **tolerant on values** so older exports import cleanly: theme/palette/sort fall back to defaults, user fields coerce to `""`, and collection rows are validated **per collection** — each row is rebuilt field-by-field (unknown fields stripped, safe fields coerced: invalid `categoryId` → `uncategorized`, non-string display text → `""`), and a row that is truly unusable (catalog/list/history rows missing their `id`/`itemId` keys, history actions outside `add`/`remove`) is dropped instead of poisoning the store. Avatars are accepted only as `data:image/` URIs — anything else becomes `""`, preserving the local-first invariant (an https URL would issue a network request when rendered). On success the view opens a confirm dialog (export date + backup version, destructive warning, plus a warning line when the backup's major version is newer than the running app — `isNewerBackupVersion()`) and runs `restoreLocalData(envelope)` — the cross-store command in `commands.ts` that overwrites all 12 atoms, **forces `$onboarded` to true** (a restored backup must never bounce to the gate), and re-runs the seeding normalizers (`ensureUncategorizedExists`, `normalizeCategoryFrequencies`, `normalizeCategoryColors`). It deliberately skips `localStorage.clear()` — each persistent atom overwrites its own key, and clearing would also wipe the locale choice the envelope doesn't capture (language is UI, not data). Profile shows a success ack then navigates home; **onboarding step 2** offers the same restore ("I have a backup file") which replaces the profile + dataset steps entirely. Both views guard against out-of-order file picks with a latest-pick token and cancel the success/ack timers on close or unmount.
 - **Erase** — `eraseLocalData()` is a full factory wipe: resets every store atom (including theme, palette, sort, and `$onboarded`) and calls `localStorage.clear()` so no `remindit:` residue survives; the onboarding gate in `router.tsx` then redirects to `/onboarding`. The wipe lives in the store layer as `wipeAllData()` in `commands.ts` (`local-data.ts` is a thin wrapper over it).
 
 ### Dev tooling
@@ -318,7 +320,7 @@ The feature-demo video set (`public/demos/*.mp4`, light + dark variants) is gene
 
 ### Type checking (tsc)
 
-- `bun run typecheck` — `tsc --noEmit --pretty` (TypeScript 7's native compiler): static-checks the whole project without emitting, reporting every type error with source context.
+- `bun run typecheck` — `i18n:compile && tsc --noEmit --pretty` (TypeScript 7's native compiler): the i18n compile runs first because `src/paraglide/` is gitignored — without fresh generated output `tsc` would fail on missing `m.*` declarations; then it static-checks the whole project without emitting, reporting every type error with source context.
 - Run it after type-relevant changes (store types, component props, shared types) and before committing — it catches what runtime tests don't (broken prop contracts, stale type imports). It is also the **first step of the `test:pre` release gate**, so a type error blocks a release the same way a failing test does.
 
 ### Usage in React

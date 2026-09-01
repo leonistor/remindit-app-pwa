@@ -3,7 +3,7 @@
 ## Rules
 
 - check [docs/DEV.md](docs/DEV.md) before making changes or adding new features
-- elvaluate the local project skills: [.opencode/skills](.opencode/skills)
+- evaluate the local project skills: [.opencode/skills](.opencode/skills)
 
 ## Commands
 
@@ -49,7 +49,7 @@ Progressive test suites — pick the one that matches the moment (see `docs/DEV.
 
 ### Type checking
 
-- Run `bun run typecheck` after type-relevant changes and before committing — `tsc --noEmit --pretty` (TypeScript 7's native compiler) reports every type error.
+- Run `bun run typecheck` after type-relevant changes and before committing — `i18n:compile && tsc --noEmit --pretty` (TypeScript 7's native compiler; the i18n compile runs first because `src/paraglide/` is gitignored) reports every type error.
 - It is also the first step of `bun run test:pre` (release gate), so a type error blocks a release like a failing test does.
 
 ### Biome

@@ -48,6 +48,26 @@ stay available.
 Popover-based tooltip wrapper (`ToggleTooltip` / `ToggleTooltipTrigger` / `ToggleTooltipContent` /
 `ToggleTooltipArrow`). **Not** in the `@shark` registry. Builds on the registry `popover` primitive.
 
+### `form-dialog.tsx` — project-custom
+
+Dialog scaffolding for create/edit flows (`FormDialog`): a Shark `Dialog` wrapper that pairs a body
+slot with Cancel/Save footer buttons (`onSave`/`onCancel`, overridable labels). **Not** in the
+`@shark` registry. Builds on the registry `dialog` primitive and the custom `button` fork.
+
+### `validated-field.tsx` — project-custom
+
+Labelled, validation-aware field wrapper (`ValidatedField`): keeps the `Field` + `FieldLabel` +
+`FieldError` triad consistent across dialogs (`invalid` + `error` props drive the error state).
+**Not** in the `@shark` registry. Builds on the registry `field` primitive.
+
+### `collection.ts` — project-custom (Ark re-export seam)
+
+Re-exports Ark UI collection utilities (`createListCollection`, `createGridCollection`, `useFilter`,
+…) from `@ark-ui/react` / `@ark-ui/react/collection`. This is the **one sanctioned seam where the
+"no raw Ark imports in feature code" rule bends**: feature components import these helpers from here
+(`ui/custom/collection`), never from `@ark-ui/react` directly. It lives in `ui/custom/` — not the
+CLI-tracked `ui/` root — so a registry regeneration can't clobber it.
+
 ## Latest upstream update check (findings)
 
 Checked every component in `src/components/ui/*` with:
@@ -71,15 +91,15 @@ Results:
 - **`button.tsx` is the only file with a real structural delta**, and it is a **regression**: the
   registry would delete `success`/`info` (see guardrail above). It lives in `ui/custom/`, not the
   registry path, precisely so it is not clobbered.
-- **`item-button.tsx` and `toggle-tooltip.tsx` are not in the registry** (project-custom) — there is
-  no CLI update path for them.
+- **`item-button.tsx`, `toggle-tooltip.tsx`, `form-dialog.tsx`, `validated-field.tsx`, and
+  `collection.ts` are not in the registry** (project-custom) — there is no CLI update path for them.
 
 ### `components.json` caveat
 
-`components.json` still lists `button` under "Installed Components" (stale metadata from before the
-move). This is harmless but means a future `shadcn add @shark/button` would happily recreate a
-registry `button.tsx` and reintroduce the missing-variant breakage. Treat `button` as **custom** and
-don't run that command.
+`components.json` carries no per-component install list, so the CLI has no memory that `button` was
+moved to `custom/`. A future `shadcn add @shark/button` would happily recreate a registry
+`button.tsx` at `src/components/ui/button.tsx` and reintroduce the missing-variant breakage. Treat
+`button` as **custom** and don't run that command.
 
 ## Safe update workflow
 
@@ -87,4 +107,4 @@ don't run that command.
 2. For a registry component, apply only the **non-formatting, non-breaking** hunks by hand.
 3. Never pass `--overwrite` without explicit review.
 4. After any edit: `bun run lint` + `bun run build`.
-5. `button`, `item-button`, `toggle-tooltip` are **out of scope** for the CLI — edit them directly.
+5. `button`, `item-button`, `toggle-tooltip`, `form-dialog`, `validated-field`, and `collection` are **out of scope** for the CLI — edit them directly.

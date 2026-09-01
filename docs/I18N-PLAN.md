@@ -1,6 +1,7 @@
 # i18n plan — multi-language support in v4 (Paraglide JS)
 
-> **Status: approved, execution in progress.** Locked decisions from the planning session on 2026-09-01.
+> **Status: shipped (v4.2.0).** All 7 phases below are done; the plan is kept as the record of the
+> locked decisions from the planning session on 2026-09-01.
 > Multi-language support moved from Wishlist to **Version 4** in [ROADMAP.md](./ROADMAP.md); v5 (workspace, multi-user, sync) waits.
 > Companion docs: [DEV.md](./DEV.md) (architecture), [WORKSPACE-PLAN.md](./WORKSPACE-PLAN.md) (future module layout).
 > Work branch: `feat/multi-language-support` (local-only, merged into main at the end — no PRs).
@@ -50,7 +51,7 @@ Version 4 header becomes `in progress`, gains the multi-language item (EN+RO now
 - `project.inlang/settings.json`: `baseLocale: "en"`, `locales: ["en", "ro"]`, message-format plugin, `pathPattern: "./messages/{locale}.json"`
 - `messages/en.json`, `messages/ro.json` — **committed** source of truth; `src/paraglide/` generated + gitignored
 - `scripts/compile-i18n.ts`: programmatic `compile({ project, outdir: "src/paraglide", strategy: ["localStorage", "preferredLanguage", "baseLocale"], localStorageKey: "remindit:locale", emitTsDeclarations: true })`
-- package.json: `i18n:compile` script, chained into `predev` / `prebuild` / `pretest` (bun pre-hooks) so every entry point has fresh output
+- package.json: `i18n:compile` script, chained into `typecheck` / `test` / `test:quick` / `test:changed` / `test:watch` so every entry point that runs outside the bundler has fresh output (the originally drafted `predev` / `prebuild` / `pretest` bun pre-hooks were superseded by this wiring — they never shipped)
 
 ### Phase 2 — App wiring (small)
 - `src/index.tsx`: set `document.documentElement.lang = getLocale()` **before first paint** (mirrors `initTheme()`)
@@ -113,8 +114,8 @@ Version 4 header becomes `in progress`, gains the multi-language item (EN+RO now
 - [x] Phase 2 — App wiring (html lang, `src/lib/locale.ts`)
 - [x] Phase 3 — Onboarding language step (4-step wizard)
 - [x] Phase 4 — Profile switcher
-- [x] Phase 5 — String sweep (batches 1–5, ~300 keys; en.json merged centrally)
-- [x] Phase 6 — Romanian translations complete (314 keys, `null`-free, placeholder parity verified)
+- [x] Phase 5 — String sweep (batches 1–5, ~300 keys at sweep time; 336 keys in v4.3.0; en.json merged centrally)
+- [x] Phase 6 — Romanian translations complete (314 keys at sign-off; 336 keys in v4.3.0, `null`-free, placeholder parity verified)
 - [x] Phase 7 — Gates green (`typecheck`, `lint`, `test:pre` — all Rstest + dev/prod Playwright) + DEV.md §Internationalization
 
 ### Review notes for Leo (Phase 6 sign-off)

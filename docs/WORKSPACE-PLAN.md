@@ -1,7 +1,7 @@
-# Workspace plan (v5–v6) — for discussion
+# Workspace plan (v5–v6)
 
-> **Status: proposal, not decided.** Two delivery plans are drafted below (big bang vs gradual).
-> Outcome of the planning session on 2026-08-31; pick one before any restructuring work starts.
+> **Status: decided — Plan B (gradual).** Two delivery plans are drafted below (big bang vs gradual);
+> Plan B is the checked decision at the bottom. Outcome of the planning session on 2026-08-31.
 
 ## Why a workspace
 

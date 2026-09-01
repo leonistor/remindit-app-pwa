@@ -24,23 +24,25 @@ Core PWA + personalization slice. All items below are live (see `CHANGELOG.md`).
 - [x] Inspect history (`/history`, grouped by day, snapshot `categoryName`)
 - [x] Quick search+add (`+` → grouped `Autocomplete`, recommendation-aware, create-under-Uncategorized)
 - [x] Automate screenshots in PWA manifest (`scripts/generate-mobile-screenshot.ts`, light/dark gallery in `README.md`)
-- [x] PWA checklist & hardening — installability (manifest + SW `fetch` + HTTPS + maskable icons), offline shell, `navigateFallback`, safe-area, standalone mode, update prompt (`src/components/update-prompt.tsx`), `docs/PWA-CHECKLIST.md` / `docs/DEPLOY.md`
+- [x] PWA checklist & hardening — installability (manifest + SW `fetch` + HTTPS + maskable icons), offline shell, `navigateFallback`, safe-area, standalone mode, update prompt (`src/components/update-prompt.tsx`), `docs/DEPLOY.md`
 - [x] App updates in browser (SW update flow, `UpdatePrompt` wired in `src/router.tsx`)
 - [x] Help content — text ( `src/views/help.tsx`, `src/views/about.tsx`, `src/views/onboarding.tsx` copy; updated for floating sort + alphabetical A–Z in v3.4)
 - [x] Internal hardening pre-V4 — hooks out of `src/stores` barrel, cross-store flows in `src/stores/commands.ts`, pure helpers in `src/lib/` (`quick-add`, `history-view`, `display`, `pwa-install`), palette seeding consolidation, history snapshot + palette reactivity fixes
 
-## [ ] Version 4 — in progress
+## [x] Version 4 — shipped as v4.0.0–v4.3.0
+
+All items below are live (see `CHANGELOG.md`).
 
 - [x] [DESIGN.md](../DESIGN.md) — design system as shipped (contributors, text-only)
 - [x] Onboarding welcome step — intro + add-items demo video (autoplay, muted, looped, no controls) with a `Steps` indicator rail (new `@shark/steps` primitive)
 - [x] Share page (`/share`): export the current shopping list as a PNG image — light-theme branded card, unchecked items grouped by category, download + copy-to-clipboard (`@zumer/snapdom`)
 - [x] Help content: guided tour (videos shipped — Help page embeds 5 demo videos with theme-matched variants)
 - [x] Add license (AGPL-3 LICENSE.txt at repo root)
-- [ ] Multi-language support — English (default) + Romanian first (German, French, Ukrainian later); language selection as the first onboarding step, UI language switchable in Profile; Paraglide JS, changelog stays English in v4 (plan: [I18N-PLAN.md](./I18N-PLAN.md))
+- [x] Multi-language support — English (default) + Romanian first (German, French, Ukrainian later); language selection as the first onboarding step, UI language switchable in Profile; Paraglide JS, changelog stays English in v4 (shipped in v4.2.0; plan: [I18N-PLAN.md](./I18N-PLAN.md))
 
 ## [ ] Version 5
 
-> Restructuring proposal for v5–v6 (Bun workspace, modules, big bang vs gradual): [WORKSPACE-PLAN.md](./WORKSPACE-PLAN.md) — pending decision.
+> Restructuring proposal for v5–v6 (Bun workspace, modules, big bang vs gradual): [WORKSPACE-PLAN.md](./WORKSPACE-PLAN.md) — decided: Plan B (gradual).
 
 - [ ] Multi-user support will be added, allowing multiple users to share the same list and collaborate in real-time.
 - [ ] Sync with the server will be implemented to allow the list to be saved and loaded across devices.
@@ -49,7 +51,7 @@ Core PWA + personalization slice. All items below are live (see `CHANGELOG.md`).
 ## [ ] Version 6
 
 - [ ] App website (standalone marketing/docs site beyond the deployed PWA at `https://remindit.parsedwink.com`)
-- [ ] Community of early adopters and feedback capture (see `docs/LINKS.md#feedback`)
+- [ ] Community of early adopters and feedback capture (see `docs/LINKS.md#integrations`)
 - [ ] Basic AI features
 - [ ] Integration with LLMs (MCP, skills)
 

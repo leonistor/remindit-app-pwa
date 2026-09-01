@@ -13,24 +13,24 @@
 
 - **Name:** RemindIt (capital I, single word). Wordmark is not rendered as type in chrome — the round logo + user avatar are the header identity.
 - **Logo:** `public/remindit-icon.svg` and `public/remindit-icon-maskable.svg`, fill `#262626` on white. Same value is the PWA brand color so manifest, favicons, and chrome reconcile.
-- **PWA:** manifest object `WEB_APP_MANIFEST` in `pwa-manifest.config.ts:1` exports `PWA_THEME_COLOR` / `PWA_BACKGROUND_COLOR` (`#262626` / `#ffffff`). `scripts/generate-favicons.ts` imports the same constants; the HTML `theme-color` meta in `public/index.html:12` matches. Do not hard-code brand hex elsewhere.
-- **Voice:** plain verbs, sentence case, no filler. Controls say what they do ("Save changes", "Reset & reseed"). Empty/error states give direction, not persona. See `frontend-design` copy guidance in repo skill — current copy follows it.
+- **PWA:** manifest object `WEB_APP_MANIFEST` in `pwa-manifest.config.ts` exports `PWA_THEME_COLOR` / `PWA_BACKGROUND_COLOR` (`#262626` / `#ffffff`). `scripts/generate-favicons.ts` imports the same constants; the HTML `theme-color` meta in `public/index.html:12` matches. Do not hard-code brand hex elsewhere.
+- **Voice:** plain verbs, sentence case, no filler. Controls say what they do ("Save changes", "Reset & reseed"). Empty/error states give direction, not persona. See the `frontend-design` skill copy guidance — current copy follows it.
 
 ## 3. Typography
 
-- **Typeface:** self-hosted **Atkinson Hyperlegible Next Variable** (`@fontsource-variable/atkinson-hyperlegible-next`, weights `200–800`) imported in `src/index.tsx`. Exposed as `--font-sans` in `src/styles/globals.css:9`:
+- **Typeface:** self-hosted **Atkinson Hyperlegible Next Variable** (`@fontsource-variable/atkinson-hyperlegible-next`, weights `200–800`) imported in `src/index.tsx`. Exposed as `--font-sans` in `src/styles/globals.css`:
   ```css
   --font-sans: "Atkinson Hyperlegible Next Variable", ui-sans-serif, system-ui, sans-serif;
   ```
   `body` applies `font-sans`; feature components inherit — no local font declarations.
-- **Tokens:** `--font-heading` and `--font-mono` are declared (`globals.css:11-12`) but currently alias/unused — there is no distinct display face today. Scale is driven by Tailwind defaults + `text-2xl` for view titles (e.g. `Profile` header).
+- **Tokens:** `--font-heading` and `--font-mono` are declared (`globals.css`) but currently alias/unused — there is no distinct display face today. Scale is driven by Tailwind defaults + `text-2xl` for view titles (e.g. `Profile` header).
 - **Conventions:** headings are `font-bold text-2xl` in Cards/views; body is base `text-foreground` with `text-sm text-muted-foreground` for secondary copy; `FieldLabel` / `CardHeader description` carry the explanatory voice.
 
 ## 4. Color
 
 ### 4.1 Semantic / chrome tokens
 
-Registry style `base-nova` (`components.json:4`), `baseColor: neutral`, `cssVariables: true`. Inline theme in `src/styles/globals.css:6` maps Tailwind color roles to CSS vars; actual values under `:root` (light) and `.dark`:
+Registry style `base-nova` (`components.json`), `baseColor: neutral`, `cssVariables: true`. Inline theme in `src/styles/globals.css` maps Tailwind color roles to CSS vars; actual values under `:root` (light) and `.dark`:
 
 | Role | Light (`:root`) | Dark (`.dark`) | Notes |
 |---|---|---|---|
@@ -52,13 +52,13 @@ Registry style `base-nova` (`components.json:4`), `baseColor: neutral`, `cssVari
 | `chart-1..5` | `orange-600, teal-600, cyan-900, amber-400, amber-500` | `blue-700, emerald-500, amber-500, purple-500, rose-500` | charts (distinct per theme) |
 | `sidebar` | `neutral-50` 97% + `neutral-950` | `neutral-950` 97% + `neutral-50` | sidebar tokens present but not separately rendered as a sidebar today |
 
-Mixes use `color-mix(in srgb, …)` so neutrals track the background in both themes (`globals.css:320-490`). `color-scheme: light dark` is set in both blocks.
+Mixes use `color-mix(in srgb, …)` so neutrals track the background in both themes (`globals.css`). `color-scheme: light dark` is set in both blocks.
 
 ### 4.2 Categorical palette (items & categories)
 
 Qualitative, colorblind-minded. **Not** tied to button variants or recommendation urgency — separate concern.
 
-- **Pool source:** `seed/palettes.json` is the single source. `src/lib/palettes.ts:1` re-exports it as `PALETTE_POOL` / `defaultPalette` / `getPalette(id)` / `getPaletteColor(id, index)`. All palettes are length 12.
+- **Pool source:** `seed/palettes.json` is the single source. `src/lib/palettes.ts` re-exports it as `PALETTE_POOL` / `defaultPalette` / `getPalette(id)` / `getPaletteColor(id, index)`. All palettes are length 12.
 - **Pool contents (whimsical names are canonical):**
 
 | id | Name | Source | Colors (hex in order) |
@@ -72,47 +72,47 @@ Qualitative, colorblind-minded. **Not** tied to button variants or recommendatio
 `defaultPaletteId` is `paired` (Van Gogh).
 
 - **Assignment:** `Category.color` (`stores/types.ts`) is a stable palette slot (index). Assigned sequentially in dataset order by `assignCategoryColors` (`src/stores/categories.ts`) at dataset init, reset, and on `addCategory`; backfilled by `normalizeCategoryColors`. Distinctness guaranteed only up to 12 (pool size); beyond that indices wrap modulo 12.
-- **Rendering:** `src/lib/category-palette.ts:1` turns a category key → `ItemPalette` via CSS variables: `--cat` (solid hex) and `--cat-ink` (WCAG contrast ink `#ffffff` or `#0a0a0a` from `relativeLuminance` → higher contrast ratio). Background is the *full* hue in both themes so one ink stays accessible. `useCategoryPalette(key, overrideSlot?)` (`src/hooks/use-category-palette.ts`) subscribes to `$activePaletteId` + `$categoryById` and prefers the stored slot, falling back to hash for ad-hoc keys (e.g. palette preview chips). Consumers set `style={palette.style}` + class tokens (`button`, `buttonSelected`, `badge`, `dimmed`, `border`, `ring`, `dot`). The `ring` token is the **desktop hover emphasis ring**: chips apply it as `ring-foreground` + `hover:ring-2`, so the categorical fill is preserved on hover (the `bare` variant no longer forces `hover:bg-transparent`). The ring draws *outside* the chip, against the page/panel background — so it uses the theme-aware `foreground` token (always contrasts the page in both themes), **not** `--cat-ink`, which contrasts the fill and would vanish whenever it matches the page background (white-on-white in light mode for dark fills, black-on-dark in dark mode). Scroll/clip containers around chips keep 4px of breathing room (compensated padding/negative margins) so the ring isn't clipped at panel edges.
+- **Rendering:** `src/lib/category-palette.ts` turns a category key → `ItemPalette` via CSS variables: `--cat` (solid hex) and `--cat-ink` (WCAG contrast ink `#ffffff` or `#0a0a0a` from `relativeLuminance` → higher contrast ratio). Background is the *full* hue in both themes so one ink stays accessible. `useCategoryPalette(key, overrideSlot?)` (`src/hooks/use-category-palette.ts`) subscribes to `$activePaletteId` + `$categoryById` and prefers the stored slot, falling back to hash for ad-hoc keys (e.g. palette preview chips). Consumers set `style={palette.style}` + class tokens (`button`, `buttonSelected`, `badge`, `dimmed`, `border`, `ring`, `dot`). The `ring` token is the **desktop hover emphasis ring**: chips apply it as `ring-foreground` + `hover:ring-2`, so the categorical fill is preserved on hover (the `bare` variant no longer forces `hover:bg-transparent`). The ring draws *outside* the chip, against the page/panel background — so it uses the theme-aware `foreground` token (always contrasts the page in both themes), **not** `--cat-ink`, which contrasts the fill and would vanish whenever it matches the page background (white-on-white in light mode for dark fills, black-on-dark in dark mode). Scroll/clip containers around chips keep 4px of breathing room (compensated padding/negative margins) so the ring isn't clipped at panel edges.
 - **Active palette choice:** `$activePaletteId` (`src/stores/palette.ts`, `persistent jsonStore` key `remindit:active-palette`) + `setActivePalette(id)`. Changed live in **Profile → Color palette** via `PaletteChooser` (`src/components/palette-chooser.tsx`): Shark `Listbox` with 12-swatch preview + sample chip.
 - **Neutral sentinel:** `uncategorized` uses `ItemPalette` `NEUTRAL` (`category-palette.ts:NEUTRAL`): no CSS vars, `bg-muted text-foreground`, `dot: bg-muted-foreground`. Reads as "no category".
 
 ### 4.3 Recommendation tiers (urgency dots)
 
-Distinct from categorical color. `src/lib/recommendation-tiers.ts` defines dots overlaid at `-top-0.5 -right-0.5` with `ring-2 ring-background` on `ItemButton` (see `src/components/ui/custom/item-button.tsx:77`). Semantic urgency; do not reuse for category fills.
+Distinct from categorical color. `src/lib/recommendation-tiers.ts` defines dots overlaid at `-top-0.5 -right-0.5` with `ring-2 ring-background` on `ItemButton` (see `src/components/ui/custom/item-button.tsx`). Semantic urgency; do not reuse for category fills.
 
 ## 5. Layout & Navigation
 
 ```
 DrawerProvider
-├── Menu (h-16, rounded-md border bg-accent px-4, safe-area pads)
-│     logo (→ /) · ProfileAvatarLink · "Shopping list" link · hamburger MenuRoot · [+] quick-add
+├── Menu (min-h-14 md:min-h-16, rounded-md border bg-accent px-4, safe-area pads)
+│     logo (→ /) · ProfileAvatarLink · "Shopping list" link · hamburger MenuRoot — no quick-add (+) button
 │     └─ MenuContent w-52: nav links + Install + ThemeMenu submenu
 ├── <Outlet />  (page content)
 ├── ItemDetailDrawer (context-managed drawer, placeholder — Phase 3)
 └── Footer  (hidden on "/")
 ```
 
-- **Header:** `src/components/menu.tsx:80` — `flex min-h-16 shrink-0 … rounded-md border bg-accent`. Single hamburger for all viewports (KISS). `ThemeMenu` is a `MenuSub` radio-group; `InstallInstructionsDialog` / `QuickAddDialog` live here.
-- **Main shopping view `/`:** `ShoppingPanels` (`src/components/shopping-panels.tsx:1`) — vertical `Resizable` `defaultSize [30,70]`, `panels: [{id:"selected" min 25 max 90},{id:"all"}]` + `ResizableResizeTrigger withHandle`. Left = `ShoppingListPanel` (selected items), right = `ItemCatalog` (Ark `Accordion`, `multiple`, first open by default, chips grouped by category via `$catalogByCategory`, toggle via `addToList/removeFromList`).
+- **Header:** `src/components/menu.tsx` — `flex min-h-14 md:min-h-16 shrink-0 … rounded-md border bg-accent`. Single hamburger for all viewports (KISS). `ThemeMenu` is a `MenuSub` radio-group; `InstallInstructionsDialog` lives here (no quick-add in the menu — the `+` is the shopping-list panel's floating button group).
+- **Main shopping view `/`:** `ShoppingPanels` (`src/components/shopping-panels.tsx`) — vertical `Resizable` `defaultSize [30,70]`, `panels: [{id:"selected" min 25 max 90},{id:"all"}]` + `ResizableResizeTrigger withHandle`. Left = `ShoppingListPanel` (selected items), right = `ItemCatalog` (Ark `Accordion`, `multiple`, first two categories open by default, chips grouped by category via `$catalogByCategory`, toggle via `addToList/removeFromList`).
 - **Other routes:** `/catalog` CatalogView, `/history` HistoryView, `/profile` ProfileView, `/about`, `/help`, `/onboarding` (chrome-less, centered Card). Router in `src/router.tsx`.
-- **Container:** `@utility container` (`globals.css:519`) = `mx-auto max-w-3xl px-2 py-2 md:px-4 md:py-4`. Cards on Profile/Onboarding are `w-full max-w-xl` centered with `flex flex-col items-center gap-6 py-8`.
-- **Quick-add:** header `+` opens `QuickAddDialog` (Shark `Dialog` + grouped `Autocomplete` `@shark/autocomplete`). Source mirrors `$catalogByCategory` ordered by `frequencyRank`; when `$recommendations.length >= 10` shows only recommended items. Create-new row under `UNCATEGORIZED_ID` via `createItemAndAddToList`.
+- **Container:** `@utility container` (`globals.css`) = `mx-auto max-w-3xl px-2 py-2 md:px-4 md:py-4`. Cards on Profile/Onboarding are `w-full max-w-xl` centered with `flex flex-col items-center gap-6 py-8`.
+- **Quick-add:** the shopping-list panel's floating `+` (button group next to the sort button, `src/components/shopping-list-panel.tsx`) opens `QuickAddDialog` (Shark `Dialog` + grouped `Autocomplete` `@shark/autocomplete`). Source mirrors `$catalogByCategory` ordered by `frequencyRank`; when `$recommendations.length >= 10` shows only recommended items. Create-new row under `UNCATEGORIZED_ID` via `createItemAndAddToList`.
 
 ## 6. Components
 
 ### 6.1 Primitive layer
 
-Shark UI is the only allowed UI import in feature code. Registry config `components.json:4-15`: `style base-nova`, `tailwind css src/styles/globals.css`, `baseColor neutral`, `cssVariables true`, `iconLibrary phosphor`, `registries @shark https://shark.vini.one/r/{name}.json`.
+Shark UI is the only allowed UI import in feature code. Registry config `components.json`: `style base-nova`, `tailwind css src/styles/globals.css`, `baseColor neutral`, `cssVariables true`, `iconLibrary phosphor`, `registries @shark https://shark.vini.one/r/{name}.json`.
 
 Installed primitives in `src/components/ui/`:
-`accordion, alert-dialog, autocomplete, avatar, badge, button, card, collapsible, combobox, dialog, drawer, editable, field, float, input-group, input, item, listbox, menu, popover, resizable, scroll-area, segment-group, select, separator, spinner, status, table, textarea, toggle-group, toggle` — plus `custom/`.
+`accordion, alert-dialog, autocomplete, avatar, badge, button, card, collapsible, combobox, dialog, drawer, field, float, input-group, input, item, listbox, menu, popover, resizable, scroll-area, segment-group, select, separator, spinner, status, steps, table, textarea, toggle-group, toggle` — plus `custom/`.
 
-Rules: use `cn()` (`src/lib/utils.ts:1`) + Shark `variant/size` props + semantic tokens (`bg-primary`, `text-muted-foreground`). Avoid ad-hoc `dark:` pairs and `space-x/y`.
+Rules: use `cn()` (`src/lib/utils.ts`) + Shark `variant/size` props + semantic tokens (`bg-primary`, `text-muted-foreground`). Avoid ad-hoc `dark:` pairs and `space-x/y`.
 
 ### 6.2 Registry vs custom split (`docs/DEV.md` §Registry vs custom)
 
 - **Registry-managed** (`src/components/ui/*`): regenerate via `bunx shadcn add @shark/<name>`; never hand-edit shape.
-- **Hand-maintained** (`src/components/ui/custom/*`): `button.tsx` (forked Shark button — adds `success/info/bare`; `bare` is the transparent base for palette-colored chips), `item-button.tsx`, `toggle-tooltip.tsx`, `form-dialog.tsx`, `validated-field.tsx`. **Do not run `shadcn add @shark/button`** — upstream drops the custom variants.
+- **Hand-maintained** (`src/components/ui/custom/*`): `button.tsx` (forked Shark button — adds `success/info/bare`; `bare` is the transparent base for palette-colored chips), `item-button.tsx`, `toggle-tooltip.tsx`, `form-dialog.tsx`, `validated-field.tsx`, `collection.ts` (the sanctioned `@ark-ui/react` re-export seam — feature code imports Ark's collection helpers from here, never from Ark directly). **Do not run `shadcn add @shark/button`** — upstream drops the custom variants.
 
 ### 6.3 Item display (pick the right one)
 
@@ -123,7 +123,7 @@ Rules: use `cn()` (`src/lib/utils.ts:1`) + Shark `variant/size` props + semantic
 
 Both share the palette so catalog and list agree for the same category id. Never use `Button variant="success"` for selected state — palette is the source.
 
-Other notable feature components: `ItemCatalog`, `ShoppingListPanel`, `PaletteChooser`, `QuickAddDialog`, `ThemeMenu`/`ThemeToggle`, `InstallBanner`/`InstallInstructionsDialog`, `BackButton`, `Footer`.
+Other notable feature components: `ItemCatalog`, `ShoppingListPanel`, `PaletteChooser`, `QuickAddDialog`, `ThemeMenu`/`ThemeToggle`, `InstallBanner`/`InstallInstructionsDialog`, `BackButton`, `Footer`, `AvatarPicker` (Profile avatar editing — 12 random DiceBear `personas` options + reroll, self-contained `data:` URIs), `LanguageChooser` (onboarding step 1 + Profile language card).
 
 ## 7. Motion
 
@@ -157,15 +157,15 @@ View Transitions for item travel: per-item `view-transition-name` via `data-vt-c
 
 ## 8. Iconography
 
-`@phosphor-icons/react` (`components.json` `iconLibrary: phosphor`) — menu/Toggle icons: `List, Plus, X, Clock, Info, Question, User, Rows, DownloadSimple`, theme icons `Sun/Moon/Monitor`, onboarding `DiceFive`. Size typical `16` in menus, `18–20` for header actions, `28` for dice. Keep to Phosphor; Lucide is installed but not used for UI.
+`@phosphor-icons/react` (`components.json` `iconLibrary: phosphor`) — menu/Toggle icons: `List, Plus, X, Clock, Info, Question, User, Rows, DownloadSimple`, theme icons `Sun/Moon/Monitor`, onboarding `DiceFive`, avatar picker `PencilSimple`/`Shuffle`. Size typical `16` in menus, `18–20` for header actions, `28` for dice. Keep to Phosphor; Lucide is installed but not used in feature code (the registry templates import a few icons from it).
 
 ## 9. Theming
 
-Mode `light|dark|system` in `$theme` (`src/stores/theme.ts:1`, `persistentAtom` key `remindit:theme`, JSON-encoded with legacy fallback). `initTheme()` (`stores/theme.ts:36`) applies `dark` class + `colorScheme` on `<html>` and subscribes to store + `matchMedia("(prefers-color-scheme: dark)")`. Controls: `ThemeToggle` (cycles `ORDER [light,dark,system]`) and `ThemeMenu` (`MenuSub` → `MenuRadioGroup`) both call `setTheme`. PWA `colorScheme` and `::selection bg-primary/80` track the mode.
+Mode `light|dark|system` in `$theme` (`src/stores/theme.ts`, `persistentAtom` key `remindit:theme`, JSON-encoded with legacy fallback). `initTheme()` (`stores/theme.ts`) applies `dark` class + `colorScheme` on `<html>` and subscribes to store + `matchMedia("(prefers-color-scheme: dark)")`. Controls: `ThemeToggle` (cycles `ORDER [light,dark,system]`) and `ThemeMenu` (`MenuSub` → `MenuRadioGroup`) both call `setTheme`. PWA `colorScheme` and `::selection bg-primary/80` track the mode.
 
 ## 10. Accessibility
 
-- `html antialiased`, global `* { border-border outline-ring/50 ring-ring }` (`globals.css:497`), visible focus via `ring`.
+- `html antialiased`, global `* { border-border outline-ring/50 ring-ring }` (`globals.css`), visible focus via `ring`.
 - `prefers-reduced-motion` respected for animations and view transitions (`motion-reduce:animate-none` + media query `animation:none`).
 - `button:not(:disabled), [role="button"]:not(:disabled) {cursor:pointer}`; interactive elements carry `aria-label` (logo, avatar, add button, menu toggle, theme).
 - Single Atkinson family chosen for hyperlegibility; contrast ink is WCAG-ratio-picked, not heuristic.
@@ -173,8 +173,8 @@ Mode `light|dark|system` in `$theme` (`src/stores/theme.ts:1`, `persistentAtom` 
 
 ## 11. Shape & Spacing
 
-- **Radius:** `--radius 0.5rem` (`globals.css:320`), scaled `xs 0.25× → 4xl 4×` (`globals.css:70-77`). Typical Cards/menus/bars use `rounded-md` (`0.375rem`) and header/list panels `rounded-md border`. Utility classes `.radius-none/.radius-xs/.radius-sm/.radius-md/.radius-lg` override via `--radius`.
-- **Header height:** `--header-height: calc(var(--spacing) * 14)` (`globals.css:7`) — 56px at default spacing.
+- **Radius:** `--radius 0.5rem` (`globals.css`), scaled `xs 0.25× → 4xl 4×` (`globals.css`). Typical Cards/menus/bars use `rounded-md` (`0.375rem`) and header/list panels `rounded-md border`. Utility classes `.radius-none/.radius-xs/.radius-sm/.radius-md/.radius-lg` override via `--radius`.
+- **Header height:** `--header-height: calc(var(--spacing) * 14)` (`globals.css`) — 56px at default spacing.
 - **Selection:** `::selection bg-primary/80 text-primary-foreground`.
 - **Step utility:** `@utility step` with `counter(step)` circled `size-6 md:size-8` badge — used in help/onboarding flows.
 

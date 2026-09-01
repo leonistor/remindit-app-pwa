@@ -17,3 +17,5 @@ This project is a Progressive Web App (PWA) to manage a personal shopping list.
 - [AGENTS.md](AGENTS.md) agents instructions
 - [docs/DEV.md](docs/DEV.md) development & state architecture
 - [docs/DEV-COMPONENTS.md](docs/DEV-COMPONENTS.md) Shark UI registry vs custom split
+- [docs/DEMOS.md](docs/DEMOS.md) demo video generator (scenarios, gotchas, release flow)
+- [docs/DEPLOY.md](docs/DEPLOY.md) deployment
