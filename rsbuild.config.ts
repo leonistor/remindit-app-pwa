@@ -1,10 +1,12 @@
 import { defineConfig } from "@rsbuild/core"
 import { pluginReact } from "@rsbuild/plugin-react"
 import { pluginTailwindcss } from "@rsbuild/plugin-tailwindcss"
+import { paraglideRspackPlugin } from "@inlang/paraglide-js"
 import * as QRCode from "qrcode"
 import { pluginPWA } from "rsbuild-plugin-pwa"
 import pkg from "./package.json"
 import { WEB_APP_MANIFEST } from "./pwa-manifest.config"
+import { PARAGLIDE_COMPILER_OPTIONS } from "./scripts/compile-i18n"
 
 export default defineConfig({
   source: {
@@ -23,6 +25,9 @@ export default defineConfig({
       module: {
         rules: [{ test: /\.md$/, type: "asset/source" }],
       },
+      // Compiles messages/*.json into src/paraglide (watched in dev) so
+      // message edits hot-compile without restarting the server.
+      plugins: [paraglideRspackPlugin(PARAGLIDE_COMPILER_OPTIONS)],
     },
   },
   server: {
