@@ -184,8 +184,12 @@ const scenarios: Scenario[] = [
       await p.evaluate(() => localStorage.clear())
       await p.goto(BASE)
       // Unrecorded click-through of the real onboarding (no dice rolls).
-      await p.getByRole("button", { name: "Next" }).click()
-      // Step 2's Next stays disabled while the profile generates — wait for
+      // Language step (first) and welcome step each carry a single Next
+      // footer button — the default resolved locale (English) needs no
+      // interaction to advance.
+      await p.getByRole("button", { name: "Next" }).click() // language → welcome
+      await p.getByRole("button", { name: "Next" }).click() // welcome → profile
+      // Step 3's Next stays disabled while the profile generates — wait for
       // the username value before advancing.
       await p.getByLabel("Username").waitFor({ state: "visible" })
       await p.waitForFunction(
@@ -228,13 +232,20 @@ const scenarios: Scenario[] = [
       // rather than addInitScript, which would wipe state on EVERY load.
       await p.evaluate(() => localStorage.clear())
       await p.goto(BASE)
-      // First-run lands on the welcome step (autoplaying demo video + Next);
-      // the profile dice only appears after advancing past it.
+      // First-run lands on the language step (English/Română picker + Next);
+      // the welcome video and profile dice only appear after advancing.
       await p
         .getByRole("button", { name: "Next" })
         .waitFor({ state: "visible", timeout: 15_000 })
     },
     run: async (p) => {
+      // Language step (new first step): tap the already-active English —
+      // setAppLocale's same-locale guard makes it a no-op (no reload) —
+      // then advance to the welcome step.
+      await think(1200, 1800)
+      await humanClick(p.getByRole("button", { name: "English" }))
+      await think(500, 900)
+      await humanClick(p.getByRole("button", { name: "Next" }))
       // Let the welcome video play for a beat, then advance to the profile.
       await think(1600, 2400)
       await humanClick(p.getByRole("button", { name: "Next" }))
@@ -460,7 +471,8 @@ const scenarios: Scenario[] = [
       // Back to the main view for the next scenario. (The list has items at
       // this point, so wait for chrome that's always visible, not the
       // empty-state text.)
-      await humanClick(p.getByRole("button", { name: "Go back" }))
+      // "Back" (m.back()) — the label changed in the paraglide i18n migration.
+      await humanClick(p.getByRole("button", { name: "Back" }))
       await p
         .getByRole("button", { name: "Add to shopping list" })
         .waitFor({ timeout: 5000 })

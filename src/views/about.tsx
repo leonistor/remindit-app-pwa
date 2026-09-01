@@ -82,6 +82,10 @@ const AboutView = () => (
           {m.aboutFeatureThemeDesc()}
         </li>
         <li>
+          <strong>{m.aboutFeatureLanguage()}</strong>
+          {m.aboutFeatureLanguageDesc()}
+        </li>
+        <li>
           <strong>{m.aboutFeatureInstall()}</strong>
           {m.aboutFeatureInstallDesc()}
         </li>

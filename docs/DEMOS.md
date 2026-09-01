@@ -41,7 +41,7 @@ Order mirrors what a real user does:
 | # | Scenario | Shows | ~Len |
 |---|----------|-------|------|
 | 00 | welcome | **Dedicated onboarding step-1 embed (not in Help):** steady start → 2 catalog chips (eggs, milk) onto the empty list; prepare onboards unrecorded so the take opens settled | 7s |
-| 01 | onboarding | Welcome card (embeds 00) → Next, dice-roll profile (**Jane Doe**), Minimal dataset, Finish | 16s |
+| 01 | onboarding | Language step (default English) → welcome card (embeds 00) → dice-roll profile (**Jane Doe**), Minimal dataset, Finish | 18s |
 | 02 | install-banner | Mocked `beforeinstallprompt` → banner → "Maybe later" | 4s |
 | 03 | add-items | Snacks accordion → 4 catalog chips onto the list | 8s |
 | 04 | quick-add | Header-`+` dialog: pick existing "Milk", create "apple" → fridge via category pill | 10s |

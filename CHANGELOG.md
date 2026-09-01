@@ -2,6 +2,22 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v4.3.0 — 2026-09-01
+
+_Remindit now speaks Romanian — choose your language at first run or switch anytime from Profile._
+
+### ✨ New Features
+
+- **English & Romanian**: the entire interface — onboarding, list, catalog, quick-add, history, share, help — is now fully available in Romanian alongside English. Onboarding opens with a language picker (English by default), and Profile gains a Language card; switching applies instantly with a quick reload, and your choice is remembered
+
+### 🔧 Improvements
+
+- **About & Help stay in sync**: both pages now mention language support, and the onboarding demo video shows the new first step
+
+### 🐛 Fixes
+
+- **A friendlier language picker**: the onboarding's first step greets you in both languages at once — so you can find yours before choosing one — and the language buttons got a calmer, secondary look
+
 ## v4.2.0 — 2026-09-01
 
 _A calmer, more consistent feel throughout — plus a richer starter catalog and a friendlier first run._

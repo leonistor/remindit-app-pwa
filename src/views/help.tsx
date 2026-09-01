@@ -100,6 +100,16 @@ const HelpView = () => (
           </Link>{" "}
           {m.helpPersonalizeReseedSuffix()}
         </li>
+        <li>
+          {m.helpPersonalizeLanguagePrefix()}{" "}
+          <Link
+            className="text-primary underline underline-offset-4 hover:opacity-90"
+            to="/profile"
+          >
+            {m.navProfile()}
+          </Link>{" "}
+          {m.helpPersonalizeLanguageSuffix()}
+        </li>
       </ul>
       <DemoVideo aria-label={m.helpVideoTheme()} scenario="05-theme" />
     </section>

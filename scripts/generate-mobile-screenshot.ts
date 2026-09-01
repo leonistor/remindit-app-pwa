@@ -73,13 +73,17 @@ async function capture(page: Page, outputs: string[]) {
 
 async function completeOnboarding(page: Page) {
   const usernameInput = page.locator("#username")
-  // Fresh installs open on the welcome step (video + Next); the profile
-  // fields only render after advancing past it. No markers at all means the
-  // app is already onboarded.
+  // Fresh installs open on the language step (English/Română picker); the
+  // welcome step (video + Next) follows, and the profile fields only render
+  // after that. No markers at all means the app is already onboarded.
   if (!(await usernameInput.count())) {
-    const welcomeNext = page.getByRole("button", { name: "Next" })
-    if (!(await welcomeNext.count())) return
-    await welcomeNext.click()
+    const next = page.getByRole("button", { name: "Next" })
+    if (!(await next.count())) return
+    // Language step → welcome step → profile step: each of the first two
+    // steps carries a single Next footer button (English is the default
+    // resolved locale, so the picker itself needs no interaction).
+    await next.click()
+    await next.click()
   }
   await page.waitForFunction(
     () => {
