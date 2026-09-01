@@ -1,21 +1,32 @@
-# remindit-app-pwa
+# Remindit monorepo
 
-**Live app: [remindit.parsedwink.com](https://remindit.parsedwink.com)**
+Bun workspace for the Remindit project.
 
-This project is a Progressive Web App (PWA) to manage a personal shopping list.
+## Modules
 
-- [docs/ROADMAP.md](docs/ROADMAP.md) roadmap
+| Module          | Path | Description                                                                 |
+| --------------- | ---- | --------------------------------------------------------------------------- |
+| `@remindit/pwa` | pwa/ | Local-first shopping-list / reminders PWA — see [pwa/README.md](pwa/README.md) |
 
-| Light | Dark |
-| --- | --- |
-| <img src="public/mobile-screenshot-light.png" alt="RemindIt mobile screenshot (light)" width="300" style="border-radius: 12px;" /> | <img src="public/mobile-screenshot-dark.png" alt="RemindIt mobile screenshot (dark)" width="300" style="border-radius: 12px;" /> |
+Planned: `@remindit/common` (shared data models, design elements), `@remindit/web` (marketing website).
 
+## Usage
 
-## Documentation
+All package scripts are runnable from the repo root — each one delegates into
+the owning module, so you never need to `cd` first:
 
-- [DESIGN.md](DESIGN.md) design system (contributors)
-- [AGENTS.md](AGENTS.md) agents instructions
-- [docs/DEV.md](docs/DEV.md) development & state architecture
-- [docs/DEV-COMPONENTS.md](docs/DEV-COMPONENTS.md) Shark UI registry vs custom split
-- [docs/DEMOS.md](docs/DEMOS.md) demo video generator (scenarios, gotchas, release flow)
-- [docs/DEPLOY.md](docs/DEPLOY.md) deployment
+```sh
+bun install     # installs every workspace
+bun run dev     # pwa dev server
+bun run build   # pwa production build
+bun run test    # pwa test suite
+```
+
+See [AGENTS.md](AGENTS.md) for the development guide and [DESIGN.md](DESIGN.md)
+for the design system.
+
+## Repo-level (non-module) files
+
+- `.opencode/`, `opencode.jsonc`, `skills-lock.json`, `.hive/` — opencode memory & config
+- `.zed/` — Zed editor config
+- `LICENSE.txt` — license

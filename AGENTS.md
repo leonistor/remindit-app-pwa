@@ -1,8 +1,12 @@
 # AGENTS.md
 
+## Repo layout
+
+Bun workspace. All app code lives in the `pwa/` module (`@remindit/pwa`); root `package.json` scripts delegate into it (`bun run <script>` works from the repo root). Planned future modules: `@remindit/common`, `@remindit/web`. Repo-level config: `.opencode/`, `opencode.jsonc`, `skills-lock.json`, `.hive/`, `.zed/`, `LICENSE.txt`.
+
 ## Rules
 
-- check [docs/DEV.md](docs/DEV.md) before making changes or adding new features
+- check [pwa/docs/DEV.md](pwa/docs/DEV.md) before making changes or adding new features
 - evaluate the local project skills: [.opencode/skills](.opencode/skills)
 
 ## Commands
@@ -21,14 +25,14 @@
 
 ## UI framework
 
-Our primary UI framework is **Shark UI** — a shadcn-style registry built on top of [Ark UI](https://ark-ui.com). Components in `src/components/ui/*` are Shark wrappers (several import from `@ark-ui/react` internally). **Feature code must consume the Shark wrappers, never import `@ark-ui/react` directly.** Add missing primitives via `bunx shadcn add @shark/<component>` (registry config in `components.json`). See `docs/DEV.md` §UI components (Shark UI).
+Our primary UI framework is **Shark UI** — a shadcn-style registry built on top of [Ark UI](https://ark-ui.com). Components in `pwa/src/components/ui/*` are Shark wrappers (several import from `@ark-ui/react` internally). **Feature code must consume the Shark wrappers, never import `@ark-ui/react` directly.** Add missing primitives via `bunx shadcn add @shark/<component>` (registry config in `pwa/components.json`). See `pwa/docs/DEV.md` §UI components (Shark UI).
 
 ## Docs
 
 - [DESIGN.md](DESIGN.md) — design system (contributors, current look as shipped)
-- [docs/DEV.md](docs/DEV.md) — development & state architecture
-- [docs/DEMOS.md](docs/DEMOS.md) — demo video generator (scenarios, gotchas, release flow)
-- [docs/DEV-COMPONENTS.md](docs/DEV-COMPONENTS.md) — Shark UI registry vs custom split
+- [pwa/docs/DEV.md](pwa/docs/DEV.md) — development & state architecture
+- [pwa/docs/DEMOS.md](pwa/docs/DEMOS.md) — demo video generator (scenarios, gotchas, release flow)
+- [pwa/docs/DEV-COMPONENTS.md](pwa/docs/DEV-COMPONENTS.md) — Shark UI registry vs custom split
 - Rsbuild: https://rsbuild.rs/llms.txt
 - Rspack: https://rspack.rs/llms.txt
 - Rstest: https://rstest.rs/llms.txt
@@ -37,7 +41,7 @@ Our primary UI framework is **Shark UI** — a shadcn-style registry built on to
 
 ### Rstest
 
-Progressive test suites — pick the one that matches the moment (see `docs/DEV.md` §Testing):
+Progressive test suites — pick the one that matches the moment (see `pwa/docs/DEV.md` §Testing):
 
 - `bun run test:quick` — fast unit layer (`src/lib` + `tests/stores`). Use in the dev loop after a change.
 - `bun run test` — every Rstest test. Use pre-commit.

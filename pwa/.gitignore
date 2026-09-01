@@ -1,0 +1,18 @@
+# Environment variables — keep .env.example committed; .env is local-only
+.env
+
+# Dist
+dist/
+
+# Deploy archives
+deploy/
+
+# Playwright artifacts
+test-results/
+.playwright-mcp/
+
+# Generated demo videos (regenerate with `bun run demos`; preview.html is tracked)
+public/demos/*.mp4
+
+# Profile
+.rspack-profile-*/

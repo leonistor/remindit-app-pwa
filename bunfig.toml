@@ -1,0 +1,5 @@
+# Pin hoisted installs — identical node_modules layout to the pre-workspace
+# repo. Revisit ("isolated", bun's workspace default) when the second module
+# lands, as its own verified change.
+[install]
+linker = "hoisted"

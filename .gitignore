@@ -6,20 +6,21 @@
 # Environment variables — keep .env.example committed; .env is local-only
 .env
 
-# Dist
+# Dependencies
 node_modules
+
+# Build artifacts (any module)
 dist/
 
-# Deploy archives
+# Deploy archives (any module)
 deploy/
-/release.sh
 
 # Playwright artifacts
 test-results/
 .playwright-mcp/
 
-# Generated demo videos (regenerate with `bun run demos`; preview.html is tracked)
-public/demos/*.mp4
+# Release script (local-only)
+/release.sh
 
 # Profile
 .rspack-profile-*/
