@@ -1,6 +1,13 @@
 import { useStore } from "@nanostores/react"
-import { CheckCircle, DownloadSimple, Rows, Trash } from "@phosphor-icons/react"
-import { useEffect, useState } from "react"
+import {
+  CheckCircle,
+  DownloadSimple,
+  Rows,
+  Trash,
+  UploadSimple,
+  Warning,
+} from "@phosphor-icons/react"
+import { useEffect, useRef, useState, type ChangeEvent } from "react"
 import { Link, useNavigate } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { BackButton } from "@/components/back-button"
@@ -32,11 +39,18 @@ import {
   SegmentGroupItem,
   SegmentGroupItemText,
 } from "@/components/ui/segment-group"
-import { downloadLocalData, eraseLocalData } from "@/lib/local-data"
+import {
+  downloadLocalData,
+  eraseLocalData,
+  formatExportedAt,
+  readLocalDataFile,
+  type LocalDataEnvelope,
+} from "@/lib/local-data"
 import { m } from "@/paraglide/messages"
 import {
   $user,
   getUser,
+  restoreLocalData,
   seedFromDataset,
   setSelectedDataset,
   updateUser,
@@ -53,6 +67,11 @@ const RESEED_ACK_MS = 1500
 // done (confirmation shown, auto-redirect armed).
 type ResetPhase = "idle" | "busy" | "done"
 
+// The import dialog's lifecycle: idle (nothing picked) → confirm (a valid
+// backup was parsed and is awaiting confirmation) → busy (restore runs) →
+// done (confirmation shown, auto-redirect armed).
+type ImportPhase = "idle" | "confirm" | "busy" | "done"
+
 const ProfileView = () => {
   const user = useStore($user)
   const navigate = useNavigate()
@@ -60,6 +79,11 @@ const ProfileView = () => {
   const [eraseOpen, setEraseOpen] = useState(false)
   const [dataset, setDataset] = useState<string>(INITIAL_DATASET)
   const [resetPhase, setResetPhase] = useState<ResetPhase>("idle")
+  const [importPhase, setImportPhase] = useState<ImportPhase>("idle")
+  const [pendingEnvelope, setPendingEnvelope] =
+    useState<LocalDataEnvelope | null>(null)
+  const [importError, setImportError] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState({
     firstName: user.firstName,
     lastName: user.lastName,
@@ -111,6 +135,45 @@ const ProfileView = () => {
     // Full wipe — including theme — then let the onboarding guard redirect.
     eraseLocalData()
     setEraseOpen(false)
+  }
+
+  const handleImportPick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleImportFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    // Clear the selection so re-picking the same file re-fires onChange.
+    event.target.value = ""
+    if (!file) return
+    try {
+      const envelope = await readLocalDataFile(file)
+      setPendingEnvelope(envelope)
+      setImportError(false)
+      setImportPhase("confirm")
+    } catch {
+      // Not a RemindIt backup: surface the inline error, keep the dialog shut.
+      setImportError(true)
+    }
+  }
+
+  const handleImportConfirm = () => {
+    if (importPhase !== "confirm" || !pendingEnvelope) return
+    setImportPhase("busy")
+    // restoreLocalData is one long synchronous block (all stores swap at
+    // once); defer it a frame so the busy state actually paints before the
+    // main thread freezes for the work.
+    window.setTimeout(() => {
+      restoreLocalData(pendingEnvelope)
+      setImportPhase("done")
+      // Let the confirmation land, then take the user to the restored list —
+      // the same visible "it worked" moment as the reseed flow.
+      window.setTimeout(() => {
+        setImportPhase("idle")
+        setPendingEnvelope(null)
+        navigate("/")
+      }, RESEED_ACK_MS)
+    }, 50)
   }
 
   return (
@@ -216,16 +279,34 @@ const ProfileView = () => {
           title={m.profileLocalDataTitle()}
           description={m.profileLocalDataDescription()}
         />
-        <CardContent>
+        <CardContent className="flex flex-col gap-2">
           <p className="text-muted-foreground text-sm">
             {m.profileLocalDataHint()}
           </p>
+          {importError && (
+            <p className="text-destructive text-sm" role="alert">
+              {m.importBackupInvalidFile()}
+            </p>
+          )}
         </CardContent>
         <CardFooter className="flex gap-2">
           <Button variant="outline" onClick={downloadLocalData}>
             <DownloadSimple size={16} />
             {m.profileDownloadButton()}
           </Button>
+          <Button variant="outline" onClick={handleImportPick}>
+            <UploadSimple size={16} />
+            {m.profileImportButton()}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="sr-only"
+            aria-hidden="true"
+            tabIndex={-1}
+            onChange={handleImportFile}
+          />
           <AlertDialog
             open={eraseOpen}
             onOpenChange={(d) => setEraseOpen(d.open)}
@@ -251,6 +332,77 @@ const ProfileView = () => {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          <Dialog
+            open={importPhase !== "idle"}
+            onOpenChange={(details) => {
+              // Lock the dialog while the restore runs (ESC/overlay can't
+              // abandon a half-done import); closing always clears the
+              // transient state.
+              if (!details.open && importPhase === "busy") return
+              if (!details.open) {
+                setImportPhase("idle")
+                setPendingEnvelope(null)
+                setImportError(false)
+              }
+            }}
+          >
+            <DialogContent>
+              {importPhase === "done" ? (
+                <>
+                  <DialogHeader
+                    title={m.profileImportSuccessTitle()}
+                    description={m.profileImportSuccessDescription()}
+                  />
+                  <DialogBody>
+                    <p
+                      className="flex items-center gap-2 text-sm text-success"
+                      role="status"
+                    >
+                      <CheckCircle size={18} weight="fill" />
+                      {m.profileReseededRedirect()}
+                    </p>
+                  </DialogBody>
+                </>
+              ) : (
+                <>
+                  <DialogHeader
+                    title={m.importBackupTitle()}
+                    description={
+                      pendingEnvelope
+                        ? m.importBackupDescription({
+                            appVersion: pendingEnvelope.version,
+                            exportedAt: formatExportedAt(
+                              pendingEnvelope.exportedAt
+                            ),
+                          })
+                        : undefined
+                    }
+                  />
+                  <DialogBody>
+                    <p className="flex items-center gap-2 text-destructive text-sm">
+                      <Warning size={18} />
+                      {m.importBackupWarning()}
+                    </p>
+                  </DialogBody>
+                  <DialogFooter>
+                    {importPhase === "confirm" && (
+                      <DialogClose asChild>
+                        <Button variant="outline">{m.cancel()}</Button>
+                      </DialogClose>
+                    )}
+                    <Button
+                      variant="destructive"
+                      onClick={handleImportConfirm}
+                      isLoading={importPhase === "busy"}
+                      disabled={importPhase === "busy"}
+                    >
+                      {m.importBackupConfirmButton()}
+                    </Button>
+                  </DialogFooter>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
         </CardFooter>
       </Card>
 

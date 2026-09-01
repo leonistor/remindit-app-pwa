@@ -9,9 +9,18 @@
 // the only history writer (see `./list`); `wipeAllData` resets the `$history`
 // atom directly, which is a reset, not a history event.
 
+// Type-only on purpose: local-data.ts imports `wipeAllData` from this module at
+// runtime, so a value import would create a cycle. The envelope type is just
+// the restore payload's shape.
+import type { LocalDataEnvelope } from "@/lib/local-data"
 import { DEFAULT_PALETTE_ID } from "@/lib/palettes"
 import { $catalog, addCatalogItem, reassignItemsToCategory } from "./catalog"
-import { $categories } from "./categories"
+import {
+  $categories,
+  ensureUncategorizedExists,
+  normalizeCategoryColors,
+  normalizeCategoryFrequencies,
+} from "./categories"
 import { $history } from "./history"
 import { $list, addToList, removeListEntriesForItem } from "./list"
 import { $onboarded, $selectedDatasetId } from "./onboarding"
@@ -75,4 +84,31 @@ export function wipeAllData(): void {
   $installDismissed.set(false)
 
   localStorage.clear()
+}
+
+// Restore a downloaded backup (src/lib/local-data.ts): overwrite every
+// persisted store with the envelope snapshot, then re-run the same normalizers
+// the seeding paths use (initStores / seedFromDataset) so older backups land
+// well-formed — sentinel category, frequency + color backfills. $onboarded is
+// forced to true: a restored backup must never bounce the user back to the
+// onboarding gate. Deliberately no localStorage.clear() — each persistent atom
+// overwrites its own `remindit:` key on set, and clearing would also wipe the
+// locale choice the backup didn't capture.
+export function restoreLocalData(envelope: LocalDataEnvelope): void {
+  $catalog.set(envelope.data.catalog)
+  $categories.set(envelope.data.categories)
+  $list.set(envelope.data.list)
+  $history.set(envelope.data.history)
+  $user.set(envelope.data.user)
+  $theme.set(envelope.data.theme)
+  $activePaletteId.set(envelope.data.activePalette)
+  $selectedSort.set(envelope.data.selectedSort)
+  $accordionOpen.set(envelope.data.accordionOpen)
+  $onboarded.set(true)
+  $selectedDatasetId.set(envelope.data.selectedDataset)
+  $installDismissed.set(envelope.data.installDismissed)
+
+  ensureUncategorizedExists()
+  normalizeCategoryFrequencies()
+  normalizeCategoryColors()
 }

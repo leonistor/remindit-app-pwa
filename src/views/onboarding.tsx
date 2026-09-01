@@ -1,11 +1,26 @@
 import { useStore } from "@nanostores/react"
-import { DiceFive, User } from "@phosphor-icons/react"
-import { type FocusEvent, type MouseEvent, useEffect, useState } from "react"
+import { DiceFive, UploadSimple, User, Warning } from "@phosphor-icons/react"
+import {
+  type ChangeEvent,
+  type FocusEvent,
+  type MouseEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 import { Navigate, useNavigate } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { LanguageChooser } from "@/components/language-chooser"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/custom/button"
+import {
+  Dialog,
+  DialogBody,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+} from "@/components/ui/dialog"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -20,9 +35,14 @@ import {
   StepsList,
   StepsSeparator,
 } from "@/components/ui/steps"
+import {
+  formatExportedAt,
+  type LocalDataEnvelope,
+  readLocalDataFile,
+} from "@/lib/local-data"
 import { generateRandomProfile } from "@/lib/profile-generator"
 import { m } from "@/paraglide/messages"
-import { $onboarded, completeOnboarding } from "@/stores"
+import { $onboarded, completeOnboarding, restoreLocalData } from "@/stores"
 import type { UserProfile } from "@/stores/types"
 
 const EMPTY_PROFILE: UserProfile = {
@@ -32,6 +52,10 @@ const EMPTY_PROFILE: UserProfile = {
   email: "",
   avatar: "",
 }
+
+// The backup-restore flow's lifecycle: idle (nothing picked) → confirm
+// (dialog open with a parsed envelope) → busy (restoreLocalData running).
+type RestorePhase = "idle" | "confirm" | "busy"
 
 // Tracks inputs that got a fresh focus so `keepSelectionOnClick` only suppresses
 // the single mouseup that ends a click-focus (which would otherwise collapse the
@@ -70,6 +94,11 @@ const OnboardingView = () => {
   const [profile, setProfile] = useState<UserProfile>(EMPTY_PROFILE)
   const [dataset, setDataset] = useState<string>(DEFAULT_DATASET_ID)
   const [busy, setBusy] = useState(false)
+  const [restorePhase, setRestorePhase] = useState<RestorePhase>("idle")
+  const [pendingEnvelope, setPendingEnvelope] =
+    useState<LocalDataEnvelope | null>(null)
+  const [restoreError, setRestoreError] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // React does not reliably render the `muted` ATTRIBUTE (it only sets the DOM
   // property), and some browsers ignore property-only muting for autoplay
@@ -108,6 +137,38 @@ const OnboardingView = () => {
     if (!finalProfile.username) return
     completeOnboarding(finalProfile, dataset)
     navigate("/")
+  }
+
+  const onRestoreFilePicked = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    // Reset the input so re-picking the same file fires onChange again.
+    e.target.value = ""
+    if (!file) return
+    setRestoreError(false)
+    try {
+      const envelope = await readLocalDataFile(file)
+      setPendingEnvelope(envelope)
+      setRestorePhase("confirm")
+    } catch {
+      setRestoreError(true)
+    }
+  }
+
+  const confirmRestore = () => {
+    if (restorePhase !== "confirm" || !pendingEnvelope) return
+    const envelope = pendingEnvelope
+    setRestorePhase("busy")
+    // restoreLocalData is one long synchronous block (sets all 12 stores);
+    // defer a tick so the busy state actually paints before the main thread
+    // freezes for the work.
+    window.setTimeout(() => {
+      restoreLocalData(envelope)
+      setPendingEnvelope(null)
+      setRestorePhase("idle")
+      // The wizard's own profile/dataset/step state is deliberately untouched:
+      // the restore abandons steps 3–4, and $onboarded now routes home anyway.
+      navigate("/")
+    }, 50)
   }
 
   return (
@@ -164,6 +225,84 @@ const OnboardingView = () => {
                 playsInline
                 className="mx-auto max-h-96 w-auto rounded-lg border bg-white"
               />
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-center text-muted-foreground text-sm">
+                  {m.onboardingRestoreBackupHint()}
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <UploadSimple size={16} />
+                  {m.onboardingRestoreBackupButton()}
+                </Button>
+                {restoreError ? (
+                  <p
+                    className="text-center text-destructive text-sm"
+                    role="alert"
+                  >
+                    {m.importBackupInvalidFile()}
+                  </p>
+                ) : null}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="application/json,.json"
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden
+                onChange={onRestoreFilePicked}
+              />
+              <Dialog
+                open={restorePhase !== "idle"}
+                onOpenChange={(details) => {
+                  // Lock dismissal while the restore runs; closing discards
+                  // the pending envelope so a re-open starts the flow fresh.
+                  if (!details.open && restorePhase === "busy") return
+                  setRestorePhase(details.open ? "confirm" : "idle")
+                  if (!details.open) setPendingEnvelope(null)
+                }}
+              >
+                <DialogContent>
+                  {pendingEnvelope ? (
+                    <>
+                      <DialogHeader
+                        title={m.importBackupTitle()}
+                        description={m.importBackupDescription({
+                          appVersion: pendingEnvelope.version,
+                          exportedAt: formatExportedAt(
+                            pendingEnvelope.exportedAt
+                          ),
+                        })}
+                      />
+                      <DialogBody>
+                        <p className="flex items-center gap-2 text-destructive text-sm">
+                          <Warning size={18} weight="fill" />
+                          {m.importBackupWarning()}
+                        </p>
+                      </DialogBody>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button type="button" variant="outline">
+                            {m.cancel()}
+                          </Button>
+                        </DialogClose>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={confirmRestore}
+                          isLoading={restorePhase === "busy"}
+                          disabled={restorePhase === "busy"}
+                        >
+                          {m.importBackupConfirmButton()}
+                        </Button>
+                      </DialogFooter>
+                    </>
+                  ) : null}
+                </DialogContent>
+              </Dialog>
             </div>
           ) : step === 3 ? (
             <div className="flex flex-col items-center gap-6">
