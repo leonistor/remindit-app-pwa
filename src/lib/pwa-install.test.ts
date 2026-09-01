@@ -34,7 +34,9 @@ function setNav(overrides: {
 }
 
 afterEach(() => {
-  for (const key of stubbed) delete (nav as Record<string, unknown>)[key]
+  // Props were defined `configurable: true`, so delete restores the prototype
+  // value. Reflect.deleteProperty takes plain `object` — no cast needed.
+  for (const key of stubbed) Reflect.deleteProperty(nav, key)
   stubbed.clear()
 })
 

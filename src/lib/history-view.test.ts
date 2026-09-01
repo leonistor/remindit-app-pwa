@@ -10,6 +10,7 @@ const event = (id: string, timestamp: number): HistoryEvent => ({
   itemId: id,
   itemName: id,
   categoryId: "cat-x",
+  categoryName: "Category X",
   timestamp,
 })
 

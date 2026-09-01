@@ -12,6 +12,7 @@
 
 import { afterEach, describe, expect, test } from "@rstest/core"
 import { cleanup, render, screen } from "@testing-library/react"
+import type { UserEvent } from "@testing-library/user-event"
 import userEvent from "@testing-library/user-event"
 import { QuickAddDialog } from "@/components/quick-add-dialog"
 import {
@@ -54,7 +55,7 @@ async function setupDialog() {
 }
 
 /** Type a value one char at a time (keeps Ark's per-keystroke sync in step). */
-async function typeValue(user: userEvent.User, value: string) {
+async function typeValue(user: UserEvent, value: string) {
   for (const char of value) {
     await user.keyboard(char)
   }

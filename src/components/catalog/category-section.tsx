@@ -135,7 +135,11 @@ export const CategorySection = ({
                     </Button>
                   </MenuTrigger>
                   <MenuContent>
-                    <MenuItem onClick={handleEditCategory} closeOnSelect>
+                    <MenuItem
+                      value="edit-category"
+                      onClick={handleEditCategory}
+                      closeOnSelect
+                    >
                       <PencilSimpleIcon />
                       Edit category
                     </MenuItem>
@@ -148,6 +152,7 @@ export const CategorySection = ({
                       }
                     >
                       <MenuItem
+                        value="delete-category"
                         variant="destructive"
                         closeOnSelect={false}
                         onClick={(e) => e.preventDefault()}

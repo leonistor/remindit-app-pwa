@@ -31,7 +31,10 @@ function renderOnboarding() {
   )
 }
 
-const usernameInput = () => screen.getByLabelText(/Username/i)
+// getTyping-library types getByLabelText as HTMLElement; cast so `.value` is
+// available (the username/first-name fields are always <input> elements).
+const usernameInput = () =>
+  screen.getByLabelText(/Username/i) as HTMLInputElement
 
 // The initial profile is generated asynchronously (lazy DiceBear chunk) and
 // the dice button stays `disabled` while a roll is in flight — wait for both
