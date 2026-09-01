@@ -67,11 +67,19 @@ describe("OnboardingView", () => {
   test("starts on the language step: locale radios, Next reveals the welcome video, then profile", async () => {
     renderOnboarding()
 
-    // Step 1 is the language picker: one radio per registered locale, with
-    // English resolved as the default (no stored choice in a fresh env).
-    expect(screen.getByText(m.chooseYourLanguage())).toBeInTheDocument()
-    expect(screen.getAllByRole("radio")).toHaveLength(2)
-    expect(screen.getByRole("radio", { name: "English" })).toBeChecked()
+    // Step 1 is the language picker: bilingual prompt + one secondary button
+    // per registered locale, English resolved as the default (no stored
+    // choice in a fresh env) and marked with aria-pressed.
+    expect(screen.getByText(m.chooseYourLanguageEn())).toBeInTheDocument()
+    expect(screen.getByText(m.chooseYourLanguageRo())).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "English" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    )
+    expect(screen.getByRole("button", { name: "Română" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    )
 
     // Next reveals the welcome video step — happy-dom doesn't decode/play
     // videos, so assert element + attributes only.

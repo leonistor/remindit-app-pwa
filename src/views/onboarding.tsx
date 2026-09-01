@@ -138,9 +138,16 @@ const OnboardingView = () => {
           </Steps>
           {step === 1 ? (
             <div className="flex flex-col items-center gap-6">
-              <p className="text-center text-muted-foreground text-sm">
-                {m.chooseYourLanguage()}
-              </p>
+              {/* Bilingual by design: the user may not read the default locale
+                  yet, so both self-labels render regardless of active locale. */}
+              <div className="flex flex-col items-center gap-1">
+                <p className="text-center text-muted-foreground text-sm">
+                  {m.chooseYourLanguageEn()}
+                </p>
+                <p className="text-center text-muted-foreground text-sm">
+                  {m.chooseYourLanguageRo()}
+                </p>
+              </div>
               <LanguageChooser className="w-full max-w-xs" />
             </div>
           ) : step === 2 ? (

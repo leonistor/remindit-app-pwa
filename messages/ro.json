@@ -1,7 +1,8 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "language": "Limbă",
-  "chooseYourLanguage": "Alege limba",
+  "chooseYourLanguageEn": "Choose your language",
+  "chooseYourLanguageRo": "Alege limba",
   "languageSwitchHint": "Schimbarea limbii reîncarcă aplicația.",
   "back": "Înapoi",
   "next": "Următor",
