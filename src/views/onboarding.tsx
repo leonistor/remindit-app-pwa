@@ -138,7 +138,7 @@ const OnboardingView = () => {
               </p>
               <video
                 ref={welcomeVideoRef}
-                src="/demos/03-add-items-light.mp4"
+                src="/demos/00-welcome-light.mp4"
                 autoPlay
                 loop
                 muted

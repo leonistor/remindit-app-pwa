@@ -16,7 +16,7 @@ resolves natively; `tsx` doesn't).
 ```sh
 bun run dev            # dev server on :3000 must be running; the script
                        # exits with instructions if it isn't
-bun run demos          # both theme variants (14 files)
+bun run demos          # both theme variants (16 files)
 bun run demos -- dark  # single variant (the arg is passed through to the script)
 ```
 
@@ -40,7 +40,8 @@ Order mirrors what a real user does:
 
 | # | Scenario | Shows | ~Len |
 |---|----------|-------|------|
-| 01 | onboarding | Welcome video → Next, dice-roll profile (**Jane Doe**), Minimal dataset, Finish | 16s |
+| 00 | welcome | **Dedicated onboarding step-1 embed (not in Help):** steady start → 2 catalog chips (eggs, milk) onto the empty list; prepare onboards unrecorded so the take opens settled | 7s |
+| 01 | onboarding | Welcome card (embeds 00) → Next, dice-roll profile (**Jane Doe**), Minimal dataset, Finish | 16s |
 | 02 | install-banner | Mocked `beforeinstallprompt` → banner → "Maybe later" | 4s |
 | 03 | add-items | Snacks accordion → 4 catalog chips onto the list | 8s |
 | 04 | quick-add | Header-`+` dialog: pick existing "Milk", create "apple" → fridge via category pill | 10s |
@@ -50,7 +51,9 @@ Order mirrors what a real user does:
 
 Total ≈ 1 min per variant. Scenario steps and exact selectors live in the
 script itself (`scripts/demo-scenarios.ts` — each block is commented with the
-gotchas that shaped it).
+gotchas that shaped it). Help embeds `01/03/04/05/06` via `DemoVideo`; the
+onboarding welcome card embeds only `00` (hardcoded light variant), so `00` is
+deliberately calmer than the Help demos and `01`/`03` stay Help-only.
 
 ## Architecture decisions
 

@@ -168,6 +168,57 @@ interface Scenario {
 }
 
 const scenarios: Scenario[] = [
+  // --- 00 — dedicated onboarding welcome preview ------------------------------
+  // Embedded (autoplaying, looping) in the onboarding step-1 card — NOT in
+  // Help. Designed for that small embed: a steady opening beat (no motion),
+  // then two deliberate catalog-chip taps into the still-empty list. Its
+  // prepare performs a real (unrecorded) onboarding so the take starts on a
+  // settled main view — the mount animations are gone before the recorder
+  // attaches, so the embed never opens with "the app animating in".
+  {
+    file: "00-welcome",
+    prepare: async (p) => {
+      await p.goto(BASE)
+      // One-time wipe for a genuine first run (same pattern as scenario 01;
+      // 01 re-wipes and re-onboards right after this, so no state leaks).
+      await p.evaluate(() => localStorage.clear())
+      await p.goto(BASE)
+      // Unrecorded click-through of the real onboarding (no dice rolls).
+      await p.getByRole("button", { name: "Next" }).click()
+      // Step 2's Next stays disabled while the profile generates — wait for
+      // the username value before advancing.
+      await p.getByLabel("Username").waitFor({ state: "visible" })
+      await p.waitForFunction(
+        () =>
+          (document.querySelector<HTMLInputElement>("#username")?.value ?? "")
+            .length > 0
+      )
+      await p.getByRole("button", { name: "Next" }).click()
+      await p
+        .getByRole("radio", { name: "Minimal (starter)" })
+        .waitFor({ state: "visible", timeout: 5000 })
+      await p.getByRole("button", { name: "Finish" }).click()
+      await p
+        .getByText("Tap items below to add to the shopping list.")
+        .waitFor()
+    },
+    run: async (p) => {
+      await think(1400, 2000)
+      // Both targets live in the two default-open groups (cooking/fridge);
+      // scope to catalog chips — after adding, the same name also exists in
+      // the list panel and getByRole alone would multi-match.
+      const chip = (name: string) =>
+        p
+          .getByRole("button", { name })
+          .and(p.locator('[data-testid="catalog-item"]'))
+      await humanClick(chip("eggs"))
+      await think(900, 1500)
+      await humanClick(chip("milk"))
+      await think(900, 1500)
+      await think(1000, 1600)
+    },
+  },
+
   // --- 01 — onboarding ------------------------------------------------------
   {
     file: "01-onboarding",

@@ -66,7 +66,7 @@ describe("OnboardingView", () => {
     renderOnboarding()
 
     // happy-dom doesn't decode/play videos — assert element + attributes only.
-    const video = document.querySelector('video[src*="03-add-items-light"]')
+    const video = document.querySelector('video[src*="00-welcome-light"]')
     expect(video).not.toBeNull()
     expect(video?.hasAttribute("controls")).toBe(false)
 
