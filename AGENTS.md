@@ -45,7 +45,12 @@ Progressive test suites — pick the one that matches the moment (see `docs/DEV.
 - `bun run test:watch` — watch mode.
 - `bun run test:e2e` — Playwright against the dev server (`e2e/`).
 - `bun run test:e2e:prod` — Playwright against a production preview (`e2e-prod/`); builds first.
-- `bun run test:pre` — all Rstest + both Playwright suites (release gate).
+- `bun run test:pre` — typecheck + all Rstest + both Playwright suites (release gate).
+
+### Type checking
+
+- Run `bun run typecheck` after type-relevant changes and before committing — `tsc --noEmit --pretty` (TypeScript 7's native compiler) reports every type error.
+- It is also the first step of `bun run test:pre` (release gate), so a type error blocks a release like a failing test does.
 
 ### Biome
 

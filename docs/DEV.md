@@ -303,6 +303,11 @@ The feature-demo video set (`public/demos/*.mp4`, light + dark variants) is gene
 - `bun run format` — format only (`biome format --write`).
 - `bun run check` — full fix: `biome check --write --unsafe` — lints, formats, **organizes imports** (`biome.json: assist.actions.source.organizeImports: "on"`), and sorts Tailwind classes (`linter.domains.tailwind`). Use this before committing after import changes; `lint` alone does not fix imports.
 
+### Type checking (tsc)
+
+- `bun run typecheck` — `tsc --noEmit --pretty` (TypeScript 7's native compiler): static-checks the whole project without emitting, reporting every type error with source context.
+- Run it after type-relevant changes (store types, component props, shared types) and before committing — it catches what runtime tests don't (broken prop contracts, stale type imports). It is also the **first step of the `test:pre` release gate**, so a type error blocks a release the same way a failing test does.
+
 ### Usage in React
 
 ```tsx
@@ -337,7 +342,7 @@ Progressive suites — cheap tests run often, expensive ones at the gates. Pick 
 |---|---|---|---|
 | **quick** | Pure helpers (`src/lib/**`) + store/command/selector layer (`tests/stores/**`) — the data model & core logic, no UI rendering | `bun run test:quick` | Dev loop after a logic change |
 | **all** | Every Rstest test (adds `src/components/**`, `src/hooks/**`, `tests/index`, `tests/seed*`) | `bun run test` | Pre-commit / CI |
-| **pre-release** | `all` + Playwright dev (`e2e/`) + production precache (`e2e-prod/`) | `bun run test:pre` | Release / main CI |
+| **pre-release** | `typecheck` + `all` + Playwright dev (`e2e/`) + production precache (`e2e-prod/`) | `bun run test:pre` | Release / main CI |
 
 - `bun run test:changed` is change-aware — it runs Rstest tests related to changed files, falling back to the full suite when the related set can't be resolved. (In this Rspack setup it currently runs the full suite, so use `test:quick` for the reliable fast dev gate.)
 - `bun run test:e2e` runs Playwright against the dev server; `bun run test:e2e:prod` runs the offline-precache specs against a production `preview` (so it **builds first** — the `e2e-prod/` specs need a real bundle, not the dev server).

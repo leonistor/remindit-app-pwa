@@ -22,7 +22,7 @@
     "test:watch": "rstest --watch",
     "test:e2e": "playwright test",
     "test:e2e:prod": "bun run build && playwright test -c playwright.prod.config.ts",
-    "test:pre": "bun run test && bun run test:e2e && bun run test:e2e:prod"
+    "test:pre": "bun run typecheck && bun run test && bun run test:e2e && bun run test:e2e:prod"
   },
   "dependencies": {
     "@ark-ui/react": "^5.39.0",
