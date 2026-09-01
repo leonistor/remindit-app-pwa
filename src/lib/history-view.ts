@@ -2,6 +2,8 @@
 // relative day headings. Extracted from views/history.tsx so the date grouping
 // and generic-days logic are testable without a React environment.
 
+import { m } from "@/paraglide/messages"
+import { getLocale } from "@/paraglide/runtime"
 import type { HistoryEvent } from "@/stores/types"
 
 // Day key in the form YYYY-MM-DD (zero-padded so lexicographic order matches
@@ -13,11 +15,23 @@ export function dayKey(ts: number): string {
   ).padStart(2, "0")}`
 }
 
-const dayFormatter = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-})
+// One cached formatter per locale — Intl.DateTimeFormat construction is
+// comparatively expensive, and the locale is resolved at call time so headings
+// render in the active language rather than the runtime default.
+const dayFormatters = new Map<string, Intl.DateTimeFormat>()
+
+function dayFormatterFor(locale: string): Intl.DateTimeFormat {
+  let formatter = dayFormatters.get(locale)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+    dayFormatters.set(locale, formatter)
+  }
+  return formatter
+}
 
 // Human heading for a day key. Relative labels ("Today"/"Yesterday") are
 // computed against `now` so the logic is deterministic and testable; other days
@@ -31,9 +45,9 @@ export function formatDayHeading(
   const today = new Date(now)
   const yesterday = new Date(now)
   yesterday.setDate(today.getDate() - 1)
-  if (dayKey(today.getTime()) === key) return "Today"
-  if (dayKey(yesterday.getTime()) === key) return "Yesterday"
-  return dayFormatter.format(date)
+  if (dayKey(today.getTime()) === key) return m.historyToday()
+  if (dayKey(yesterday.getTime()) === key) return m.historyYesterday()
+  return dayFormatterFor(getLocale()).format(date)
 }
 
 export interface HistoryDayGroup {

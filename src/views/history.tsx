@@ -12,13 +12,28 @@ import {
 } from "@/components/ui/table"
 import { useCategoryPalette } from "@/hooks/use-category-palette"
 import { formatDayHeading, groupByDay } from "@/lib/history-view"
+import { m } from "@/paraglide/messages"
+import { getLocale } from "@/paraglide/runtime"
 import { $history, UNCATEGORIZED_NAME } from "@/stores"
 import type { HistoryEvent } from "@/stores/types"
 
-const timeFormatter = new Intl.DateTimeFormat(undefined, {
-  hour: "2-digit",
-  minute: "2-digit",
-})
+// Locale-aware time formatting: the active locale is resolved at call time and
+// one formatter per locale is cached (Intl.DateTimeFormat construction is
+// comparatively expensive).
+const timeFormatters = new Map<string, Intl.DateTimeFormat>()
+
+const formatEventTime = (ts: number) => {
+  const locale = getLocale()
+  let formatter = timeFormatters.get(locale)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+    timeFormatters.set(locale, formatter)
+  }
+  return formatter.format(new Date(ts))
+}
 
 const HistoryRow = ({ event }: { event: HistoryEvent }) => {
   const palette = useCategoryPalette(event.categoryId)
@@ -32,11 +47,11 @@ const HistoryRow = ({ event }: { event: HistoryEvent }) => {
       </TableCell>
       <TableCell>
         <Badge variant={event.action === "add" ? "success" : "secondary"}>
-          {event.action === "add" ? "Added" : "Removed"}
+          {event.action === "add" ? m.historyAdded() : m.historyRemoved()}
         </Badge>
       </TableCell>
       <TableCell className="text-muted-foreground">
-        {timeFormatter.format(new Date(event.timestamp))}
+        {formatEventTime(event.timestamp)}
       </TableCell>
     </TableRow>
   )
@@ -54,14 +69,11 @@ const HistoryView = () => {
     <div className="mx-auto flex max-w-2xl flex-col gap-8 py-8">
       <div className="flex items-center gap-2">
         <BackButton />
-        <h1 className="font-bold text-2xl">History</h1>
+        <h1 className="font-bold text-2xl">{m.historyTitle()}</h1>
       </div>
 
       {groups.length === 0 ? (
-        <p className="text-muted-foreground">
-          No shopping history yet. Add and remove items from your list and
-          they&rsquo;ll show up here.
-        </p>
+        <p className="text-muted-foreground">{m.historyEmptyHint()}</p>
       ) : (
         <>
           {groups.slice(0, 7).map(({ key, events }) => (
@@ -70,10 +82,10 @@ const HistoryView = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Item</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Action</TableHead>
-                    <TableHead>When</TableHead>
+                    <TableHead>{m.historyItemColumn()}</TableHead>
+                    <TableHead>{m.historyCategoryColumn()}</TableHead>
+                    <TableHead>{m.historyActionColumn()}</TableHead>
+                    <TableHead>{m.historyWhenColumn()}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -86,7 +98,7 @@ const HistoryView = () => {
           ))}
 
           <p className="text-muted-foreground text-sm">
-            Full history display and search will be implemented soon.
+            {m.historyMoreComing()}
           </p>
         </>
       )}

@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/custom/button"
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/components/ui/menu"
 import { useIsMobile } from "@/hooks/use-is-mobile"
+import { m } from "@/paraglide/messages"
 import {
   $categories,
   type CatalogByCategoryAllGroup,
@@ -64,7 +65,9 @@ export const CategorySection = ({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label={`Toggle ${group.categoryName}`}
+                aria-label={m.catalogToggleCategoryAria({
+                  name: group.categoryName,
+                })}
               >
                 <CollapsibleIndicator />
               </Button>
@@ -77,10 +80,12 @@ export const CategorySection = ({
               aria-label={
                 isUncategorized
                   ? group.categoryName
-                  : `Edit ${group.categoryName} (double-click to edit)`
+                  : m.catalogEditCategoryAria({ name: group.categoryName })
               }
               title={
-                isUncategorized ? undefined : "Double-click to edit category"
+                isUncategorized
+                  ? undefined
+                  : m.catalogDoubleClickToEditCategory()
               }
               disabled={isUncategorized}
               onClick={isMobile ? handleEditCategory : undefined}
@@ -108,7 +113,11 @@ export const CategorySection = ({
               variant="outline"
               size="sm"
               className="h-7 shrink-0"
-              aria-label={`${group.items.length} ${group.items.length === 1 ? "item" : "items"}`}
+              aria-label={
+                group.items.length === 1
+                  ? m.catalogItemCountOne({ count: group.items.length })
+                  : m.catalogItemCountOther({ count: group.items.length })
+              }
             >
               {group.items.length}
             </Badge>
@@ -117,7 +126,9 @@ export const CategorySection = ({
               <Button
                 variant="outline"
                 size="icon-sm"
-                aria-label={`Add item to ${group.categoryName}`}
+                aria-label={m.catalogAddItemToCategoryAria({
+                  name: group.categoryName,
+                })}
                 onClick={() => onAddItem(group.categoryId)}
               >
                 <PlusIcon />
@@ -129,7 +140,9 @@ export const CategorySection = ({
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`More actions for ${group.categoryName}`}
+                      aria-label={m.catalogMoreActionsAria({
+                        name: group.categoryName,
+                      })}
                     >
                       <DotsThreeIcon weight="bold" />
                     </Button>
@@ -141,12 +154,14 @@ export const CategorySection = ({
                       closeOnSelect
                     >
                       <PencilSimpleIcon />
-                      Edit category
+                      {m.catalogEditCategory()}
                     </MenuItem>
                     <ConfirmDelete
-                      title={`Delete "${group.categoryName}"?`}
-                      description="Its items will be moved to Uncategorized. This cannot be undone."
-                      confirmLabel="Delete category"
+                      title={m.catalogDeleteCategoryTitle({
+                        name: group.categoryName,
+                      })}
+                      description={m.catalogDeleteCategoryDescription()}
+                      confirmLabel={m.catalogDeleteCategory()}
                       onConfirm={() =>
                         deleteCategoryWithReassign(group.categoryId)
                       }
@@ -158,7 +173,7 @@ export const CategorySection = ({
                         onClick={(e) => e.preventDefault()}
                       >
                         <TrashIcon />
-                        Delete category
+                        {m.catalogDeleteCategory()}
                       </MenuItem>
                     </ConfirmDelete>
                   </MenuContent>

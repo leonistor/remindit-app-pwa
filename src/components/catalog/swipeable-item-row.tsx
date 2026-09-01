@@ -3,6 +3,7 @@ import { useState } from "react"
 import { useSwipeable } from "react-swipeable"
 import { Button } from "@/components/ui/custom/button"
 import { cn } from "@/lib/utils"
+import { m } from "@/paraglide/messages"
 
 interface SwipeableItemRowProps {
   /** Row content (name + actions). Rendered as foreground that translates on swipe. */
@@ -130,7 +131,7 @@ export const SwipeableItemRow = ({
           tabIndex={revealed ? 0 : -1}
         >
           <TrashIcon weight="bold" />
-          Delete
+          {m.delete()}
         </Button>
       </div>
 

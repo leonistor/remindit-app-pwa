@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/menu"
 import { usePwaInstall } from "@/hooks/use-pwa-install"
 import { avatarInitials } from "@/lib/display"
+import { m } from "@/paraglide/messages"
 import { $user, installApp } from "@/stores"
 import { InstallInstructionsDialog } from "./install-instructions-dialog"
 import { ThemeMenu } from "./theme-menu"
@@ -30,14 +31,16 @@ import { ThemeMenu } from "./theme-menu"
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `text-sm transition-colors hover:text-foreground ${isActive ? "font-medium text-foreground" : "text-muted-foreground"}`
 
+// Labels resolve lazily so the active locale is read at render time,
+// not frozen at import time.
 const navLinks = [
-  { to: "/", label: "Shopping list", icon: List },
-  { to: "/profile", label: "Profile", icon: User },
-  { to: "/catalog", label: "Catalog", icon: Rows },
-  { to: "/history", label: "History", icon: Clock },
-  { to: "/share", label: "Share", icon: ShareNetwork },
-  { to: "/about", label: "About", icon: Info },
-  { to: "/help", label: "Help", icon: Question },
+  { to: "/", label: () => m.menuShoppingList(), icon: List },
+  { to: "/profile", label: () => m.menuProfile(), icon: User },
+  { to: "/catalog", label: () => m.menuCatalog(), icon: Rows },
+  { to: "/history", label: () => m.menuHistory(), icon: Clock },
+  { to: "/share", label: () => m.menuShare(), icon: ShareNetwork },
+  { to: "/about", label: () => m.menuAbout(), icon: Info },
+  { to: "/help", label: () => m.menuHelp(), icon: Question },
 ]
 
 const ProfileAvatarLink = () => {
@@ -45,7 +48,7 @@ const ProfileAvatarLink = () => {
   return (
     <NavLink
       to="/profile"
-      aria-label="Your profile"
+      aria-label={m.menuYourProfile()}
       className="inline-flex items-center rounded-full hover:opacity-80"
     >
       <Avatar size="md">
@@ -81,11 +84,11 @@ const Menu = () => {
           (links to Profile) per the Phase 4 plan. */}
       <NavLink
         to="/"
-        aria-label="RemindIt — Shopping list"
+        aria-label={m.menuHomeAriaLabel()}
         className="flex items-center gap-2 rounded-md hover:opacity-80"
       >
         <img
-          alt="RemindIt logo"
+          alt={m.menuLogoAlt()}
           className="size-8 rounded-full"
           src="/remindit-icon.svg"
         />
@@ -97,7 +100,7 @@ const Menu = () => {
           mobile dropdown used to show. */}
       <div className="ml-auto flex items-center gap-2">
         <NavLink to="/" className={linkClass}>
-          Shopping list
+          {m.menuShoppingList()}
         </NavLink>
         <MenuRoot open={open} onOpenChange={(details) => setOpen(details.open)}>
           <MenuTrigger asChild>
@@ -105,7 +108,7 @@ const Menu = () => {
               type="button"
               variant="ghost"
               size="icon-sm"
-              aria-label={open ? "Close menu" : "Open menu"}
+              aria-label={open ? m.menuClose() : m.menuOpen()}
               aria-expanded={open}
             >
               {open ? <X size={20} /> : <List size={20} />}
@@ -120,14 +123,14 @@ const Menu = () => {
                   onClick={() => setOpen(false)}
                 >
                   <Icon size={16} />
-                  {label}
+                  {label()}
                 </NavLink>
               </MenuItem>
             ))}
             {!installed && (
               <MenuItem value="install-app" onClick={handleInstall}>
                 <DownloadSimple size={16} />
-                Install Remindit
+                {m.installRemindit()}
               </MenuItem>
             )}
             <MenuSeparator />

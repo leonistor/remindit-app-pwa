@@ -15,6 +15,7 @@ import { cleanup, render, screen } from "@testing-library/react"
 import type { UserEvent } from "@testing-library/user-event"
 import userEvent from "@testing-library/user-event"
 import { QuickAddDialog } from "@/components/quick-add-dialog"
+import { m } from "@/paraglide/messages"
 import {
   $catalog,
   $list,
@@ -46,7 +47,9 @@ async function setupDialog() {
 
   closeCalls = []
   render(<QuickAddDialog open onOpenChange={(open) => closeCalls.push(open)} />)
-  const input = screen.getByPlaceholderText("Add an item…") as HTMLInputElement
+  const input = screen.getByPlaceholderText(
+    m.quickAddPlaceholder()
+  ) as HTMLInputElement
   const user = userEvent.setup()
   // Click to focus first: typing needs the combobox input active, and the
   // dialog's deferred auto-focus must not race the keystrokes.
@@ -124,7 +127,9 @@ describe("QuickAddDialog", () => {
     await typeValue(user, "apple")
 
     await user.click(
-      screen.getByRole("button", { name: "Add “apple” to Fridge" })
+      screen.getByRole("button", {
+        name: m.addNamedToCategory({ name: "apple", category: "Fridge" }),
+      })
     )
 
     expect(catalogItemsNamed("apple")).toBe(1)

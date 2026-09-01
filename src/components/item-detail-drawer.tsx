@@ -6,6 +6,7 @@ import {
   DrawerContent,
   DrawerHeader,
 } from "@/components/ui/drawer"
+import { m } from "@/paraglide/messages"
 import { $itemDetail } from "@/stores"
 
 // Phase 3 stub. `openDrawer` (from drawer-context) is intentionally not wired
@@ -25,14 +26,12 @@ export const ItemDetailDrawer = () => {
     >
       <DrawerContent>
         <DrawerHeader
-          title={item?.name ?? "Item details"}
+          title={item?.name ?? m.itemDetails()}
           description={categoryName}
         />
         <DrawerBody>
           {/* Phase 3: item attributes — photo, quantity, price */}
-          <p className="text-muted-foreground text-sm">
-            Item details will appear here.
-          </p>
+          <p className="text-muted-foreground text-sm">{m.itemDetailsHint()}</p>
         </DrawerBody>
       </DrawerContent>
     </Drawer>

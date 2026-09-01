@@ -8,6 +8,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/custom/button"
+import { m } from "@/paraglide/messages"
 
 interface ConfirmDeleteProps {
   /** Dialog title (e.g. "Delete category?"). */
@@ -27,7 +28,8 @@ interface ConfirmDeleteProps {
 export const ConfirmDelete = ({
   title,
   description,
-  confirmLabel = "Delete",
+  // Default param resolves per call, so the label follows the active language.
+  confirmLabel = m.delete(),
   onConfirm,
   children,
 }: ConfirmDeleteProps) => {
@@ -40,7 +42,7 @@ export const ConfirmDelete = ({
         <AlertDialogHeader title={title} description={description} />
         <AlertDialogFooter>
           <AlertDialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">{m.cancel()}</Button>
           </AlertDialogClose>
           <AlertDialogClose asChild>
             <Button

@@ -14,13 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { m } from "@/paraglide/messages"
 import {
   addCategory,
   type Category,
   type CategoryFrequency,
   updateCategory,
 } from "@/stores"
-import { FREQUENCY_LABELS, FREQUENCY_OPTIONS } from "./frequency-labels"
+import { FREQUENCY_OPTIONS, frequencyLabel } from "./frequency-labels"
 
 interface CategoryDialogProps {
   open: boolean
@@ -35,12 +36,12 @@ export const CategoryDialog = ({
   editingCategory,
 }: CategoryDialogProps) => {
   const { collection: frequencyCollection } = useListCollection<{
-    label: string
     value: CategoryFrequency
   }>({
     initialItems: FREQUENCY_OPTIONS,
     itemToValue: (item) => item.value,
-    itemToString: (item) => item.label,
+    // Resolved at call time so the label follows the active language.
+    itemToString: (item) => frequencyLabel(item.value),
   })
 
   const [name, setName] = useState("")
@@ -70,31 +71,31 @@ export const CategoryDialog = ({
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={editingCategory ? "Edit category" : "Add category"}
+      title={editingCategory ? m.catalogEditCategory() : m.catalogAddCategory()}
       description={
         editingCategory
-          ? "Rename the category or change how often it is bought."
-          : "Name the category and set how often it is typically bought."
+          ? m.categoryDialogEditDescription()
+          : m.categoryDialogAddDescription()
       }
       onSave={handleSave}
-      saveLabel={editingCategory ? "Save" : "Add"}
+      saveLabel={editingCategory ? m.save() : m.add()}
       saveDisabled={invalid}
     >
       <FieldGroup>
         <ValidatedField
-          label="Name"
+          label={m.categoryDialogNameLabel()}
           invalid={invalid}
-          error="Name is required."
+          error={m.categoryDialogNameRequired()}
         >
           <Input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Dairy"
+            placeholder={m.categoryDialogNamePlaceholder()}
             autoFocus
           />
         </ValidatedField>
-        <ValidatedField label="Purchase frequency">
+        <ValidatedField label={m.categoryDialogFrequencyLabel()}>
           <Select
             collection={
               frequencyCollection as unknown as ListCollection<unknown>
@@ -105,12 +106,14 @@ export const CategoryDialog = ({
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a frequency" />
+              <SelectValue
+                placeholder={m.categoryDialogFrequencyPlaceholder()}
+              />
             </SelectTrigger>
             <SelectContent>
               {FREQUENCY_OPTIONS.map((option) => (
                 <SelectItem key={option.value} item={option}>
-                  {FREQUENCY_LABELS[option.value]}
+                  {frequencyLabel(option.value)}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -8,40 +8,40 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog"
 import type { ManualInstallPlatform } from "@/lib/pwa-install"
+import { m } from "@/paraglide/messages"
 
+// Titles and steps resolve lazily (inside component render) so they follow
+// the active locale instead of freezing at import time.
 const INSTRUCTIONS: Record<
   ManualInstallPlatform,
-  { title: string; steps: string[] }
+  { title: () => string; steps: () => string[] }
 > = {
   ios: {
-    title: "Add to your iPhone or iPad",
-    steps: [
-      "Tap the Share button (the square with an arrow) in Safari.",
-      'Scroll down and tap "Add to Home Screen".',
-      "Tap Add in the top-right to confirm.",
+    title: () => m.installIosTitle(),
+    steps: () => [
+      m.installIosStep1(),
+      m.installIosStep2(),
+      m.installIosStep3(),
     ],
   },
   "mac-safari": {
-    title: "Add to your Mac",
-    steps: [
-      'In Safari, choose File ▸ "Add to Dock", or open the Share menu.',
-      "Confirm Remindit to add it to your Dock.",
-    ],
+    title: () => m.installMacTitle(),
+    steps: () => [m.installMacStep1(), m.installMacStep2()],
   },
   "android-nonchrome": {
-    title: "Add to your Android device",
-    steps: [
-      "Open your browser menu (the three-dot or three-line icon).",
-      'Tap "Install app" or "Add to Home screen".',
-      "Confirm to install Remindit.",
+    title: () => m.installAndroidTitle(),
+    steps: () => [
+      m.installAndroidStep1(),
+      m.installAndroidStep2(),
+      m.installAndroidStep3(),
     ],
   },
   other: {
-    title: "Install Remindit",
-    steps: [
-      "Open your browser menu (usually top-right).",
-      'Choose "Install Remindit" or "Add to Home screen".',
-      "Confirm to install.",
+    title: () => m.installRemindit(),
+    steps: () => [
+      m.installOtherStep1(),
+      m.installOtherStep2(),
+      m.installOtherStep3(),
     ],
   },
 }
@@ -65,19 +65,19 @@ export function InstallInstructionsDialog({
     <Dialog open={open} onOpenChange={(details) => onOpenChange(details.open)}>
       <DialogContent>
         <DialogHeader
-          description="Remindit works best installed, with offline access from your home screen or dock."
-          title={title}
+          description={m.installInstructionsDescription()}
+          title={title()}
         />
         <DialogBody>
           <ol className="list-decimal space-y-2 pl-5 text-sm">
-            {steps.map((step) => (
+            {steps().map((step) => (
               <li key={step}>{step}</li>
             ))}
           </ol>
         </DialogBody>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Close</Button>
+            <Button variant="outline">{m.close()}</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

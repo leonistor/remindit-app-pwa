@@ -30,6 +30,7 @@ import {
   type QuickAddItem,
   RECS_ONLY_THRESHOLD,
 } from "@/lib/quick-add"
+import { m } from "@/paraglide/messages"
 import {
   $catalogByCategory,
   $categories,
@@ -92,7 +93,7 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
               value: `${NEW_VALUE_PREFIX}${trimmed}`,
               label: trimmed,
               categoryId: NEW_CATEGORY_ID,
-              categoryName: "Add new",
+              categoryName: m.addNew(),
             },
           ]
         : baseItems,
@@ -218,8 +219,8 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
     <Dialog open={open} onOpenChange={(details) => onOpenChange(details.open)}>
       <DialogContent ref={contentRef}>
         <DialogHeader
-          description="Search the catalog or type to add something new."
-          title="Quick add"
+          description={m.quickAddDescription()}
+          title={m.quickAddTitle()}
         />
         <DialogBody>
           <Autocomplete
@@ -233,17 +234,17 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
               autoFocus
               size="lg"
               className="h-11 [&>input]:h-full [&>input]:w-full [&>input]:min-w-0 [&>input]:flex-1"
-              placeholder="Add an item…"
+              placeholder={m.quickAddPlaceholder()}
               showClear
               onKeyDown={handleKeyDown}
             />
             <AutocompleteContent>
-              <AutocompleteEmpty>No items found.</AutocompleteEmpty>
+              <AutocompleteEmpty>{m.noItemsFound()}</AutocompleteEmpty>
               <AutocompleteList>
                 {groups.map(([key, items]) => {
                   const heading =
                     key === NEW_CATEGORY_ID
-                      ? "Add new"
+                      ? m.addNew()
                       : (items[0]?.categoryName ?? "")
                   return (
                     <AutocompleteGroup key={key} id={key}>
@@ -255,7 +256,7 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
                           showIndicator={item.categoryId !== NEW_CATEGORY_ID}
                         >
                           {item.categoryId === NEW_CATEGORY_ID
-                            ? `Add “${item.label}”`
+                            ? m.addNamed({ name: item.label })
                             : item.label}
                         </AutocompleteItem>
                       ))}
@@ -268,7 +269,7 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
                   <Separator className="my-2" />
                   <div className="px-1 pb-1">
                     <p className="mb-1.5 px-1 font-medium text-muted-foreground text-xs">
-                      Category for “{trimmed}”
+                      {m.categoryFor({ name: trimmed })}
                     </p>
                     <div className="flex flex-wrap gap-1.5 px-1">
                       {categories.map((category) => {
@@ -282,7 +283,10 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
                             role="button"
                             tabIndex={0}
                             aria-pressed={isSelected}
-                            aria-label={`Add “${trimmed}” to ${category.name}`}
+                            aria-label={m.addNamedToCategory({
+                              name: trimmed,
+                              category: category.name,
+                            })}
                             className="cursor-pointer select-none"
                             onClick={(e) => {
                               e.preventDefault()
@@ -309,8 +313,8 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
                     </div>
                     <p className="mt-2 px-1 text-muted-foreground text-xs">
                       {trimmed.length >= 3
-                        ? "Tap a category to create — or press Enter / “Add …”."
-                        : "Type at least 3 letters, then tap a category or press Enter."}
+                        ? m.quickAddCreateHint()
+                        : m.quickAddMinLengthHint()}
                     </p>
                   </div>
                 </>
@@ -320,14 +324,13 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
 
           {!useRecommendedOnly && (
             <p className="mt-3 text-muted-foreground text-xs">
-              Add at least {RECS_ONLY_THRESHOLD} items to unlock personalized
-              recommendations — type a name that isn&apos;t listed to create it.
+              {m.quickAddUnlockHint({ count: RECS_ONLY_THRESHOLD })}
             </p>
           )}
         </DialogBody>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Done</Button>
+            <Button variant="outline">{m.done()}</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

@@ -8,6 +8,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "@rstest/core"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { m } from "@/paraglide/messages"
 import { $theme, type ThemeMode } from "@/stores/theme"
 
 const setMode = (mode: ThemeMode) => $theme.set(mode)
@@ -26,16 +27,20 @@ describe("ThemeToggle", () => {
     setMode("dark")
     render(<ThemeToggle />)
 
-    const button = screen.getByRole("button", { name: /Theme/ })
+    const button = screen.getByRole("button", {
+      name: m.themeToggleAriaLabel({ mode: m.themeDark() }),
+    })
     expect(button).toBeDefined()
-    expect(button.getAttribute("aria-label")).toContain("Dark")
+    expect(button.getAttribute("aria-label")).toContain(m.themeDark())
   })
 
   test("cycles to the next theme when clicked", () => {
     setMode("light")
     render(<ThemeToggle />)
 
-    const button = screen.getByRole("button", { name: /Theme/ })
+    const button = screen.getByRole("button", {
+      name: m.themeToggleAriaLabel({ mode: m.themeLight() }),
+    })
     fireEvent.click(button)
 
     expect($theme.get()).toBe("dark")

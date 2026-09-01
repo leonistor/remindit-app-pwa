@@ -10,6 +10,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter, Route, Routes } from "react-router"
 import { DATASETS, getDataset } from "seed"
+import { m } from "@/paraglide/messages"
 import { $onboarded, setOnboarded } from "@/stores"
 import { $catalog } from "@/stores/catalog"
 import { $history } from "@/stores/history"
@@ -35,7 +36,7 @@ function renderOnboarding() {
 // getTyping-library types getByLabelText as HTMLElement; cast so `.value` is
 // available (the username/first-name fields are always <input> elements).
 const usernameInput = () =>
-  screen.getByLabelText(/Username/i) as HTMLInputElement
+  screen.getByLabelText(m.onboardingUsernameLabel()) as HTMLInputElement
 
 // The initial profile is generated asynchronously (lazy DiceBear chunk) and
 // the dice button stays `disabled` while a roll is in flight — wait for both
@@ -44,7 +45,7 @@ async function awaitProfileReady() {
   // Direct value check — jest-dom v7's toHaveValue rejects RegExp matchers.
   await waitFor(() => expect(usernameInput().value).not.toBe(""))
   const dice = screen.getByRole("button", {
-    name: "Roll a new random name and avatar",
+    name: m.onboardingRollProfileLabel(),
   })
   await waitFor(() => expect(dice).toBeEnabled())
   return dice
@@ -68,29 +69,31 @@ describe("OnboardingView", () => {
 
     // Step 1 is the language picker: one radio per registered locale, with
     // English resolved as the default (no stored choice in a fresh env).
-    expect(screen.getByText("Choose your language")).toBeInTheDocument()
+    expect(screen.getByText(m.chooseYourLanguage())).toBeInTheDocument()
     expect(screen.getAllByRole("radio")).toHaveLength(2)
     expect(screen.getByRole("radio", { name: "English" })).toBeChecked()
 
     // Next reveals the welcome video step — happy-dom doesn't decode/play
     // videos, so assert element + attributes only.
-    await userEvent.click(screen.getByRole("button", { name: "Next" }))
+    await userEvent.click(screen.getByRole("button", { name: m.next() }))
     const video = document.querySelector('video[src*="00-welcome-light"]')
     expect(video).not.toBeNull()
     expect(video?.hasAttribute("controls")).toBe(false)
 
     // The welcome step is the only step without the dice button; Next is the
     // only visible footer action and it advances to the profile step.
-    await userEvent.click(screen.getByRole("button", { name: "Next" }))
-    expect(screen.getByLabelText(/First name/i)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: m.next() }))
+    expect(
+      screen.getByLabelText(m.onboardingFirstNameLabel())
+    ).toBeInTheDocument()
   })
 
   test("generates a suggested profile and rerolls username + avatar on dice click", async () => {
     renderOnboarding()
-    await userEvent.click(screen.getByRole("button", { name: "Next" }))
-    await userEvent.click(screen.getByRole("button", { name: "Next" }))
+    await userEvent.click(screen.getByRole("button", { name: m.next() }))
+    await userEvent.click(screen.getByRole("button", { name: m.next() }))
     const dice = await awaitProfileReady()
-    const avatar = screen.getByAltText("Avatar preview")
+    const avatar = screen.getByAltText(m.onboardingAvatarAlt())
     // Attribute matchers reject RegExp here — assert via toMatch instead.
     expect(avatar.getAttribute("src")).toMatch(/^data:image\/svg\+/)
 
@@ -109,17 +112,20 @@ describe("OnboardingView", () => {
 
   test("Next stays disabled until the username is non-empty", async () => {
     renderOnboarding()
-    await userEvent.click(screen.getByRole("button", { name: "Next" }))
-    await userEvent.click(screen.getByRole("button", { name: "Next" }))
+    await userEvent.click(screen.getByRole("button", { name: m.next() }))
+    await userEvent.click(screen.getByRole("button", { name: m.next() }))
     await awaitProfileReady()
-    const next = screen.getByRole("button", { name: "Next" })
+    const next = screen.getByRole("button", { name: m.next() })
     expect(next).toBeEnabled()
 
     // The actual validation rule is `!profile.username.trim()` — clearing the
     // username disables Next even with first/last name filled.
     await userEvent.clear(usernameInput())
     expect(next).toBeDisabled()
-    await userEvent.type(screen.getByLabelText(/First name/i), "Jane")
+    await userEvent.type(
+      screen.getByLabelText(m.onboardingFirstNameLabel()),
+      "Jane"
+    )
     expect(next).toBeDisabled()
 
     await userEvent.type(usernameInput(), "x")
@@ -131,7 +137,7 @@ describe("OnboardingView", () => {
     // Language → welcome: rail shows language complete, welcome current (the
     // old "Step X of N" header text is gone). State attrs live on the
     // Ark indicator elements, not on the item wrappers.
-    await userEvent.click(screen.getByRole("button", { name: "Next" }))
+    await userEvent.click(screen.getByRole("button", { name: m.next() }))
     const indicator = (n: string) =>
       Array.from(
         container.querySelectorAll('[data-slot="steps-indicator"]')
@@ -139,9 +145,9 @@ describe("OnboardingView", () => {
     expect(indicator("2")).toHaveAttribute("data-current")
     expect(indicator("1")).toHaveAttribute("data-complete")
 
-    await userEvent.click(screen.getByRole("button", { name: "Next" }))
+    await userEvent.click(screen.getByRole("button", { name: m.next() }))
     await awaitProfileReady()
-    await userEvent.click(screen.getByRole("button", { name: "Next" }))
+    await userEvent.click(screen.getByRole("button", { name: m.next() }))
 
     expect(screen.getAllByRole("radio")).toHaveLength(DATASETS.length)
     // The starter dataset is the default selection.
@@ -155,12 +161,12 @@ describe("OnboardingView", () => {
 
   test("Finish completes onboarding: flag persisted, profile + catalog seeded", async () => {
     renderOnboarding()
-    await userEvent.click(screen.getByRole("button", { name: "Next" }))
-    await userEvent.click(screen.getByRole("button", { name: "Next" }))
+    await userEvent.click(screen.getByRole("button", { name: m.next() }))
+    await userEvent.click(screen.getByRole("button", { name: m.next() }))
     await awaitProfileReady()
     const username = usernameInput().value
-    await userEvent.click(screen.getByRole("button", { name: "Next" }))
-    await userEvent.click(screen.getByRole("button", { name: "Finish" }))
+    await userEvent.click(screen.getByRole("button", { name: m.next() }))
+    await userEvent.click(screen.getByRole("button", { name: m.finish() }))
 
     expect($onboarded.get()).toBe(true)
     expect(localStorage.getItem(STORAGE_KEYS.onboarded)).toBe("true")
@@ -172,7 +178,7 @@ describe("OnboardingView", () => {
 
     // The onboarded gate navigated away from the onboarding step.
     expect(
-      screen.queryByRole("button", { name: "Finish" })
+      screen.queryByRole("button", { name: m.finish() })
     ).not.toBeInTheDocument()
   })
 })

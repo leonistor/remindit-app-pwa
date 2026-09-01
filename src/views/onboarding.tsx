@@ -113,7 +113,7 @@ const OnboardingView = () => {
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-8">
       <Card className="w-full max-w-xl">
-        <CardHeader title="Welcome to RemindIt" />
+        <CardHeader title={m.onboardingWelcomeTitle()} />
         <CardContent>
           {/* Ark's controlled prop is `step` (0-based) in this version —
               `value` would leak to the DOM and never update the machine. */}
@@ -146,8 +146,7 @@ const OnboardingView = () => {
           ) : step === 2 ? (
             <div className="flex flex-col items-center gap-6">
               <p className="text-center text-muted-foreground text-sm">
-                Here's a quick look at adding items — then two short steps and
-                you're in.
+                {m.onboardingVideoIntro()}
               </p>
               <video
                 ref={welcomeVideoRef}
@@ -164,7 +163,7 @@ const OnboardingView = () => {
               <div className="flex flex-col items-center gap-3">
                 {profile.avatar ? (
                   <img
-                    alt="Avatar preview"
+                    alt={m.onboardingAvatarAlt()}
                     className="size-24 rounded-full border"
                     src={profile.avatar}
                   />
@@ -177,17 +176,19 @@ const OnboardingView = () => {
                   size="icon-xl"
                   onClick={roll}
                   disabled={busy}
-                  aria-label="Roll a new random name and avatar"
+                  aria-label={m.onboardingRollProfileLabel()}
                 >
                   <DiceFive size={28} />
                 </Button>
                 <span className="text-muted-foreground text-xs">
-                  Not feeling it? Roll again.
+                  {m.onboardingRollHint()}
                 </span>
               </div>
 
               <Field className="gap-3">
-                <FieldLabel htmlFor="firstName">First name</FieldLabel>
+                <FieldLabel htmlFor="firstName">
+                  {m.onboardingFirstNameLabel()}
+                </FieldLabel>
                 <Input
                   id="firstName"
                   value={profile.firstName}
@@ -200,7 +201,9 @@ const OnboardingView = () => {
               </Field>
 
               <Field className="gap-3">
-                <FieldLabel htmlFor="lastName">Last name</FieldLabel>
+                <FieldLabel htmlFor="lastName">
+                  {m.onboardingLastNameLabel()}
+                </FieldLabel>
                 <Input
                   id="lastName"
                   value={profile.lastName}
@@ -213,7 +216,9 @@ const OnboardingView = () => {
               </Field>
 
               <Field className="gap-3">
-                <FieldLabel htmlFor="username">Username *</FieldLabel>
+                <FieldLabel htmlFor="username">
+                  {m.onboardingUsernameLabel()}
+                </FieldLabel>
                 <Input
                   id="username"
                   value={profile.username}
@@ -228,11 +233,10 @@ const OnboardingView = () => {
           ) : (
             <div className="flex flex-col gap-4">
               <p className="text-muted-foreground text-sm">
-                Pick a starter catalog. You can switch or reseed later from
-                Profile.
+                {m.onboardingDatasetHint()}
               </p>
               <SegmentGroup
-                aria-label="Seed dataset"
+                aria-label={m.seedDatasetLabel()}
                 className="w-full"
                 value={dataset}
                 onValueChange={(details) =>
@@ -265,17 +269,17 @@ const OnboardingView = () => {
               // literal; the cast satisfies the narrowed state union.
               onClick={() => setStep((step - 1) as 1 | 2 | 3)}
             >
-              Back
+              {m.back()}
             </Button>
           )}
           {step === 1 ? (
             <Button type="button" onClick={() => setStep(2)}>
-              Next
+              {m.next()}
             </Button>
           ) : null}
           {step === 2 ? (
             <Button type="button" onClick={() => setStep(3)}>
-              Next
+              {m.next()}
             </Button>
           ) : null}
           {step === 3 ? (
@@ -284,13 +288,13 @@ const OnboardingView = () => {
               onClick={() => setStep(4)}
               disabled={busy || !profile.username.trim()}
             >
-              Next
+              {m.next()}
             </Button>
           ) : null}
           {step === 4 ? (
             <Button type="button" onClick={finish} disabled={busy}>
               <User size={16} />
-              Finish
+              {m.finish()}
             </Button>
           ) : null}
         </CardFooter>

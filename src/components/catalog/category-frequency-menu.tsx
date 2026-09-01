@@ -7,8 +7,9 @@ import {
   MenuRadioItem,
   MenuTrigger,
 } from "@/components/ui/menu"
+import { m } from "@/paraglide/messages"
 import { type CategoryFrequency, updateCategory } from "@/stores"
-import { FREQUENCY_LABELS, FREQUENCY_OPTIONS } from "./frequency-labels"
+import { FREQUENCY_OPTIONS, frequencyLabel } from "./frequency-labels"
 
 interface CategoryFrequencyMenuProps {
   categoryId: string
@@ -29,9 +30,9 @@ export const CategoryFrequencyMenu = ({
       <Button
         variant="outline"
         size="sm"
-        aria-label={`Change ${categoryName} purchase frequency`}
+        aria-label={m.catalogChangeFrequencyAria({ name: categoryName })}
       >
-        {FREQUENCY_LABELS[frequency]}
+        {frequencyLabel(frequency)}
         <CaretDownIcon />
       </Button>
     </MenuTrigger>
@@ -46,7 +47,7 @@ export const CategoryFrequencyMenu = ({
       >
         {FREQUENCY_OPTIONS.map((option) => (
           <MenuRadioItem key={option.value} value={option.value}>
-            {FREQUENCY_LABELS[option.value]}
+            {frequencyLabel(option.value)}
           </MenuRadioItem>
         ))}
       </MenuRadioGroup>

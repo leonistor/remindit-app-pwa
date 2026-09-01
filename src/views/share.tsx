@@ -12,6 +12,8 @@ import {
   listImageFilename,
 } from "@/lib/share-image"
 import { cn } from "@/lib/utils"
+import { m } from "@/paraglide/messages"
+import { getLocale } from "@/paraglide/runtime"
 import type { SelectedViewEntry } from "@/stores"
 import { $categories } from "@/stores"
 
@@ -96,21 +98,11 @@ const ShareView = () => {
       // start the capture synchronously and pass the still-pending promise.
       const capture = captureListPng(card)
       copyImageBlobToClipboard(capture)
-        .then(() =>
-          setStatus({ kind: "success", message: "Copied to clipboard" })
-        )
-        .catch(() =>
-          setStatus({
-            kind: "error",
-            message: "Couldn't copy the image — try downloading it instead",
-          })
-        )
+        .then(() => setStatus({ kind: "success", message: m.shareCopied() }))
+        .catch(() => setStatus({ kind: "error", message: m.shareCopyFailed() }))
         .finally(() => setCapturing(false))
     } catch {
-      setStatus({
-        kind: "error",
-        message: "Couldn't copy the image — try downloading it instead",
-      })
+      setStatus({ kind: "error", message: m.shareCopyFailed() })
       setCapturing(false)
     }
   }
@@ -123,9 +115,9 @@ const ShareView = () => {
     try {
       const blob = await captureListPng(card)
       downloadBlob(blob, listImageFilename())
-      setStatus({ kind: "success", message: "Image downloaded" })
+      setStatus({ kind: "success", message: m.shareDownloaded() })
     } catch {
-      setStatus({ kind: "error", message: "Couldn't download the image" })
+      setStatus({ kind: "error", message: m.shareDownloadFailed() })
     } finally {
       setCapturing(false)
     }
@@ -135,13 +127,11 @@ const ShareView = () => {
     <div className="mx-auto flex max-w-2xl flex-col gap-6 py-8">
       <div className="flex items-center gap-2">
         <BackButton />
-        <h1 className="font-bold text-2xl">Share</h1>
+        <h1 className="font-bold text-2xl">{m.shareTitle()}</h1>
       </div>
 
       {groups.length === 0 ? (
-        <p className="text-muted-foreground">
-          Nothing left to share — check items off as you shop.
-        </p>
+        <p className="text-muted-foreground">{m.shareEmptyHint()}</p>
       ) : (
         <>
           {/* Forced-light card: hard-coded light colors (no theme tokens) so
@@ -155,7 +145,7 @@ const ShareView = () => {
             >
               <header className="flex items-center gap-2">
                 <img
-                  alt="RemindIt logo"
+                  alt={m.shareLogoAlt()}
                   className="size-8 rounded-full"
                   src="/remindit-icon.svg"
                 />
@@ -165,10 +155,10 @@ const ShareView = () => {
               </header>
               <div className="flex flex-col gap-1">
                 <h2 className="font-bold text-neutral-900 text-xl">
-                  Shopping list
+                  {m.shareCardTitle()}
                 </h2>
                 <p className="text-neutral-500 text-sm">
-                  {new Date().toLocaleDateString(undefined, {
+                  {new Date().toLocaleDateString(getLocale(), {
                     dateStyle: "long",
                   })}
                 </p>
@@ -197,20 +187,19 @@ const ShareView = () => {
           <div className="flex flex-col items-center gap-3">
             <div className="flex items-center gap-2">
               <Button disabled={capturing || !canCopy} onClick={handleCopy}>
-                Copy image
+                {m.shareCopyImage()}
               </Button>
               <Button
                 disabled={capturing}
                 onClick={handleDownload}
                 variant="outline"
               >
-                Download PNG
+                {m.shareDownloadPng()}
               </Button>
             </div>
             {!canCopy && (
               <p className="text-muted-foreground text-xs">
-                Copying isn&rsquo;t available in this browser — use Download
-                instead
+                {m.shareCopyUnavailable()}
               </p>
             )}
             <p

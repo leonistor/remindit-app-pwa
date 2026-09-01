@@ -6,6 +6,7 @@ import {
   MenuSubContent,
   MenuSubTrigger,
 } from "@/components/ui/menu"
+import { m } from "@/paraglide/messages"
 import { $theme, type ThemeMode } from "@/stores/theme"
 import { OPTIONS, ORDER, setTheme } from "./theme-toggle"
 
@@ -18,20 +19,20 @@ export function ThemeMenu() {
     <MenuSub>
       <MenuSubTrigger>
         {OPTIONS[mode].Icon && <OptionsIcon mode={mode} />}
-        Theme
+        {m.themeMenuLabel()}
       </MenuSubTrigger>
       <MenuSubContent>
         <MenuRadioGroup
           value={mode}
           onValueChange={(details) => setTheme(details.value as ThemeMode)}
         >
-          {ORDER.map((m) => {
-            const Icon = OPTIONS[m].Icon
+          {ORDER.map((mode) => {
+            const Icon = OPTIONS[mode].Icon
             return (
-              <MenuRadioItem key={m} value={m}>
+              <MenuRadioItem key={mode} value={mode}>
                 <span className="inline-flex items-center gap-2">
                   <Icon size={16} aria-hidden />
-                  {OPTIONS[m].label}
+                  {OPTIONS[mode].label()}
                 </span>
               </MenuRadioItem>
             )

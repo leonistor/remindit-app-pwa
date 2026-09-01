@@ -16,6 +16,7 @@ import {
 import { categoryPalette } from "@/lib/category-palette"
 import { getPalette, PALETTE_POOL, type Palette } from "@/lib/palettes"
 import { cn } from "@/lib/utils"
+import { m } from "@/paraglide/messages"
 import { $activePaletteId, setActivePalette } from "@/stores/palette"
 
 // Fixed demo categories used purely to preview the active palette's contrast.
@@ -52,7 +53,9 @@ export const PaletteChooser = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-xs">Preview</p>
+        <p className="text-muted-foreground text-xs">
+          {m.palettePreviewLabel()}
+        </p>
         <div className="flex flex-wrap gap-2">
           {SAMPLE_CATEGORIES.map((name) => (
             <PreviewChip key={name} name={name} palette={activePalette} />
@@ -64,7 +67,7 @@ export const PaletteChooser = () => {
         collection={collection}
         value={[activeId]}
         onValueChange={(details) => setActivePalette(details.value[0])}
-        aria-label="Category color palette"
+        aria-label={m.paletteChooserLabel()}
       >
         <ListboxContent className="gap-3">
           {collection.items.map((palette) => (

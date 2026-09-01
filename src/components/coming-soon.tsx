@@ -7,6 +7,7 @@ import {
   CardMedia,
   CardTitle,
 } from "@/components/ui/card"
+import { m } from "@/paraglide/messages"
 
 export const ComingSoon = () => (
   <Card className="mx-auto w-full max-w-sm">
@@ -14,13 +15,11 @@ export const ComingSoon = () => (
       <HammerIcon className="size-8" aria-hidden />
     </CardMedia>
     <CardHeader>
-      <CardTitle>We&rsquo;re working on this!</CardTitle>
-      <CardDescription>This part of RemindIt is on its way.</CardDescription>
+      <CardTitle>{m.comingSoonTitle()}</CardTitle>
+      <CardDescription>{m.comingSoonDescription()}</CardDescription>
     </CardHeader>
     <CardContent>
-      <p className="text-muted-foreground text-sm">
-        Check back soon &mdash; it&rsquo;ll be ready in a future update.
-      </p>
+      <p className="text-muted-foreground text-sm">{m.comingSoonHint()}</p>
     </CardContent>
   </Card>
 )

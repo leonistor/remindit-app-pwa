@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useIsMobile } from "@/hooks/use-is-mobile"
+import { m } from "@/paraglide/messages"
 import {
   type CatalogByCategoryItem,
   deleteCatalogItemWithCascade,
@@ -41,7 +42,7 @@ export const CategoryItemsTable = ({
     useState<CatalogByCategoryItem | null>(null)
 
   if (items.length === 0) {
-    return <p className="text-muted-foreground text-sm">No items yet.</p>
+    return <p className="text-muted-foreground text-sm">{m.catalogNoItems()}</p>
   }
 
   const handleEdit = (item: CatalogByCategoryItem) => onEditItem(item)
@@ -61,14 +62,14 @@ export const CategoryItemsTable = ({
             <SwipeableItemRow
               key={item.id}
               enabled
-              deleteLabel={`Delete ${item.name}`}
+              deleteLabel={m.catalogDeleteItemAria({ name: item.name })}
               onDelete={() => setPendingDelete(item)}
             >
               {/* Tap to edit, keyboard Enter to edit */}
               <button
                 type="button"
                 className="w-full px-3 py-2.5 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label={`Edit ${item.name} (tap to edit)`}
+                aria-label={m.catalogEditItemTapAria({ name: item.name })}
                 onClick={() => handleEdit(item)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -93,17 +94,17 @@ export const CategoryItemsTable = ({
             <AlertDialogHeader
               title={
                 pendingDelete
-                  ? `Delete "${pendingDelete.name}"?`
-                  : "Delete item?"
+                  ? m.catalogDeleteItemTitle({ name: pendingDelete.name })
+                  : m.catalogDeleteItemQuestion()
               }
-              description="This will also remove it from your shopping list. This cannot be undone."
+              description={m.catalogDeleteItemDescription()}
             />
             <AlertDialogFooter>
               <AlertDialogClose asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="outline">{m.cancel()}</Button>
               </AlertDialogClose>
               <Button variant="destructive" onClick={handleConfirmDelete}>
-                Delete item
+                {m.catalogDeleteItem()}
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -118,9 +119,9 @@ export const CategoryItemsTable = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Item</TableHead>
+            <TableHead>{m.catalogItemHeader()}</TableHead>
             <TableHead className="w-12 text-right">
-              <span className="sr-only">Delete</span>
+              <span className="sr-only">{m.delete()}</span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -131,8 +132,10 @@ export const CategoryItemsTable = ({
                 <button
                   type="button"
                   className="w-full px-2 py-2 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  aria-label={`Edit ${item.name} (double-click to edit)`}
-                  title="Double-click to edit"
+                  aria-label={m.catalogEditItemDoubleClickAria({
+                    name: item.name,
+                  })}
+                  title={m.catalogDoubleClickToEdit()}
                   onDoubleClick={() => handleEdit(item)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
@@ -146,15 +149,15 @@ export const CategoryItemsTable = ({
               </TableCell>
               <TableCell className="text-right">
                 <ConfirmDelete
-                  title={`Delete "${item.name}"?`}
-                  description="This will also remove it from your shopping list. This cannot be undone."
-                  confirmLabel="Delete item"
+                  title={m.catalogDeleteItemTitle({ name: item.name })}
+                  description={m.catalogDeleteItemDescription()}
+                  confirmLabel={m.catalogDeleteItem()}
                   onConfirm={() => deleteCatalogItemWithCascade(item.id)}
                 >
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    aria-label={`Delete ${item.name}`}
+                    aria-label={m.catalogDeleteItemAria({ name: item.name })}
                   >
                     <TrashIcon />
                   </Button>
@@ -175,16 +178,18 @@ export const CategoryItemsTable = ({
         <AlertDialogContent>
           <AlertDialogHeader
             title={
-              pendingDelete ? `Delete "${pendingDelete.name}"?` : "Delete item?"
+              pendingDelete
+                ? m.catalogDeleteItemTitle({ name: pendingDelete.name })
+                : m.catalogDeleteItemQuestion()
             }
-            description="This will also remove it from your shopping list. This cannot be undone."
+            description={m.catalogDeleteItemDescription()}
           />
           <AlertDialogFooter>
             <AlertDialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline">{m.cancel()}</Button>
             </AlertDialogClose>
             <Button variant="destructive" onClick={handleConfirmDelete}>
-              Delete item
+              {m.catalogDeleteItem()}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

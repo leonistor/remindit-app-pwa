@@ -2,6 +2,7 @@ import { DownloadSimple } from "@phosphor-icons/react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/custom/button"
 import { usePwaInstall } from "@/hooks/use-pwa-install"
+import { m } from "@/paraglide/messages"
 import { dismissInstall, dismissLater, installApp } from "@/stores/pwa-install"
 
 // Non-blocking prompt for Chromium browsers that offer a native install. Hidden
@@ -33,20 +34,20 @@ export function InstallBanner() {
       >
         <DownloadSimple size={20} className="shrink-0 text-primary" />
         <div className="flex-1 text-sm">
-          <p className="font-medium">Install Remindit</p>
+          <p className="font-medium">{m.installRemindit()}</p>
           <p className="text-muted-foreground">
-            Add it to your device for quick, offline access.
+            {m.installBannerDescription()}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <Button size="sm" variant="ghost" onClick={dismissLater}>
-            Maybe later
+            {m.installBannerMaybeLater()}
           </Button>
           <Button size="sm" variant="ghost" onClick={dismissInstall}>
-            No
+            {m.installBannerNo()}
           </Button>
           <Button size="sm" onClick={() => installApp()}>
-            Install
+            {m.installBannerInstall()}
           </Button>
         </div>
       </div>

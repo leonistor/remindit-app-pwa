@@ -1,129 +1,104 @@
 import { Link } from "react-router"
 import { BackButton } from "@/components/back-button"
+import { m } from "@/paraglide/messages"
 
 const AboutView = () => (
   <div className="mx-auto flex max-w-2xl flex-col gap-6 py-8">
     <div className="flex items-center gap-2">
       <BackButton />
-      <h1 className="font-bold text-2xl">About</h1>
+      <h1 className="font-bold text-2xl">{m.aboutTitle()}</h1>
     </div>
 
     <p className="text-muted-foreground">
-      See what&rsquo;s new in{" "}
+      {m.aboutChangelogPrefix()}{" "}
       <Link
         className="text-primary underline underline-offset-4 hover:opacity-90"
         to="/changelog"
       >
-        the changelog
+        {m.aboutChangelogLink()}
       </Link>
       .
     </p>
 
-    <p className="text-muted-foreground">
-      RemindIt is a Progressive Web App for managing your personal shopping
-      list. Add it to your home screen and it works offline — your data stays on
-      your device.
-    </p>
+    <p className="text-muted-foreground">{m.aboutTagline()}</p>
 
     <section className="flex flex-col gap-2">
-      <h2 className="font-semibold text-lg">What&rsquo;s included today</h2>
+      <h2 className="font-semibold text-lg">{m.aboutIncludedSection()}</h2>
       <p className="text-muted-foreground text-sm">
-        Everything shipping in the current release, at a glance.
+        {m.aboutIncludedSubtitle()}
       </p>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
         <li>
-          <strong>First-run onboarding</strong>: a quick 3-step setup shows you
-          the app in action, rolls a random profile (avatar + handle), and lets
-          you pick a starter catalog before landing on your list.
+          <strong>{m.aboutFeatureOnboarding()}</strong>
+          {m.aboutFeatureOnboardingDesc()}
         </li>
         <li>
-          <strong>Profile</strong>: manage your name and username, switch your
-          starter catalog, pick a color palette, and reset or reseed your data —
-          all from one place (tap your avatar in the menu).
+          <strong>{m.navProfile()}</strong>
+          {m.aboutFeatureProfileDesc()}
+        </li>
+        <li>{m.aboutFeatureList()}</li>
+        <li>
+          <strong>{m.aboutFeatureQuickAdd()}</strong>
+          {m.aboutFeatureQuickAddDesc1()} <strong>+</strong>{" "}
+          {m.aboutFeatureQuickAddDesc2()} <strong>Enter</strong>{" "}
+          {m.aboutFeatureQuickAddDesc3()}
         </li>
         <li>
-          Build your list by tapping items; tap again to remove them. Your list
-          is grouped by category and you can check items off as you shop.
+          <strong>{m.navCatalog()}</strong>
+          {m.aboutFeatureCatalogDesc1()} <strong>⋯</strong>{" "}
+          {m.aboutFeatureCatalogDesc2()} <strong>{m.delete()}</strong>{" "}
+          {m.aboutFeatureCatalogDesc3()} <strong>{m.catalogAddItem()}</strong>{" "}
+          {m.aboutFeatureCatalogDesc4()}{" "}
+          <strong>{m.catalogAddCategory()}</strong>{" "}
+          {m.aboutFeatureCatalogDesc5()}{" "}
+          <strong>{m.catalogUncategorized()}</strong>
+          {m.aboutFeatureCatalogDesc6()}
         </li>
         <li>
-          <strong>Quick add</strong>: tap <strong>+</strong> in the floating row
-          at the top of your list to add a new item — a grouped autocomplete
-          suggests items by category and surfaces your recommendations as you
-          type. When creating a new item, category pills appear below the
-          results: tap a pill to create in that category immediately, or press{" "}
-          <strong>Enter</strong> to create with the selected pill (at least 3
-          letters).
+          <strong>{m.aboutFeatureRecommendations()}</strong>
+          {m.aboutFeatureRecommendationsDesc()}
         </li>
         <li>
-          <strong>Catalog</strong>: manage items and categories in collapsible
-          sections sorted by how often you reach for them, with items
-          alphabetically sorted (A–Z) within each category. A contextual legend
-          at the top explains the affordances: double-click (desktop) or tap
-          (mobile) a name to rename via dialog, use the <strong>⋯</strong> menu
-          to edit or delete a category, and swipe an item left on mobile to
-          reveal <strong>Delete</strong> (confirmed in a dialog). Both{" "}
-          <strong>Add item</strong> and <strong>Add category</strong> are
-          outline buttons in the header — deleting a category moves its items to{" "}
-          <strong>Uncategorized</strong>; deleting an item also removes it from
-          your list.
+          <strong>{m.navHistory()}</strong>
+          {m.aboutFeatureHistoryDesc()}
         </li>
         <li>
-          <strong>Smart recommendations</strong>: colored pips mark items that
-          are overdue or due soon based on how often you buy them, and learn
-          from your history the more you shop. A count next to each category
-          name in the catalog tells you how many of its items are recommended
-          right now.
+          <strong>{m.navShare()}</strong>
+          {m.aboutFeatureShareDesc1()} <strong>{m.helpCopyImage()}</strong>{" "}
+          {m.aboutFeatureShareDesc2()} <strong>{m.helpDownloadPng()}</strong>{" "}
+          {m.aboutFeatureShareDesc3()}
         </li>
         <li>
-          <strong>History</strong>: review your recent shopping in the History
-          tab — your last 7 days of adds and removes, grouped by day, so you can
-          see what you&rsquo;ve picked up and what&rsquo;s still pending.
+          <strong>{m.aboutFeaturePalettes()}</strong>
+          {m.aboutFeaturePalettesDesc()}
         </li>
         <li>
-          <strong>Share</strong>: turn the list you still need into a polished
-          image from the menu — items grouped by category with their colors,
-          ready to <strong>Copy image</strong> or <strong>Download PNG</strong>{" "}
-          and send to whoever&rsquo;s shopping with you.
+          <strong>{m.aboutFeatureOrdering()}</strong>
+          {m.aboutFeatureOrderingDesc1()} <strong>+</strong>
+          {m.aboutFeatureOrderingDesc2()}
         </li>
         <li>
-          <strong>Color palettes</strong>: choose a categorical palette (Van
-          Gogh is the default) with a live preview; it colors categories and
-          items consistently across the app.
+          <strong>{m.aboutFeatureTheme()}</strong>
+          {m.aboutFeatureThemeDesc()}
         </li>
         <li>
-          <strong>Ordering controls</strong>: a floating sort button in the
-          top-right of your list (next to <strong>+</strong>) cycles your list
-          between category/name, most-recently-added, and alphabetical (A–Z) —
-          your choice is remembered.
-        </li>
-        <li>
-          <strong>Theme</strong>: pick dark, light, or system and your
-          preference is saved.
-        </li>
-        <li>
-          <strong>Install as an app</strong>: add Remindit to your home screen
-          and use it offline like a native app, with an in-app changelog to
-          track what&rsquo;s new.
+          <strong>{m.aboutFeatureInstall()}</strong>
+          {m.aboutFeatureInstallDesc()}
         </li>
       </ul>
     </section>
 
     <section className="flex flex-col gap-2">
-      <h2 className="font-semibold text-lg">What&rsquo;s coming</h2>
-      <p className="text-muted-foreground text-sm">
-        A peek at what we&rsquo;re building next.
-      </p>
+      <h2 className="font-semibold text-lg">{m.aboutComingSection()}</h2>
+      <p className="text-muted-foreground text-sm">{m.aboutComingSubtitle()}</p>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
-        <li>
-          Item attributes (photo, quantity, price) — the remaining piece of
-          Phase 3.
-        </li>
-        <li>Phase 4 — multi-user lists with real-time sync across devices.</li>
+        <li>{m.aboutComingAttributes()}</li>
+        <li>{m.aboutComingMultiUser()}</li>
       </ul>
     </section>
 
     <p className="text-muted-foreground">
-      RemindIt is open source. View the code and follow development on{" "}
+      {m.aboutOpenSourcePrefix()}{" "}
       <a
         className="text-primary underline underline-offset-4 hover:opacity-90"
         href="https://github.com/leonistor/remindit-app-pwa/"

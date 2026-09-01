@@ -2,6 +2,7 @@
 
 import { describe, expect, test } from "@rstest/core"
 import { dayKey, formatDayHeading, groupByDay } from "@/lib/history-view"
+import { getLocale } from "@/paraglide/runtime"
 import type { HistoryEvent } from "@/stores/types"
 
 const event = (id: string, timestamp: number): HistoryEvent => ({
@@ -35,7 +36,7 @@ describe("formatDayHeading", () => {
 
   test("formats older days as a short date", () => {
     const heading = formatDayHeading("2026-00-12", now)
-    const expected = new Intl.DateTimeFormat(undefined, {
+    const expected = new Intl.DateTimeFormat(getLocale(), {
       month: "short",
       day: "numeric",
       year: "numeric",

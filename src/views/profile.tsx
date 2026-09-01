@@ -116,30 +116,32 @@ const ProfileView = () => {
     <div className="flex flex-col items-center gap-6 py-8">
       <div className="flex items-center gap-2">
         <BackButton />
-        <h1 className="font-bold text-2xl">Profile</h1>
+        <h1 className="font-bold text-2xl">{m.profileTitle()}</h1>
       </div>
 
       <Card className="w-full max-w-xl">
         <CardHeader
-          title="Your details"
-          description="Update how you appear in RemindIt. The username is required."
+          title={m.profileDetailsTitle()}
+          description={m.profileDetailsDescription()}
         />
         <CardContent className="flex flex-col gap-4">
           <div className="flex items-center gap-4">
             {user.avatar ? (
               <img
-                alt="Your avatar"
+                alt={m.profileAvatarAlt()}
                 className="size-16 rounded-full border"
                 src={user.avatar}
               />
             ) : null}
             <p className="text-muted-foreground text-sm">
-              Avatar editing is coming later.
+              {m.profileAvatarHint()}
             </p>
           </div>
 
           <Field className="gap-3">
-            <FieldLabel htmlFor="firstName">First name</FieldLabel>
+            <FieldLabel htmlFor="firstName">
+              {m.profileFirstNameLabel()}
+            </FieldLabel>
             <Input
               id="firstName"
               value={form.firstName}
@@ -150,7 +152,9 @@ const ProfileView = () => {
           </Field>
 
           <Field className="gap-3">
-            <FieldLabel htmlFor="lastName">Last name</FieldLabel>
+            <FieldLabel htmlFor="lastName">
+              {m.profileLastNameLabel()}
+            </FieldLabel>
             <Input
               id="lastName"
               value={form.lastName}
@@ -161,7 +165,9 @@ const ProfileView = () => {
           </Field>
 
           <Field className="gap-3">
-            <FieldLabel htmlFor="username">Username *</FieldLabel>
+            <FieldLabel htmlFor="username">
+              {m.profileUsernameLabel()}
+            </FieldLabel>
             <Input
               id="username"
               value={form.username}
@@ -173,21 +179,21 @@ const ProfileView = () => {
         </CardContent>
         <CardFooter>
           <Button onClick={saveProfile} disabled={!form.username.trim()}>
-            Save changes
+            {m.profileSaveChanges()}
           </Button>
         </CardFooter>
       </Card>
 
       <Card className="w-full max-w-xl">
         <CardHeader
-          title="Catalog"
-          description="Manage the items and categories in your catalog."
+          title={m.profileCatalogTitle()}
+          description={m.profileCatalogDescription()}
         />
         <CardContent>
           <Button asChild variant="outline">
             <Link to="/catalog">
               <Rows size={16} />
-              Open catalog
+              {m.profileOpenCatalog()}
             </Link>
           </Button>
         </CardContent>
@@ -195,8 +201,8 @@ const ProfileView = () => {
 
       <Card className="w-full max-w-xl">
         <CardHeader
-          title="Color palette"
-          description="Choose how categories and items are colored across the app. Your pick is saved and applies everywhere."
+          title={m.profilePaletteTitle()}
+          description={m.profilePaletteDescription()}
         />
         <CardContent>
           <PaletteChooser />
@@ -212,20 +218,18 @@ const ProfileView = () => {
 
       <Card className="w-full max-w-xl">
         <CardHeader
-          title="My local data"
-          description="Download a copy of your data or erase everything stored in this browser."
+          title={m.profileLocalDataTitle()}
+          description={m.profileLocalDataDescription()}
         />
         <CardContent>
           <p className="text-muted-foreground text-sm">
-            Download saves a JSON file with all your lists, catalog, history,
-            and preferences. Erase removes everything — including theme — and
-            sends you back to onboarding.
+            {m.profileLocalDataHint()}
           </p>
         </CardContent>
         <CardFooter className="flex gap-2">
           <Button variant="outline" onClick={downloadLocalData}>
             <DownloadSimple size={16} />
-            Download
+            {m.profileDownloadButton()}
           </Button>
           <AlertDialog
             open={eraseOpen}
@@ -234,20 +238,20 @@ const ProfileView = () => {
             <AlertDialogTrigger asChild>
               <Button variant="destructive">
                 <Trash size={16} />
-                Erase
+                {m.profileEraseButton()}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader
-                title="Erase all local data?"
-                description="This cannot be undone. All lists, history, catalog, and preferences will be removed and you will be sent back to onboarding."
+                title={m.profileEraseTitle()}
+                description={m.profileEraseDescription()}
               />
               <AlertDialogFooter>
                 <Button variant="outline" onClick={() => setEraseOpen(false)}>
-                  Cancel
+                  {m.cancel()}
                 </Button>
                 <Button variant="destructive" onClick={handleErase}>
-                  Erase
+                  {m.profileEraseButton()}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -257,13 +261,12 @@ const ProfileView = () => {
 
       <Card className="w-full max-w-xl">
         <CardHeader
-          title="Reset & reseed"
-          description="Replace all local data with a fresh catalog from the selected dataset."
+          title={m.profileResetTitle()}
+          description={m.profileResetDescription()}
         />
         <CardContent>
           <p className="text-muted-foreground text-sm">
-            This wipes your shopping list, history, and catalog, then reseeds
-            from the chosen dataset. Your profile and theme preference are kept.
+            {m.profileResetHint()}
           </p>
         </CardContent>
         <CardFooter>
@@ -278,16 +281,17 @@ const ProfileView = () => {
             }}
           >
             <DialogTrigger asChild>
-              <Button variant="destructive">Reset app & reseed</Button>
+              <Button variant="destructive">{m.profileResetButton()}</Button>
             </DialogTrigger>
             <DialogContent>
               {resetPhase === "done" ? (
                 <>
                   <DialogHeader
-                    title="Catalog reseeded"
-                    description={`Replaced your catalog from "${
-                      DATASETS.find((d) => d.id === dataset)?.name ?? dataset
-                    }".`}
+                    title={m.profileReseededTitle()}
+                    description={m.profileReseededDescription({
+                      datasetName:
+                        DATASETS.find((d) => d.id === dataset)?.name ?? dataset,
+                    })}
                   />
                   <DialogBody>
                     <p
@@ -295,19 +299,19 @@ const ProfileView = () => {
                       role="status"
                     >
                       <CheckCircle size={18} weight="fill" />
-                      Taking you to your shopping list…
+                      {m.profileReseededRedirect()}
                     </p>
                   </DialogBody>
                 </>
               ) : (
                 <>
                   <DialogHeader
-                    title="Reset app and reseed?"
-                    description="This cannot be undone. Choose which dataset to seed from."
+                    title={m.profileResetConfirmTitle()}
+                    description={m.profileResetConfirmDescription()}
                   />
                   <DialogBody>
                     <SegmentGroup
-                      aria-label="Seed dataset"
+                      aria-label={m.seedDatasetLabel()}
                       className="w-full"
                       disabled={resetPhase === "busy"}
                       value={dataset}
@@ -329,7 +333,7 @@ const ProfileView = () => {
                   <DialogFooter>
                     {resetPhase === "idle" && (
                       <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
+                        <Button variant="outline">{m.cancel()}</Button>
                       </DialogClose>
                     )}
                     <Button
@@ -338,7 +342,9 @@ const ProfileView = () => {
                       isLoading={resetPhase === "busy"}
                       disabled={resetPhase === "busy"}
                     >
-                      {resetPhase === "busy" ? "Reseeding…" : "Reset & reseed"}
+                      {resetPhase === "busy"
+                        ? m.profileReseeding()
+                        : m.profileResetConfirmButton()}
                     </Button>
                   </DialogFooter>
                 </>

@@ -7,6 +7,7 @@ import { CategorySection } from "@/components/catalog/category-section"
 import { ItemDialog } from "@/components/catalog/item-dialog"
 import { Button } from "@/components/ui/custom/button"
 import { useIsMobile } from "@/hooks/use-is-mobile"
+import { m } from "@/paraglide/messages"
 import {
   $catalogByCategoryAll,
   type CatalogByCategoryItem,
@@ -52,16 +53,16 @@ const CatalogView = () => {
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <BackButton />
-          <h1 className="font-bold text-2xl">Catalog</h1>
+          <h1 className="font-bold text-2xl">{m.catalogTitle()}</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => openAddItem()}>
             <PlusIcon />
-            Add item
+            {m.catalogAddItem()}
           </Button>
           <Button variant="outline" onClick={openAddCategory}>
             <FolderPlusIcon />
-            Add category
+            {m.catalogAddCategory()}
           </Button>
         </div>
       </div>
@@ -76,24 +77,33 @@ const CatalogView = () => {
         <p className="min-w-0">
           {isMobile ? (
             <>
-              <span className="font-medium text-foreground">Tap</span> a
-              category or item name to edit it.{" "}
-              <span className="font-medium text-foreground">Swipe</span> an item
-              left to reveal{" "}
-              <span className="font-medium text-foreground">Delete</span> (you
-              will be asked to confirm). Categories are edited or deleted from
-              the <span className="font-medium text-foreground">⋯</span> menu.
+              <span className="font-medium text-foreground">
+                {m.catalogLegendTap()}
+              </span>{" "}
+              {m.catalogLegendTapHint()}{" "}
+              <span className="font-medium text-foreground">
+                {m.catalogLegendSwipe()}
+              </span>{" "}
+              {m.catalogLegendSwipeHint()}{" "}
+              <span className="font-medium text-foreground">{m.delete()}</span>{" "}
+              {m.catalogLegendDeleteHint()}{" "}
+              <span className="font-medium text-foreground">⋯</span>{" "}
+              {m.catalogLegendMenuSuffix()}
             </>
           ) : (
             <>
-              <span className="font-medium text-foreground">Double-click</span>{" "}
-              a category or item name to edit. Use the{" "}
-              <span className="font-medium text-foreground">⋯</span> menu for
-              more actions. Deleting an item asks for confirmation and also
-              removes it from your list; deleting a category moves its items to{" "}
+              <span className="font-medium text-foreground">
+                {m.catalogLegendDoubleClick()}
+              </span>{" "}
+              {m.catalogLegendDoubleClickHint()}{" "}
+              <span className="font-medium text-foreground">⋯</span>{" "}
+              {m.catalogLegendMoreActionsHint()}{" "}
               <span className="font-medium text-foreground">Uncategorized</span>
-              . Press <span className="font-medium text-foreground">Enter</span>{" "}
-              while focused to edit via keyboard.
+              {m.catalogLegendPressPrefix()}{" "}
+              <span className="font-medium text-foreground">
+                {m.catalogLegendEnter()}
+              </span>{" "}
+              {m.catalogLegendEnterHint()}
             </>
           )}
         </p>

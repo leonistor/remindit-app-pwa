@@ -13,15 +13,18 @@ import { Button } from "@/components/ui/custom/button"
 import { Float } from "@/components/ui/float"
 import { useItemTravelTransition } from "@/hooks/use-item-travel-transition"
 import { useShoppingList } from "@/hooks/use-shopping-list"
+import { m } from "@/paraglide/messages"
 import type { SelectedSort, SelectedViewEntry } from "@/stores"
 
-// Icon + label per sort mode, mirroring the theme toggle's OPTIONS map. The
-// single sort button renders the entry for the active mode.
-const OPTIONS: Record<SelectedSort, { label: string; Icon: Icon }> = {
-  default: { label: "Insertion order", Icon: ListBulletsIcon },
-  "category-name": { label: "Category, then name", Icon: SortAscendingIcon },
-  name: { label: "Name (A–Z)", Icon: TextAaIcon },
-  "last-added": { label: "Last added first", Icon: ClockIcon },
+// Icon per sort mode, mirroring the theme toggle's OPTIONS map. The single
+// sort button renders the entry for the active mode. Labels resolve from
+// messages at render time — m.* must not be called at module scope (it would
+// freeze the string at import, ignoring the active locale).
+const OPTIONS: Record<SelectedSort, { Icon: Icon }> = {
+  default: { Icon: ListBulletsIcon },
+  "category-name": { Icon: SortAscendingIcon },
+  name: { Icon: TextAaIcon },
+  "last-added": { Icon: ClockIcon },
 }
 
 // Renders the active list ($selectedOrdered) as color-coded item chips that
@@ -74,7 +77,13 @@ export const ShoppingListPanel = () => {
   )
 
   const isEmpty = selectedView.length === 0
-  const { label, Icon } = OPTIONS[sort]
+  const { Icon } = OPTIONS[sort]
+  const label = {
+    default: m.sortDefault(),
+    "category-name": m.sortCategoryName(),
+    name: m.sortNameAZ(),
+    "last-added": m.sortLastAdded(),
+  }[sort]
 
   return (
     <div className="relative flex h-full min-h-0 flex-col px-4 py-3">
@@ -88,8 +97,8 @@ export const ShoppingListPanel = () => {
           <Button
             variant="secondary"
             size="icon-lg"
-            aria-label={`Sort: ${label}. Click to change.`}
-            title={`Sort: ${label}`}
+            aria-label={m.sortButtonAriaLabel({ label })}
+            title={m.sortButtonTitle({ label })}
             onClick={cycleSelectedSort}
           >
             <Icon size={16} aria-hidden />
@@ -97,7 +106,7 @@ export const ShoppingListPanel = () => {
           <Button
             variant="default"
             size="icon-lg"
-            aria-label="Add to shopping list"
+            aria-label={m.addToShoppingList()}
             onClick={() => setQuickAddOpen(true)}
           >
             <PlusIcon size={18} aria-hidden />
@@ -118,7 +127,7 @@ export const ShoppingListPanel = () => {
         }
       >
         {isEmpty ? (
-          <p>Tap items below to add to the shopping list.</p>
+          <p>{m.listEmptyHint()}</p>
         ) : (
           selectedView.map((entry) => {
             const isRemoving = removingIds.has(entry.entryId)

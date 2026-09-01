@@ -1,6 +1,7 @@
 import { useStore } from "@nanostores/react"
 
 import { useAutoplayInView } from "@/hooks/use-autoplay-in-view"
+import { m } from "@/paraglide/messages"
 import { $themeVariant } from "@/stores"
 
 interface DemoVideoProps {
@@ -24,7 +25,7 @@ export function DemoVideo({ scenario, ...rest }: DemoVideoProps) {
   return (
     <video
       ref={ref}
-      aria-label={rest["aria-label"] ?? `Demo: ${scenario}`}
+      aria-label={rest["aria-label"] ?? m.demoVideoAriaLabel({ scenario })}
       autoPlay={!manual}
       className="mx-auto max-h-[480px] w-auto rounded-lg border bg-muted"
       controls={manual || blocked}

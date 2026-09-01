@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { m } from "@/paraglide/messages"
 import {
   $categories,
   addCatalogItem,
@@ -74,31 +75,31 @@ export const ItemDialog = ({
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={editingItem ? "Edit item" : "Add item"}
+      title={editingItem ? m.catalogEditItem() : m.catalogAddItem()}
       description={
         editingItem
-          ? "Update the item's name or category."
-          : "Give the item a name and pick its category."
+          ? m.catalogEditItemDescription()
+          : m.catalogAddItemDescription()
       }
       onSave={handleSave}
-      saveLabel={editingItem ? "Save" : "Add"}
+      saveLabel={editingItem ? m.save() : m.add()}
       saveDisabled={invalid || !categoryId}
     >
       <FieldGroup>
         <ValidatedField
-          label="Name"
+          label={m.itemDialogNameLabel()}
           invalid={invalid}
-          error="Name is required."
+          error={m.itemDialogNameRequired()}
         >
           <Input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Milk"
+            placeholder={m.itemDialogNamePlaceholder()}
             autoFocus
           />
         </ValidatedField>
-        <ValidatedField label="Category">
+        <ValidatedField label={m.itemDialogCategoryLabel()}>
           <Select
             collection={
               categoryCollection as unknown as ListCollection<unknown>
@@ -109,7 +110,7 @@ export const ItemDialog = ({
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a category" />
+              <SelectValue placeholder={m.itemDialogCategoryPlaceholder()} />
             </SelectTrigger>
             <SelectContent>
               {categories.map((category) => (

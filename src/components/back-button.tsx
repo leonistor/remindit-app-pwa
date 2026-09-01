@@ -1,5 +1,6 @@
 import { ArrowLeft } from "@phosphor-icons/react"
 import { useLocation, useNavigate } from "react-router"
+import { m } from "@/paraglide/messages"
 
 /**
  * In-app back control for iOS standalone mode, which lacks a system back button.
@@ -18,7 +19,7 @@ export function BackButton({ className = "" }: { className?: string }) {
   return (
     <button
       type="button"
-      aria-label="Go back"
+      aria-label={m.back()}
       onClick={goBack}
       className={`inline-flex items-center gap-1 rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground ${className}`}
     >

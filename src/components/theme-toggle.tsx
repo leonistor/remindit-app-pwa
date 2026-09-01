@@ -6,12 +6,15 @@ import {
   SunIcon,
 } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/custom/button"
+import { m } from "@/paraglide/messages"
 import { $theme, type ThemeMode } from "@/stores/theme"
 
-export const OPTIONS: Record<ThemeMode, { label: string; Icon: Icon }> = {
-  light: { label: "Light", Icon: SunIcon },
-  dark: { label: "Dark", Icon: MoonIcon },
-  system: { label: "System", Icon: MonitorIcon },
+// Labels resolve lazily so the active locale is read at render time,
+// not frozen at import time.
+export const OPTIONS: Record<ThemeMode, { label: () => string; Icon: Icon }> = {
+  light: { label: () => m.themeLight(), Icon: SunIcon },
+  dark: { label: () => m.themeDark(), Icon: MoonIcon },
+  system: { label: () => m.themeSystem(), Icon: MonitorIcon },
 }
 
 // Cycle order when clicking the toggle.
@@ -33,7 +36,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon-sm"
-      aria-label={`Theme: ${label}. Click to change.`}
+      aria-label={m.themeToggleAriaLabel({ mode: label() })}
       onClick={cycle}
     >
       <Icon size={16} aria-hidden />
