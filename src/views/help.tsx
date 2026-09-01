@@ -172,6 +172,7 @@ const HelpView = () => (
       <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
         <li>{m.helpDataLocal()}</li>
         <li>{m.helpDataSeed()}</li>
+        <li>{m.helpDataBackup()}</li>
         <li>
           {m.helpDataResetPrefix()}{" "}
           <Link

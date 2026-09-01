@@ -2,6 +2,24 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v4.4.0 — 2026-09-01
+
+_Make it yours — pick an avatar you like, and bring your data with you wherever you go._
+
+### ✨ New Features
+
+- **Pick your avatar**: Profile now offers 12 randomly generated avatar options — reroll until one feels right, and your choice is saved instantly
+- **Restore from backup**: bring your data back from a downloaded backup file — import it from Profile, or offer it right during a fresh onboarding and skip setup entirely
+
+### 🔧 Improvements
+
+- **About & Help stay in sync**: both pages now mention avatar editing and backup restore, and the "Your data" section explains how backups work
+
+### 🐛 Fixes
+
+- **Safer backups**: import validates the file's contents before touching your data — broken entries are dropped instead of breaking the app, oversized files are rejected up front with a clear message, and a backup made by a newer app version warns you before importing
+- **A more resilient avatar picker**: if avatars fail to load (for example after an app update), the picker now tells you and lets you retry instead of spinning forever
+
 ## v4.3.0 — 2026-09-01
 
 _Remindit now speaks Romanian — choose your language at first run or switch anytime from Profile._
