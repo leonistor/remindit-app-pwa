@@ -125,11 +125,7 @@ export const ShoppingListPanel = () => {
             return (
               <div
                 key={entry.entryId}
-                className={
-                  isRemoving
-                    ? "fade-out zoom-out-95 animate-out duration-150"
-                    : "fade-in zoom-in-95 animate-in duration-200"
-                }
+                className={isRemoving ? "tm-scale-out" : "tm-scale-in"}
               >
                 <ShoppingItem
                   name={entry.name}

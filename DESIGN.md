@@ -127,20 +127,33 @@ Other notable feature components: `ItemCatalog`, `ShoppingListPanel`, `PaletteCh
 
 ## 7. Motion
 
-Tokens in `globals.css:79-96`; all respect reduced motion.
+Two layers with a hard boundary:
+
+- **App layer — TailMotion** (`tailmotion/css`, imported last in `globals.css` so its utilities win the cascade): owns feature-code motion. The `tm-motion-calm` personality sits on `<html>` (`public/index.html`) and retunes every TailMotion class below it (×1.1 duration, 8px travel, no overshoot, 70ms stagger step) — matching the calm, ease-out, no-bounce feel. Reduced motion is built in: classes collapse to 1ms so state still lands; don't add `motion-reduce:` gates on TailMotion classes.
+- **Registry layer — tw-animate-css**: Shark component templates (dialog, drawer, accordion, collapsible, menu, popover, select, combobox, listbox, tooltip) ship their own animation classes and stay untouched. Don't add TailMotion classes to registry components — e.g. `tm-press` sets `transition-property: scale` and would override a template's `transition-all`, snapping hover color changes.
+
+TailMotion classes in use (feature code only):
+
+| Class | Where | Notes |
+|---|---|---|
+| `tm-scale-in` / `tm-scale-out` with `[--tm-scale-from:0.92]` / `[--tm-exit-scale:0.92]` | `ItemButton` `animationState` (chip add/remove) | preserves the original 0.18s / 0.92-scale feel under the calm profile |
+| `tm-scale-in` / `tm-scale-out` | `shopping-list-panel.tsx` wrapper divs | list item mount / removal (exit holds the final frame until the node is removed) |
+| `tm-slide-up` | `InstallBanner`, `UpdatePrompt` cards | bottom-anchored entrance (260ms, ≈286ms under calm) |
+| `tm-stagger tm-stagger-50` | `ItemCatalog` per-category chip container | chips cascade once when an accordion panel mounts on open (indices capped at 20 children) |
+
+Registry-referenced tokens that stay in `globals.css` (Shark templates depend on them):
 
 | Token | Duration / easing | Purpose |
 |---|---|---|
-| `animate-item-enter` / `animate-item-exit` | `0.18s ease-out` / `0.18s ease-in forwards` (`itemEnter` scale 0.92→1, fade) | catalog chip add/remove; also `motion-reduce:animate-none` |
-| `animate-drawer-slide-in-*` | `0.5s cubic-bezier(0.32,0.72,0,1)` (4 directions) | `ItemDetailDrawer` (bottom default) |
-| `animate-drawer-slide-out-*` | `0.3s cubic-bezier(0.4,0,0.2,1)` | drawer dismiss |
-| `animate-expand` / `collapse` | `0.2s ease-out` | Accordion |
-| `animate-slide-up` / `down` | `0.2s ease-out` (height `var(--height)` → 0) | collapsible regions |
-| `animate-flip-in` / `out` | `0.2s ease-out` (rotateY) | flip tokens (present, lightly used) |
-| `animate-marquee-x` / `y` | `var(--marquee-duration) linear infinite` | marquee primitives |
-| `animate-indeterminate` | `1.5s ease-in-out` | progress |
+| `animate-drawer-slide-in-*` / `out-*` | `0.5s cubic-bezier(0.32,0.72,0,1)` / `0.3s cubic-bezier(0.4,0,0.2,1)` (4 directions) | Shark `Drawer` content (bottom default) |
+| `animate-expand` / `collapse` | `0.2s ease-out` | Shark `Collapsible` |
+| `animate-slide-up` / `down` | `0.2s ease-out` (height `var(--height)` → 0) | Shark `Accordion` |
 
-View Transitions for item travel: per-item `view-transition-name` via `data-vt-catalog` / `data-vt-list`, root transition disabled (`::view-transition-old/new(root) {animation:none}`), group timing `cubic-bezier(0.4,0,0.2,1)` (`globals.css:552-575`). JS hook also bails on `prefers-reduced-motion`; CSS is the safety net.
+Removed as dead code: `flip-in/out`, `marquee-x/y`, `indeterminate` tokens + keyframes (zero usages in `src/`).
+
+Press feedback is the custom button's `clickEffect` (`active:scale-[0.98]`, default on) — deliberately not `tm-press` (see the registry-layer note above; the same `transition-all` conflict applies to the button fork).
+
+View Transitions for item travel: per-item `view-transition-name` via `data-vt-catalog` / `data-vt-list`, root transition disabled (`::view-transition-old/new(root) {animation:none}`), group timing `cubic-bezier(0.4,0,0.2,1)` (`globals.css`). JS hook also bails on `prefers-reduced-motion`; CSS is the safety net.
 
 ## 8. Iconography
 
@@ -186,6 +199,6 @@ Mode `light|dark|system` in `$theme` (`src/stores/theme.ts:1`, `persistentAtom` 
 
 - Add primitives via `bunx shadcn add @shark/<name>`; if forking, move to `src/components/ui/custom/` and document the divergence (see button case).
 - Color new UI with semantic tokens (`bg-primary`, `text-muted-foreground`, `border-input`) — do not introduce ad-hoc hex or `dark:` pairs. For anything categorized, use `useCategoryPalette`.
-- Keep motion on the approved tokens; gate new animations behind `motion-reduce:animate-none` and verify with `prefers-reduced-motion`.
+- App-layer motion uses TailMotion (`tm-*`) classes under the `tm-motion-calm` personality on `<html>`; registry components keep their shipped `tw-animate-css` classes. Never add TailMotion classes to registry component files (they override the template's own transitions). TailMotion handles reduced motion itself; verify new motion with `prefers-reduced-motion` emulation.
 - Persist any new user preference via `@nanostores/persistent` under `remindit:` and expose a hook that subscribes to it (pattern: `palette.ts` + `use-category-palette.ts`).
 - `bun run lint` (Biome) before committing; `bun run build` must pass. No secrets in `.env` commits.

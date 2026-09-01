@@ -1,6 +1,18 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* TailMotion owns app-layer motion (chips, banners, stagger — DESIGN.md §7).
+   Imported after Tailwind so its utilities win the cascade on shared
+   properties. Modular entries instead of the full library (`tailmotion/css`)
+   to keep the precached PWA stylesheet small; per-animation imports carry the
+   shared token + profile layer via base.css. Registry components keep
+   tw-animate-css classes. */
+@import "tailmotion/animations/base.css";
+@import "tailmotion/animations/zoom.css";
+@import "tailmotion/animations/exit.css";
+@import "tailmotion/animations/slide.css";
+@import "tailmotion/choreography.css";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -79,20 +91,8 @@
   --animate-slide-up: slideUp 0.2s ease-out;
   --animate-slide-down: slideDown 0.2s ease-out;
 
-  --animate-marquee-x: marqueeX var(--marquee-duration) linear infinite
-    var(--marquee-delay);
-  --animate-marquee-y: marqueeY var(--marquee-duration) linear infinite
-    var(--marquee-delay);
-  --animate-indeterminate: indeterminate 1.5s ease-in-out infinite;
-
   --animate-expand: expand 0.2s ease-out;
   --animate-collapse: collapse 0.2s ease-out;
-
-  --animate-flip-in: flip-in 0.2s ease-out;
-  --animate-flip-out: flip-out 0.2s ease-out;
-
-  --animate-item-enter: itemEnter 0.18s ease-out;
-  --animate-item-exit: itemExit 0.18s ease-in forwards;
 
   --animate-drawer-slide-in-bottom: drawer-slide-in-bottom 0.5s
     cubic-bezier(0.32, 0.72, 0, 1);
@@ -127,24 +127,6 @@
     }
   }
 
-  @keyframes marqueeX {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(var(--marquee-translate));
-    }
-  }
-
-  @keyframes marqueeY {
-    from {
-      transform: translateY(0);
-    }
-    to {
-      transform: translateY(var(--marquee-translate));
-    }
-  }
-
   @keyframes expand {
     from {
       height: var(--collapsed-height, 0);
@@ -160,55 +142,6 @@
     }
     to {
       height: var(--collapsed-height, 0);
-    }
-  }
-
-  @keyframes indeterminate {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(400%);
-    }
-  }
-
-  @keyframes flip-in {
-    from {
-      transform: rotateY(180deg);
-    }
-    to {
-      transform: rotateY(0deg);
-    }
-  }
-
-  @keyframes flip-out {
-    from {
-      transform: rotateY(0deg);
-    }
-    to {
-      transform: rotateY(180deg);
-    }
-  }
-
-  @keyframes itemEnter {
-    from {
-      opacity: 0;
-      transform: scale(0.92);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  @keyframes itemExit {
-    from {
-      opacity: 1;
-      transform: scale(1);
-    }
-    to {
-      opacity: 0;
-      transform: scale(0.92);
     }
   }
 

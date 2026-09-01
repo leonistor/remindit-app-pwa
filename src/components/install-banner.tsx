@@ -29,7 +29,7 @@ export function InstallBanner() {
       <div
         role="status"
         aria-live="polite"
-        className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-2xl border bg-popover px-4 py-3 text-popover-foreground shadow-lg"
+        className="tm-slide-up pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-2xl border bg-popover px-4 py-3 text-popover-foreground shadow-lg"
       >
         <DownloadSimple size={20} className="shrink-0 text-primary" />
         <div className="flex-1 text-sm">

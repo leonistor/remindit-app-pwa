@@ -62,7 +62,9 @@ export default function ItemCatalog() {
                 </span>
               </AccordionTrigger>
               <AccordionContent className="-mx-1">
-                <div className="flex flex-wrap gap-2 px-1 pt-2">
+                {/* tm-stagger: chips cascade in once when the panel mounts on
+                    open (50ms step under the calm profile). */}
+                <div className="tm-stagger tm-stagger-50 flex flex-wrap gap-2 px-1 pt-2">
                   {group.items.map((item) => {
                     const isSelected = selected.has(item.id)
                     return (

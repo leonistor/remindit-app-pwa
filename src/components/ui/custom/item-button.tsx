@@ -67,11 +67,14 @@ export const ItemButton = ({
       ? palette.dimmed
       : palette.button
 
+  // TailMotion entrance/exit (DESIGN.md §7). The scale overrides preserve the
+  // original 0.92 chip feel; reduced motion is handled by TailMotion itself
+  // (collapses to 1ms, state still lands).
   const animationClass =
     animationState === "enter"
-      ? "animate-item-enter motion-reduce:animate-none"
+      ? "tm-scale-in [--tm-scale-from:0.92]"
       : animationState === "exit"
-        ? "animate-item-exit motion-reduce:animate-none"
+        ? "tm-scale-out [--tm-exit-scale:0.92]"
         : ""
 
   const dotColor = recommendationTier
