@@ -1,8 +1,9 @@
 // Component test for the Onboarding view (src/views/onboarding.tsx):
-// the step-1 welcome video, initial + dice-rolled profile generation, the
-// Next-button validation rule (username must be non-empty — NOT first name),
-// the step-3 dataset radios, the Steps indicator rail states, and Finish
-// wiring `completeOnboarding` (flag flip + seeded catalog).
+// the step-1 language picker, the step-2 welcome video, initial + dice-rolled
+// profile generation, the Next-button validation rule (username must be
+// non-empty — NOT first name), the step-4 dataset radios, the Steps indicator
+// rail states, and Finish wiring `completeOnboarding` (flag flip + seeded
+// catalog).
 
 import { afterEach, beforeEach, describe, expect, test } from "@rstest/core"
 import { cleanup, render, screen, waitFor } from "@testing-library/react"
@@ -62,22 +63,31 @@ afterEach(() => {
 })
 
 describe("OnboardingView", () => {
-  test("starts on the welcome step: video renders without controls, Next reveals profile", async () => {
+  test("starts on the language step: locale radios, Next reveals the welcome video, then profile", async () => {
     renderOnboarding()
 
-    // happy-dom doesn't decode/play videos — assert element + attributes only.
+    // Step 1 is the language picker: one radio per registered locale, with
+    // English resolved as the default (no stored choice in a fresh env).
+    expect(screen.getByText("Choose your language")).toBeInTheDocument()
+    expect(screen.getAllByRole("radio")).toHaveLength(2)
+    expect(screen.getByRole("radio", { name: "English" })).toBeChecked()
+
+    // Next reveals the welcome video step — happy-dom doesn't decode/play
+    // videos, so assert element + attributes only.
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
     const video = document.querySelector('video[src*="00-welcome-light"]')
     expect(video).not.toBeNull()
     expect(video?.hasAttribute("controls")).toBe(false)
 
-    // Welcome step is the only step without the dice button; Next is the only
-    // visible footer action and it advances to the profile step.
+    // The welcome step is the only step without the dice button; Next is the
+    // only visible footer action and it advances to the profile step.
     await userEvent.click(screen.getByRole("button", { name: "Next" }))
     expect(screen.getByLabelText(/First name/i)).toBeInTheDocument()
   })
 
   test("generates a suggested profile and rerolls username + avatar on dice click", async () => {
     renderOnboarding()
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
     await userEvent.click(screen.getByRole("button", { name: "Next" }))
     const dice = await awaitProfileReady()
     const avatar = screen.getByAltText("Avatar preview")
@@ -100,6 +110,7 @@ describe("OnboardingView", () => {
   test("Next stays disabled until the username is non-empty", async () => {
     renderOnboarding()
     await userEvent.click(screen.getByRole("button", { name: "Next" }))
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
     await awaitProfileReady()
     const next = screen.getByRole("button", { name: "Next" })
     expect(next).toBeEnabled()
@@ -117,7 +128,7 @@ describe("OnboardingView", () => {
 
   test("Next reveals the dataset step with one radio per dataset, Minimal pre-selected", async () => {
     const { container } = renderOnboarding()
-    // Welcome → profile: rail shows welcome complete, profile current (the
+    // Language → welcome: rail shows language complete, welcome current (the
     // old "Step X of N" header text is gone). State attrs live on the
     // Ark indicator elements, not on the item wrappers.
     await userEvent.click(screen.getByRole("button", { name: "Next" }))
@@ -128,6 +139,7 @@ describe("OnboardingView", () => {
     expect(indicator("2")).toHaveAttribute("data-current")
     expect(indicator("1")).toHaveAttribute("data-complete")
 
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
     await awaitProfileReady()
     await userEvent.click(screen.getByRole("button", { name: "Next" }))
 
@@ -137,12 +149,13 @@ describe("OnboardingView", () => {
       screen.getByRole("radio", { name: "Minimal (starter)" })
     ).toBeChecked()
     // Profile → dataset: rail shows profile complete, dataset current.
-    expect(indicator("3")).toHaveAttribute("data-current")
-    expect(indicator("2")).toHaveAttribute("data-complete")
+    expect(indicator("4")).toHaveAttribute("data-current")
+    expect(indicator("3")).toHaveAttribute("data-complete")
   })
 
   test("Finish completes onboarding: flag persisted, profile + catalog seeded", async () => {
     renderOnboarding()
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
     await userEvent.click(screen.getByRole("button", { name: "Next" }))
     await awaitProfileReady()
     const username = usernameInput().value

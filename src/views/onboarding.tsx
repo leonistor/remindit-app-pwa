@@ -3,6 +3,7 @@ import { DiceFive, User } from "@phosphor-icons/react"
 import { type FocusEvent, type MouseEvent, useEffect, useState } from "react"
 import { Navigate, useNavigate } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
+import { LanguageChooser } from "@/components/language-chooser"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/custom/button"
 import { Field, FieldLabel } from "@/components/ui/field"
@@ -20,6 +21,7 @@ import {
   StepsSeparator,
 } from "@/components/ui/steps"
 import { generateRandomProfile } from "@/lib/profile-generator"
+import { m } from "@/paraglide/messages"
 import { $onboarded, completeOnboarding } from "@/stores"
 import type { UserProfile } from "@/stores/types"
 
@@ -64,7 +66,7 @@ const OnboardingView = () => {
   const navigate = useNavigate()
   const onboarded = useStore($onboarded)
 
-  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
   const [profile, setProfile] = useState<UserProfile>(EMPTY_PROFILE)
   const [dataset, setDataset] = useState<string>(DEFAULT_DATASET_ID)
   const [busy, setBusy] = useState(false)
@@ -115,7 +117,7 @@ const OnboardingView = () => {
         <CardContent>
           {/* Ark's controlled prop is `step` (0-based) in this version —
               `value` would leak to the DOM and never update the machine. */}
-          <Steps className="mb-6" count={3} step={step - 1}>
+          <Steps className="mb-6" count={4} step={step - 1}>
             <StepsList className="w-full">
               <StepsItem index={0}>
                 <StepsIndicator>1</StepsIndicator>
@@ -127,10 +129,21 @@ const OnboardingView = () => {
               </StepsItem>
               <StepsItem index={2}>
                 <StepsIndicator>3</StepsIndicator>
+                <StepsSeparator />
+              </StepsItem>
+              <StepsItem index={3}>
+                <StepsIndicator>4</StepsIndicator>
               </StepsItem>
             </StepsList>
           </Steps>
           {step === 1 ? (
+            <div className="flex flex-col items-center gap-6">
+              <p className="text-center text-muted-foreground text-sm">
+                {m.chooseYourLanguage()}
+              </p>
+              <LanguageChooser className="w-full max-w-xs" />
+            </div>
+          ) : step === 2 ? (
             <div className="flex flex-col items-center gap-6">
               <p className="text-center text-muted-foreground text-sm">
                 Here's a quick look at adding items — then two short steps and
@@ -146,7 +159,7 @@ const OnboardingView = () => {
                 className="mx-auto max-h-96 w-auto rounded-lg border bg-white"
               />
             </div>
-          ) : step === 2 ? (
+          ) : step === 3 ? (
             <div className="flex flex-col items-center gap-6">
               <div className="flex flex-col items-center gap-3">
                 {profile.avatar ? (
@@ -241,15 +254,16 @@ const OnboardingView = () => {
         </CardContent>
         <CardFooter className="justify-between">
           {/* Step 1 renders an empty left slot so Next aligns right like on
-              steps 2/3, where Back occupies the left side. */}
+              steps 2–4, where Back occupies the left side. */}
           {step === 1 ? (
             <span aria-hidden />
           ) : (
             <Button
               type="button"
               variant="outline"
-              // step - 1 widens to number; only steps 2/3 render Back.
-              onClick={() => setStep(step === 3 ? 2 : 1)}
+              // Back renders only for steps 2–4, so step - 1 is always a valid
+              // literal; the cast satisfies the narrowed state union.
+              onClick={() => setStep((step - 1) as 1 | 2 | 3)}
             >
               Back
             </Button>
@@ -260,15 +274,20 @@ const OnboardingView = () => {
             </Button>
           ) : null}
           {step === 2 ? (
+            <Button type="button" onClick={() => setStep(3)}>
+              Next
+            </Button>
+          ) : null}
+          {step === 3 ? (
             <Button
               type="button"
-              onClick={() => setStep(3)}
+              onClick={() => setStep(4)}
               disabled={busy || !profile.username.trim()}
             >
               Next
             </Button>
           ) : null}
-          {step === 3 ? (
+          {step === 4 ? (
             <Button type="button" onClick={finish} disabled={busy}>
               <User size={16} />
               Finish

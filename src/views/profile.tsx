@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { BackButton } from "@/components/back-button"
+import { LanguageChooser } from "@/components/language-chooser"
 import { PaletteChooser } from "@/components/palette-chooser"
 import {
   AlertDialog,
@@ -31,6 +32,7 @@ import {
   SegmentGroupItemText,
 } from "@/components/ui/segment-group"
 import { downloadLocalData, eraseLocalData } from "@/lib/local-data"
+import { m } from "@/paraglide/messages"
 import {
   $user,
   getUser,
@@ -198,6 +200,13 @@ const ProfileView = () => {
         />
         <CardContent>
           <PaletteChooser />
+        </CardContent>
+      </Card>
+
+      <Card className="w-full max-w-xl">
+        <CardHeader title={m.language()} description={m.languageSwitchHint()} />
+        <CardContent>
+          <LanguageChooser />
         </CardContent>
       </Card>
 

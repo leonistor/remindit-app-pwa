@@ -1,5 +1,6 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "language": "Language",
-  "chooseYourLanguage": "Choose your language"
+  "chooseYourLanguage": "Choose your language",
+  "languageSwitchHint": "Switching languages reloads the app."
 }
