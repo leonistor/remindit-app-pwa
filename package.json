@@ -8,6 +8,7 @@
     "deploy": "bash scripts/deploy.sh",
     "lint": "biome lint",
     "check": "biome check --write --unsafe",
+    "typecheck": "tsc --noEmit --pretty",
     "dev": "rsbuild dev",
     "format": "biome format --write",
     "preview": "rsbuild preview",

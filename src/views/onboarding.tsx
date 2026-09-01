@@ -240,10 +240,10 @@ const OnboardingView = () => {
           )}
         </CardContent>
         <CardFooter className="justify-between">
+          {/* Step 1 renders an empty left slot so Next aligns right like on
+              steps 2/3, where Back occupies the left side. */}
           {step === 1 ? (
-            <Button type="button" variant="outline" onClick={() => setStep(2)}>
-              Next
-            </Button>
+            <span aria-hidden />
           ) : (
             <Button
               type="button"
@@ -254,10 +254,14 @@ const OnboardingView = () => {
               Back
             </Button>
           )}
+          {step === 1 ? (
+            <Button type="button" onClick={() => setStep(2)}>
+              Next
+            </Button>
+          ) : null}
           {step === 2 ? (
             <Button
               type="button"
-              variant="outline"
               onClick={() => setStep(3)}
               disabled={busy || !profile.username.trim()}
             >
