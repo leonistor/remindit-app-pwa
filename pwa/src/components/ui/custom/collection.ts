@@ -17,4 +17,7 @@ export {
   useFilter,
   useListCollection,
 } from "@ark-ui/react"
-export { createGridCollection, type GridCollection } from "@ark-ui/react/collection"
+export {
+  createGridCollection,
+  type GridCollection,
+} from "@ark-ui/react/collection"

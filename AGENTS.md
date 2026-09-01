@@ -2,7 +2,7 @@
 
 ## Repo layout
 
-Bun workspace. All app code lives in the `pwa/` module (`@remindit/pwa`); root `package.json` scripts delegate into it (`bun run <script>` works from the repo root). Planned future modules: `@remindit/common`, `@remindit/web`. Repo-level config: `.opencode/`, `opencode.jsonc`, `skills-lock.json`, `.hive/`, `.zed/`, `LICENSE.txt`.
+Bun workspace. App code lives in the `pwa/` module (`@remindit/pwa`); shared brand constants and domain entities live in `common/` (`@remindit/common`). Root `package.json` scripts delegate into the modules (`bun run <script>` works from the repo root). Planned future modules: `@remindit/web`. Repo-level config: `.opencode/`, `opencode.jsonc`, `skills-lock.json`, `.hive/`, `.zed/`, `LICENSE.txt`.
 
 ## Rules
 
@@ -29,7 +29,7 @@ Our primary UI framework is **Shark UI** — a shadcn-style registry built on to
 
 ## Docs
 
-- [DESIGN.md](DESIGN.md) — design system (contributors, current look as shipped)
+- [pwa/DESIGN.md](pwa/DESIGN.md) — design system (contributors, current look as shipped)
 - [pwa/docs/DEV.md](pwa/docs/DEV.md) — development & state architecture
 - [pwa/docs/DEMOS.md](pwa/docs/DEMOS.md) — demo video generator (scenarios, gotchas, release flow)
 - [pwa/docs/DEV-COMPONENTS.md](pwa/docs/DEV-COMPONENTS.md) — Shark UI registry vs custom split

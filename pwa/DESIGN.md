@@ -1,6 +1,6 @@
 # RemindIt — Design System
 
-> **Scope:** contributors only. Describes the current look as shipped — no proposals. Text-only reference; source of truth is code (`src/styles/globals.css`, `seed/palettes.json`, `components.json`). For implementation details see `docs/DEV.md`.
+> **Scope:** contributors only. Describes the current look as shipped — no proposals. Text-only reference; source of truth is code (`src/styles/globals.css`, `seed/palettes.json`, `components.json`, and `@remindit/common` for brand). For implementation details see `docs/DEV.md`.
 
 ## 1. Principles
 
@@ -11,9 +11,9 @@
 
 ## 2. Brand
 
-- **Name:** RemindIt (capital I, single word). Wordmark is not rendered as type in chrome — the round logo + user avatar are the header identity.
-- **Logo:** `public/remindit-icon.svg` and `public/remindit-icon-maskable.svg`, fill `#262626` on white. Same value is the PWA brand color so manifest, favicons, and chrome reconcile.
-- **PWA:** manifest object `WEB_APP_MANIFEST` in `pwa-manifest.config.ts` exports `PWA_THEME_COLOR` / `PWA_BACKGROUND_COLOR` (`#262626` / `#ffffff`). `scripts/generate-favicons.ts` imports the same constants; the HTML `theme-color` meta in `public/index.html:12` matches. Do not hard-code brand hex elsewhere.
+- **Name:** RemindIt (capital I, single word). Wordmark is not rendered as type in chrome — the round logo + user avatar are the header identity. (The PWA manifest currently displays "Remindit" — a pre-existing casing inconsistency, see `pwa-manifest.config.ts`.)
+- **Logo & colors — shared source:** `@remindit/common` (`../common/src/brand.ts`) owns the brand: `BRAND_NAME`, `BRAND_COLOR` (`#262626`), `BRAND_BACKGROUND_COLOR` (`#ffffff`), and the logo SVGs as string constants (`BRAND_LOGO_SVG`, `BRAND_LOGO_MASKABLE_SVG`). The served copies `public/remindit-icon.svg` / `public/remindit-icon-maskable.svg` (fill `#262626` on white) are rewritten from those constants by `scripts/generate-favicons.ts` on every run — edit brand artwork in `common/`, never in `public/`.
+- **PWA:** manifest object `WEB_APP_MANIFEST` in `pwa-manifest.config.ts` consumes `BRAND_COLOR` / `BRAND_BACKGROUND_COLOR` from common, so manifest, favicons, and chrome reconcile. The HTML `theme-color` meta in `public/index.html:12` is hardcoded `#262626` — keep it in sync manually. Do not hard-code brand hex elsewhere.
 - **Voice:** plain verbs, sentence case, no filler. Controls say what they do ("Save changes", "Reset & reseed"). Empty/error states give direction, not persona. See the `frontend-design` skill copy guidance — current copy follows it.
 
 ## 3. Typography
@@ -182,8 +182,8 @@ Mode `light|dark|system` in `$theme` (`src/stores/theme.ts`, `persistentAtom` ke
 
 | Concern | File |
 |---|---|
+| Brand (name, colors, logo SVGs) | `../common/src/brand.ts` (`@remindit/common`); served copies `public/remindit-icon*.svg` are synced by `scripts/generate-favicons.ts` |
 | Tokens, keyframes, utilities | `src/styles/globals.css` |
-| PWA brand colors | `pwa-manifest.config.ts` |
 | Tailwind/Shark config | `components.json` |
 | Categorical pool | `seed/palettes.json` + `src/lib/palettes.ts` |
 | Palette → CSS vars | `src/lib/category-palette.ts` + `src/hooks/use-category-palette.ts` |

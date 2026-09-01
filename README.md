@@ -4,11 +4,12 @@ Bun workspace for the Remindit project.
 
 ## Modules
 
-| Module          | Path | Description                                                                 |
-| --------------- | ---- | --------------------------------------------------------------------------- |
-| `@remindit/pwa` | pwa/ | Local-first shopping-list / reminders PWA — see [pwa/README.md](pwa/README.md) |
+| Module              | Path     | Description                                                                    |
+| ------------------- | -------- | ------------------------------------------------------------------------------ |
+| `@remindit/pwa`     | pwa/     | Local-first shopping-list / reminders PWA — see [pwa/README.md](pwa/README.md) |
+| `@remindit/common`  | common/  | Shared brand constants (name, colors, logo) + domain entities                   |
 
-Planned: `@remindit/common` (shared data models, design elements), `@remindit/web` (marketing website).
+Planned: `@remindit/web` (marketing website).
 
 ## Usage
 
@@ -22,7 +23,7 @@ bun run build   # pwa production build
 bun run test    # pwa test suite
 ```
 
-See [AGENTS.md](AGENTS.md) for the development guide and [DESIGN.md](DESIGN.md)
+See [AGENTS.md](AGENTS.md) for the development guide and [pwa/DESIGN.md](pwa/DESIGN.md)
 for the design system.
 
 ## Repo-level (non-module) files

@@ -2,9 +2,11 @@
  * Generate all PWA favicon assets using the `favicons` library.
  *
  * Design notes:
- * - Two master sources: the normal icon (public/remindit-icon.svg) for standard
- *   icons, and the maskable-safe icon (public/remindit-icon-maskable.svg) which
- *   keeps the artwork inside the safe zone and has a full-bleed opaque background.
+ * - The brand source of truth is `@remindit/common` (`BRAND_LOGO_SVG` /
+ *   `BRAND_LOGO_MASKABLE_SVG`): the normal icon for standard icons, and the
+ *   maskable-safe variant which keeps the artwork inside the safe zone with a
+ *   full-bleed opaque background. This script also rewrites the served copies
+ *   in public/ from those constants on every run, so they can never drift.
  * - `manifestMaskable` makes favicons emit a second set of android-chrome PNGs
  *   (purpose "maskable") alongside the standard set (purpose "any").
  * - We intentionally DO NOT emit favicons' own manifest.webmanifest: rsbuild-plugin-pwa
@@ -20,20 +22,26 @@
 
 import { mkdir, writeFile } from "node:fs/promises"
 import { join } from "node:path"
+import {
+  BRAND_BACKGROUND_COLOR,
+  BRAND_COLOR,
+  BRAND_LOGO_MASKABLE_SVG,
+  BRAND_LOGO_SVG,
+} from "@remindit/common"
 import favicons from "favicons"
-import { PWA_BACKGROUND_COLOR, PWA_THEME_COLOR } from "../pwa-manifest.config"
 
 const PUBLIC_DIR = "public"
-const NORMAL_SOURCE = "public/remindit-icon.svg"
-const MASKABLE_SOURCE = "public/remindit-icon-maskable.svg"
+// Brand copies served as static assets (favicon link + manifest icons).
+const NORMAL_COPY = join(PUBLIC_DIR, "remindit-icon.svg")
+const MASKABLE_COPY = join(PUBLIC_DIR, "remindit-icon-maskable.svg")
 
 const configuration = {
   path: "/", // base path used in the generated html tags / manifest references
   appName: "Remindit",
   appShortName: "Remindit",
   appDescription: "Local-first reminders that work offline.",
-  theme_color: PWA_THEME_COLOR,
-  background: PWA_BACKGROUND_COLOR,
+  theme_color: BRAND_COLOR,
+  background: BRAND_BACKGROUND_COLOR,
   // Only run the platforms we actually need. android produces the 18 PNGs we put in
   // the web manifest; appleIcon/windows/yandex produce icons referenced from HTML.
   icons: {
@@ -48,13 +56,22 @@ const configuration = {
   // and browserconfig.xml / yandex-browser-manifest.json (kept).
   output: { images: true, files: true, html: true },
   // Use the maskable-safe master for the maskable icon set.
-  manifestMaskable: MASKABLE_SOURCE,
+  manifestMaskable: Buffer.from(BRAND_LOGO_MASKABLE_SVG),
   // Avoid favicons trying to load an external manifest.
   loadManifestWithCredentials: false,
 } as const
 
 async function main() {
-  const { images, files, html } = await favicons(NORMAL_SOURCE, configuration)
+  // Sync the served brand copies from the common-module source first, so the
+  // favicons run always starts from canonical artwork.
+  await writeFile(NORMAL_COPY, BRAND_LOGO_SVG)
+  await writeFile(MASKABLE_COPY, BRAND_LOGO_MASKABLE_SVG)
+  console.log(`synced brand copies: ${NORMAL_COPY}, ${MASKABLE_COPY}`)
+
+  const { images, files, html } = await favicons(
+    Buffer.from(BRAND_LOGO_SVG),
+    configuration
+  )
 
   await mkdir(PUBLIC_DIR, { recursive: true })
 

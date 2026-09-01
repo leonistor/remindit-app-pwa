@@ -3,12 +3,12 @@
   "files": {
     "includes": [
       "**",
-      "!docs",
+      "!pwa/docs",
       "!.hive",
       "!.agents",
       "!!**/dist",
       "!!**/build",
-      "!public"
+      "!pwa/public"
     ]
   },
   "vcs": {

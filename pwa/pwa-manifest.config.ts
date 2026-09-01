@@ -2,14 +2,12 @@
 //
 // The app chrome is intentionally neutral (primary = Tailwind neutral-800), so
 // the PWA `theme_color` is reconciled to that neutral primary instead of the
-// old purple (#863bff), which contradicted the UI. Both `rsbuild.config.ts`
-// (the generated manifest) and `scripts/generate-favicons.ts` (favicon
-// generation) consume these values, so the manifest and the generated icons
-// stay in sync from a single source of truth.
+// old purple (#863bff), which contradicted the UI. Brand colors are imported
+// from `@remindit/common` — the shared brand source of truth (DESIGN.md §2) —
+// and consumed here and by `scripts/generate-favicons.ts`, so the manifest and
+// the generated icons stay in sync from a single source of truth.
 
-// Tailwind neutral-800 — the app's actual primary in light mode.
-export const PWA_THEME_COLOR = "#262626"
-export const PWA_BACKGROUND_COLOR = "#ffffff"
+import { BRAND_BACKGROUND_COLOR, BRAND_COLOR } from "@remindit/common"
 
 const ANDROID_SIZES = [36, 48, 72, 96, 144, 192, 256, 384, 512] as const
 
@@ -17,8 +15,8 @@ export const WEB_APP_MANIFEST = {
   name: "Remindit",
   short_name: "Remindit",
   description: "Local-first reminders that work offline.",
-  theme_color: PWA_THEME_COLOR,
-  background_color: PWA_BACKGROUND_COLOR,
+  theme_color: BRAND_COLOR,
+  background_color: BRAND_BACKGROUND_COLOR,
   display: "standalone",
   start_url: "/",
   // Richer install UI: up to 8 screenshots, ≥320px and ≤3840px each, max dim

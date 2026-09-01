@@ -2,6 +2,7 @@
   "name": "remindit-monorepo",
   "private": true,
   "workspaces": [
+    "common",
     "pwa"
   ],
   "scripts": {
@@ -24,6 +25,6 @@
     "test:pre": "cd pwa && bun run test:pre",
     "test:quick": "cd pwa && bun run test:quick",
     "test:watch": "cd pwa && bun run test:watch",
-    "typecheck": "cd pwa && bun run typecheck"
+    "typecheck": "cd pwa && bun run typecheck && cd ../common && bun run typecheck"
   }
 }
