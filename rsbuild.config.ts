@@ -1,7 +1,7 @@
+import { paraglideRspackPlugin } from "@inlang/paraglide-js"
 import { defineConfig } from "@rsbuild/core"
 import { pluginReact } from "@rsbuild/plugin-react"
 import { pluginTailwindcss } from "@rsbuild/plugin-tailwindcss"
-import { paraglideRspackPlugin } from "@inlang/paraglide-js"
 import * as QRCode from "qrcode"
 import { pluginPWA } from "rsbuild-plugin-pwa"
 import pkg from "./package.json"

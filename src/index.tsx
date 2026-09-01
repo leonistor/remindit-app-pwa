@@ -4,6 +4,7 @@ import "@fontsource-variable/atkinson-hyperlegible-next"
 import "./styles/globals.css"
 
 import App from "./App"
+import { getLocale } from "./paraglide/runtime"
 import { initStores, setupDevLogging } from "./stores"
 import { initTheme } from "./stores/theme"
 
@@ -12,6 +13,11 @@ import { initTheme } from "./stores/theme"
 initTheme()
 initStores()
 setupDevLogging()
+
+// Reflect the resolved locale on <html lang> before first paint (a11y; the
+// static template hardcodes lang="en" while the strategy chain may resolve
+// differently — stored choice or browser language).
+document.documentElement.lang = getLocale()
 
 const rootEl = document.getElementById("root")
 if (rootEl) {
