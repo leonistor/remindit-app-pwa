@@ -25,6 +25,7 @@ import { $history } from "@/stores/history"
 import { $list } from "@/stores/list"
 import { $onboarded, $selectedDatasetId } from "@/stores/onboarding"
 import { $activePaletteId, setActivePalette } from "@/stores/palette"
+import { STORAGE_KEYS } from "@/stores/persistence"
 import { $installDismissed } from "@/stores/pwa-install"
 import { $theme } from "@/stores/theme"
 import type { HistoryEvent } from "@/stores/types"
@@ -210,5 +211,41 @@ describe("restoreLocalData", () => {
       expect(CATEGORY_FREQUENCIES).toContain(category.frequency)
     }
     expect($onboarded.get()).toBe(true)
+  })
+
+  test("persists the restored snapshot to localStorage and leaves unrelated keys alone", () => {
+    // Build a real app-like state so the persisted keys carry recognizable
+    // values, then wipe (which clears localStorage) before restoring.
+    const category = addCategory("Produce", "weekly")
+    addCatalogItem("Apple", category.id)
+    ensureUncategorizedExists()
+    $user.set({
+      username: "leo",
+      firstName: "Leo",
+      lastName: "Nistor",
+      email: "leo@example.com",
+      avatar: "",
+    })
+
+    const envelope = collectLocalData()
+    wipeAllData()
+
+    // The locale key is owned by Paraglide, not by any of the 12 persisted
+    // atoms — restore's no-localStorage.clear() design must keep it (and any
+    // third-party key) intact while every `remindit:` atom key is overwritten.
+    localStorage.setItem("remindit:locale", "ro")
+    localStorage.setItem("unrelated-key", "keep-me")
+
+    restoreLocalData(envelope)
+
+    expect(localStorage.getItem(STORAGE_KEYS.onboarded)).toBe("true")
+    expect(localStorage.getItem(STORAGE_KEYS.catalog)).toBe(
+      JSON.stringify(envelope.data.catalog)
+    )
+    expect(localStorage.getItem(STORAGE_KEYS.user)).toBe(
+      JSON.stringify(envelope.data.user)
+    )
+    expect(localStorage.getItem("remindit:locale")).toBe("ro")
+    expect(localStorage.getItem("unrelated-key")).toBe("keep-me")
   })
 })

@@ -1,0 +1,72 @@
+{
+  "version": "4.3.0",
+  "exportedAt": "2026-09-01T10:30:00.000Z",
+  "data": {
+    "catalog": [
+      {
+        "id": "item-e2e-saffron",
+        "name": "E2E Backup Saffron",
+        "categoryId": "cat-e2e-spices"
+      },
+      {
+        "id": "item-e2e-basil",
+        "name": "E2E Backup Basil",
+        "categoryId": "cat-e2e-produce"
+      },
+      {
+        "id": "item-e2e-orphan",
+        "name": "E2E Backup Orphan",
+        "categoryId": "uncategorized"
+      }
+    ],
+    "categories": [
+      {
+        "id": "cat-e2e-spices",
+        "name": "E2E Spices",
+        "frequency": "weekly",
+        "color": 0
+      },
+      {
+        "id": "cat-e2e-produce",
+        "name": "E2E Produce",
+        "frequency": "weekly",
+        "color": 1
+      },
+      {
+        "id": "uncategorized",
+        "name": "Uncategorized",
+        "frequency": "unknown",
+        "color": 2
+      }
+    ],
+    "list": [
+      {
+        "id": "entry-e2e-1",
+        "itemId": "item-e2e-saffron",
+        "checked": false,
+        "addedAt": 1700000000000
+      },
+      {
+        "id": "entry-e2e-2",
+        "itemId": "item-e2e-basil",
+        "checked": true,
+        "addedAt": 1700000001000
+      }
+    ],
+    "history": [],
+    "user": {
+      "username": "e2e-restored",
+      "firstName": "E2E",
+      "lastName": "Restored",
+      "email": "e2e@example.com",
+      "avatar": ""
+    },
+    "theme": "system",
+    "activePalette": "paired",
+    "selectedSort": "default",
+    "accordionOpen": ["cat-e2e-spices", "cat-e2e-produce", "uncategorized"],
+    "onboarded": true,
+    "selectedDataset": "minimal",
+    "installDismissed": false
+  }
+}
