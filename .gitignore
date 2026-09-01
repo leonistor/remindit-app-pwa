@@ -12,6 +12,7 @@ dist/
 
 # Deploy archives
 deploy/
+/release.sh
 
 # Playwright artifacts
 test-results/
