@@ -2,6 +2,22 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v4.2.0 — 2026-09-01
+
+_A calmer, more consistent feel throughout — plus a richer starter catalog and a friendlier first run._
+
+### ✨ New Features
+
+- **A consistent motion language**: the whole app now moves with one calm, tested motion system — catalog chips cascade in when you open a category, list items enter and exit smoothly, and the install and update prompts slide up from the bottom instead of popping in. If your device prefers reduced motion, everything still lands, just instantly
+- **Richer starter catalog**: the Minimal starter dataset now includes 14 more everyday groceries (three per category), so a fresh install feels lived-in and the recommendations have more to learn from
+
+### 🔧 Improvements
+
+- **A more inviting first look**: on a fresh install the catalog now opens with its first two categories expanded (previously one), so the panel reads as populated right away
+- **Reset & reseed with confidence**: the reset flow now shows a busy state while it works and a confirmation before you're sent back to your freshly seeded list
+- **Onboarding polish**: the Next button on the welcome and profile steps is now the primary action, aligned to the right where your thumb expects it
+- **A dedicated welcome video**: the onboarding's opening step now embeds its own shorter, calmer demo video
+
 ## v4.1.0 — 2026-08-31
 
 _The catalog now shows how many recommendations each category holds — and the Help page got more accurate._
