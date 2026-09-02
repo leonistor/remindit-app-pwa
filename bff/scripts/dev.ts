@@ -33,6 +33,10 @@ if (await pbHealthy()) {
       "serve",
       `--http=127.0.0.1:${url.port || "8090"}`,
       `--dir=${resolve(repoRoot, env.pocketbaseDataDir)}`,
+      // Schema is code-owned (src/schema/collections.ts + scripts/migrate.ts,
+      // D7) — PB's auto-migration snapshots would create a second source of
+      // truth that replays on fresh pb_data. The migrate script bootstraps.
+      "--automigrate=false",
     ],
     cwd: bffDir,
     stdin: "ignore",

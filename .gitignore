@@ -35,3 +35,6 @@ test-results/
 .vscode/*
 !.vscode/extensions.json
 .idea
+
+# PocketBase auto-migration snapshots (schema is code-owned, D7)
+pb_migrations/
