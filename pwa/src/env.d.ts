@@ -10,6 +10,16 @@ declare module "*.svg?react" {
 }
 
 /**
+ * Imports a file's raw source as a string via the `?raw` query. Natively
+ * supported by the Bun runtime and Rspack — used by `@remindit/common`'s
+ * brand.ts to load the logo SVG asset files as strings.
+ */
+declare module "*.svg?raw" {
+  const content: string
+  export default content
+}
+
+/**
  * Imports a Markdown file's raw source as a string. Rspack is configured
  * (rsbuild.config.ts) to treat `.md` as `asset/source`, used to load
  * CHANGELOG.md for the changelog view.

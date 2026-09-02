@@ -2,8 +2,10 @@
  * Generate all PWA favicon assets using the `favicons` library.
  *
  * Design notes:
- * - The brand source of truth is `@remindit/common` (`BRAND_LOGO_SVG` /
- *   `BRAND_LOGO_MASKABLE_SVG`): the normal icon for standard icons, and the
+ * - The brand source of truth is `@remindit/common`: the logo SVG asset files
+ *   (../common/assets/remindit-icon*.svg) imported as string constants
+ *   (`BRAND_LOGO_SVG` / `BRAND_LOGO_MASKABLE_SVG`) — the normal icon for
+ *   standard icons, and the
  *   maskable-safe variant which keeps the artwork inside the safe zone with a
  *   full-bleed opaque background. This script also rewrites the served copies
  *   in public/ from those constants on every run, so they can never drift.
@@ -28,7 +30,7 @@ import {
   BRAND_LOGO_MASKABLE_SVG,
   BRAND_LOGO_SVG,
   BRAND_NAME,
-} from "@remindit/common"
+} from "@remindit/common/brand"
 import favicons from "favicons"
 
 const PUBLIC_DIR = "public"

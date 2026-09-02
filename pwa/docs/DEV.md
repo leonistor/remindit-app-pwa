@@ -50,7 +50,7 @@ A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Lay
 
 ### PWA manifest
 
-The installable web manifest is defined in `pwa-manifest.config.ts` (the `WEB_APP_MANIFEST` object), **not** inline in `rsbuild.config.ts`. Brand color for both the manifest and the generated icons lives in that same file as `PWA_THEME_COLOR` / `PWA_BACKGROUND_COLOR` — both default to the **neutral app primary** (`#262626`, background `#ffffff`), reconciled with the neutral UI chrome. `scripts/generate-favicons.ts` imports those same constants when regenerating icons, so the manifest and favicons stay in sync. The master icon SVGs (`public/remindit-icon.svg`, `public/remindit-icon-maskable.svg`) carry the same `#262626` fill.
+The installable web manifest is defined in `pwa-manifest.config.ts` (the `WEB_APP_MANIFEST` object), **not** inline in `rsbuild.config.ts`. Brand color for both the manifest and the generated icons lives in that same file as `PWA_THEME_COLOR` / `PWA_BACKGROUND_COLOR` — both default to the **neutral app primary** (`#262626`, background `#ffffff`), reconciled with the neutral UI chrome. `scripts/generate-favicons.ts` imports those same constants when regenerating icons, so the manifest and favicons stay in sync. The master icon SVGs live in `@remindit/common` (`../common/assets/remindit-icon.svg`, `remindit-icon-maskable.svg`) and carry the same `#262626` fill; the served copies in `public/` are rewritten from them on every favicons run (drift-guarded by `tests/brand.test.ts`).
 
 ### PWA install & update
 

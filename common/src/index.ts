@@ -2,5 +2,5 @@
 // module (pwa today; web, future server). Framework-agnostic by design: no
 // React, no UI-kit, no DOM types.
 
-export * from "./brand"
+export * from "./constants"
 export * from "./models/types"
