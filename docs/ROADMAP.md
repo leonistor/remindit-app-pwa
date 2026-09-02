@@ -145,15 +145,16 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - [x] Biome/tsconfig conventions documented (AGENTS.md §Platform conventions)
 - Gate: `bun install && bun run typecheck && bun run lint` green; pwa behavior unchanged (`PUBLIC_DATASET`/`PUBLIC_SEED_HISTORY` still inlined)
 
-### Phase 1 — bff skeleton · `feat/bff-skeleton`
-- [ ] `bff/` module: package.json, tsconfig, AGENTS.md, README.md (devdoc); env comes from the root `.env` (D9) — no module env file
-- [ ] Hono app on Bun.serve with **routes → services → repositories layering** (D8): `/api/health` first; server-side PB client module (`autoCancellation(false)`)
-- [ ] `@remindit/bff/api` subpath exporting `AppType` (kept small) + Zod wiring — the client contract from day one
-- [ ] **Spike: streaming through Hono on Bun** — verify SSE can flow unbuffered (needed by phase 5 whichever data-plane wins)
-- [ ] dev script (root, `--env-file`): start PB via `bunx @fadlee/pocketbase-bin serve` (pinned version via `POCKETBASE_VERSION`), wait for health, then Hono on `PORT`
-- [ ] pocketbase-mcp added to `opencode.jsonc` (disabled by default; superuser creds referenced from the root `.env`)
-- [ ] Tests (bun test): health endpoint, RPC round-trip, PB client module
-- Gate: typecheck + lint + bff tests; manual curl of health + a PB SDK server-side call
+### Phase 1 — bff skeleton · `feat/bff-skeleton` ✅
+- [x] `bff/` module: package.json, tsconfig, AGENTS.md, README.md (devdoc); env from the root `.env` (D9) — no module env file
+- [x] Hono app on Bun.serve with **routes → services → repositories layering** (D8): `/api/health` (BFF liveness + PB reachability, PB-down is a reported state); server-side PB client module (`autoCancellation(false)`)
+- [x] `@remindit/bff/api` subpath exporting `AppType` + Zod contracts (`src/contracts.ts`); `@hono/zod-validator` lands in phase 3 with real inputs
+- [x] **Spike: streaming through Hono on Bun** — SSE verified unbuffered (unit test with chunk-count assertion + live curl); `idleTimeout: 255` set for future realtime
+- [x] dev script: PB via `bunx @fadlee/pocketbase-bin serve` (`POCKETBASE_VERSION=0.40.1` pinned; binary + `pb_data/` gitignored), health-wait (120s deadline for first-run download), reuse of an already-running PB, then Hono on `PORT`
+- [x] pocketbase-mcp added to `opencode.jsonc` (disabled by default; wrapper `bff/scripts/pocketbase-mcp.ts` injects superuser creds from the root `.env`)
+- [x] Tests (bun test): health contract round-trip, `hc<AppType>` RPC over live HTTP, SSE buffering detector — 3 pass
+- Gate: typecheck (pwa + common + bff) + lint + tests + live smoke (`/api/health` → `pb:"up"` via real PB, SSE streaming) ✅
+- Note: root `dev:all` runs pwa + bff via `concurrently` (root devDep, per §5)
 
 ### Phase 2 — schema & migrations · `feat/bff-schema`
 - [ ] `bff/src/schema/`: PB collections JSON builders importing `@remindit/common` (frequencies, sentinels, types)

@@ -33,6 +33,15 @@
       "enabled": false,
       "type": "local",
       "command": ["bunx", "-y", "@ark-ui/mcp"]
+    },
+    // PocketBase agent ops (gaspechak-pocketbase-mcp) — enable while working
+    // on bff/. The wrapper injects PB_URL + dev superuser creds from the root
+    // .env (never hardcoded here); requires `bun run dev:bff` (or a running
+    // PB) and POCKETBASE_ADMIN_* set in the root .env.
+    "pocketbase": {
+      "enabled": false,
+      "type": "local",
+      "command": ["bun", "bff/scripts/pocketbase-mcp.ts"]
     }
   }
 }

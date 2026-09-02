@@ -15,6 +15,12 @@ dist/
 # Deploy archives (any module)
 deploy/
 
+# PocketBase (any module): data dir, downloaded binary, version tracker
+pb_data/
+.pocketbase-version
+pocketbase
+pocketbase.exe
+
 # Playwright artifacts
 test-results/
 .playwright-mcp/
