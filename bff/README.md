@@ -52,6 +52,19 @@ The PB superuser is provisioned in phase 2 (migrations); until then PB runs
 with no accounts and only anon routes are reachable — `/api/health` still
 reports `pb: "up"` because `/api/health` on PB is public.
 
+## Schema & migrations (phase 2)
+
+The served PocketBase schema is code: `src/schema/collections.ts` (desired
+state, built on `@remindit/common`) + `scripts/migrate.ts` (idempotent
+reconcile: structure pass, then rules/indexes patch — never deletes). Full
+mapping, rules rationale and the live-verified rule matrix:
+[docs/SCHEMA.md](docs/SCHEMA.md).
+
+```sh
+bun run dev:bff      # PocketBase must be running
+bun run migrate:bff  # from repo root — run twice; second run must be a no-op
+```
+
 ## Environment (D9)
 
 All from the root `.env` (see root `.env.example`): `PORT`,

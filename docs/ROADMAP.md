@@ -156,12 +156,13 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - Gate: typecheck (pwa + common + bff) + lint + tests + live smoke (`/api/health` → `pb:"up"` via real PB, SSE streaming) ✅
 - Note: root `dev:all` runs pwa + bff via `concurrently` (root devDep, per §5)
 
-### Phase 2 — schema & migrations · `feat/bff-schema`
-- [ ] `bff/src/schema/`: PB collections JSON builders importing `@remindit/common` (frequencies, sentinels, types)
-- [ ] `bff/scripts/migrate.ts`: superuser login from env → fetch current schema → **merge-diff** (PB import replaces wholesale, so diff per collection first) → import; idempotent, safe on re-run
-- [ ] API rules per §3 table; seed `uncategorized` handling
-- [ ] Devdoc `bff/docs/SCHEMA.md` (mapping table above, kept in sync)
-- Gate: fresh `pb_data` migrate → `pb_schema` (MCP) review; rules exercised via `pb_rules_test`; CI-able idempotency test (run twice → no drift)
+### Phase 2 — schema & migrations · `feat/bff-schema` ✅
+- [x] `bff/src/schema/`: PB collections JSON builders importing `@remindit/common` (frequencies, sentinels, types) — 8 collections: users, groups, group_members, categories, items, list_entries, history_events, notifications (reserved, D4)
+- [x] `bff/scripts/migrate.ts`: superuser auth from env (auto-provisions via `pocketbase-bin superuser upsert` on first run) → **pass A** create structure without rules (PB validates `@collection.*` rule references at definition time — all collections must exist first) → **pass B** canonicalized per-collection diff → patch. Never deletes; idempotency verified live (second run ⇒ all `unchanged`)
+- [x] API rules per §3 table — **live-verified rule matrix (8/8)** incl. the two uncertain patterns: create rules are evaluated against the hydrated record, and `@request.body.<relation>` resolves for membership scoping (PB 0.40.1). Details + matrix: `bff/docs/SCHEMA.md`
+- [x] Devdoc `bff/docs/SCHEMA.md` (mapping table, rules, migration algorithm, sentinel strategy — sentinel provisioning lands with the phase-3 groups service)
+- [x] Builder integrity tests (`tests/schema.test.ts`: unique names, relation ordering, `CATEGORY_FREQUENCIES`/`HistoryAction` mirroring) + root `migrate:bff` script
+- Gate: migrate on live PB → reconcile 15 changes → re-run ⇒ `✓ schema in sync (8 collections, no changes)`; rules matrix 8/8 ✅; typecheck + lint + 8 bun tests green
 
 ### Phase 3 — auth & groups API · `feat/bff-auth-groups`
 - [ ] `/api/auth/*` (register, login, logout, me) — pass-through of PB auth tokens with sameSite cookie option for web

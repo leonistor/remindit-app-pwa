@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "bun scripts/dev.ts",
     "start": "bun src/index.ts",
+    "migrate": "bun scripts/migrate.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit --pretty",
     "lint": "biome lint",

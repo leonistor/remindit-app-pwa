@@ -26,6 +26,8 @@ in the root [AGENTS.md](../AGENTS.md); the phased rollout plan in
 - `bun run dev` — PocketBase (via `@fadlee/pocketbase-bin`) + Hono; reuses an
   already-running PB; first run downloads the PB binary
 - `bun run start` — Hono only (`src/index.ts`)
+- `bun run migrate` — reconcile PB schema towards `src/schema/collections.ts`
+  (idempotent; run twice, second run must be a no-op — see docs/SCHEMA.md)
 - `bun run test` — bun test suite
 - `bun run typecheck` — `tsc --noEmit --pretty`
 - `bun run lint` / `bun run check` — Biome (repo-wide config)
