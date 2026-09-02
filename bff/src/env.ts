@@ -25,4 +25,18 @@ export const env = {
    * reverse proxy); dev http://localhost keeps it false.
    */
   sessionCookieSecure: bool(process.env.SESSION_COOKIE_SECURE, false),
+  /**
+   * CORS origin allowlist (comma-separated `CORS_ORIGINS`). The frontends are
+   * separate origins from the BFF (pwa 3000 / web 3200 / admin 3300 locally),
+   * and prod serves them from different subdomains — so the BFF must answer
+   * preflights for exactly these, never `*` (Bearer tokens + session cookies
+   * ride these requests). Defaults cover local dev.
+   */
+  corsOrigins: (
+    process.env.CORS_ORIGINS ??
+    "http://localhost:3000,http://localhost:3200,http://localhost:3300"
+  )
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
 }

@@ -1,0 +1,67 @@
+# @remindit/admin
+
+Admin dashboard: **Rsbuild + TanStack Start** (same stack as `web/`) with
+**Mantine** components and brand constants from `@remindit/common`. Phase
+plan: [docs/ROADMAP.md](../docs/ROADMAP.md); module rules: [AGENTS.md](AGENTS.md).
+
+## Pages
+
+| Route | Content |
+|-------|---------|
+| `/login` | Email/password sign-in against `/api/auth/login`; client-side role check + server-side 403 gate |
+| `/` | Overview — live platform counts (users, groups, items, list entries, history events) |
+| `/users` | User table + create-user modal (the admin registration flow) + delete |
+| `/groups` | Group table (owner, member count) + cascade delete |
+
+## Auth model
+
+Bearer-token SPA, deliberately **client-side gated** (unlike `web/`, whose
+only data is public stats):
+
+- Token in `localStorage` (`remindit-admin-token`); attached as
+  `authorization: Bearer` by the `api()` client (`src/lib/api.ts`).
+- **No token checks in `beforeLoad`.** TanStack Start executes `beforeLoad`
+  on the server during SSR, where the localStorage token is invisible — a
+  guard there bounces every hard navigation to `/login` and the hydrated
+  router then trusts that resolution (stuck on `/login`). Guards are
+  client-side mount effects instead: `useRequireAuth()` (`src/lib/auth.ts`)
+  on protected routes, the inverse on `/login`.
+- The first server and client renders agree (signed-out shell), so hydration
+  stays consistent; the nav appears after mount when a token exists.
+- Data fetching is client-only (`useEffect`) for the same reason — the SSR
+  pass has no token, so `/api/admin/*` calls would 401 server-side.
+- The real authorization boundary is server-side: every `/api/admin/*` route
+  validates the session and requires `users.role = "admin"` (403 otherwise,
+  see `bff/src/routes/admin.ts`). The client's role check after login is
+  UX-only.
+- The first admin is bootstrapped by `bun run migrate:bff`: an existing
+  `users` record matching `POCKETBASE_ADMIN_EMAIL` is promoted to
+  `role = admin` (idempotent). Register that account first (public
+  `/api/auth/register` or the create-user modal as an existing admin).
+
+## CORS
+
+The admin origin differs from the BFF (`:3300` vs `:3100`), so the BFF ships
+a `hono/cors` allowlist (`CORS_ORIGINS`, defaults cover local dev — see
+`bff/src/env.ts`). This module needs no CORS config of its own.
+
+## Environment (D9)
+
+From the root `.env` (see root `.env.example`): `PUBLIC_BFF_URL` (client
+`fetch` base), `ADMIN_PORT` (dev server port, default 3300 — pwa 3000, BFF
+3100, web 3200). Never create `admin/.env`.
+
+## Dev flow
+
+```sh
+bun run dev:admin    # from repo root — root .env injected (D9)
+bun run dev:all      # pwa + bff + web + admin concurrently
+bun run build:admin  # production build → dist/ (client + SSR server)
+```
+
+## Deployment (later phase)
+
+Same story as `web/`: `dist/server/index.js` (SSR) + `dist/client/` static
+assets behind the VPS reverse proxy (roadmap D3) — plumbing lands with the
+deployment phase. Restrict `admin.*` exposure (VPN / IP allowlist / basic
+auth at the proxy) — the dashboard is superuser-side by design.

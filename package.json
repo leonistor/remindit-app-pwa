@@ -5,7 +5,8 @@
     "common",
     "pwa",
     "bff",
-    "web"
+    "web",
+    "admin"
   ],
   "scripts": {
     "build": "cd pwa && bun --env-file=../.env run build",
@@ -15,7 +16,7 @@
     "dev:pwa": "cd pwa && bun --env-file=../.env run dev",
     "dev:bff": "cd bff && bun --env-file=../.env run dev",
     "dev:web": "cd web && bun --env-file=../.env run dev",
-    "dev:all": "concurrently --kill-others -n pwa,bff,web -c blue,green,magenta \"bun run dev:pwa\" \"bun run dev:bff\" \"bun run dev:web\"",
+    "dev:all": "concurrently --kill-others -n pwa,bff,web,admin -c blue,green,magenta,yellow \"bun run dev:pwa\" \"bun run dev:bff\" \"bun run dev:web\" \"bun run dev:admin\"",
     "build:web": "cd web && bun --env-file=../.env run build",
     "migrate:bff": "cd bff && bun --env-file=../.env run migrate",
     "test:bff": "cd bff && bun --env-file=../.env test",
@@ -34,7 +35,9 @@
     "test:pre": "cd pwa && bun run test:pre",
     "test:quick": "cd pwa && bun run test:quick",
     "test:watch": "cd pwa && bun run test:watch",
-    "typecheck": "cd pwa && bun run typecheck && cd ../common && bun run typecheck && cd ../bff && bun run typecheck && cd ../web && bun run typecheck"
+    "typecheck": "cd pwa && bun run typecheck && cd ../common && bun run typecheck && cd ../bff && bun run typecheck && cd ../web && bun run typecheck && cd ../admin && bun run typecheck",
+    "dev:admin": "cd admin && bun --env-file=../.env run dev",
+    "build:admin": "cd admin && bun --env-file=../.env run build"
   },
   "devDependencies": {
     "concurrently": "^10.0.5"

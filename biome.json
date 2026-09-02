@@ -9,7 +9,8 @@
       "!!**/dist",
       "!!**/build",
       "!pwa/public",
-      "!web/src/routeTree.gen.ts"
+      "!web/src/routeTree.gen.ts",
+      "!admin/src/routeTree.gen.ts"
     ]
   },
   "vcs": {

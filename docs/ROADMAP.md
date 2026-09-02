@@ -6,7 +6,7 @@ verification gate. Check off items as they land; this file is the single
 source of truth for sequencing and status (see also root [README.md](../README.md)
 module table).
 
-Status: **plan approved, not started** (2026-09-02).
+Status: **all phases landed** (2026-09-02).
 
 ---
 
@@ -192,11 +192,12 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - Gate: pwa `test:pre` fully green (**272 Rstest** incl. 13 new reconcile tests + 23 dev e2e + 2 prod e2e), bff suite 36 tests, typecheck ×4, lint ✅; **live two-device check**: device A creates a category through the forwarder → member device B sees + patches it → realtime SSE streams ✅
 - Manual two-device scenario (browser tabs, two profiles): documented in SYNC.md §Testing
 
-### Phase 6 — admin · `feat/admin` (last priority)
-- [ ] `admin/`: Rsbuild + TanStack Start + Mantine; login, registration flow, dashboards (overview, users, groups)
-- [ ] Role model: `users.role` (`admin`) + BFF `/api/admin/*` guards (token role check server-side)
-- [ ] Devdoc `admin/README.md`
-- Gate: typecheck + lint + build + e2e smoke
+### Phase 6 — admin · `feat/admin` ✅
+- [x] `admin/`: Rsbuild + TanStack Start + Mantine; login + create-user registration modal (users dashboard), dashboards (overview, users, groups); **client-side auth gating** — Bearer token in `localStorage`, guards are mount effects (`src/lib/auth.ts`), data fetching client-only (`useEffect`)
+- [x] Role model: `users.role` (`user`\|`admin`) + BFF `/api/admin/*` guards (session role checked server-side, 403 before any superuser query); first admin bootstrapped by `migrate` (promotes the `POCKETBASE_ADMIN_EMAIL` user); **BFF CORS allowlist** (`CORS_ORIGINS` via `hono/cors` — frontends live on separate origins, needed by admin today and any browser client in prod)
+- [x] Devdoc `admin/README.md` (+ `admin/AGENTS.md`); root README module table completed
+- Gate: typecheck ×5 modules + lint + build ✅ + **live e2e smoke** (`dev:bff` + `dev:admin`): login → overview renders live counts (122 users / 9 groups), users + groups dashboards live, create-user → 201 + listed, non-admin sign-in client-rejected + `/api/admin/*` 403, sign-out/in clean ✅; bff suite 37 tests green
+- Gotchas recorded: TanStack Start runs `beforeLoad` server-side during SSR where the localStorage token is invisible — a guard there bounces every hard navigation to `/login` and the hydrated router trusts that resolution (stuck); auth guards must be client-side mount effects, and post-login navigation must be `router.navigate` (a full reload re-enters the SSR token-less redirect dance)
 
 ## 7. Verification gates (every phase)
 

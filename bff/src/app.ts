@@ -1,6 +1,8 @@
 import { Hono } from "hono"
+import { cors } from "hono/cors"
 import { pbErrorResponse } from "./lib/pb-error"
-import { type AppEnv, requireAuth } from "./middleware/auth"
+import { env } from "./env"
+import { requireAuth, type AppEnv } from "./middleware/auth"
 import { admin } from "./routes/admin"
 import { auth } from "./routes/auth"
 import { groups } from "./routes/groups"
@@ -24,6 +26,21 @@ export const app = new Hono<AppEnv>()
     console.error("[bff] unhandled error:", error)
     return c.json({ error: "internal server error" }, 500)
   })
+  // Frontends live on separate origins (dev ports / prod subdomains) — answer
+  // preflights for the allowlisted ones only (env.corsOrigins). Mounted first
+  // so every route below (including the /pb/* forwarder's SSE streams) gets
+  // the headers; with an allowlist hono echoes the request origin only when
+  // it matches, and OPTIONS short-circuits before the route handlers.
+  .use(
+    "*",
+    cors({
+      origin: env.corsOrigins,
+      allowMethods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+      allowHeaders: ["content-type", "authorization"],
+      credentials: true,
+      maxAge: 86400,
+    }),
+  )
   .route("/api/health", health)
   .route("/api/auth", auth)
   .route("/api/groups", groups)

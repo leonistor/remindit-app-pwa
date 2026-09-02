@@ -78,7 +78,9 @@ describeIfPb("admin API (live)", () => {
       authOptions(regularToken)
     )
     expect(res.status).toBe(403)
-    const body = (await res.json()) as { error: string }
+    // hono RPC types only route-handler responses — the 403 body comes from
+    // the requireAdmin middleware, so it's invisible to the client type.
+    const body = (await res.json()) as unknown as { error: string }
     expect(body.error).toBe("admin role required")
   })
 

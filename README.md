@@ -9,10 +9,10 @@ Bun workspace for the Remindit project.
 | `@remindit/pwa`     | pwa/     | Local-first shopping-list / reminders PWA — see [pwa/README.md](pwa/README.md) |
 | `@remindit/common`  | common/  | Shared brand constants (name, colors, logo) + domain entities                   |
 | `@remindit/bff`     | bff/     | PocketBase + Hono backend-for-frontend — see [bff/README.md](bff/README.md)     |
+| `@remindit/web`     | web/     | Marketing site (Rsbuild + TanStack Start) — see [web/README.md](web/README.md)  |
+| `@remindit/admin`   | admin/   | Admin dashboard (Rsbuild + TanStack Start + Mantine) — see [admin/README.md](admin/README.md) |
 
-Planned: `@remindit/bff` (PocketBase + Hono), `@remindit/web` (marketing,
-Rsbuild + TanStack Start), `@remindit/admin` (Rsbuild + TanStack Start +
-Mantine) — see [docs/ROADMAP.md](docs/ROADMAP.md) for the phased plan.
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the phased rollout plan.
 
 ## Usage
 
