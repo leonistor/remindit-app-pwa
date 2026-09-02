@@ -20,7 +20,7 @@ const pbUp = await fetch(`${env.pocketbaseUrl}/api/health`)
 const describeIfPb = pbUp ? describe : describe.skip
 
 const run = Date.now().toString(36)
-const password = "secret12345"
+const password = process.env.TEST_PASSWORD ?? "secret12345"
 
 const register = async (username: string) => {
   const res = await client.api.auth.register.$post({

@@ -41,7 +41,7 @@ describe("request contracts", () => {
   test("register rejects mismatched passwords", () => {
     const result = registerBodySchema.safeParse({
       email: "a@b.co",
-      password: "secret12345",
+      password: process.env.TEST_PASSWORD ?? "secret12345",
       passwordConfirm: "different123",
       username: "alice",
     })
@@ -51,8 +51,8 @@ describe("request contracts", () => {
   test("register rejects invalid usernames", () => {
     const result = registerBodySchema.safeParse({
       email: "a@b.co",
-      password: "secret12345",
-      passwordConfirm: "secret12345",
+      password: process.env.TEST_PASSWORD ?? "secret12345",
+      passwordConfirm: process.env.TEST_PASSWORD ?? "secret12345",
       username: "has space",
     })
     expect(result.success).toBe(false)

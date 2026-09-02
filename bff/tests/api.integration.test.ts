@@ -41,7 +41,7 @@ const describeIfPb = pbUp ? describe : describe.skip
 
 // Unique per run (unique username/email indexes on PB).
 const run = Date.now().toString(36)
-const password = "secret12345"
+const password = process.env.TEST_PASSWORD ?? "secret12345"
 
 // Per-request auth goes in hc's SECOND arg (ClientRequestOptions.headers);
 // the first arg carries json/param/query.
