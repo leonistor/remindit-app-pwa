@@ -43,6 +43,7 @@
     "generate-random-username": "^2.2.0",
     "lucide-react": "^1.34.0",
     "nanostores": "^1.5.2",
+    "pocketbase": "^0.28.0",
     "pwa-install-handler": "^2.6.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

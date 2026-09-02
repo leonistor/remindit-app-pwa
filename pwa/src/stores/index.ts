@@ -41,6 +41,8 @@ declare global {
       // Public (client-exposed via Rsbuild's `PUBLIC_` convention). Selects the
       // seed dataset on first run — see .env / .env.example.
       PUBLIC_DATASET?: string
+      // BFF origin — sync RPC + the /pb/* data-plane forwarder (phase 5).
+      PUBLIC_BFF_URL?: string
       [key: string]: unknown
     }
   }

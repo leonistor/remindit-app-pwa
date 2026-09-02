@@ -11,6 +11,7 @@ import { type ChangeEvent, useEffect, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { AvatarPicker } from "@/components/avatar-picker"
+import { SyncCard } from "@/components/sync-card"
 import { BackButton } from "@/components/back-button"
 import { LanguageChooser } from "@/components/language-chooser"
 import { PaletteChooser } from "@/components/palette-chooser"
@@ -281,6 +282,9 @@ const ProfileView = () => {
           </Button>
         </CardFooter>
       </Card>
+
+      {/* Sync & account (phase 5) — self-contained card. */}
+      <SyncCard />
 
       <Card className="w-full max-w-xl">
         <CardHeader

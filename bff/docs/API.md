@@ -64,6 +64,7 @@ Channel undecided; only the read path exists (dispatch in phase 5+).
 |---|---|---|
 | `GET /api/health` | `200 { ok, service, pb: { status } }` | PB-down is a reported state, not a 5xx |
 | `GET /api/sse` | SSE stream | phase-1 spike / diagnostics |
+| `ANY /pb/api/*` | PB passthrough | **Data-plane forwarder (phase 5)**: authenticated proxy to the internal PocketBase for the pwa sync engine (PB SDK `baseUrl = PUBLIC_BFF_URL + "/pb"`). Requires a BFF session, forwards the rotated token, streams SSE unbuffered; rules stay the authorization boundary. See [../docs/SYNC.md](../../pwa/docs/SYNC.md) |
 
 ## Error shape
 

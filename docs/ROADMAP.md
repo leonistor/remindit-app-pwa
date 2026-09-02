@@ -182,12 +182,15 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - Gate: typecheck ×4 modules + lint + build ✅ + **live smoke via `dev:all`**: BFF `{"users":70,"groups":3}` rendered in SSR home (`<strong>70</strong>`), features/download 200, pwa unaffected (3000) ✅
 - Note: web dev server binds IPv6 `[::1]` (rsbuild default) — use `localhost`, not `127.0.0.1`; deployment of the SSR bundle lands with the platform deployment phase
 
-### Phase 5 — pwa sync · `feat/pwa-sync`
-- [ ] Design doc first: `pwa/docs/SYNC.md` (auth UX, offline queue, last-write-wins via `updated` timestamps, realtime transport, conflict rules per collection)
-- [ ] **Decide the sync data-plane (D2/§8):** scoped authenticated `/pb/*` forwarder (PB SDK client-side) vs bespoke BFF endpoints + server-side PB SDK + custom SSE. Recommendation: hybrid — hybrid keeps PB's proven record API + realtime for bulk sync while app-level concerns stay on the typed RPC API; the analysis's "no PB SDK in clients" guidance is honored for web/admin, where it applies cleanly
-- [ ] Auth UI in profile; local stores ↔ PB hydration/push; profile, items, categories, lists sync (D1: scoped to user's groups)
-- [ ] Notifications consumer (channel per D4 decision, made here)
-- Gate: full pwa suite (`test:pre`) + new sync tests; two-device manual scenario
+### Phase 5 — pwa sync · `feat/pwa-sync` ✅
+- [x] Design doc first: `pwa/docs/SYNC.md` — identity model (local ids stay; pb records carry `localId` + per-group unique indexes; per-device sync map), **journal + three-way reconciliation** (LWW by PB server-side `updated`), realtime via subscriptions, offline behavior, security notes, deferred scope
+- [x] **Data-plane decision (D2/§8): hybrid** — typed BFF RPC for account ops + scoped authenticated `/pb/*` forwarder (PB SDK client-side, `baseUrl = PUBLIC_BFF_URL + "/pb"`) for record CRUD + realtime; PB rules remain the authorization boundary
+- [x] BFF: `/pb/api/*` forwarder (auth-gated, rotated token forwarded, hop-by-hop stripped, SSE unbuffered) + integration tests (auth gating, rule-scoped CRUD, unique-index dedupe, SSE passthrough)
+- [x] Schema delta: `localId` + unique `(group, localId)` indexes on categories/items/list_entries/history_events
+- [x] pwa sync engine (`src/stores/sync/`): session store, BFF fetch client (types mirrored from the BFF contracts), pure reconcile diff (`reconcile.ts`, unit-tested — journal/three-way/LWW/tombstones/adoption), engine (group bootstrap + sentinel provisioning, reconcile apply, realtime subscriptions, tombstone detection via store snapshots, profile LWW sync)
+- [x] Auth UI: Sync card in Profile (sign in/up/out + status, en+ro i18n); notifications consumer in-app only (D4 channel decision still open — dispatch lands with the channel)
+- Gate: pwa `test:pre` fully green (**272 Rstest** incl. 13 new reconcile tests + 23 dev e2e + 2 prod e2e), bff suite 36 tests, typecheck ×4, lint ✅; **live two-device check**: device A creates a category through the forwarder → member device B sees + patches it → realtime SSE streams ✅
+- Manual two-device scenario (browser tabs, two profiles): documented in SYNC.md §Testing
 
 ### Phase 6 — admin · `feat/admin` (last priority)
 - [ ] `admin/`: Rsbuild + TanStack Start + Mantine; login, registration flow, dashboards (overview, users, groups)

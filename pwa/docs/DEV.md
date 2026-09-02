@@ -147,6 +147,8 @@ App state lives in **framework-agnostic [nanostores](https://github.com/nanostor
 
 All collections are persisted to `localStorage` with `@nanostores/persistent` (key prefix `remindit:`).
 
+**Sync (phase 5):** an overlay reconciles these local stores with the backend when a session exists — local-first stays the source of truth for every feature. Design, data-plane decision and conflict policy: [SYNC.md](SYNC.md); the control surface is the Sync card in the Profile view (`src/components/sync-card.tsx`, engine under `src/stores/sync/`).
+
 ### Model: Catalog + active list
 
 - **Catalog** (`$catalog`) — the master pool of every known item `{ id, name, categoryId }`.

@@ -335,5 +335,18 @@
   "aboutComingSubtitle": "A peek at what we’re building next.",
   "aboutComingAttributes": "Item attributes (photo, quantity, price) — the remaining piece of Phase 3.",
   "aboutComingMultiUser": "Phase 4 — multi-user lists with real-time sync across devices.",
-  "aboutOpenSourcePrefix": "RemindIt is open source. View the code and follow development on"
+  "aboutOpenSourcePrefix": "RemindIt is open source. View the code and follow development on",
+  "syncTitle": "Sync & account",
+  "syncDescription": "Sign in to sync your lists across devices and share them with your group. Everything keeps working offline.",
+  "syncEmailLabel": "Email",
+  "syncPasswordLabel": "Password",
+  "syncSignInButton": "Sign in",
+  "syncSignUpButton": "Create account",
+  "syncSwitchToSignUp": "No account yet? Create one",
+  "syncSwitchToSignIn": "Already have an account? Sign in",
+  "syncSignOutButton": "Sign out",
+  "syncStatusOnline": "Synced and up to date",
+  "syncStatusConnecting": "Connecting…",
+  "syncStatusError": "Sync error",
+  "syncStatusOff": "Sync is off — data stays on this device"
 }

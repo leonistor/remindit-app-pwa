@@ -335,5 +335,18 @@
   "aboutComingSubtitle": "O privire asupra a ceea ce construim în continuare.",
   "aboutComingAttributes": "Atribute pentru articole (fotografie, cantitate, preț) — ultimul element din Faza 3.",
   "aboutComingMultiUser": "Faza 4 — liste multi-utilizator cu sincronizare în timp real între dispozitive.",
-  "aboutOpenSourcePrefix": "RemindIt este open source. Vezi codul și urmărește dezvoltarea pe"
+  "aboutOpenSourcePrefix": "RemindIt este open source. Vezi codul și urmărește dezvoltarea pe",
+  "syncTitle": "Sincronizare și cont",
+  "syncDescription": "Autentifică-te pentru a-ți sincroniza listele între dispozitive și a le partaja cu grupul tău. Totul funcționează și offline.",
+  "syncEmailLabel": "Email",
+  "syncPasswordLabel": "Parolă",
+  "syncSignInButton": "Autentificare",
+  "syncSignUpButton": "Creează cont",
+  "syncSwitchToSignUp": "Nu ai cont? Creează unul",
+  "syncSwitchToSignIn": "Ai deja cont? Autentifică-te",
+  "syncSignOutButton": "Deconectare",
+  "syncStatusOnline": "Sincronizat și la zi",
+  "syncStatusConnecting": "Se conectează…",
+  "syncStatusError": "Eroare de sincronizare",
+  "syncStatusOff": "Sincronizarea e oprită — datele rămân pe acest dispozitiv"
 }

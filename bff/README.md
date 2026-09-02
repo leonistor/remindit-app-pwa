@@ -39,6 +39,7 @@ rule matrix: [docs/API.md](docs/API.md).
 | `GET/POST /api/groups`, `GET/DELETE /api/groups/:id` | shared workspaces (creator = owner member) |
 | `GET/POST /api/groups/:id/members`, `DELETE …/:memberId` | membership management (owner-only mutations via PB rules) |
 | `GET /api/notifications`, `PATCH /api/notifications/:id` | stub (D4): list + mark-read |
+| `ANY /pb/api/*` | authenticated PB data-plane forwarder (pwa sync, phase 5 — SSE-capable) |
 | `GET /api/health` | BFF liveness + PocketBase reachability (`pb.status: "up" \| "down"`; PB down is a reported state, not a 5xx) |
 | `GET /api/sse` | SSE spike/diagnostic — emits 3 `ping` events 150ms apart |
 

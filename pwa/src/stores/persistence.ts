@@ -22,6 +22,12 @@ export const STORAGE_KEYS = {
   onboarded: "remindit:onboarded",
   selectedDataset: "remindit:selected-dataset",
   installDismissed: "remindit:install-dismissed",
+  // Sync (phase 5, docs/SYNC.md)
+  syncSession: "remindit:sync-session",
+  syncGroup: "remindit:sync-group",
+  syncMap: "remindit:sync-map",
+  syncJournal: "remindit:sync-journal",
+  syncTombstones: "remindit:sync-tombstones",
 } as const
 
 // JSON-encoded persistent store. The single serialization strategy avoids the
