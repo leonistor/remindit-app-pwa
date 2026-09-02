@@ -5,6 +5,7 @@ import { auth } from "./routes/auth"
 import { groups } from "./routes/groups"
 import { health } from "./routes/health"
 import { notifications } from "./routes/notifications"
+import { pb } from "./routes/pb"
 import { sse } from "./routes/sse"
 import { stats } from "./routes/stats"
 
@@ -27,6 +28,7 @@ export const app = new Hono<AppEnv>()
   .route("/api/groups", groups)
   .route("/api/notifications", notifications)
   .route("/api/stats", stats)
+  .route("/pb", pb)
   .route("/api/sse", sse)
 
 export type { AppEnv }

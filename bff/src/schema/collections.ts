@@ -269,6 +269,17 @@ const categories: CollectionDef = {
   updateRule: GROUP_ACCESS,
   deleteRule: GROUP_ACCESS,
   fields: [
+        {
+      type: "text",
+      name: "localId",
+      required: false,
+      hidden: false,
+      presentable: false,
+      min: 1,
+      max: 64,
+      pattern: "",
+      autogeneratePattern: "",
+    },
     {
       type: "text",
       name: "name",
@@ -314,6 +325,7 @@ const categories: CollectionDef = {
     },
     ...stamps(),
   ],
+  indexes: ["CREATE UNIQUE INDEX `idx_categories_group_local` ON `categories` (`group`, `localId`)"],
 }
 
 // items ---------------------------------------------------------------------
@@ -328,6 +340,17 @@ const items: CollectionDef = {
   updateRule: GROUP_ACCESS,
   deleteRule: GROUP_ACCESS,
   fields: [
+        {
+      type: "text",
+      name: "localId",
+      required: false,
+      hidden: false,
+      presentable: false,
+      min: 1,
+      max: 64,
+      pattern: "",
+      autogeneratePattern: "",
+    },
     {
       type: "text",
       name: "name",
@@ -363,6 +386,7 @@ const items: CollectionDef = {
     },
     ...stamps(),
   ],
+  indexes: ["CREATE UNIQUE INDEX `idx_items_group_local` ON `items` (`group`, `localId`)"],
 }
 
 // list_entries --------------------------------------------------------------
@@ -376,6 +400,17 @@ const listEntries: CollectionDef = {
   updateRule: GROUP_ACCESS,
   deleteRule: GROUP_ACCESS,
   fields: [
+        {
+      type: "text",
+      name: "localId",
+      required: false,
+      hidden: false,
+      presentable: false,
+      min: 1,
+      max: 64,
+      pattern: "",
+      autogeneratePattern: "",
+    },
     {
       type: "bool",
       name: "checked",
@@ -417,6 +452,7 @@ const listEntries: CollectionDef = {
     },
     ...stamps(),
   ],
+  indexes: ["CREATE UNIQUE INDEX `idx_list_entries_group_local` ON `list_entries` (`group`, `localId`)"],
 }
 
 // history_events ------------------------------------------------------------
@@ -432,6 +468,17 @@ const historyEvents: CollectionDef = {
   updateRule: null,
   deleteRule: null,
   fields: [
+        {
+      type: "text",
+      name: "localId",
+      required: false,
+      hidden: false,
+      presentable: false,
+      min: 1,
+      max: 64,
+      pattern: "",
+      autogeneratePattern: "",
+    },
     {
       type: "select",
       name: "action",
@@ -508,6 +555,7 @@ const historyEvents: CollectionDef = {
     },
     ...stamps(),
   ],
+  indexes: ["CREATE UNIQUE INDEX `idx_history_events_group_local` ON `history_events` (`group`, `localId`)"],
 }
 
 // notifications -------------------------------------------------------------
