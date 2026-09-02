@@ -11,11 +11,12 @@ import { type ZodType, z } from "zod"
 import { type AppType, app } from "../src/app"
 import {
   authResponseSchema,
-  type Group,
   groupSchema,
+  type Group,
   type Member,
   memberSchema,
   notificationSchema,
+  statsSchema,
   userPublicSchema,
 } from "../src/contracts"
 import { env } from "../src/env"
@@ -243,5 +244,17 @@ describeIfPb("notifications API (live)", () => {
       z.array(notificationSchema)
     )
     expect(otherItems.find((n) => n.id === own?.id)).toBeUndefined()
+  })
+})
+
+describeIfPb("stats API (live)", () => {
+  test("public aggregate counts, no auth needed", async () => {
+    // Registrations from the describes above already ran — users must count
+    // at least those; groups may be zero on a fresh instance.
+    const res = await client.api.stats.$get()
+    expect(res.status).toBe(200)
+    const stats = await contract(res, statsSchema)
+    expect(stats.users).toBeGreaterThanOrEqual(3)
+    expect(stats.groups).toBeGreaterThanOrEqual(0)
   })
 })

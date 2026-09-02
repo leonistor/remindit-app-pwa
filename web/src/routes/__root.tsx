@@ -1,0 +1,80 @@
+import type { ReactNode } from "react"
+import {
+  HeadContent,
+  Outlet,
+  Scripts,
+  createRootRoute,
+} from "@tanstack/react-router"
+import {
+  BRAND_BACKGROUND_COLOR,
+  BRAND_COLOR,
+  BRAND_LOGO_SVG,
+  BRAND_NAME,
+} from "@remindit/common/brand"
+import "../styles.css"
+
+// Inline SVG data URI — works in SSR markup with no extra asset pipeline.
+const faviconHref = `data:image/svg+xml,${encodeURIComponent(BRAND_LOGO_SVG)}`
+
+export const Route = createRootRoute({
+  head: () => ({
+    meta: [
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: BRAND_COLOR },
+      { property: "og:site_name", content: BRAND_NAME },
+    ],
+    links: [
+      { rel: "icon", href: faviconHref, type: "image/svg+xml" },
+    ],
+  }),
+  component: RootComponent,
+})
+
+function RootComponent() {
+  return (
+    <RootDocument>
+      <Outlet />
+    </RootDocument>
+  )
+}
+
+function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  return (
+    // Background/theme colors come from the brand constants (single source
+    // of truth, @remindit/common) — kept in sync via inline vars.
+    <html lang="en" style={{ background: BRAND_BACKGROUND_COLOR }}>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <header className="site-header">
+          <div className="container">
+            <a href="/" className="brand">
+              <img
+                className="brand-logo"
+                // Brand logo from @remindit/common/brand (see styles note).
+                src={faviconHref}
+                alt=""
+                width={28}
+                height={28}
+              />
+              {BRAND_NAME}
+            </a>
+            <nav className="nav">
+              <a href="/features">Features</a>
+              <a href="/download">Get the app</a>
+            </nav>
+          </div>
+        </header>
+        {children}
+        <footer className="site-footer">
+          <div className="container">
+            {BRAND_NAME} — shopping lists that remind you.
+          </div>
+        </footer>
+        <Scripts />
+      </body>
+    </html>
+  )
+}

@@ -173,12 +173,14 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - Gate: typecheck ×3 modules + lint + 25 bun tests green ✅
 - Gotchas recorded: hc per-request headers go in the second `options` arg (hono 4.13); SDK attaches Authorization only when `authStore.isValid`; PB `expand` rides the query string (ignored in create body); failed CREATE rules surface as 400, not 403; `created/updated` autodate fields added to all data collections (phase-5 sync needs them)
 
-### Phase 4 — web marketing site · `feat/web-marketing`
-- [ ] `web/`: Rsbuild + `@tanstack/react-start` (rsbuild adapter), SSR, brand from `@remindit/common` (incl. logo assets)
-- [ ] Pages: home, features, download/PWA install CTA; SEO meta + OG tags
-- [ ] Minimal BFF use: `/api/stats` (total users, total groups) with server-side cache
-- [ ] Devdoc `web/README.md`; root scripts (`dev:web`, `build:web`)
-- Gate: typecheck + lint + build; Playwright smoke (pattern reused from pwa)
+### Phase 4 — web marketing site · `feat/web-marketing` ✅
+- [x] `web/`: Rsbuild + `@tanstack/react-start` (`./plugin/rsbuild` adapter — `pluginReact()` chained **after** `tanstackStart()`), SSR with server functions; brand from `@remindit/common/brand` (logo as SVG data-URI `<img>` — no asset pipeline)
+- [x] Pages: `/` (hero + **live stats** + install CTA), `/features` (6 feature cards), `/download` (PWA install steps, `PUBLIC_PWA_URL`); per-route `head()` SEO meta + Open Graph; favicon as inline SVG data URI
+- [x] Minimal BFF use: `GET /api/stats` on the bff (public aggregate counts, superuser-side counting, 60s cache, `cache-control: public, max-age=60`); web server function degrades to `null` counts when the BFF is down — marketing never 500s
+- [x] Devdoc `web/README.md` + `web/AGENTS.md`; root scripts (`dev:web`, `build:web`, `dev:all` = pwa + bff + web concurrently); env `WEB_PORT` (3200), `PUBLIC_PWA_URL`
+- [x] Generated `src/routeTree.gen.ts` committed (typecheck needs it); biome excludes it (generator emits `as any`)
+- Gate: typecheck ×4 modules + lint + build ✅ + **live smoke via `dev:all`**: BFF `{"users":70,"groups":3}` rendered in SSR home (`<strong>70</strong>`), features/download 200, pwa unaffected (3000) ✅
+- Note: web dev server binds IPv6 `[::1]` (rsbuild default) — use `localhost`, not `127.0.0.1`; deployment of the SSR bundle lands with the platform deployment phase
 
 ### Phase 5 — pwa sync · `feat/pwa-sync`
 - [ ] Design doc first: `pwa/docs/SYNC.md` (auth UX, offline queue, last-write-wins via `updated` timestamps, realtime transport, conflict rules per collection)

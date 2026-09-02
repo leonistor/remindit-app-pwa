@@ -8,7 +8,8 @@
       "!.agents",
       "!!**/dist",
       "!!**/build",
-      "!pwa/public"
+      "!pwa/public",
+      "!web/src/routeTree.gen.ts"
     ]
   },
   "vcs": {

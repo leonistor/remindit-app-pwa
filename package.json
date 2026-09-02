@@ -4,7 +4,8 @@
   "workspaces": [
     "common",
     "pwa",
-    "bff"
+    "bff",
+    "web"
   ],
   "scripts": {
     "build": "cd pwa && bun --env-file=../.env run build",
@@ -13,7 +14,9 @@
     "dev": "bun run dev:pwa",
     "dev:pwa": "cd pwa && bun --env-file=../.env run dev",
     "dev:bff": "cd bff && bun --env-file=../.env run dev",
-    "dev:all": "concurrently --kill-others -n pwa,bff -c blue,green \"bun run dev:pwa\" \"bun run dev:bff\"",
+    "dev:web": "cd web && bun --env-file=../.env run dev",
+    "dev:all": "concurrently --kill-others -n pwa,bff,web -c blue,green,magenta \"bun run dev:pwa\" \"bun run dev:bff\" \"bun run dev:web\"",
+    "build:web": "cd web && bun --env-file=../.env run build",
     "migrate:bff": "cd bff && bun --env-file=../.env run migrate",
     "test:bff": "cd bff && bun --env-file=../.env test",
     "demos": "cd pwa && bun run demos",
@@ -31,7 +34,7 @@
     "test:pre": "cd pwa && bun run test:pre",
     "test:quick": "cd pwa && bun run test:quick",
     "test:watch": "cd pwa && bun run test:watch",
-    "typecheck": "cd pwa && bun run typecheck && cd ../common && bun run typecheck && cd ../bff && bun run typecheck"
+    "typecheck": "cd pwa && bun run typecheck && cd ../common && bun run typecheck && cd ../bff && bun run typecheck && cd ../web && bun run typecheck"
   },
   "devDependencies": {
     "concurrently": "^10.0.5"

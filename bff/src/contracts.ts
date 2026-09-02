@@ -116,6 +116,14 @@ export type NotificationMarkReadBody = z.infer<
   typeof notificationMarkReadBodySchema
 >
 
+// --- stats (public, aggregate-only — marketing site, phase 4) -----------------
+
+export const statsSchema = z.object({
+  users: z.number().int().nonnegative(),
+  groups: z.number().int().nonnegative(),
+})
+export type Stats = z.infer<typeof statsSchema>
+
 // --- health ------------------------------------------------------------------
 
 export const healthResponseSchema = z.object({
