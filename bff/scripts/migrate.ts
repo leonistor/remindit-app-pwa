@@ -243,6 +243,24 @@ async function main(): Promise<void> {
     actions.push(`patched  ${def.name}`)
   }
 
+  // Role bootstrap (phase 6): the user matching POCKETBASE_ADMIN_EMAIL (if
+  // registered) becomes the first admin — idempotent.
+  if (env.pocketbaseAdminEmail) {
+    try {
+      const adminUser = await pb
+        .collection("users")
+        .getFirstListItem(pb.filter("email = {:email}", {
+          email: env.pocketbaseAdminEmail,
+        }))
+      if (adminUser.role !== "admin") {
+        await pb.collection("users").update(adminUser.id, { role: "admin" })
+        actions.push(`patched  users (role bootstrap: ${env.pocketbaseAdminEmail} → admin)`)
+      }
+    } catch {
+      // No such registered user yet — nothing to promote.
+    }
+  }
+
   for (const action of actions) console.log(`  ${action}`)
   const changed = actions.filter((a) => !a.startsWith("unchanged")).length
   console.log(

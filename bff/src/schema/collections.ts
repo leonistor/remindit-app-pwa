@@ -148,6 +148,17 @@ const users: CollectionDef = {
     // Inline SVG data-URI (common UserProfile.avatar) — text, not file, to
     // keep the profile self-contained; revisit if size becomes a problem.
     {
+      // Optional: PB selects have no default value, and open registration
+      // must not be forced to send it — absence means "user".
+      type: "select",
+      name: "role",
+      required: false,
+      hidden: false,
+      presentable: false,
+      maxSelect: 1,
+      values: ["user", "admin"],
+    },
+    {
       type: "text",
       name: "avatar",
       required: false,

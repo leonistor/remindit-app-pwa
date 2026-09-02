@@ -1,6 +1,7 @@
 import { Hono } from "hono"
 import { pbErrorResponse } from "./lib/pb-error"
 import { type AppEnv, requireAuth } from "./middleware/auth"
+import { admin } from "./routes/admin"
 import { auth } from "./routes/auth"
 import { groups } from "./routes/groups"
 import { health } from "./routes/health"
@@ -27,6 +28,7 @@ export const app = new Hono<AppEnv>()
   .route("/api/auth", auth)
   .route("/api/groups", groups)
   .route("/api/notifications", notifications)
+  .route("/api/admin", admin)
   .route("/api/stats", stats)
   .route("/pb", pb)
   .route("/api/sse", sse)

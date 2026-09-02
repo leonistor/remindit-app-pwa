@@ -19,6 +19,7 @@ export const toPublicUser = (record: Record<string, unknown>): UserPublic => ({
   firstName: (record.firstName as string) ?? "",
   lastName: (record.lastName as string) ?? "",
   avatar: (record.avatar as string) ?? "",
+  role: record.role === "admin" ? "admin" : "user",
 })
 
 export const authService = {

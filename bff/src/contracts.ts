@@ -13,6 +13,9 @@ export const usernameSchema = z
   .max(64)
   .regex(/^[a-zA-Z0-9_-]+$/, "letters, digits, _ and - only")
 
+export const userRoleSchema = z.enum(["user", "admin"])
+export type UserRole = z.infer<typeof userRoleSchema>
+
 export const userPublicSchema = z.object({
   id: z.string(),
   email: z.string(),
@@ -20,6 +23,7 @@ export const userPublicSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   avatar: z.string(),
+  role: userRoleSchema.optional(),
 })
 export type UserPublic = z.infer<typeof userPublicSchema>
 
@@ -115,6 +119,57 @@ export const notificationMarkReadBodySchema = z.object({
 export type NotificationMarkReadBody = z.infer<
   typeof notificationMarkReadBodySchema
 >
+
+// --- admin (phase 6) — role-guarded server-side endpoints ---------------------
+
+export const adminOverviewSchema = z.object({
+  users: z.number().int().nonnegative(),
+  groups: z.number().int().nonnegative(),
+  items: z.number().int().nonnegative(),
+  listEntries: z.number().int().nonnegative(),
+  historyEvents: z.number().int().nonnegative(),
+})
+export type AdminOverview = z.infer<typeof adminOverviewSchema>
+
+export const adminUserSchema = z
+  .object({
+    id: z.string(),
+    email: z.string(),
+    username: z.string(),
+    firstName: z.string(),
+    lastName: z.string(),
+    avatar: z.string(),
+    role: userRoleSchema,
+  })
+  .merge(recordStamps)
+export type AdminUser = z.infer<typeof adminUserSchema>
+
+export const adminUserPageSchema = z.object({
+  items: z.array(adminUserSchema),
+  total: z.number().int().nonnegative(),
+})
+export type AdminUserPage = z.infer<typeof adminUserPageSchema>
+
+export const adminUserCreateBodySchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  username: usernameSchema,
+  role: userRoleSchema,
+  firstName: z.string().max(64).optional(),
+  lastName: z.string().max(64).optional(),
+})
+export type AdminUserCreateBody = z.infer<typeof adminUserCreateBodySchema>
+
+export const adminGroupSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    owner: z.string(),
+    ownerUsername: z.string().optional(),
+    membersCount: z.number().int().nonnegative(),
+  })
+  .merge(recordStamps)
+export type AdminGroup = z.infer<typeof adminGroupSchema>
 
 // --- stats (public, aggregate-only — marketing site, phase 4) -----------------
 
