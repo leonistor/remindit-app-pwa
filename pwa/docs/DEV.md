@@ -273,7 +273,7 @@ The repo-root `seed/` directory is a tracked, extensible registry of sample cata
 
 #### Selecting the seeded dataset
 
-The catalog is seeded from the **persisted dataset choice** (`remindit:selected-dataset`, set during onboarding or reset & reseed). `PUBLIC_DATASET` is only the **fallback** for when no choice is persisted (fresh installs). It is a **public** variable (Rsbuild exposes any `PUBLIC_`-prefixed var to client code via `import.meta.env`) defined in a `.env` file at the project root. Copy `.env.example` to `.env` and set:
+The catalog is seeded from the **persisted dataset choice** (`remindit:selected-dataset`, set during onboarding or reset & reseed). `PUBLIC_DATASET` is only the **fallback** for when no choice is persisted (fresh installs). It is a **public** variable (Rsbuild exposes any `PUBLIC_`-prefixed var to client code via `import.meta.env`) defined in the **single repo-root `.env`** (one env file for all modules — see `docs/ROADMAP.md` §4). Copy `.env.example` to `.env` and set:
 
 ```sh
 PUBLIC_DATASET=rick_morty
@@ -283,7 +283,7 @@ Valid values are the `id`s registered in `DATASETS`: `minimal`, `items_categorie
 
 #### Seeding history (first run)
 
-In addition to the catalog, both seeding paths (`initStores` first-run and `seedFromDataset`) generate a simulated **6-month shopping history** into `$history`, so the recommender has data to surface for new users (`initStores` only does this while history is empty). Always on; disable by setting `PUBLIC_SEED_HISTORY=0` in `.env`.
+In addition to the catalog, both seeding paths (`initStores` first-run and `seedFromDataset`) generate a simulated **6-month shopping history** into `$history`, so the recommender has data to surface for new users (`initStores` only does this while history is empty). Always on; disable by setting `PUBLIC_SEED_HISTORY=0` in the repo-root `.env`.
 
 The generator lives in `seed/history.ts` (`generateShoppingHistory`) and is **frequency-aware** and **reproducible** (seeded `mulberry32` PRNG, default seed `42`):
 

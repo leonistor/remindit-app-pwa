@@ -20,10 +20,15 @@ the owning module, so you never need to `cd` first:
 
 ```sh
 bun install     # installs every workspace
-bun run dev     # pwa dev server
+bun run dev     # pwa dev server (alias of dev:pwa; per-module dev:* as modules land)
 bun run build   # pwa production build
 bun run test    # pwa test suite
 ```
+
+Environment: **one repo-root `.env`** for all modules — copy `.env.example`
+(gitignored `.env` holds local values; prod secrets come from the VPS). Root
+`dev:*`/`build` scripts inject it via `bun --env-file=../.env` (see
+[docs/ROADMAP.md §4](docs/ROADMAP.md)).
 
 See [AGENTS.md](AGENTS.md) for the development guide and [pwa/DESIGN.md](pwa/DESIGN.md)
 for the design system.

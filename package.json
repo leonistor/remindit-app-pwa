@@ -6,10 +6,11 @@
     "pwa"
   ],
   "scripts": {
-    "build": "cd pwa && bun run build",
+    "build": "cd pwa && bun --env-file=../.env run build",
     "check": "cd pwa && bun run check",
     "deploy": "cd pwa && bun run deploy",
-    "dev": "cd pwa && bun run dev",
+    "dev": "bun run dev:pwa",
+    "dev:pwa": "cd pwa && bun --env-file=../.env run dev",
     "demos": "cd pwa && bun run demos",
     "format": "cd pwa && bun run format",
     "generate:palettes": "cd pwa && bun run generate:palettes",

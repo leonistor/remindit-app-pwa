@@ -138,12 +138,12 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 
 ## 6. Phases — one feature branch each
 
-### Phase 0 — workspace foundations · `feat/platform-foundations`
-- [ ] `docs/ROADMAP.md` (this file) + README/AGENTS pointers
-- [ ] Root scripts: `dev:pwa|bff|web|admin|all`, `typecheck` composition — **all env-dependent delegations launch from the repo root with `bun --env-file=.env`** (D9)
-- [ ] Root `.env.example` committed with all planned vars (§4 table, placeholders ok); root `.env` gitignored (already true); remove the `pwa/.env` / `pwa/.env.example` lines from `.gitignore`
-- [ ] Biome/tsconfig conventions documented for new modules
-- Gate: `bun install && bun run typecheck && bun run lint` green; pwa untouched
+### Phase 0 — workspace foundations · `feat/platform-foundations` ✅
+- [x] `docs/ROADMAP.md` (this file) + README/AGENTS pointers
+- [x] Root scripts: `dev` is an alias of `dev:pwa`; env-bearing delegations use `cd <module> && bun --env-file=../.env run <script>` (D9; verified — vars propagate, missing `.env` tolerated). `dev:bff|web|admin|all` land with their modules (nothing to point at yet); `typecheck` composition exists and gains modules as they land
+- [x] Root `.env.example` committed with all planned + existing vars (§4); the **tracked** `pwa/.env.example` was merged into it and removed; local `pwa/.env` migrated to root `.env` (no `.gitignore` change needed — the existing `.env` pattern already ignores it everywhere). Verified end-to-end: Rsbuild inlines `PUBLIC_*` from process.env (marker-value build test)
+- [x] Biome/tsconfig conventions documented (AGENTS.md §Platform conventions)
+- Gate: `bun install && bun run typecheck && bun run lint` green; pwa behavior unchanged (`PUBLIC_DATASET`/`PUBLIC_SEED_HISTORY` still inlined)
 
 ### Phase 1 — bff skeleton · `feat/bff-skeleton`
 - [ ] `bff/` module: package.json, tsconfig, AGENTS.md, README.md (devdoc); env comes from the root `.env` (D9) — no module env file

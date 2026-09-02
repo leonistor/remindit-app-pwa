@@ -28,3 +28,17 @@ Module-specific rules live next to each module — read the one for the module y
 
 - `bun run typecheck` (repo root) covers both modules: `pwa/` then `common/`.
 - Root scripts are pass-throughs to `pwa/`; module-owned tooling is documented in the module AGENTS.md files.
+
+## Platform conventions (adding modules)
+
+New modules (`bff`, `web`, `admin` — phased rollout in [docs/ROADMAP.md](docs/ROADMAP.md)):
+
+- Bun workspace package named `@remindit/<module>`, `"type": "module"`, own
+  `dev/build/test/typecheck/lint` scripts, plus module `AGENTS.md` +
+  `README.md` (devdoc). Biome covers the whole repo automatically
+  (`biome.json` `files.includes: **`); root `bun run typecheck` gains the
+  module when it lands.
+- **Env (D9):** one root `.env` (gitignored) + committed root `.env.example`
+  — no per-module env files. Root delegation scripts launch env-dependent
+  processes with `cd <module> && bun --env-file=../.env run <script>` (verified:
+  vars propagate into children; Rsbuild inlines `PUBLIC_*` from process.env).
