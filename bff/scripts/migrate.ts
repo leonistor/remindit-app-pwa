@@ -10,8 +10,8 @@ import { resolve } from "node:path"
 import PocketBase from "pocketbase"
 import { env } from "../src/env"
 import {
-  desiredCollections,
   type CollectionDef,
+  desiredCollections,
   type FieldDef,
 } from "../src/schema/collections"
 
@@ -35,7 +35,7 @@ const canonicalize = (value: unknown): unknown => {
       Object.entries(value as Record<string, unknown>)
         .filter(([key]) => !SERVER_NOISE_KEYS.has(key))
         .sort(([a], [b]) => a.localeCompare(b))
-        .map(([key, v]) => [key, canonicalize(v)]),
+        .map(([key, v]) => [key, canonicalize(v)])
     )
   }
   return value
@@ -70,26 +70,28 @@ const managedView = (collection: Record<string, unknown>): string =>
         // tokenKey/email) — they carry PB's internal users collection marker.
         if (key === "indexes" && Array.isArray(value)) {
           value = value.filter(
-            (sql) => typeof sql !== "string" || !sql.includes("_pb_users_auth_"),
+            (sql) => typeof sql !== "string" || !sql.includes("_pb_users_auth_")
           )
         }
         return [key, canonicalize(value)]
-      }),
-    ),
+      })
+    )
   )
 
 // Relations reference collections by NAME in the builders (ids only exist at
 // runtime); resolve to the wire-format `collectionId` here.
 const toWireFields = (
   fields: FieldDef[],
-  nameToId: Map<string, string>,
+  nameToId: Map<string, string>
 ): Record<string, unknown>[] =>
   fields.map((field) => {
     if (field.type !== "relation") return { ...field }
-    const id = field.collectionName ? nameToId.get(field.collectionName) : undefined
+    const id = field.collectionName
+      ? nameToId.get(field.collectionName)
+      : undefined
     if (!id) {
       throw new Error(
-        `relation "${field.name}" targets "${field.collectionName}" which is not defined yet (check collection order)`,
+        `relation "${field.name}" targets "${field.collectionName}" which is not defined yet (check collection order)`
       )
     }
     const { collectionName: _drop, ...wire } = field
@@ -105,7 +107,7 @@ async function ensureSuperuser(pb: PocketBase): Promise<void> {
   const password = env.pocketbaseAdminPassword
   if (!email || !password) {
     console.error(
-      "[migrate] POCKETBASE_ADMIN_EMAIL / POCKETBASE_ADMIN_PASSWORD missing in the root .env",
+      "[migrate] POCKETBASE_ADMIN_EMAIL / POCKETBASE_ADMIN_PASSWORD missing in the root .env"
     )
     process.exit(1)
   }
@@ -116,7 +118,14 @@ async function ensureSuperuser(pb: PocketBase): Promise<void> {
     console.log("[migrate] superuser not found — provisioning via CLI…")
   }
   const proc = Bun.spawnSync({
-    cmd: ["bunx", "@fadlee/pocketbase-bin", "superuser", "upsert", email, password],
+    cmd: [
+      "bunx",
+      "@fadlee/pocketbase-bin",
+      "superuser",
+      "upsert",
+      email,
+      password,
+    ],
     cwd: bffDir,
     stdout: "inherit",
     stderr: "inherit",
@@ -138,7 +147,7 @@ async function main(): Promise<void> {
     await fetch(`${env.pocketbaseUrl}/api/health`)
   } catch {
     console.error(
-      `[migrate] PocketBase is not reachable at ${env.pocketbaseUrl} — start it with \`bun run dev:bff\``,
+      `[migrate] PocketBase is not reachable at ${env.pocketbaseUrl} — start it with \`bun run dev:bff\``
     )
     process.exit(1)
   }
@@ -148,11 +157,14 @@ async function main(): Promise<void> {
   const existing = await pb.collections.getFullList()
   const nameToId = new Map(existing.map((c) => [c.name, c.id]))
   const byName = new Map<string, Record<string, unknown>>(
-    existing.map((c) => [c.name, c as unknown as Record<string, unknown>]),
+    existing.map((c) => [c.name, c as unknown as Record<string, unknown>])
   )
 
   const actions: string[] = []
-  const fullPayload = (def: CollectionDef, fields: Record<string, unknown>[]) => ({
+  const fullPayload = (
+    def: CollectionDef,
+    fields: Record<string, unknown>[]
+  ) => ({
     name: def.name,
     type: def.type,
     fields,
@@ -183,8 +195,15 @@ async function main(): Promise<void> {
 
   // Pass B — reconcile definitions: rules, indexes, field drift, auth opts.
   for (const def of desiredCollections) {
-    const managed = managedView(fullPayload(def, toWireFields(def.fields, nameToId)))
-    const current = byName.get(def.name)!
+    const managed = managedView(
+      fullPayload(def, toWireFields(def.fields, nameToId))
+    )
+    const current = byName.get(def.name)
+    if (!current) {
+      throw new Error(
+        `collection "${def.name}" vanished between passes — rerun the migration`
+      )
+    }
 
     if (managedView(current) === managed) {
       actions.push(`unchanged ${def.name}`)
@@ -193,7 +212,9 @@ async function main(): Promise<void> {
 
     // Partial patch — PB merges, so only managed keys change. Log which
     // managed keys diverged so schema drift stays explainable.
-    const desiredCanonical = managedView(fullPayload(def, toWireFields(def.fields, nameToId)))
+    const desiredCanonical = managedView(
+      fullPayload(def, toWireFields(def.fields, nameToId))
+    )
     const currentCanonical = managedView(current)
     const diffKeys = MANAGED_KEYS.filter((key) => {
       const a = JSON.parse(desiredCanonical)[key]
@@ -209,14 +230,15 @@ async function main(): Promise<void> {
             return `\n      ${key} desired: ${JSON.stringify(a)?.slice(0, 500)}\n      ${key} current: ${JSON.stringify(b)?.slice(0, 500)}`
           })
           .join("") +
-        `\n    )`,
+        `\n    )`
     )
 
     // Partial patch — PB merges, so only managed keys change.
-    const { name: _name, type: _type, ...patch } = fullPayload(
-      def,
-      toWireFields(def.fields, nameToId),
-    )
+    const {
+      name: _name,
+      type: _type,
+      ...patch
+    } = fullPayload(def, toWireFields(def.fields, nameToId))
     await pb.collections.update(def.name, patch)
     actions.push(`patched  ${def.name}`)
   }
@@ -226,7 +248,7 @@ async function main(): Promise<void> {
   console.log(
     changed === 0
       ? `✓ schema in sync with src/schema/collections.ts (${actions.length} collections, no changes)`
-      : `✓ schema reconciled (${changed} change${changed === 1 ? "" : "s"} out of ${actions.length} collections)`,
+      : `✓ schema reconciled (${changed} change${changed === 1 ? "" : "s"} out of ${actions.length} collections)`
   )
 }
 
@@ -235,7 +257,10 @@ main().catch((error) => {
   // surface them verbosely, the collapsed SDK message is useless.
   const response = (error as { response?: { data?: unknown } }).response
   if (response) {
-    console.error("[migrate] PB error response:", JSON.stringify(response, null, 2))
+    console.error(
+      "[migrate] PB error response:",
+      JSON.stringify(response, null, 2)
+    )
   }
   console.error("[migrate] failed:", error)
   process.exit(1)

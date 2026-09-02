@@ -164,12 +164,14 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - [x] Builder integrity tests (`tests/schema.test.ts`: unique names, relation ordering, `CATEGORY_FREQUENCIES`/`HistoryAction` mirroring) + root `migrate:bff` script
 - Gate: migrate on live PB → reconcile 15 changes → re-run ⇒ `✓ schema in sync (8 collections, no changes)`; rules matrix 8/8 ✅; typecheck + lint + 8 bun tests green
 
-### Phase 3 — auth & groups API · `feat/bff-auth-groups`
-- [ ] `/api/auth/*` (register, login, logout, me) — pass-through of PB auth tokens with sameSite cookie option for web
-- [ ] `/api/groups/*` CRUD + member/role management (owner-only mutations) — all via Hono RPC with Zod schemas (the `AppType` contract frontends consume)
-- [ ] Notification stub endpoints (`/api/notifications/*` listed, no channel)
-- [ ] Devdoc `bff/docs/API.md`; bun test coverage for rules/boundaries
-- Gate: typecheck + lint + tests; MCP `pb_rules_test` for member/owner matrix
+### Phase 3 — auth & groups API · `feat/bff-auth-groups` ✅
+- [x] `/api/auth/*` (register, login, logout, me) — PB auth pass-through with **dual transport**: Bearer token (pwa) + HttpOnly SameSite=Lax session cookie (web, `SESSION_COOKIE_SECURE` env for prod); every authenticated request validates **and rotates** the token via PB auth-refresh
+- [x] `/api/groups/*` CRUD + member management — creator becomes owner-member automatically; **all authorization via PB rules on the token-scoped client** (BFF never widens access, D8); Hono RPC + `@hono/zod-validator` for request bodies, Zod response contracts
+- [x] Notification stubs: `GET /api/notifications` + `PATCH :id` (list + mark-read; channel undecided, D4)
+- [x] Devdoc `bff/docs/API.md` (endpoints, auth flows, error shape, live gate results)
+- [x] Tests: unit (401 boundaries, contract rejects, cookie clear) + **live integration suite (10/10 vs PB 0.40.1)** — every response parsed against the published Zod contract; integration tests skip (not fail) when PB is down
+- Gate: typecheck ×3 modules + lint + 25 bun tests green ✅
+- Gotchas recorded: hc per-request headers go in the second `options` arg (hono 4.13); SDK attaches Authorization only when `authStore.isValid`; PB `expand` rides the query string (ignored in create body); failed CREATE rules surface as 400, not 403; `created/updated` autodate fields added to all data collections (phase-5 sync needs them)
 
 ### Phase 4 — web marketing site · `feat/web-marketing`
 - [ ] `web/`: Rsbuild + `@tanstack/react-start` (rsbuild adapter), SSR, brand from `@remindit/common` (incl. logo assets)

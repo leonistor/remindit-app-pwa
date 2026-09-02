@@ -28,10 +28,17 @@ PocketBase (POCKETBASE_URL, 127.0.0.1:8090) ── never public
 - `src/routes/sse.ts` — phase-1 spike: SSE streams unbuffered through Hono on
   Bun (verified by `tests/sse.test.ts`); transport basis for phase-5 realtime.
 
-## Endpoints (phase 1)
+## Endpoints
+
+Phase 1+2/3 surface — full request/response contracts and the live-verified
+rule matrix: [docs/API.md](docs/API.md).
 
 | Route | Purpose |
 |-------|---------|
+| `POST /api/auth/register` / `login` / `logout`, `GET /api/auth/me` | PB auth pass-through (Bearer **and** HttpOnly session cookie; tokens rotate via auth-refresh) |
+| `GET/POST /api/groups`, `GET/DELETE /api/groups/:id` | shared workspaces (creator = owner member) |
+| `GET/POST /api/groups/:id/members`, `DELETE …/:memberId` | membership management (owner-only mutations via PB rules) |
+| `GET /api/notifications`, `PATCH /api/notifications/:id` | stub (D4): list + mark-read |
 | `GET /api/health` | BFF liveness + PocketBase reachability (`pb.status: "up" \| "down"`; PB down is a reported state, not a 5xx) |
 | `GET /api/sse` | SSE spike/diagnostic — emits 3 `ping` events 150ms apart |
 

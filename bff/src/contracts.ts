@@ -1,8 +1,122 @@
-// API response contracts (D8): Zod schemas are the published shape frontends
-// consume through Hono RPC (`hc<AppType>`), and services return data that
-// satisfies them — the compiler keeps both sides honest.
+// API contracts (D8): Zod schemas are the published shape frontends consume
+// through Hono RPC (`hc<AppType>`), and services return data that satisfies
+// them — the compiler keeps both sides honest. Request bodies are validated
+// with @hono/zod-validator; response shapes are what services construct.
 
 import { z } from "zod"
+
+// --- shared ------------------------------------------------------------------
+
+export const usernameSchema = z
+  .string()
+  .min(2)
+  .max(64)
+  .regex(/^[a-zA-Z0-9_-]+$/, "letters, digits, _ and - only")
+
+export const userPublicSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  username: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  avatar: z.string(),
+})
+export type UserPublic = z.infer<typeof userPublicSchema>
+
+export const errorSchema = z.object({
+  error: z.string(),
+  details: z.unknown().optional(),
+})
+export type ErrorBody = z.infer<typeof errorSchema>
+
+// --- auth --------------------------------------------------------------------
+
+export const registerBodySchema = z
+  .object({
+    email: z.string().email(),
+    password: z.string().min(8),
+    passwordConfirm: z.string().min(8),
+    username: usernameSchema,
+    firstName: z.string().max(64).optional(),
+    lastName: z.string().max(64).optional(),
+  })
+  .refine((body) => body.password === body.passwordConfirm, {
+    message: "passwords do not match",
+    path: ["passwordConfirm"],
+  })
+export type RegisterBody = z.infer<typeof registerBodySchema>
+
+export const loginBodySchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+})
+export type LoginBody = z.infer<typeof loginBodySchema>
+
+export const authResponseSchema = z.object({
+  token: z.string(),
+  user: userPublicSchema,
+})
+export type AuthResponse = z.infer<typeof authResponseSchema>
+
+// PB record timestamps, as-is from the wire.
+const recordStamps = z.object({
+  created: z.string().optional(),
+  updated: z.string().optional(),
+})
+
+// --- groups ------------------------------------------------------------------
+
+export const groupSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    owner: z.string(),
+  })
+  .merge(recordStamps)
+export type Group = z.infer<typeof groupSchema>
+
+export const groupCreateBodySchema = z.object({
+  name: z.string().min(1).max(120),
+})
+export type GroupCreateBody = z.infer<typeof groupCreateBodySchema>
+
+export const memberRoleSchema = z.enum(["owner", "member"])
+export type MemberRole = z.infer<typeof memberRoleSchema>
+
+export const memberSchema = z.object({
+  id: z.string(),
+  role: memberRoleSchema,
+  group: z.string(),
+  user: userPublicSchema,
+})
+export type Member = z.infer<typeof memberSchema>
+
+export const memberInviteBodySchema = z.object({
+  userId: z.string().min(1),
+  role: memberRoleSchema,
+})
+export type MemberInviteBody = z.infer<typeof memberInviteBodySchema>
+
+// --- notifications (reserved, D4 — list + mark-read only for now) ------------
+
+export const notificationSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  payload: z.unknown().optional(),
+  read: z.boolean(),
+  user: z.string(),
+  group: z.string().optional(),
+})
+export type Notification = z.infer<typeof notificationSchema>
+
+export const notificationMarkReadBodySchema = z.object({
+  read: z.boolean(),
+})
+export type NotificationMarkReadBody = z.infer<
+  typeof notificationMarkReadBodySchema
+>
+
+// --- health ------------------------------------------------------------------
 
 export const healthResponseSchema = z.object({
   ok: z.literal(true),
@@ -11,5 +125,4 @@ export const healthResponseSchema = z.object({
     status: z.enum(["up", "down"]),
   }),
 })
-
 export type HealthResponse = z.infer<typeof healthResponseSchema>

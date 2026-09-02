@@ -15,7 +15,7 @@
     "dev:bff": "cd bff && bun --env-file=../.env run dev",
     "dev:all": "concurrently --kill-others -n pwa,bff -c blue,green \"bun run dev:pwa\" \"bun run dev:bff\"",
     "migrate:bff": "cd bff && bun --env-file=../.env run migrate",
-    "test:bff": "cd bff && bun test",
+    "test:bff": "cd bff && bun --env-file=../.env test",
     "demos": "cd pwa && bun run demos",
     "format": "cd pwa && bun run format",
     "generate:palettes": "cd pwa && bun run generate:palettes",

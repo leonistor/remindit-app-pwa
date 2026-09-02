@@ -21,6 +21,7 @@ export type FieldDef = {
     | "select"
     | "relation"
     | "json"
+    | "autodate"
   name: string
   required?: boolean
   hidden?: boolean
@@ -44,6 +45,9 @@ export type FieldDef = {
   minSelect?: number
   /** json */
   maxSize?: number
+  /** autodate */
+  onCreate?: boolean
+  onUpdate?: boolean
   [key: string]: unknown
 }
 
@@ -70,6 +74,27 @@ const MEMBER_OF_GROUP_BY_BODY = `@collection.group_members.user ?= @request.auth
 const GROUP_ACCESS = `group.owner = @request.auth.id || ${MEMBER_OF_GROUP}`
 const GROUP_ACCESS_CREATE = `group.owner = @request.auth.id || ${MEMBER_OF_GROUP_BY_BODY}`
 
+// Record timestamps (PB 0.40 only has them if defined) — the sync layer
+// (phase 5) keys last-write-wins off `updated`.
+const stamps = (): FieldDef[] => [
+  {
+    type: "autodate",
+    name: "created",
+    onCreate: true,
+    onUpdate: false,
+    hidden: false,
+    presentable: false,
+  },
+  {
+    type: "autodate",
+    name: "updated",
+    onCreate: true,
+    onUpdate: true,
+    hidden: false,
+    presentable: false,
+  },
+]
+
 // users ---------------------------------------------------------------------
 // Mirrors UserProfile (username, firstName, lastName, avatar as inline SVG
 // data-URI text). email/verification/password are PB auth system fields.
@@ -77,8 +102,11 @@ const users: CollectionDef = {
   name: "users",
   type: "auth",
   passwordAuth: { enabled: true, identityFields: ["email"] },
-  listRule: "id = @request.auth.id",
-  viewRule: "id = @request.auth.id",
+  // Profiles are visible to any authenticated user (needed for group member
+  // lists — "shared group" correlation is not expressible in flat PB rules).
+  // Email is NOT exposed: PB gates it per-record via `emailVisibility`.
+  listRule: '@request.auth.id != ""',
+  viewRule: '@request.auth.id != ""',
   // Open registration for now (BFF-mediated); invites/verification in phase 3.
   createRule: "",
   updateRule: "id = @request.auth.id",
@@ -146,7 +174,8 @@ const groups: CollectionDef = {
     "owner = @request.auth.id || @collection.group_members.user ?= @request.auth.id && @collection.group_members.group ?= id",
   viewRule:
     "owner = @request.auth.id || @collection.group_members.user ?= @request.auth.id && @collection.group_members.group ?= id",
-  createRule: '@request.auth.id != "" && @request.body.owner = @request.auth.id',
+  createRule:
+    '@request.auth.id != "" && @request.body.owner = @request.auth.id',
   updateRule: "owner = @request.auth.id",
   deleteRule: "owner = @request.auth.id",
   fields: [
@@ -172,6 +201,7 @@ const groups: CollectionDef = {
       minSelect: 1,
       maxSelect: 1,
     },
+    ...stamps(),
   ],
 }
 
@@ -220,6 +250,7 @@ const groupMembers: CollectionDef = {
       minSelect: 1,
       maxSelect: 1,
     },
+    ...stamps(),
   ],
   indexes: [
     "CREATE UNIQUE INDEX `idx_group_members_unique` ON `group_members` (`group`, `user`)",
@@ -281,6 +312,7 @@ const categories: CollectionDef = {
       minSelect: 1,
       maxSelect: 1,
     },
+    ...stamps(),
   ],
 }
 
@@ -329,6 +361,7 @@ const items: CollectionDef = {
       minSelect: 1,
       maxSelect: 1,
     },
+    ...stamps(),
   ],
 }
 
@@ -382,6 +415,7 @@ const listEntries: CollectionDef = {
       minSelect: 1,
       maxSelect: 1,
     },
+    ...stamps(),
   ],
 }
 
@@ -472,6 +506,7 @@ const historyEvents: CollectionDef = {
       minSelect: 1,
       maxSelect: 1,
     },
+    ...stamps(),
   ],
 }
 
@@ -534,6 +569,7 @@ const notifications: CollectionDef = {
       minSelect: 0,
       maxSelect: 1,
     },
+    ...stamps(),
   ],
 }
 

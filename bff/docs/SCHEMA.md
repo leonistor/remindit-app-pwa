@@ -10,7 +10,7 @@ collections in the PB Admin UI; inspect via pocketbase-mcp instead
 
 | PB collection | Common type | Fields | Notes |
 |---------------|-------------|--------|-------|
-| `users` (auth) | `UserProfile` | `username`* (unique), `firstName`, `lastName`, `avatar` (text: inline SVG data-URI) | email/password/verified are PB auth system fields; open registration for now |
+| `users` (auth) | `UserProfile` | `username`* (unique), `firstName`, `lastName`, `avatar` (text: inline SVG data-URI) | email/password/verified are PB auth system fields; open registration for now; **profiles visible to any authenticated user** (group member lists need it — "shared group" correlation is not expressible in flat PB rules; email stays gated by PB's `emailVisibility`) |
 | `groups` | — (new, D1) | `name`*, `owner` → users* | a group = one shared workspace owning categories/items/lists |
 | `group_members` | — (new, D1) | `role`* (`owner`\|`member`), `group`* → groups†, `user`* → users† | join collection; drives every membership rule; unique `(group,user)` |
 | `categories` | `Category` | `name`*, `frequency`* (select = `CATEGORY_FREQUENCIES`), `color` (palette slot), `group`* → groups† | |
@@ -38,7 +38,7 @@ only). Baseline (phase 2), all verified live (see "Rule matrix" below):
 
 | Collection | list/view | create | update | delete |
 |------------|-----------|--------|--------|--------|
-| `users` | self | `""` (open signup) | self | self |
+| `users` | any authenticated user (profiles; email gated by `emailVisibility`) | `""` (open signup) | self | self |
 | `groups` | owner ∨ member (via `@collection.group_members`) | auth ∧ `@request.body.owner` = self | owner | owner |
 | `group_members` | self-membership ∨ group owner | group owner (hydrated record) | nobody | group owner ∨ self (leave) |
 | `categories` / `items` / `list_entries` | group owner ∨ member | group owner ∨ member (group from `@request.body`) | group owner ∨ member | group owner ∨ member |

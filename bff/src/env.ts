@@ -7,6 +7,9 @@ const positiveInt = (raw: string | undefined, fallback: number): number => {
   return Number.isInteger(n) && n > 0 ? n : fallback
 }
 
+const bool = (raw: string | undefined, fallback: boolean): boolean =>
+  raw === undefined || raw === "" ? fallback : raw === "true" || raw === "1"
+
 export const env = {
   /** Hono (Bun.serve) port. */
   port: positiveInt(process.env.PORT, 3100),
@@ -14,7 +17,12 @@ export const env = {
   pocketbaseUrl: process.env.POCKETBASE_URL ?? "http://127.0.0.1:8090",
   /** PocketBase data dir, resolved from the repo root (gitignored). */
   pocketbaseDataDir: process.env.POCKETBASE_DATA_DIR ?? "bff/pb_data",
-  /** Dev-only superuser credentials (migrations + MCP from phase 2 on). */
+  /** Dev-only superuser credentials (migrations + MCP + admin-side tests). */
   pocketbaseAdminEmail: process.env.POCKETBASE_ADMIN_EMAIL,
   pocketbaseAdminPassword: process.env.POCKETBASE_ADMIN_PASSWORD,
+  /**
+   * Session cookie: `Secure` attribute — enable in production (TLS behind the
+   * reverse proxy); dev http://localhost keeps it false.
+   */
+  sessionCookieSecure: bool(process.env.SESSION_COOKIE_SECURE, false),
 }
