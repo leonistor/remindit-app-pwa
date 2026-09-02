@@ -9,7 +9,9 @@ Bun workspace for the Remindit project.
 | `@remindit/pwa`     | pwa/     | Local-first shopping-list / reminders PWA — see [pwa/README.md](pwa/README.md) |
 | `@remindit/common`  | common/  | Shared brand constants (name, colors, logo) + domain entities                   |
 
-Planned: `@remindit/web` (marketing website).
+Planned: `@remindit/bff` (PocketBase + Hono), `@remindit/web` (marketing,
+Rsbuild + TanStack Start), `@remindit/admin` (Rsbuild + TanStack Start +
+Mantine) — see [docs/ROADMAP.md](docs/ROADMAP.md) for the phased plan.
 
 ## Usage
 
