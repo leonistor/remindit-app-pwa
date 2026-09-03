@@ -8,6 +8,15 @@ import pkg from "./package.json"
 import { WEB_APP_MANIFEST } from "./pwa-manifest.config"
 import { PARAGLIDE_COMPILER_OPTIONS } from "./scripts/compile-i18n"
 
+// Caddy-proxied dev hostnames (docs/CADDY-LOCAL.md): allowlisted on the dev
+// server and printed as labeled QR codes at startup. The QR targets are the
+// HTTPS public names — no ports, since Caddy serves on 443.
+const CADDY_HOSTS = [
+  { label: "PWA", host: "pwa.remindit.localhost" },
+  { label: "Web", host: "web.remindit.localhost" },
+  { label: "Admin", host: "admin.remindit.localhost" },
+] as const
+
 export default defineConfig({
   source: {
     define: {
@@ -36,24 +45,26 @@ export default defineConfig({
     // pwa.remindit.localhost — the dev server rejects unknown Host headers
     // by default, so the proxied name must be allowlisted. Direct-port URLs
     // (http://localhost:3000) stay allowed by the default 'auto' policy.
-    allowedHosts: [
-      "pwa.remindit.localhost",
-      "web.remindit.localhost",
-      "admin.remindit.localhost",
-    ],
+    // Single source of truth for both this allowlist and the startup QR codes.
+    allowedHosts: CADDY_HOSTS.map(({ host }) => host),
     printUrls({ urls }) {
       for (const url of urls) {
         console.log(`  ➜  ${url}`)
       }
       console.log()
-      // A QR code per URL (localhost + LAN addresses) so a phone can scan
-      // whichever host it can reach. `small: true` keeps three codes from
-      // flooding the terminal. printUrls is sync-typed in Rsbuild, so the
-      // promises are fire-and-forget: failures are logged, never thrown,
-      // because an exception inside this callback would crash the dev server.
-      for (const url of urls) {
+      // QR codes target the Caddy HTTPS hostnames (docs/CADDY-LOCAL.md)
+      // instead of the raw localhost/LAN URLs above, matching how the app is
+      // actually browsed. printUrls is sync-typed in Rsbuild, so the promises
+      // are fire-and-forget: failures are logged, never thrown, because an
+      // exception inside this callback would crash the dev server.
+      for (const { label, host } of CADDY_HOSTS) {
+        const url = `https://${host}`
         QRCode.toString(url, { type: "terminal", small: true })
-          .then((qr) => console.log(`${qr}\n  ${url}\n`))
+          .then((qr) =>
+            console.log(
+              `\n  \x1b[1m${label}\x1b[0m  \x1b[2m${url}\x1b[0m\n${qr}`
+            )
+          )
           .catch((err) =>
             console.error(`Failed to generate QR code for ${url}:`, err)
           )
