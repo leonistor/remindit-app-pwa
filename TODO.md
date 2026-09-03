@@ -177,8 +177,12 @@ in-flight reconciles would close the last wipe edge case.
   username) and remove, self-leave behind an alert-dialog confirm; both flows
   call `recoverActiveGroup()` (no-op while the group is still valid) then
   refresh; en/ro strings under the `sharedList*` family.
-- [ ] **F3** Release the sync slice as the next pwa release (sync engine +
-  auth UI are on main since phase 5, unreleased at v4.4.0).
+- [x] **F3** Release the sync slice as the next pwa release (sync engine +
+  auth UI are on main since phase 5, unreleased at v4.4.0). Done 2026-09-03:
+  tagged v5.0.0 (major, mirroring roadmap V5) — changelog, About/Help sync +
+  shared-list sections (en/ro), DEPLOY.md build-time env note, regenerated
+  screenshots; release-gate `test:pre` green. Commit + tag are local — push
+  and the server deploy are the D4 step.
 - [ ] **F4** Notifications channel decision (D4) — Web Push vs email vs
   realtime-only; then dispatch in the bff + the in-app consumer.
 
