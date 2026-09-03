@@ -78,8 +78,6 @@
   "quickAddMinLengthHint": "Scrie cel puțin 3 litere, apoi atinge o categorie sau apasă Enter.",
   "quickAddUnlockHint": "Adaugă cel puțin {count} articole pentru a debloca recomandări personalizate — scrie un nume care nu apare în listă pentru a-l crea.",
   "done": "Gata",
-  "itemDetails": "Detalii articol",
-  "itemDetailsHint": "Aici vor apărea detaliile articolului.",
   "catalogTitle": "Catalog",
   "catalogAddItem": "Adaugă articol",
   "catalogAddCategory": "Adaugă categorie",

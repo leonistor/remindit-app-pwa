@@ -83,12 +83,10 @@ Distinct from categorical color. `src/lib/recommendation-tiers.ts` defines dots 
 ## 5. Layout & Navigation
 
 ```
-DrawerProvider
-├── Menu (min-h-14 md:min-h-16, rounded-md border bg-accent px-4, safe-area pads)
+Menu (min-h-14 md:min-h-16, rounded-md border bg-accent px-4, safe-area pads)
 │     logo (→ /) · ProfileAvatarLink · "Shopping list" link · hamburger MenuRoot — no quick-add (+) button
 │     └─ MenuContent w-52: nav links + Install + ThemeMenu submenu
 ├── <Outlet />  (page content)
-├── ItemDetailDrawer (context-managed drawer, placeholder — Phase 3)
 └── Footer  (hidden on "/")
 ```
 

@@ -7,11 +7,9 @@
 The app is a multi-route SPA (`src/router.tsx`, `createBrowserRouter`): one shared `Layout` hosts the main routes, and `/onboarding` is a chrome-less top-level route. The `Layout` renders a top menu bar, a content area (`<Outlet />`), and a discreet version footer (hidden on the main shopping view). A first-run gate redirects to `/onboarding` while `$onboarded` is false (`<Navigate to="/onboarding" replace />`), so the menu never shows during onboarding.
 
 ```
-DrawerProvider
-├── Menu (min-h-14 md:min-h-16 bar: logo, profile avatar, "Shopping list" link,
+Menu (min-h-14 md:min-h-16 bar: logo, profile avatar, "Shopping list" link,
 │   hamburger menu with nav links + install item + theme picker — no quick-add (+) button)
 ├── <Outlet /> (page content)
-├── ItemDetailDrawer (context-managed, hidden by default)
 ├── InstallBanner (fixed bottom, mounts 1.5s after the app becomes installable)
 ├── UpdatePrompt (fixed bottom, while a service worker is waiting)
 └── Footer (version → /changelog; hidden on "/")
@@ -32,7 +30,12 @@ Catalog items show recommendation badges (overdue/soon dots) based on the comput
 
 ### Item detail drawer
 
-A context-managed drawer (`DrawerProvider` + `ItemDetailDrawer`) sits at the Layout level. `openDrawer(itemId)` (via `useDrawerContext()`, `src/components/drawer-context.tsx`) is **reserved for Phase 3** and is intentionally not wired into the item UI yet — `ItemDetailDrawer` currently renders placeholder content. Phase 3 will populate it with item attributes (photo, quantity, price).
+The Phase 3 placeholder drawer (`DrawerProvider` + `ItemDetailDrawer` + the
+`$itemDetail` selector) was removed on 2026-09-03 — it was never openable
+(`openDrawer` had no callers), so it was dead UI. Phase 3 (item attributes:
+photo, quantity, price) will build item detail on the Shark `Drawer`
+primitive (`bunx shadcn add @shark/drawer` re-adds it) instead of the
+placeholder.
 
 ### Routes
 
@@ -169,7 +172,7 @@ All collections are persisted to `localStorage` with `@nanostores/persistent` (k
 | `history.ts`     | `$history`, `logHistory`, `clearHistory`                                                                                                                |
 | `commands.ts`    | Cross-store flows — `deleteCategoryWithReassign`, `deleteCatalogItemWithCascade`, `createItemAndAddToList`, full factory wipe `wipeAllData` (used by the local-data erase), backup restore `restoreLocalData` (see below) |
 | `user.ts`        | `$user`, `getUser`, `updateUser`, `randomUser` (offline initials fallback via `localAvatar`)                                                            |
-| `selectors.ts`   | computed `$itemsByCategory`, `$categoryById`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$selectedOrdered`, `$listItemIds`, `$catalogByCategory`, `$catalogByCategoryAll`, `$recommendations`, `$recommendationsByItemId`, `$itemDetail(itemId)` |
+| `selectors.ts`   | computed `$itemsByCategory`, `$categoryById`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$selectedOrdered`, `$listItemIds`, `$catalogByCategory`, `$catalogByCategoryAll`, `$recommendations`, `$recommendationsByItemId` |
 | `recommender.ts` | `computeItemStats`, `getExpectedInterval`, `scoreItem`, `computeRecommendations`, `FREQ_TO_DAYS`                                                        |
 | `ui.ts`          | UI-preference state — `$accordionOpen`, `setAccordionOpen` (persists the available-items panel's accordion open-state) + list sort — `SelectedSort`, `$selectedSort`, `SELECTED_SORT_ORDER`, `cycleSelectedSort` (see [List sort feature](#list-sort-feature)) |
 | `palette.ts`     | Active categorical-palette selection — `$activePaletteId`, `getActivePalette`, `setActivePalette` (persisted to `localStorage` under `remindit:active-palette`) |
@@ -182,7 +185,7 @@ Import store atoms/actions from the barrel: `import { $list, addToList } from "@
 
 **Cross-store flows live in `commands.ts`.** Store modules own a *single resource* and never import a sibling store's action functions; anything that composes two or more stores for one user action lives in `src/stores/commands.ts` (e.g. deleting a category reassigns its items, deleting a catalog item cascades list entries). This keeps the store call graph acyclic. **One sanctioned exception:** `list.ts` imports `logHistory` from `./history` — history logging is intrinsic to list add/remove (the list is the only history writer), as documented in the `list.ts` header.
 
-**React hooks are NOT exported from the barrel.** `useCatalog`, `useShoppingList`, `usePwaInstall` live in `src/hooks/` (importing store atoms), and `useDrawerContext` comes from `src/components/drawer-context.tsx` (the `useDrawer` name is a local alias inside `item-detail-drawer.tsx`). Import hooks directly: `import { useCatalog } from "@/hooks/use-catalog"` — never through `@/stores`.
+**React hooks are NOT exported from the barrel.** `useCatalog`, `useShoppingList`, `usePwaInstall` live in `src/hooks/` (importing store atoms). Import hooks directly: `import { useCatalog } from "@/hooks/use-catalog"` — never through `@/stores`.
 
 ### Persistence layer
 

@@ -78,8 +78,6 @@
   "quickAddMinLengthHint": "Type at least 3 letters, then tap a category or press Enter.",
   "quickAddUnlockHint": "Add at least {count} items to unlock personalized recommendations — type a name that isn't listed to create it.",
   "done": "Done",
-  "itemDetails": "Item details",
-  "itemDetailsHint": "Item details will appear here.",
   "catalogTitle": "Catalog",
   "catalogAddItem": "Add item",
   "catalogAddCategory": "Add category",

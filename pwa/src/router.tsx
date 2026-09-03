@@ -7,10 +7,8 @@ import {
   useLocation,
 } from "react-router"
 import { $onboarded, initPwaInstall } from "@/stores"
-import { DrawerProvider } from "./components/drawer-context"
 import { Footer } from "./components/footer"
 import { InstallBanner } from "./components/install-banner"
-import { ItemDetailDrawer } from "./components/item-detail-drawer"
 import Menu from "./components/menu"
 import ShoppingPanels from "./components/shopping-panels"
 import { UpdatePrompt } from "./components/update-prompt"
@@ -42,7 +40,7 @@ function Layout() {
   if (!onboarded) return <Navigate to="/onboarding" replace />
 
   return (
-    <DrawerProvider>
+    <>
       <div className="container h-screen">
         <div className="flex h-full w-full flex-col gap-4">
           <Menu />
@@ -66,10 +64,9 @@ function Layout() {
           </div>
         </div>
       </div>
-      <ItemDetailDrawer />
       <InstallBanner />
       <UpdatePrompt />
-    </DrawerProvider>
+    </>
   )
 }
 
