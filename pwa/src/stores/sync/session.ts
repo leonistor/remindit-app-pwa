@@ -1,7 +1,7 @@
 // Sync session (phase 5): the PB auth token + identity, persisted so sync
-// survives reloads. The token rotates on every authenticated request (BFF
-// auth-refresh) — the session store is updated by the engine whenever the
-// middleware hands back a fresh token.
+// survives reloads. The token is written only at login (signIn/signUp) — the
+// BFF /pb/* forwarder rotates tokens server-side, so nothing mid-session
+// hands the engine a fresh token to patch in here.
 
 import { jsonStore, STORAGE_KEYS } from "../persistence"
 

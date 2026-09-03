@@ -2,15 +2,17 @@
 // the session and the guard checks `record.role` server-side. Non-admins get
 // 403 before any superuser-side query runs.
 
-import { zValidator } from "@hono/zod-validator"
 import { createMiddleware } from "hono/factory"
 import { Hono } from "hono"
 import { adminUserCreateBodySchema } from "../contracts"
+import { validatedJson } from "../lib/validation"
 import { requireAuth, type AppEnv } from "../middleware/auth"
 import { adminService } from "../services/admin"
 
 const requireAdmin = createMiddleware<AppEnv>(async (c, next) => {
-  if (c.get("auth").record.role !== "admin") {
+  // record is resolved on demand (fresh-token fast path) — the admin guard is
+  // one of the consumers that needs it, so this pays one PB record read.
+  if ((await c.get("auth").record()).role !== "admin") {
     return c.json({ error: "admin role required" }, 403)
   }
   await next()
@@ -27,7 +29,7 @@ export const admin = new Hono<AppEnv>()
   })
   .post(
     "/users",
-    zValidator("json", adminUserCreateBodySchema),
+    validatedJson(adminUserCreateBodySchema),
     async (c) => c.json(await adminService.createUser(c.req.valid("json")), 201),
   )
   .delete("/users/:id", async (c) => {

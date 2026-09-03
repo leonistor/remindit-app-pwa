@@ -15,12 +15,30 @@ PB tokens are stateless JWTs; there is no server session store.
   HttpOnly SameSite=Lax cookie (`Secure` in prod via `SESSION_COOKIE_SECURE`);
   requests may rely on the cookie instead of the header.
 
-Every authenticated request re-validates **and rotates** the token through
-PB's `auth-refresh` (middleware `src/middleware/auth.ts`); the refreshed token
-is used server-side for the request and is available in the response context —
-stateless sessions stay alive without expiry juggling. All downstream PB calls
-run on the caller's token, so **PB API rules are the authorization boundary**
-(D8) — the BFF never widens access.
+### Session lifecycle (near-expiry rotation)
+
+Every authenticated request decodes the token's JWT claims locally
+(`src/middleware/auth.ts`) — no signature check:
+
+- **Fresh token** (more than ~20% of its lifetime remaining): the middleware
+  makes **no PocketBase call**. Validity still fails closed — PB re-checks
+  the token on every upstream call (services and the `/pb` forwarder stamp
+  the same token), so an invalid token is rejected at the first data call.
+- **Near expiry**: the middleware calls PB `auth-refresh` (this validates the
+  signature) and uses the rotated token server-side. The fresh token is
+  delivered back so stateless sessions survive past the original 14-day TTL:
+  - `X-Session-Token: <fresh>` response header on every response where
+    rotation happened (exposed via CORS);
+  - the `remindit_session` cookie is re-issued when the request
+    authenticated via cookie.
+
+**Clients SHOULD persist the `X-Session-Token` value in place of their stored
+token** — that is what keeps Bearer sessions alive. A token is rejected with
+401 only when PB refuses to refresh it; if PocketBase is unreachable the BFF
+answers `503 { error: "PocketBase is temporarily unavailable, please retry" }`
+— a retryable infra failure, not a credential failure. All downstream PB
+calls run on the caller's token, so **PB API rules are the authorization
+boundary** (D8) — the BFF never widens access.
 
 ### Endpoints
 
@@ -74,6 +92,11 @@ Channel undecided; only the read path exists (dispatch in phase 5+).
 
 PB errors bubble out of services and are shaped once in `app.onError`
 (`src/lib/pb-error.ts`); anything else → `500 { error: "internal server error" }`.
+
+Invalid request bodies fail with the same envelope —
+`400 { "error": "validation failed", "details": { "formErrors": [...], "fieldErrors": { "email": ["..."] } } }`
+— via the shared zValidator hook (`src/lib/validation.ts`), never Hono's
+default `{ success: false, error: [...] }` shape.
 
 ## Live rule matrix (phase 3 gate)
 

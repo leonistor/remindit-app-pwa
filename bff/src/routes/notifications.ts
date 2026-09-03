@@ -1,6 +1,6 @@
-import { zValidator } from "@hono/zod-validator"
 import { Hono } from "hono"
 import { notificationMarkReadBodySchema } from "../contracts"
+import { validatedJson } from "../lib/validation"
 import { type AppEnv, requireAuth } from "../middleware/auth"
 import { notificationsService } from "../services/notifications"
 
@@ -13,7 +13,7 @@ export const notifications = new Hono<AppEnv>()
   })
   .patch(
     "/:id",
-    zValidator("json", notificationMarkReadBodySchema),
+    validatedJson(notificationMarkReadBodySchema),
     async (c) => {
       const { id } = c.req.param()
       const { read } = c.req.valid("json")

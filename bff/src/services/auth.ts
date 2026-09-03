@@ -47,8 +47,8 @@ export const authService = {
     }
   },
 
-  /** Returns the validated user from the middleware's auth-refresh pass. */
-  me(auth: { record: Record<string, unknown> }): UserPublic {
-    return toPublicUser(auth.record)
+  /** Returns the validated user from the auth middleware's auth context. */
+  me(auth: { record: () => Promise<Record<string, unknown>> }): Promise<UserPublic> {
+    return auth.record().then(toPublicUser)
   },
 }

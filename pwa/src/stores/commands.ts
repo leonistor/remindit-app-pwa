@@ -26,6 +26,7 @@ import { $list, addToList, removeListEntriesForItem } from "./list"
 import { $onboarded, $selectedDatasetId } from "./onboarding"
 import { $activePaletteId } from "./palette"
 import { $installDismissed } from "./pwa-install"
+import { signOut } from "./sync"
 import { $theme } from "./theme"
 import { UNCATEGORIZED_ID } from "./types"
 import { $accordionOpen, $selectedSort } from "./ui"
@@ -70,6 +71,11 @@ const EMPTY_USER = {
 // reseed which preserve it. Callers should navigate or rely on the onboarding
 // guard (router.tsx) redirecting to /onboarding once `$onboarded` is false.
 export function wipeAllData(): void {
+  // Sign out first: signOut is fully synchronous (no awaits) and drops the
+  // session + sync journal/map/tombstones and realtime subscriptions, so the
+  // store wipes below can't be observed by a live sync layer and reconciled
+  // into remote deletes of the shared group's records.
+  void signOut()
   $catalog.set([])
   $categories.set([])
   $list.set([])

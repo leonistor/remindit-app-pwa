@@ -1,25 +1,53 @@
-// Auth middleware (phase 3): validates a PB auth token (Bearer header, or the
-// web session cookie) via PB's auth-refresh, and exposes a token-scoped PB
-// client on the context — all downstream PB calls run under that user's API
-// rules (the BFF never bypasses authorization for user-scoped operations).
+// Auth middleware (phase 3): validates the PB auth token (Bearer header, or
+// the web session cookie) and exposes a token-scoped PB client on the context
+// — all downstream PB calls run under that user's API rules (the BFF never
+// bypasses authorization for user-scoped operations).
+//
+// Session lifecycle: the token's JWT claims are decoded locally. Fresh tokens
+// take a zero-PB-round-trip fast path; near-expiry tokens go through PB
+// auth-refresh, which validates the signature and rotates the token — the
+// fresh token is then delivered back to the client (X-Session-Token header,
+// cookie re-issue) so stateless sessions outlive the original TTL.
 
-import { getCookie } from "hono/cookie"
+import { getCookie, setCookie } from "hono/cookie"
 import { createMiddleware } from "hono/factory"
+import type { Context } from "hono"
 import type PocketBase from "pocketbase"
 import { env } from "../env"
-import { forToken } from "../repositories/pocketbase"
+import {
+  authRefresh,
+  fetchAuthedRecord,
+  forToken,
+} from "../repositories/pocketbase"
 
 /** Cookie name for web sessions (pwa uses Bearer tokens in localStorage). */
 export const SESSION_COOKIE = "remindit_session"
 
+const SESSION_MAX_AGE = 14 * 24 * 60 * 60
+
+/** Re-issue the session cookie — login/register, and rotation for cookie sessions. */
+export const setSessionCookie = (c: Context, token: string): void => {
+  setCookie(c, SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: "Lax",
+    path: "/",
+    secure: env.sessionCookieSecure,
+    maxAge: SESSION_MAX_AGE,
+  })
+}
+
 export type AuthContext = {
   userId: string
-  /** Refreshed token — pass through so clients can rotate theirs. */
   token: string
   /** PB client scoped to this user; every call is rule-evaluated as them. */
   client: PocketBase
-  /** The validated user record (from the same auth-refresh round trip). */
-  record: Record<string, unknown>
+  /**
+   * Validated user record, resolved on demand: the fresh-token fast path
+   * makes no PB calls, so consumers that need record fields (admin guard,
+   * /api/auth/me) pay one authenticated record read — memoized per request —
+   * while the token-scoped hot path (client + token only) pays nothing.
+   */
+  record: () => Promise<Record<string, unknown>>
 }
 
 export type AppEnv = {
@@ -33,40 +61,108 @@ const bearerToken = (c: {
   return header?.startsWith("Bearer ") ? header.slice(7) : undefined
 }
 
+// --- local JWT decoding (no signature check on the fast path) ----------------
+
+/** Claims the BFF cares about; `recordId` is the newer PB spelling of `id`. */
+export type JwtClaims = {
+  exp?: number
+  iat?: number
+  id?: string
+  recordId?: string
+}
+
+/** Decode a JWT payload (base64url JSON). Returns null for non-JWT input. */
+export const decodeJwtPayload = (token: string): JwtClaims | null => {
+  const part = token.split(".")[1]
+  if (!part) return null
+  try {
+    return JSON.parse(
+      new TextDecoder().decode(Buffer.from(part, "base64url"))
+    ) as JwtClaims
+  } catch {
+    return null
+  }
+}
+
+// Refresh when <20% of the token's original lifetime remains (≈2.8 days on
+// PB's default 14-day TTL): infrequent enough to skip the round trip on the
+// hot path, early enough that background rotation never lets a session lapse.
+const REFRESH_RATIO = 0.2
+// Tokens without a usable iat/exp span fall back to a 48h rotation window.
+const FALLBACK_LIFETIME_S = 48 * 60 * 60
+
+/** True when the token is near expiry or its claims can't establish validity. */
+export const shouldRotate = (
+  claims: JwtClaims,
+  nowS = Math.floor(Date.now() / 1000)
+): boolean => {
+  const { exp, iat } = claims
+  if (typeof exp !== "number" || !Number.isFinite(exp)) return true
+  const lifetime =
+    typeof iat === "number" &&
+    Number.isFinite(iat) &&
+    iat > 0 &&
+    exp > iat
+      ? exp - iat
+      : FALLBACK_LIFETIME_S
+  return exp - nowS < REFRESH_RATIO * lifetime
+}
+
+const claimsUserId = (claims: JwtClaims): string | undefined => {
+  const id = claims.id ?? claims.recordId
+  return typeof id === "string" && id.length > 0 ? id : undefined
+}
+
 export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
-  const token = bearerToken(c) ?? getCookie(c, SESSION_COOKIE)
+  const bearer = bearerToken(c)
+  const token = bearer ?? getCookie(c, SESSION_COOKIE)
   if (!token) {
     return c.json({ error: "authentication required" }, 401)
   }
 
-  const client = forToken(token)
-  try {
-    // auth-refresh validates the token AND rotates it (PB tokens are
-    // short-lived stateless JWTs; refreshing on each request keeps sessions
-    // alive without a server-side session store).
-    //
-    // Raw fetch, not client.send(): the SDK only attaches the Authorization
-    // header when authStore.isValid (which needs a record with an id we
-    // don't have before this very call).
-    const res = await fetch(
-      `${env.pocketbaseUrl}/api/collections/users/auth-refresh`,
-      { method: "POST", headers: { Authorization: token } }
-    )
-    if (!res.ok) return c.json({ error: "invalid or expired token" }, 401)
-    const refreshed = (await res.json()) as {
-      token: string
-      record: { id: string }
-    }
-    client.authStore.save(refreshed.token, refreshed.record as never)
+  const claims = decodeJwtPayload(token)
+  const claimedId = claims && claimsUserId(claims)
+
+  if (claims && claimedId && !shouldRotate(claims)) {
+    // Fast path: no PB round trip. Signature is intentionally NOT verified
+    // here — PB re-validates the token on every upstream call (services and
+    // the /pb forwarder stamp this exact token), so a forged token fails
+    // closed at the first data call; exp/iat are only trusted as a rotation
+    // heuristic because the signature covers them.
+    const client = forToken(token)
+    // Memoized so multiple consumers in one request share a single PB read.
+    let recordPromise: Promise<Record<string, unknown>> | undefined
+    const loadRecord = (): Promise<Record<string, unknown>> =>
+      (recordPromise ??= fetchAuthedRecord(token, claimedId))
     c.set("auth", {
-      userId: refreshed.record.id,
-      token: refreshed.token,
+      userId: claimedId,
+      token,
       client,
-      record: refreshed.record as unknown as Record<string, unknown>,
+      record: loadRecord,
     })
-  } catch {
-    return c.json({ error: "invalid or expired token" }, 401)
+    await next()
+    return
   }
 
+  // Near expiry (or undecodable claims): PB validates the signature and
+  // rotates the token. authRefresh throws typed errors that app.onError
+  // shapes — 401 for rejected tokens, 503 for a PB outage.
+  const refreshed = await authRefresh(token)
+  const client = forToken(refreshed.token)
+  c.set("auth", {
+    userId: String(refreshed.record.id),
+    token: refreshed.token,
+    client,
+    record: async () => refreshed.record,
+  })
   await next()
+
+  // Deliver the rotation only after the response exists: c.header()/
+  // setCookie() mutate the finalized response, which also covers the /pb
+  // forwarder's raw Response returns (headers prepared before next() would
+  // be dropped for those).
+  c.header("X-Session-Token", refreshed.token)
+  if (bearer === undefined) {
+    setSessionCookie(c, refreshed.token)
+  }
 })

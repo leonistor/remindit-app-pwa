@@ -10,78 +10,81 @@ pwa, bff, web, admin, common). Locations are `file:line` at review time.
 
 ---
 
-## Phase H — hardening (review follow-ups)
+## Phase H — hardening (review follow-ups) — done 2026-09-03
 
-Highest-signal findings; ship as one hardening slice.
+Highest-signal findings; shipped as one hardening slice. Follow-ups that
+surfaced during implementation: the pwa sync client should persist the
+`X-Session-Token` header (bff now delivers it — P9-adjacent), and cancelable
+in-flight reconciles would close the last wipe edge case.
 
 ### pwa sync engine (data-loss class)
 
-- [ ] **H1** Merge `diffCollection`'s returned map/journal back into the sync
+- [x] **H1** Merge `diffCollection`'s returned map/journal back into the sync
   maps — `pwa/src/stores/sync/engine.ts:341` keeps only `result.actions`, so a
   remote-win leaves the journal stale and the *next* local edit to that record
   is silently discarded (remote re-wins). Also loses the vanished-record
   pruning → repeated no-op deletes. Fix: assign
   `maps.map[collection] = result.map; maps.journal[collection] = result.journal`
   before executing actions.
-- [ ] **H2** `wireStoreListeners()` re-entrancy guard — `engine.ts:587`:
+- [x] **H2** `wireStoreListeners()` re-entrancy guard — `engine.ts:587`:
   every `connect()` (load, sign-in, each `online` event) re-subscribes and
   stacks listeners. Wire once behind a module flag or honor the unsubscribes.
-- [ ] **H3** Serialize `connect()` — `engine.ts:528`: `ensureGroup`
+- [x] **H3** Serialize `connect()` — `engine.ts:528`: `ensureGroup`
   (listGroups → createGroup) races with a second connect and can create
   duplicate groups. Guard like the existing `applying` flag.
-- [ ] **H4** `wipeAllData()` must sign out first — `pwa/src/stores/commands.ts:86`:
+- [x] **H4** `wipeAllData()` must sign out first — `pwa/src/stores/commands.ts:86`:
   `localStorage.clear()` wipes the sync session/journal while in-memory
   listeners still fire → tombstones → a debounced reconcile deletes the whole
   shared group remotely. Clear the session + unsubscribe (sign out) inside the
   wipe.
-- [ ] **H5** Foreground + interval reconcile — `engine.ts:690` wires only
+- [x] **H5** Foreground + interval reconcile — `engine.ts:690` wires only
   `online`; `pwa/docs/SYNC.md:77` promises foreground + 60s interval. Add
   `visibilitychange` + interval (or correct SYNC.md).
-- [ ] **H6** Engine-level test with a stubbed PB/BFF client — only the pure
+- [x] **H6** Engine-level test with a stubbed PB/BFF client — only the pure
   diff (`tests/stores/sync-reconcile.test.ts`) is tested today; H1–H3 live in
   the untested orchestration layer.
 
 ### bff auth & forwarder
 
-- [ ] **H7** Deliver the rotated token — `bff/src/middleware/auth.ts:44`:
+- [x] **H7** Deliver the rotated token — `bff/src/middleware/auth.ts:44`:
   every request pays a PB `auth-refresh` round trip but the fresh token is
   never returned (no header, cookie only re-issued at login), so all sessions
   expire at the original 14-day TTL despite `bff/docs/API.md`'s claim. Fix:
   `X-Session-Token` response header or re-issue the cookie per authenticated
   response; consider refreshing only near `exp`.
-- [ ] **H8** PB outage must be 503, not 401 — `middleware/auth.ts:51`: a fetch
+- [x] **H8** PB outage must be 503, not 401 — `middleware/auth.ts:51`: a fetch
   throw (PB down) is answered as invalid-token and clients discard valid
   credentials during infra blips.
-- [ ] **H9** Forwarder abort/timeout wiring — `bff/src/routes/pb.ts:40`: pass
+- [x] **H9** Forwarder abort/timeout wiring — `bff/src/routes/pb.ts:40`: pass
   `c.req.raw.signal` upstream (client disconnect cancels; SSE-safe) and add a
   timeout for non-streaming methods.
-- [ ] **H10** Validation errors must match the published error contract —
+- [x] **H10** Validation errors must match the published error contract —
   `@hono/zod-validator`'s default 400 body (`{ success, error: ZodError[] }`)
   differs from the published `{ error, details }` shape (`bff/src/contracts.ts:30`).
   Add a custom `zValidator` hook returning the contract shape.
 
 ### admin
 
-- [ ] **H11** Create-user modal — `admin/src/routes/users.tsx:136`: plain
+- [x] **H11** Create-user modal — `admin/src/routes/users.tsx:136`: plain
   button outside a `<form>` so `required`/`type="email"`/`minLength` never
   fire; `admin/src/lib/api.ts:57` puts an object into `Error` → UI shows
   "[object Object]". Wrap in `<form onSubmit>` + coerce the error.
-- [ ] **H12** Session expiry strands the user — `api.ts:101`: on 401 the token
+- [x] **H12** Session expiry strands the user — `api.ts:101`: on 401 the token
   is cleared and an error shown, but no redirect to `/login` and the nav keeps
   the signed-in links. Redirect on `AdminApiError` 401.
-- [ ] **H13** Overview page fires a doomed request when signed out —
+- [x] **H13** Overview page fires a doomed request when signed out —
   `admin/src/routes/index.tsx:18` lacks the `if (!getToken()) return` guard
   its siblings (`users.tsx:41`, `groups.tsx:19`) have.
-- [ ] **H14** Delete the dead, drifted `LoginResponse` type — `api.ts:101`
+- [x] **H14** Delete the dead, drifted `LoginResponse` type — `api.ts:101`
   (login.tsx inlines its own shape).
 
 ### web
 
-- [ ] **H15** Download CTA must never fall back to `http://localhost:3000` —
+- [x] **H15** Download CTA must never fall back to `http://localhost:3000` —
   `web/src/routes/download.tsx:20` renders localhost copy if
   `PUBLIC_PWA_URL` is unset at deploy time. Render the CTA conditionally
   instead.
-- [ ] **H16** Nav uses plain `<a href>` — `web/src/routes/__root.tsx:64`:
+- [x] **H16** Nav uses plain `<a href>` — `web/src/routes/__root.tsx:64`:
   full document reloads between routes in a TanStack Start app. Use `Link`
   (admin's `__root.tsx` already does).
 

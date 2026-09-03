@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import {
   HeadContent,
+  Link,
   Outlet,
   Scripts,
   createRootRoute,
@@ -50,7 +51,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       <body>
         <header className="site-header">
           <div className="container">
-            <a href="/" className="brand">
+            <Link to="/" className="brand">
               <img
                 className="brand-logo"
                 // Brand logo from @remindit/common/brand (see styles note).
@@ -60,10 +61,10 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
                 height={28}
               />
               {BRAND_NAME}
-            </a>
+            </Link>
             <nav className="nav">
-              <a href="/features">Features</a>
-              <a href="/download">Get the app</a>
+              <Link to="/features">Features</Link>
+              <Link to="/download">Get the app</Link>
             </nav>
           </div>
         </header>

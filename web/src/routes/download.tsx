@@ -16,8 +16,9 @@ export const Route = createFileRoute("/download")({
 
 function Download() {
   // The PWA origin is env-driven (D9) — deploy-time config, not a build-time
-  // brand constant.
-  const pwaUrl = process.env.PUBLIC_PWA_URL ?? "http://localhost:3000"
+  // brand constant. When unset at deploy, degrade to neutral copy: never
+  // render a user-facing localhost link.
+  const pwaUrl = process.env.PUBLIC_PWA_URL
 
   return (
     <main className="container">
@@ -27,14 +28,22 @@ function Download() {
           {BRAND_NAME} is a PWA — it installs straight from the browser, no app
           store needed, and updates itself.
         </p>
-        <p>
-          <a className="cta" href={pwaUrl}>
-            Open the app
-          </a>
-        </p>
+        {pwaUrl && (
+          <p>
+            <a className="cta" href={pwaUrl}>
+              Open the app
+            </a>
+          </p>
+        )}
         <ol className="steps">
           <li>
-            Open <strong>{pwaUrl}</strong> on your phone or desktop.
+            {pwaUrl ? (
+              <>
+                Open <strong>{pwaUrl}</strong> on your phone or desktop.
+              </>
+            ) : (
+              <>Open the app URL you received on your phone or desktop.</>
+            )}
           </li>
           <li>
             <strong>iPhone / iPad:</strong> Share → <em>Add to Home Screen</em>.

@@ -3,9 +3,9 @@
 // pbId), the journal (pbId → remote `updated` at last sync) and local-delete
 // tombstones, produces the action list that reconciles both sides.
 //
-// Network-free by design — `tests/sync/reconcile.test.ts` pins the behavior;
-// the engine (engine.ts) only executes the actions against the PB SDK and
-// the local stores.
+// Network-free by design — `tests/stores/sync-reconcile.test.ts` pins the
+// behavior; the engine (engine.ts) only executes the actions against the PB
+// SDK and the local stores.
 
 export type RemoteRecord = {
   id: string

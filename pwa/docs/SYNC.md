@@ -111,9 +111,13 @@ notifications) arrives with the channel decision.
 
 - BFF: forwarder integration tests (auth-gated, rule-scoped CRUD through the
   proxy, `skip` when PB is down — phase-3 pattern).
-- pwa: engine unit tests for the reconcile/journal logic with fixture stores
-  (no network); live two-"device" scenario covered by the phase gate
-  (dev:all + two browser profiles).
+- pwa: the pure diff is unit-tested with fixture stores (no network) in
+  [tests/stores/sync-reconcile.test.ts](../tests/stores/sync-reconcile.test.ts);
+  the engine has a stubbed PB/BFF-client test in
+  [tests/stores/sync-engine.test.ts](../tests/stores/sync-engine.test.ts)
+  (journal stamping on remote-win applies, concurrent-connect
+  serialization); the live two-"device" scenario is covered by the phase
+  gate (dev:all + two browser profiles).
 
 ## Explicitly deferred
 

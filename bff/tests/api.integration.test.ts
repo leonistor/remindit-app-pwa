@@ -80,6 +80,15 @@ describeIfPb("auth API (live)", () => {
     expect(user.email).toBe(`alice-${run}@test.local`)
   })
 
+  test("fresh token is not rotated (no X-Session-Token on the response)", async () => {
+    const res = await client.api.auth.me.$get(
+      undefined,
+      authOptions(alice.token)
+    )
+    expect(res.status).toBe(200)
+    expect(res.headers.get("x-session-token")).toBeNull()
+  })
+
   test("me with a garbage token → 401", async () => {
     const res = await client.api.auth.me.$get(undefined, {
       headers: { authorization: "Bearer garbage" },

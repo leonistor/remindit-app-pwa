@@ -51,7 +51,8 @@ function UsersPage() {
     void load()
   }, [load])
 
-  const createUser = async () => {
+  const createUser = async (event: React.FormEvent) => {
+    event.preventDefault()
     setBusy(true)
     setError(null)
     try {
@@ -138,45 +139,47 @@ function UsersPage() {
         onClose={() => setCreating(false)}
         title="Create user"
       >
-        <Stack gap="sm">
-          <TextInput
-            label="Email"
-            type="email"
-            required
-            value={form.email}
-            onChange={(event) =>
-              setForm({ ...form, email: event.target.value })
-            }
-          />
-          <TextInput
-            label="Username"
-            required
-            value={form.username}
-            onChange={(event) =>
-              setForm({ ...form, username: event.target.value })
-            }
-          />
-          <PasswordInput
-            label="Password"
-            required
-            minLength={8}
-            value={form.password}
-            onChange={(event) =>
-              setForm({ ...form, password: event.target.value })
-            }
-          />
-          <Select
-            label="Role"
-            data={["user", "admin"]}
-            value={form.role}
-            onChange={(value) =>
-              setForm({ ...form, role: (value as UserRole) ?? "user" })
-            }
-          />
-          <Button onClick={() => void createUser()} loading={busy}>
-            Create
-          </Button>
-        </Stack>
+        <form onSubmit={createUser}>
+          <Stack gap="sm">
+            <TextInput
+              label="Email"
+              type="email"
+              required
+              value={form.email}
+              onChange={(event) =>
+                setForm({ ...form, email: event.target.value })
+              }
+            />
+            <TextInput
+              label="Username"
+              required
+              value={form.username}
+              onChange={(event) =>
+                setForm({ ...form, username: event.target.value })
+              }
+            />
+            <PasswordInput
+              label="Password"
+              required
+              minLength={8}
+              value={form.password}
+              onChange={(event) =>
+                setForm({ ...form, password: event.target.value })
+              }
+            />
+            <Select
+              label="Role"
+              data={["user", "admin"]}
+              value={form.role}
+              onChange={(value) =>
+                setForm({ ...form, role: (value as UserRole) ?? "user" })
+              }
+            />
+            <Button type="submit" loading={busy}>
+              Create
+            </Button>
+          </Stack>
+        </form>
       </Modal>
     </main>
   )

@@ -26,6 +26,74 @@ export const forToken = (token: string): PocketBase => {
   return client
 }
 
+// --- session validation (phase 3 auth middleware) ----------------------------
+
+/** PB rejected the presented token (or its record is gone) — session is dead. */
+export class InvalidTokenError extends Error {
+  constructor() {
+    super("invalid or expired token")
+  }
+}
+
+/**
+ * PocketBase could not be reached or failed on its own side — a retryable
+ * infra failure, not a credential problem (app.onError maps it to 503 so
+ * clients keep their credentials instead of logging out on a PB blip).
+ */
+export class PocketBaseUnavailableError extends Error {
+  constructor(cause?: unknown) {
+    super("PocketBase is temporarily unavailable, please retry", cause ? { cause } : undefined)
+  }
+}
+
+const pbFetch = async (path: string, init?: RequestInit): Promise<Response> => {
+  try {
+    return await fetch(`${env.pocketbaseUrl}${path}`, init)
+  } catch (cause) {
+    // fetch throws only on network-level failures (refused/unreachable);
+    // HTTP error statuses still come back as a Response.
+    throw new PocketBaseUnavailableError(cause)
+  }
+}
+
+/** Typed session errors are shaped once in app.onError (lib/pb-error.ts). */
+const assertSessionUsable = (status: number, invalidStatuses: number[]): void => {
+  if (invalidStatuses.includes(status)) throw new InvalidTokenError()
+  if (status >= 400) throw new PocketBaseUnavailableError()
+}
+
+/**
+ * Validate + rotate a user token via PB's auth-refresh: PB checks the JWT
+ * signature and returns a fresh token plus the validated record. The only
+ * transport-level auth validation the BFF performs — everything else is
+ * delegated to PB's API rules on the token-scoped client.
+ */
+export const authRefresh = async (
+  token: string
+): Promise<{ token: string; record: Record<string, unknown> }> => {
+  const res = await pbFetch("/api/collections/users/auth-refresh", {
+    method: "POST",
+    headers: { Authorization: token },
+  })
+  assertSessionUsable(res.status, [400, 401])
+  return (await res.json()) as { token: string; record: Record<string, unknown> }
+}
+
+/**
+ * Authenticated read of the user record — backs `AuthContext.record` on the
+ * fresh-token fast path, where the middleware itself makes no PB calls.
+ */
+export const fetchAuthedRecord = async (
+  token: string,
+  id: string
+): Promise<Record<string, unknown>> => {
+  const res = await pbFetch(`/api/collections/users/records/${id}`, {
+    headers: { Authorization: token },
+  })
+  assertSessionUsable(res.status, [400, 401, 404])
+  return (await res.json()) as Record<string, unknown>
+}
+
 /** Superuser client (admin-side ops only — migrations, test fixtures). */
 export const forSuperuser = async (): Promise<PocketBase> => {
   const client = new PocketBase(env.pocketbaseUrl)

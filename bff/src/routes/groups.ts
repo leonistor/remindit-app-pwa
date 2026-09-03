@@ -1,6 +1,6 @@
-import { zValidator } from "@hono/zod-validator"
 import { Hono } from "hono"
 import { groupCreateBodySchema, memberInviteBodySchema } from "../contracts"
+import { validatedJson } from "../lib/validation"
 import { type AppEnv, requireAuth } from "../middleware/auth"
 import { groupsService } from "../services/groups"
 
@@ -12,7 +12,7 @@ export const groups = new Hono<AppEnv>()
   .get("/", async (c) => {
     return c.json(await groupsService.list(c.get("auth").client))
   })
-  .post("/", zValidator("json", groupCreateBodySchema), async (c) => {
+  .post("/", validatedJson(groupCreateBodySchema), async (c) => {
     const { name } = c.req.valid("json")
     const { userId, client } = c.get("auth")
     return c.json(await groupsService.create(client, userId, name), 201)
@@ -33,7 +33,7 @@ export const groups = new Hono<AppEnv>()
   })
   .post(
     "/:id/members",
-    zValidator("json", memberInviteBodySchema),
+    validatedJson(memberInviteBodySchema),
     async (c) => {
       const { id } = c.req.param()
       return c.json(

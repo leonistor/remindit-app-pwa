@@ -31,12 +31,15 @@ export const app = new Hono<AppEnv>()
   // so every route below (including the /pb/* forwarder's SSE streams) gets
   // the headers; with an allowlist hono echoes the request origin only when
   // it matches, and OPTIONS short-circuits before the route handlers.
+  // X-Session-Token is exposed so cross-origin clients can persist the
+  // rotated token (near-expiry refresh) and keep their session alive.
   .use(
     "*",
     cors({
       origin: env.corsOrigins,
       allowMethods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
       allowHeaders: ["content-type", "authorization"],
+      exposeHeaders: ["x-session-token"],
       credentials: true,
       maxAge: 86400,
     }),

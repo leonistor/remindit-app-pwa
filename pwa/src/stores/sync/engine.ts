@@ -90,6 +90,8 @@ let unsubscribeFns: Array<() => void> = []
 let reconcileTimer: ReturnType<typeof setTimeout> | null = null
 let applying = false
 let profilePushTimer: ReturnType<typeof setTimeout> | null = null
+let connectPromise: Promise<void> | null = null
+let storeListenersWired = false
 const lastSeenIds: Record<string, Set<string>> = {}
 
 // --- helpers ----------------------------------------------------------------
@@ -320,6 +322,12 @@ async function reconcileCollection<L>(
   const localRecords = spec.local()
   const remote = maps.remote[spec.collection]
 
+  // Pre-diff snapshots for the persist check below: `maps` aliases the store
+  // values, so a post-mutation self-compare could never detect diff-only
+  // changes (heal stamps, prunes).
+  const mapBefore = JSON.stringify(maps.map[spec.collection])
+  const journalBefore = JSON.stringify(maps.journal[spec.collection])
+
   const result = diffCollection({
     local: localRecords,
     remote,
@@ -334,6 +342,15 @@ async function reconcileCollection<L>(
     matches: (local, remote) => spec.matches(local, remote, maps),
     createOnly: spec.createOnly,
   })
+
+  // Merge the diff's mutated map/journal copies back BEFORE executing: the
+  // journal stamping (heal + remote-win localApply), map recovery and
+  // vanished-record pruning all live in these copies. Dropping them re-runs
+  // stale LWW decisions (a local edit right after a remote-win apply would be
+  // judged against an old journal and silently discarded) and re-emits no-op
+  // actions on every reconcile.
+  maps.map[spec.collection] = result.map
+  maps.journal[spec.collection] = result.journal
 
   let changed = false
   const collection = spec.collection
@@ -391,10 +408,8 @@ async function reconcileCollection<L>(
   // Persist the (possibly mutated) map/journal; tombstones are consumed.
   if (
     changed ||
-    JSON.stringify(maps.map[collection]) !==
-      JSON.stringify($syncMap.get()[collection]) ||
-    JSON.stringify(maps.journal[collection]) !==
-      JSON.stringify($syncJournal.get()[collection])
+    JSON.stringify(maps.map[collection]) !== mapBefore ||
+    JSON.stringify(maps.journal[collection]) !== journalBefore
   ) {
     $syncMap.set({ ...$syncMap.get(), [collection]: maps.map[collection] })
     $syncJournal.set({
@@ -405,7 +420,8 @@ async function reconcileCollection<L>(
   }
 }
 
-async function reconcileAll(): Promise<void> {
+/** Runs a full reconcile pass. Exported for the engine tests; not in the public barrel. */
+export async function reconcileAll(): Promise<void> {
   const session = getSession()
   const groupId = $syncGroup.get()
   if (!session || !groupId || applying) return
@@ -542,14 +558,25 @@ async function ensureGroup(): Promise<string> {
   return created.id
 }
 
-async function connect(): Promise<void> {
+// Serialized: a concurrent connect (e.g. an `online` event racing sign-in)
+// reuses the in-flight connect instead of duplicating its work — duplicate
+// "My list" group creation, stacked realtime subscriptions. `runConnect`
+// never rejects (errors land in sync state), so the shared promise is safe.
+function connect(): Promise<void> {
+  connectPromise ??= runConnect().finally(() => {
+    connectPromise = null
+  })
+  return connectPromise
+}
+
+async function runConnect(): Promise<void> {
   const session = getSession()
   if (!session) return
   setSyncState({ status: "connecting", lastError: null })
   try {
     // Validate the (possibly stale) token; a BffError bubbles to `error`.
     const me = await bffApi.me(session.token)
-    setSession({ ...session, token: session.token, email: me.email })
+    setSession({ ...session, email: me.email })
     pb.authStore.save(session.token, {
       id: session.userId,
       email: me.email,
@@ -585,6 +612,11 @@ async function subscribeRealtime(groupId: string): Promise<void> {
 }
 
 function wireStoreListeners(): void {
+  // App-lifetime listeners: wired once, never unwired — re-connects must not
+  // re-subscribe (the unsubscribe refs would be overwritten and the listeners
+  // would stack). Without a session the callbacks no-op instead.
+  if (storeListenersWired) return
+  storeListenersWired = true
   const watch = (collection: SyncCollection, ids: () => string[]) => {
     // Snapshot-diff on every store change → tombstones for removed ids.
     ;(collection === "categories"
@@ -595,7 +627,7 @@ function wireStoreListeners(): void {
           ? $list
           : $history
     ).subscribe(() => {
-      if (applying) return
+      if (applying || !getSession()) return
       trackIds(collection, ids())
       scheduleReconcile()
     })
@@ -654,11 +686,6 @@ export async function signUp(body: {
 export async function signOut(): Promise<void> {
   for (const unsubscribe of unsubscribeFns) unsubscribe()
   unsubscribeFns = []
-  try {
-    await bffApi.me(getSession()?.token ?? "").catch(() => undefined)
-  } catch {
-    // best-effort server-side validation is irrelevant on sign-out
-  }
   setSession(null)
   $syncGroup.set("")
   $syncMap.set({
@@ -690,4 +717,19 @@ export function initSync(): void {
   globalThis.addEventListener?.("online", () => {
     if (getSession() && $syncState.get().status !== "online") void connect()
   })
+  // Foreground + heartbeat triggers (docs/SYNC.md): app-lifetime listeners —
+  // signed out, both are gated no-ops, so unlike the realtime subscriptions
+  // there is nothing to tear down on sign-out.
+  globalThis.addEventListener?.("visibilitychange", () => {
+    if (
+      document.visibilityState === "visible" &&
+      getSession() &&
+      navigator.onLine
+    ) {
+      scheduleReconcile()
+    }
+  })
+  setInterval(() => {
+    if (getSession() && navigator.onLine) scheduleReconcile()
+  }, 60_000)
 }
