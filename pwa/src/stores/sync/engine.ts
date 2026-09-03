@@ -13,7 +13,7 @@
 
 import { atom } from "nanostores"
 import PocketBase from "pocketbase"
-import { bffApi } from "@/lib/bff-api"
+import { bffApi, setRotatedTokenHandler } from "@/lib/bff-api"
 import { $catalog } from "../catalog"
 import { $categories } from "../categories"
 import { $history } from "../history"
@@ -35,7 +35,12 @@ import {
   type SyncJournal,
   type SyncMap,
 } from "./reconcile"
-import { $syncSession, getSession, setSession } from "./session"
+import {
+  $syncSession,
+  getSession,
+  patchSessionToken,
+  setSession,
+} from "./session"
 
 // --- state ------------------------------------------------------------------
 
@@ -78,6 +83,46 @@ const $syncTombstones = jsonStore<Record<SyncCollection, string[]>>(
 const pbBase = `${import.meta.env?.PUBLIC_BFF_URL ?? "http://127.0.0.1:3100"}/pb`
 const pb = new PocketBase(pbBase)
 pb.autoCancellation(false)
+
+// --- token rotation capture -------------------------------------------------
+
+/**
+ * Patches the persisted session (and the SDK auth store) with a rotated token
+ * delivered in the BFF's `X-Session-Token` response header: its auth
+ * middleware auth-refreshes near-expiry tokens and rides the fresh one on
+ * that same response — including /pb/* forwarder calls, so sessions outlive
+ * the original login token's TTL. A quiet background patch: identity fields
+ * stay, no sync status changes, no reconcile triggers; a missing or
+ * already-current header value no-ops (rotation headers can ride concurrent
+ * in-flight responses — the guard prevents patch loops). Exported for the
+ * engine tests; not in the public barrel.
+ */
+export function captureRotatedToken(
+  headerValue: string | null | undefined
+): void {
+  const session = getSession()
+  if (!headerValue || !session || headerValue === session.token) return
+  patchSessionToken(headerValue)
+  // The data-plane client must carry the fresh token on subsequent calls —
+  // same record shape the connect path seeds, so the authStore stays valid.
+  pb.authStore.save(headerValue, {
+    id: session.userId,
+    email: session.email,
+    collectionId: "_pb_users_auth_",
+    collectionName: "users",
+  } as never)
+}
+
+// Capture wiring (once, at module init): the SDK's afterSend hook sees every
+// data-plane response (realtime SSE bypasses send() but never carries
+// rotation); the injected bff-api handler covers the account-level RPCs.
+// Layering note: bff-api must not import stores, so the direction is
+// stores → lib — the engine injects the session-patching handler.
+pb.afterSend = (response: Response, data: unknown) => {
+  captureRotatedToken(response.headers.get("X-Session-Token"))
+  return data
+}
+setRotatedTokenHandler(captureRotatedToken)
 
 const COLLECTIONS: SyncCollection[] = [
   "categories",

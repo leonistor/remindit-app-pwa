@@ -146,10 +146,18 @@ const bffApi = rs.hoisted(() => {
     createGroup: rs.fn<() => Promise<{ id: string }>>(),
     listGroups: rs.fn<() => Promise<Array<{ id: string; name: string }>>>(),
     listNotifications: rs.fn<() => Promise<unknown[]>>(),
+    // Token-rotation hook (P9): the engine's module init registers its
+    // capture through this; stubbed so the mocked module surface matches.
+    setRotatedTokenHandler: rs.fn<(handler: (token: string) => void) => void>(),
   }
 })
 
-rs.mock("@/lib/bff-api", () => ({ bffApi }))
+// The mock replaces the whole module, so both surfaces the engine imports
+// (`bffApi` + the `setRotatedTokenHandler` rotation hook) must be provided.
+rs.mock("@/lib/bff-api", () => ({
+  bffApi,
+  setRotatedTokenHandler: bffApi.setRotatedTokenHandler,
+}))
 
 // Stubs the auth RPCs for an existing group (no group creation).
 function stubAuth(existingGroups: Array<{ id: string; name: string }>): void {

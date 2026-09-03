@@ -54,6 +54,32 @@ export class BffError extends Error {
   }
 }
 
+// --- token rotation capture -------------------------------------------------
+
+type RotatedTokenHandler = (token: string) => void
+
+let rotatedTokenHandler: RotatedTokenHandler | null = null
+
+/**
+ * Registers the handler invoked when an authenticated response carries a
+ * rotated session token (`X-Session-Token` header — the BFF's auth middleware
+ * delivers the auth-refreshed token there when the near-expiry fast path
+ * misses). Layering: this lib must not import stores, so the direction is
+ * stores → lib — the sync engine injects its session-patching handler at
+ * module init. Pass `null` to unregister.
+ */
+export function setRotatedTokenHandler(
+  handler: RotatedTokenHandler | null
+): void {
+  rotatedTokenHandler = handler
+}
+
+/** Absent handler (lib used without the sync engine) → quiet no-op. */
+function notifyRotatedToken(res: Response): void {
+  const token = res.headers.get("X-Session-Token")
+  if (token && rotatedTokenHandler) rotatedTokenHandler(token)
+}
+
 async function request<T>(
   path: string,
   init: RequestInit & { token?: string }
@@ -67,6 +93,10 @@ async function request<T>(
       ...rest.headers,
     },
   })
+  // Read before the ok-check: the header only rides validated-session
+  // responses, but consuming it unconditionally costs nothing and the
+  // engine-side capture no-ops unless the token actually changed.
+  notifyRotatedToken(res)
   if (!res.ok) {
     let message = res.statusText
     let details: unknown
