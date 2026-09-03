@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/custom/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { m } from "@/paraglide/messages"
+import { syncErrorMessage } from "@/lib/sync-errors"
 import { $user } from "@/stores"
 import { $syncState, signIn, signOut, signUp } from "@/stores/sync"
 
@@ -61,7 +62,7 @@ export function SyncCard() {
         {sync.status !== "off" && (
           <p className="mb-3 text-muted-foreground text-sm">
             {statusLabel}
-            {sync.lastError ? ` — ${sync.lastError}` : ""}
+            {sync.lastError ? ` — ${syncErrorMessage(sync.lastError)}` : ""}
           </p>
         )}
 
@@ -86,7 +87,9 @@ export function SyncCard() {
                 onChange={(event) => setPassword(event.target.value)}
               />
             </Field>
-            {error && <p className="text-destructive text-sm">{error}</p>}
+            {error && (
+              <p className="text-destructive text-sm">{syncErrorMessage(error)}</p>
+            )}
             <div className="flex items-center gap-3">
               <Button type="submit" isLoading={busy} disabled={busy}>
                 {mode === "signin"

@@ -7,6 +7,7 @@ import {
   useLocation,
 } from "react-router"
 import { $onboarded, initPwaInstall } from "@/stores"
+import { m } from "@/paraglide/messages"
 import { Footer } from "./components/footer"
 import { InstallBanner } from "./components/install-banner"
 import Menu from "./components/menu"
@@ -49,7 +50,7 @@ function Layout() {
               <Suspense
                 fallback={
                   <div className="p-4 text-muted-foreground text-sm">
-                    Loading…
+                    {m.loading()}
                   </div>
                 }
               >

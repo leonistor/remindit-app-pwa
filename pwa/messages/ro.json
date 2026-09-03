@@ -347,5 +347,13 @@
   "syncStatusConnecting": "Se conectează…",
   "syncStatusError": "Eroare de sincronizare",
   "syncStatusOff": "Sincronizarea e oprită — datele rămân pe acest dispozitiv",
+  "syncErrorNotSignedIn": "Nu ești autentificat — autentifică-te pentru a începe sincronizarea.",
+  "syncErrorSession": "Sesiunea a expirat — autentifică-te din nou.",
+  "syncErrorInvalidCredentials": "Email sau parolă incorecte.",
+  "syncErrorValidation": "Verifică datele introduse — unele câmpuri sunt invalide.",
+  "syncErrorCreateAccount": "Nu s-a putut crea contul — numele de utilizator sau emailul poate fi deja folosit.",
+  "syncErrorUnavailable": "Serverul de sincronizare nu este disponibil momentan — te rugăm să încerci din nou.",
+  "syncErrorNetwork": "Eroare de rețea — verifică conexiunea și încearcă din nou.",
+  "syncErrorGeneric": "Ceva n-a mers — te rugăm să încerci din nou.",
   "footerFeedback": "Feedback"
 }

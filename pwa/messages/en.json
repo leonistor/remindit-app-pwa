@@ -347,5 +347,13 @@
   "syncStatusConnecting": "Connecting…",
   "syncStatusError": "Sync error",
   "syncStatusOff": "Sync is off — data stays on this device",
+  "syncErrorNotSignedIn": "You're not signed in — sign in to start syncing.",
+  "syncErrorSession": "Your session has expired — sign in again.",
+  "syncErrorInvalidCredentials": "Incorrect email or password.",
+  "syncErrorValidation": "Check your details — some fields are invalid.",
+  "syncErrorCreateAccount": "Couldn't create the account — the username or email may already be in use.",
+  "syncErrorUnavailable": "The sync server is temporarily unavailable — please try again.",
+  "syncErrorNetwork": "Network error — check your connection and try again.",
+  "syncErrorGeneric": "Something went wrong — please try again.",
   "footerFeedback": "Feedback"
 }
