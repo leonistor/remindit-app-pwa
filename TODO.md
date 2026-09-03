@@ -151,3 +151,24 @@ in-flight reconciles would close the last wipe edge case.
 
 Community & feedback capture, basic AI features, LLM/MCP integration; item
 attributes (photo/quantity/price), native app, notifications & live updates.
+
+### Evaluated & rejected (2026-09-03)
+
+- **`nathanstitt/pbtsdb`** (TanStack DB adapter for PocketBase; MIT, active,
+  v0.7.2, 26★) — the only credible one. Not adopted: it's a remote-as-source-
+  -of-truth model (TanStack Query cache + optimistic overlay + realtime),
+  while the pwa is local-first (device data is the source of truth offline;
+  journal + three-way LWW + tombstones per `pwa/docs/SYNC.md`). Adopting it
+  means replacing the nanostores layer + tested sync engine with a
+  React/TanStack stack (4 new peer deps) for functional parity at best.
+  **Re-evaluate** if TanStack DB ships GA offline persistence or when building
+  the V5 sharing UI from scratch.
+- **`Daniels-not/usemoor`** (offline-first optimistic hooks) — skip: v0.2.2,
+  1★, single author, entire history in one commit burst (2026-07-30);
+  whole-list resync per change (their own stated limit) vs the pwa's targeted
+  reconcile; conflict resolution is local-wins only — a downgrade from the
+  existing journal/LWW engine.
+- **`KevinBonnoron/pocketbase-react-hooks`** — skip: dormant since 2025-12,
+  and its `useAuth` wraps `pb.authStore` directly, bypassing the BFF auth
+  contract (rotating tokens, cookie transport, D2/D8 layering). Duplicates
+  what `pwa` stores + `bff` already do.
