@@ -152,6 +152,39 @@ describeIfPb("pb forwarder (live)", () => {
     expect(body.error).toBe("method not allowed")
   })
 
+  test("query strings are forwarded intact: filtered + paged list through the proxy", async () => {
+    const localId = `q-${run}`
+    const created = await pbFetch(
+      "/api/collections/categories/records",
+      owner.token,
+      {
+        method: "POST",
+        json: { team: teamId, localId, name: "Query", frequency: "weekly" },
+      }
+    )
+    expect(created.status).toBe(200)
+    const createdRecord = (await created.json()) as { id: string }
+
+    const res = await pbFetch(
+      `/api/collections/categories/records?filter=${encodeURIComponent(`localId = "${localId}"`)}&perPage=1`,
+      owner.token
+    )
+    expect(res.status).toBe(200)
+    const page = (await res.json()) as {
+      perPage: number
+      items: Array<{ localId: string }>
+    }
+    expect(page.perPage).toBe(1)
+    expect(page.items.map((item) => item.localId)).toEqual([localId])
+
+    const cleaned = await pbFetch(
+      `/api/collections/categories/records/${createdRecord.id}`,
+      owner.token,
+      { method: "DELETE" }
+    )
+    expect(cleaned.status).toBe(204)
+  })
+
   test("SSE passthrough: realtime endpoint streams with event-stream content type", async () => {
     const controller = new AbortController()
     const res = await pbFetch("/api/realtime", owner.token)

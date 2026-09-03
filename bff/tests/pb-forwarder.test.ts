@@ -1,6 +1,7 @@
-// Unit tests for the /pb/* forwarder's verb allowlist and 3xx redirect
-// handling (TODO P3) — run unconditionally against a stubbed PocketBase
-// (Bun.serve); the live integration suite covers real-PB behavior separately.
+// Unit tests for the /pb/* forwarder's verb allowlist, 3xx redirect handling
+// and incoming-query forwarding (TODO P3/P4) — run unconditionally against a
+// stubbed PocketBase (Bun.serve); the live integration suite covers real-PB
+// behavior separately.
 // Like auth-middleware.test.ts, repositories/env swap works because pb.ts
 // reads env.pocketbaseUrl at call time, and the unsigned JWT rides the
 // middleware's local-decode fast path (PB re-validates upstream, and the
@@ -38,7 +39,7 @@ const pbRequest = (path: string, init?: RequestInit) =>
     },
   })
 
-describe("pb forwarder verbs (stubbed PB)", () => {
+describe("pb forwarder verbs + query forwarding (stubbed PB)", () => {
   const stub = Bun.serve({
     port: 0,
     fetch(req) {
@@ -55,6 +56,13 @@ describe("pb forwarder verbs (stubbed PB)", () => {
         return redirect("http://[::1/nope")
       if (pathname === "/api/echo-method")
         return Response.json({ method: req.method })
+      if (pathname === "/api/echo-query") {
+        const url = new URL(req.url)
+        return Response.json({
+          search: url.search,
+          params: Object.fromEntries(url.searchParams),
+        })
+      }
       return Response.json({ message: "not found" }, { status: 404 })
     },
   })
@@ -86,6 +94,35 @@ describe("pb forwarder verbs (stubbed PB)", () => {
     const res = await pbRequest("/api/echo-method", { method: "TRACE" })
     expect(res.status).toBe(405)
     expect(res.headers.get("allow")).toBe("GET, POST, PATCH, DELETE")
+  })
+
+  test("incoming query strings are forwarded intact (path rewrite strips only /pb)", async () => {
+    const res = await pbRequest("/api/echo-query?a=1&b=two")
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual({
+      search: "?a=1&b=two",
+      params: { a: "1", b: "two" },
+    })
+  })
+
+  test("encoded query values survive the forward (PB filter syntax)", async () => {
+    // PB filters are `field = "value"` expressions riding percent-encoded in
+    // the query — the forwarder must not decode/re-encode them.
+    const filter = encodeURIComponent('(name = "Produce")')
+    const res = await pbRequest(
+      `/api/echo-query?filter=${filter}&perPage=5&sort=-created`
+    )
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as {
+      search: string
+      params: Record<string, string>
+    }
+    expect(body.search).toBe(
+      "?filter=(name%20%3D%20%22Produce%22)&perPage=5&sort=-created"
+    )
+    expect(body.params.filter).toBe('(name = "Produce")')
+    expect(body.params.perPage).toBe("5")
+    expect(body.params.sort).toBe("-created")
   })
 
   test("3xx with an internal absolute location is rewritten to the client-facing /pb origin", async () => {

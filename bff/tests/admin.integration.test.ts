@@ -37,6 +37,9 @@ describeIfPb("admin API (live)", () => {
   let adminToken: string
   let adminId: string
   let regularToken: string
+  // Users created by the tests below — deleted inline on the happy path; the
+  // afterAll net only catches partial failures (already-deleted ids 404).
+  const fixtureUserIds: string[] = []
 
   beforeAll(async () => {
     // Fixture: register a regular user, then superuser-promote them to admin.
@@ -148,5 +151,110 @@ describeIfPb("admin API (live)", () => {
     expect(res.status).toBe(200)
     const groups = (await res.json()) as Array<{ membersCount: number }>
     expect(Array.isArray(groups)).toBe(true)
+  })
+
+  afterAll(async () => {
+    if (!pbUp) return
+    const admin = await forSuperuser()
+    for (const id of fixtureUserIds) {
+      await admin
+        .collection("users")
+        .delete(id)
+        .catch(() => {})
+    }
+  })
+
+  test("non-admin cannot create users (mutating verb is admin-guarded too)", async () => {
+    // Raw fetch: the requireAdmin 403 is produced by middleware, outside the
+    // RPC client's response-type union (201 | 400).
+    const res = await fetch(`${base}/api/admin/users`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${regularToken}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        email: `nope-${run}@test.local`,
+        password,
+        username: `nope-${run}`,
+        role: "user",
+      }),
+    })
+    expect(res.status).toBe(403)
+    const body = (await res.json()) as unknown as { error: string }
+    expect(body.error).toBe("admin role required")
+  })
+
+  test("admin can mint another admin; role escalation works end-to-end", async () => {
+    const created = await client.api.admin.users.$post(
+      {
+        json: {
+          email: `escal-${run}@test.local`,
+          password,
+          username: `escal-${run}`,
+          role: "admin",
+        },
+      },
+      authOptions(adminToken)
+    )
+    expect(created.status).toBe(201)
+    const createdAdmin = await contract(created, userPublicSchema)
+    expect(createdAdmin.role).toBe("admin")
+    fixtureUserIds.push(createdAdmin.id)
+
+    // The new admin's own session can call an admin endpoint — the role is
+    // real server-side, not just a field echoed back.
+    const login = await client.api.auth.login.$post({
+      json: { email: `escal-${run}@test.local`, password },
+    })
+    const escalatedToken = ((await login.json()) as { token: string }).token
+    const overview = await client.api.admin.overview.$get(
+      undefined,
+      authOptions(escalatedToken)
+    )
+    expect(overview.status).toBe(200)
+
+    const deleted = await client.api.admin.users[":id"].$delete(
+      { param: { id: createdAdmin.id } },
+      authOptions(adminToken)
+    )
+    expect(deleted.status).toBe(204)
+  })
+
+  test("DELETE /api/admin/groups/:id removes the group (204, gone from the list)", async () => {
+    // Fixture: a group owned by the admin user (created via the user-facing
+    // route, which the admin may call — owner = self).
+    const created = await client.api.groups.$post(
+      { json: { name: `adm-group-${run}` } },
+      authOptions(adminToken)
+    )
+    expect(created.status).toBe(201)
+    const groupId = ((await created.json()) as { id: string }).id
+
+    const deleted = await client.api.admin.groups[":id"].$delete(
+      { param: { id: groupId } },
+      authOptions(adminToken)
+    )
+    expect(deleted.status).toBe(204)
+
+    // Gone: admin list is a superuser-side full list, so a find on the exact
+    // id is a complete check (no pagination to reason about).
+    const list = await client.api.admin.groups.$get(
+      undefined,
+      authOptions(adminToken)
+    )
+    expect(list.status).toBe(200)
+    const groups = (await list.json()) as Array<{ id: string }>
+    expect(groups.find((g) => g.id === groupId)).toBeUndefined()
+  })
+
+  test("DELETE /api/admin/groups/:id with an unknown id surfaces PB's 404", async () => {
+    // Raw fetch: PB's 404 (mapped by app.onError) is outside the RPC client's
+    // response-type union (204). Well-formed 15-char id that no record has.
+    const res = await fetch(`${base}/api/admin/groups/zzzzzzzzzzzzzzz`, {
+      method: "DELETE",
+      headers: authOptions(adminToken).headers,
+    })
+    expect(res.status).toBe(404)
   })
 })

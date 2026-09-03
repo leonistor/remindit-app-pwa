@@ -6,7 +6,7 @@
 
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 import { app } from "../src/app"
-import { errorSchema } from "../src/contracts"
+import { errorSchema, userPublicSchema } from "../src/contracts"
 import { env } from "../src/env"
 import { decodeJwtPayload, shouldRotate } from "../src/middleware/auth"
 
@@ -167,5 +167,81 @@ describe("PB outage (H8)", () => {
       const body = errorSchema.parse(await res.json())
       expect(body.error).toContain("unavailable")
     })
+  })
+})
+
+describe("cookie sessions + credential precedence (stubbed PB)", () => {
+  // Both tokens are fresh, so the middleware's zero-PB fast path handles
+  // them; the stub only serves the record reads /api/auth/me performs. There
+  // is deliberately no auth-refresh endpoint: a near-expiry path landing
+  // here would 401-fail the tests loudly instead of silently rotating.
+  const records: Record<string, Record<string, unknown>> = {
+    u1: {
+      id: "u1",
+      username: "alice",
+      email: "a@b.c",
+      firstName: "",
+      lastName: "",
+      avatar: "",
+    },
+    u2: {
+      id: "u2",
+      username: "bob",
+      email: "b@b.c",
+      firstName: "",
+      lastName: "",
+      avatar: "",
+    },
+  }
+  const stub = Bun.serve({
+    port: 0,
+    fetch(req) {
+      const { pathname } = new URL(req.url)
+      const match = pathname.match(/^\/api\/collections\/users\/records\/(.+)$/)
+      if (match) {
+        const record = records[match[1] as string]
+        return record
+          ? Response.json(record)
+          : Response.json({ message: "not found" }, { status: 404 })
+      }
+      return Response.json({ message: "not found" }, { status: 404 })
+    },
+  })
+
+  beforeAll(() => {
+    env.pocketbaseUrl = `http://127.0.0.1:${stub.port}`
+  })
+  afterAll(() => {
+    env.pocketbaseUrl = POCKETBASE_URL_ORIGINAL
+    stub.stop(true)
+  })
+
+  test("fresh cookie-only session → fast path: /me works, no rotation header, no cookie re-issue", async () => {
+    const res = await app.request("/api/auth/me", {
+      headers: { cookie: `remindit_session=${freshJwt}` },
+    })
+    expect(res.status).toBe(200)
+    // The cookie identity is what authenticated the request.
+    const body = userPublicSchema.parse(await res.json())
+    expect(body.id).toBe("u1")
+    // Fast path: nothing rotated, nothing re-issued.
+    expect(res.headers.get("x-session-token")).toBeNull()
+    expect(res.headers.get("set-cookie")).toBeNull()
+  })
+
+  test("Bearer + cookie both present → Bearer identity wins", async () => {
+    const freshJwtU2 = makeJwt(
+      claims({ id: "u2", iat: nowS - 3600, exp: nowS + 14 * 24 * 60 * 60 })
+    )
+    const res = await app.request("/api/auth/me", {
+      headers: {
+        authorization: `Bearer ${freshJwtU2}`,
+        cookie: `remindit_session=${freshJwt}`,
+      },
+    })
+    expect(res.status).toBe(200)
+    // u2 rides the Bearer header; the u1 cookie session is ignored entirely.
+    const body = userPublicSchema.parse(await res.json())
+    expect(body.id).toBe("u2")
   })
 })
