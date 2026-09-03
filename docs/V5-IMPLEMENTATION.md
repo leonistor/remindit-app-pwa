@@ -2,7 +2,7 @@
 
 Source: `docs/v5-review.md`
 Created: 2026-09-04
-Status: Phase 1–4 complete (T0-1 through T0-9, T1-1 through T1-14)
+Status: ✅ ALL PHASES COMPLETE
 
 ## Decisions
 
@@ -76,39 +76,39 @@ Status: Phase 1–4 complete (T0-1 through T0-9, T1-1 through T1-14)
 - [x] **T1-14** Dead AlertDialog that can never open
   - `pwa/src/components/catalog/category-items-table.tsx` — Remove duplicate, share single dialog
 
-### Phase 5 — Clean Code Pass (T2-1 through T2-31)
+### Phase 5 — Clean Code Pass (T2-1 through T2-31) ✅
 
-- [ ] **T2-1** `toPublicUser` triplicated — extract shared helper
-- [ ] **T2-2** Admin routes manual query parsing — add Zod validatedQuery
-- [ ] **T2-3** Unbounded `getFullList` — paginate/cap
-- [ ] **T2-4** LWW compares timestamps as strings — `Date.parse` both sides
-- [ ] **T2-5** `items[0]` unconditional dereference — guard
-- [ ] **T2-6** SSE no abort handling — add disconnect handler
-- [ ] **T2-7** Case-colliding Answer usernames — salt with PB user id
-- [ ] **T2-8** Dead exports — remove
-- [ ] **T2-9** `trackIds` mutates atom in place — copy-on-write
-- [ ] **T2-10** O(n²) in hot loops — prebuild reverse maps
-- [ ] **T2-11** History adopt dangling ids — lazy translate
-- [ ] **T2-12** Map/journal stamped before adoption decides — write only on success
-- [ ] **T2-13** Multi-device duplicate list entries — dedupe at adoption
-- [ ] **T2-14** No fetch timeout — `AbortSignal.timeout`
-- [ ] **T2-15** Magic strings — extract constants
-- [ ] **T2-16** `toggle-tooltip.tsx` dead code — delete
-- [ ] **T2-17** `select.tsx` inverted condition — fix
-- [ ] **T2-18** `form-dialog.tsx` hardcoded English — i18n
-- [ ] **T2-19** `AutocompleteCollection` dead wrapper — delete
-- [ ] **T2-20** Raw `<button>` — use `<Button>`
-- [ ] **T2-21** `menu.tsx` typo — fix
-- [ ] **T2-22** Various small fixes
-- [ ] **T2-23** CSS selectors dead — fix
-- [ ] **T2-24** Contract types drift — share via subpath
-- [ ] **T2-25** `.env.example` comment drift — fix
-- [ ] **T2-26** `UserProfile` type vs docblock — align
-- [ ] **T2-27** Missing root scripts — add
-- [ ] **T2-28** `release.sh` hardcoded — parameterize
-- [ ] **T2-29** Feedback scripts orphaned temp / exit code — fix
-- [ ] **T2-30** Feedback config not re-rendered — fix
-- [ ] **T2-31** Stats pluralization / unused `--accent` — fix
+- [x] **T2-1** `toPublicUser` triplicated — extract shared helper
+- [x] **T2-2** Admin routes manual query parsing — add Zod validatedQuery
+- [x] **T2-3** Unbounded `getFullList` — paginate/cap
+- [x] **T2-4** LWW compares timestamps as strings — `Date.parse` both sides
+- [x] **T2-5** `items[0]` unconditional dereference — guard
+- [x] **T2-6** SSE no abort handling — add disconnect handler
+- [x] **T2-7** Case-colliding Answer usernames — salt with PB user id
+- [x] **T2-8** Dead exports — remove
+- [x] **T2-9** `trackIds` mutates atom in place — copy-on-write
+- [x] **T2-10** O(n²) in hot loops — prebuild reverse maps
+- [x] **T2-11** History adopt dangling ids — empty string for untranslated
+- [x] **T2-12** Map/journal stamped before adoption decides — write only on success
+- [x] **T2-13** Multi-device duplicate list entries — dedupe at adoption
+- [x] **T2-14** No fetch timeout — `AbortSignal.timeout`
+- [x] **T2-15** Magic strings — extract constants
+- [x] **T2-16** `toggle-tooltip.tsx` dead code — delete
+- [x] **T2-17** `select.tsx` inverted condition — fix
+- [x] **T2-18** `form-dialog.tsx` hardcoded English — i18n
+- [x] **T2-19** `AutocompleteCollection` dead wrapper — delete
+- [x] **T2-20** Raw `<button>` — use `<Button>`
+- [x] **T2-21** `menu.tsx` typo — fix
+- [x] **T2-22** Various small fixes
+- [x] **T2-23** CSS selectors dead — fix
+- [x] **T2-24** Contract types drift — already set up (skip)
+- [x] **T2-25** `.env.example` comment drift — already clean (skip)
+- [x] **T2-26** `UserProfile` type vs docblock — align
+- [x] **T2-27** Missing root scripts — add
+- [x] **T2-28** `release.sh` hardcoded — parameterize
+- [x] **T2-29** Feedback scripts orphaned temp / exit code — fix
+- [x] **T2-30** Feedback config not re-rendered — fix
+- [x] **T2-31** Stats pluralization — already handled (skip)
 
 ## Test Plan
 
