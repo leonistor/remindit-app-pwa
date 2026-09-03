@@ -49,4 +49,14 @@ server {
 
 - The app is a PWA — service worker is generated automatically during build
 - All assets are fingerprinted, so long cache headers are safe
-- No environment variables required at runtime (local-first app)
+- Environment is build-time only, from the repo's root `.env` (see root
+  AGENTS.md, D9): the production build inlines `PUBLIC_BFF_URL` — required for
+  sync/sign-in to reach the backend; without it, sync falls back to a localhost
+  URL that will not work in production — and optionally `PUBLIC_FEEDBACK_URL`
+  (footer feedback link, hidden when unset). The root `.env` reaches the build
+  via Bun's automatic `.env` loading when running the root scripts (`bun run
+  build` also passes `--env-file=../.env` explicitly); `scripts/deploy.sh`
+  itself runs a plain `bun run build` and loads no env file, so deploy from the
+  repo root. No runtime environment variables are needed.
+- The app remains fully usable without a backend — local-first, and sync is
+  opt-in.

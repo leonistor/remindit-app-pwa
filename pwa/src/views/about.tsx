@@ -36,6 +36,10 @@ const AboutView = () => (
           <strong>{m.navProfile()}</strong>
           {m.aboutFeatureProfileDesc()}
         </li>
+        <li>
+          <strong>{m.aboutFeatureSync()}</strong>
+          {m.aboutFeatureSyncDesc()}
+        </li>
         <li>{m.aboutFeatureList()}</li>
         <li>
           <strong>{m.aboutFeatureQuickAdd()}</strong>
@@ -97,7 +101,7 @@ const AboutView = () => (
       <p className="text-muted-foreground text-sm">{m.aboutComingSubtitle()}</p>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
         <li>{m.aboutComingAttributes()}</li>
-        <li>{m.aboutComingMultiUser()}</li>
+        <li>{m.aboutComingNotifications()}</li>
       </ul>
     </section>
 

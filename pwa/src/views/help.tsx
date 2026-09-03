@@ -168,6 +168,26 @@ const HelpView = () => (
     </section>
 
     <section className="flex flex-col gap-2">
+      <h2 className="font-semibold text-lg">{m.helpSyncSection()}</h2>
+      <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
+        <li>
+          {m.helpSyncWherePrefix()}{" "}
+          <Link
+            className="text-primary underline underline-offset-4 hover:opacity-90"
+            to="/profile"
+          >
+            {m.navProfile()}
+          </Link>
+          {m.helpSyncWhereMiddle()} <strong>{m.syncTitle()}</strong>{" "}
+          {m.helpSyncWhereSuffix()}
+        </li>
+        <li>{m.helpSyncWhat()}</li>
+        <li>{m.helpSyncOffline()}</li>
+        <li>{m.helpSyncShared()}</li>
+      </ul>
+    </section>
+
+    <section className="flex flex-col gap-2">
       <h2 className="font-semibold text-lg">{m.helpYourDataSection()}</h2>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-muted-foreground marker:text-muted-foreground">
         <li>{m.helpDataLocal()}</li>

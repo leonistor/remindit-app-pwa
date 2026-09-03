@@ -2,6 +2,27 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v5.0.0 — 2026-09-03
+
+_Your list, on every device — sign in to sync, or share a list with the people you shop with._
+
+### ✨ New Features
+
+- **Sync across devices**: sign in from Profile → Sync & account and your list, catalog and history stay in step across your phone, tablet and browser. The app keeps working fully offline — an account is optional, sync is an extra
+- **Shared lists**: shop together — invite someone by their username and your list becomes a shared one. Everyone sees the same items in real time, you can switch between your lists, and members can leave (or be removed) at any time
+- **Feedback, one tap away**: a new link in the footer takes you straight to our feedback site (where available)
+
+### 🔧 Improvements
+
+- **About & Help stay in sync**: both now explain syncing and shared lists, and the "coming soon" list points at notifications next
+- **Clearer sync messages**: connection hiccups now tell you what actually happened instead of showing a raw error
+- **Stays signed in**: sessions quietly renew themselves in the background, so you aren't logged out after a couple of weeks
+
+### 🐛 Fixes
+
+- **More reliable syncing**: edits made right after receiving someone else's changes are no longer silently skipped, removed items stay removed, and reconnecting after an outage picks up exactly where it left off
+- **Calmer reconnects**: going offline and back no longer stacks up duplicate background work
+
 ## v4.4.0 — 2026-09-01
 
 _Make it yours — pick an avatar you like, and bring your data with you wherever you go._
