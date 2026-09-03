@@ -5,7 +5,7 @@
 
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 import { hc } from "hono/client"
-import { app, type AppType } from "../src/app"
+import { type AppType, app } from "../src/app"
 import { env } from "../src/env"
 
 const server = Bun.serve({ port: 0, fetch: app.fetch })
@@ -42,7 +42,7 @@ describeIfPb("pb forwarder (live)", () => {
     owner = await register(`pf-${run}`)
     const res = await client.api.groups.$post(
       { json: { name: "Forwarder" } },
-      { headers: { authorization: `Bearer ${owner.token}` } },
+      { headers: { authorization: `Bearer ${owner.token}` } }
     )
     teamId = ((await res.json()) as { id: string }).id
   })
@@ -50,7 +50,7 @@ describeIfPb("pb forwarder (live)", () => {
   const pbFetch = (
     path: string,
     token: string,
-    init?: { method?: string; json?: unknown },
+    init?: { method?: string; json?: unknown }
   ) =>
     fetch(`${base}/pb${path}`, {
       method: init?.method ?? "GET",
@@ -79,7 +79,7 @@ describeIfPb("pb forwarder (live)", () => {
   test("record CRUD through the proxy is rule-scoped", async () => {
     const res = await pbFetch(
       `/api/collections/users/records/${owner.user.id}`,
-      owner.token,
+      owner.token
     )
     expect(res.status).toBe(200)
     const record = (await res.json()) as { id: string; username: string }
@@ -88,19 +88,68 @@ describeIfPb("pb forwarder (live)", () => {
 
   test("create with localId; duplicate (team, localId) rejected by the index", async () => {
     const localId = `cat-${run}`
-    const created = await pbFetch("/api/collections/categories/records", owner.token, {
-      method: "POST",
-      json: { team: teamId, localId, name: "Produce", frequency: "weekly" },
-    })
+    const created = await pbFetch(
+      "/api/collections/categories/records",
+      owner.token,
+      {
+        method: "POST",
+        json: { team: teamId, localId, name: "Produce", frequency: "weekly" },
+      }
+    )
     expect(created.status).toBe(200)
     const record = (await created.json()) as { id: string; localId: string }
     expect(record.localId).toBe(localId)
 
-    const duplicate = await pbFetch("/api/collections/categories/records", owner.token, {
-      method: "POST",
-      json: { team: teamId, localId, name: "Dupe", frequency: "weekly" },
-    })
+    const duplicate = await pbFetch(
+      "/api/collections/categories/records",
+      owner.token,
+      {
+        method: "POST",
+        json: { team: teamId, localId, name: "Dupe", frequency: "weekly" },
+      }
+    )
     expect(duplicate.status).toBe(400)
+  })
+
+  test("PATCH and DELETE are forwarded through the proxy", async () => {
+    const created = await pbFetch(
+      "/api/collections/categories/records",
+      owner.token,
+      {
+        method: "POST",
+        json: {
+          team: teamId,
+          localId: `verb-${run}`,
+          name: "Verbs",
+          frequency: "weekly",
+        },
+      }
+    )
+    const id = ((await created.json()) as { id: string }).id
+
+    const patched = await pbFetch(
+      `/api/collections/categories/records/${id}`,
+      owner.token,
+      { method: "PATCH", json: { name: "Verbs 2" } }
+    )
+    expect(patched.status).toBe(200)
+
+    const deleted = await pbFetch(
+      `/api/collections/categories/records/${id}`,
+      owner.token,
+      { method: "DELETE" }
+    )
+    expect(deleted.status).toBe(204)
+  })
+
+  test("non-forwarded verbs are rejected with 405 + Allow (never proxied)", async () => {
+    const res = await pbFetch("/api/collections/users/records", owner.token, {
+      method: "PUT",
+    })
+    expect(res.status).toBe(405)
+    expect(res.headers.get("allow")).toBe("GET, POST, PATCH, DELETE")
+    const body = (await res.json()) as { error: string }
+    expect(body.error).toBe("method not allowed")
   })
 
   test("SSE passthrough: realtime endpoint streams with event-stream content type", async () => {
