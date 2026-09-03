@@ -32,6 +32,15 @@ export default defineConfig({
   },
   server: {
     host: "0.0.0.0",
+    // Local Caddy proxy (docs/CADDY-LOCAL.md) rewrites the Host header to
+    // pwa.remindit.localhost — the dev server rejects unknown Host headers
+    // by default, so the proxied name must be allowlisted. Direct-port URLs
+    // (http://localhost:3000) stay allowed by the default 'auto' policy.
+    allowedHosts: [
+      "pwa.remindit.localhost",
+      "web.remindit.localhost",
+      "admin.remindit.localhost",
+    ],
     printUrls({ urls }) {
       urls.map((url) => console.log(`  ➜  ${url}`))
       console.log()

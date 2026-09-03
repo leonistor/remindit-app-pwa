@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "build": "cd pwa && bun --env-file=../.env run build",
+    "caddy:reload": "caddy reload --config /opt/homebrew/etc/Caddyfile",
     "check": "cd pwa && bun run check",
     "deploy": "cd pwa && bun run deploy",
     "dev": "bun run dev:pwa",

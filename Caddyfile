@@ -1,0 +1,36 @@
+# RemindIt local HTTPS reverse proxy — site blocks only.
+# Loaded by the global /opt/homebrew/etc/Caddyfile via `import` (brew services
+# runs `caddy run --config /opt/homebrew/etc/Caddyfile`; global options live
+# there, not here — Caddy rejects global option blocks in imported files).
+# Certificates come from Caddy's local CA (`local_certs` in the global file),
+# trusted in the macOS Keychain once via `caddy trust` — see
+# docs/CADDY-LOCAL.md for the one-time setup and daily workflow.
+#
+# Hosts mirror the production subdomain topology using the RFC 6761 reserved
+# `*.remindit.localhost` scheme (resolves to 127.0.0.1, never hits real DNS):
+#
+#   pwa.remindit.localhost   -> pwa dev server  (Rsbuild, :3000)
+#   web.remindit.localhost   -> web dev server  (Rsbuild, :3200)
+#   admin.remindit.localhost -> admin dev server (Rsbuild, :3300)
+#   bff.remindit.localhost   -> Hono BFF        (:3100)
+#
+# PocketBase is intentionally NOT proxied (D2: never a public surface) — its
+# admin UI stays on http://127.0.0.1:8090/_/ .
+# The dev servers must be running (`bun run dev:all`), otherwise Caddy
+# answers 502; direct-port URLs (http://localhost:3000) keep working.
+
+pwa.remindit.localhost {
+	reverse_proxy 127.0.0.1:3000
+}
+
+web.remindit.localhost {
+	reverse_proxy 127.0.0.1:3200
+}
+
+admin.remindit.localhost {
+	reverse_proxy 127.0.0.1:3300
+}
+
+bff.remindit.localhost {
+	reverse_proxy 127.0.0.1:3100
+}
