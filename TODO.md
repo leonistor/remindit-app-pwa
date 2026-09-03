@@ -183,8 +183,15 @@ in-flight reconciles would close the last wipe edge case.
   shared-list sections (en/ro), DEPLOY.md build-time env note, regenerated
   screenshots; release-gate `test:pre` green. Commit + tag are local — push
   and the server deploy are the D4 step.
-- [ ] **F4** Notifications channel decision (D4) — Web Push vs email vs
-  realtime-only; then dispatch in the bff + the in-app consumer.
+- [x] **F4** Notifications channel decision (D4) — Web Push vs email vs
+  realtime-only; then dispatch in the bff + the in-app consumer. Done
+  2026-09-03 (in-app realtime; Web Push deferred, email rejected — D4 row
+  updated): BFF dispatches `member.added`/`member.left`/`member.removed`
+  superuser-side from the groups service (best-effort, pre-fetch before
+  delete so self-leavers can't 404 the dispatch); pwa `$notifications` store
+  + user-scoped realtime subscription in the engine + Profile card with
+  mark-read; en/ro. Plain text types, untyped payload (minimal groundwork —
+  a future push/digest design adds the typed enum + dedupeKey migration).
 
 ## Phase D — platform deployment (unblocks V6)
 
