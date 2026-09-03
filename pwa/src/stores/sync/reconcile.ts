@@ -43,7 +43,11 @@ export type SyncAction =
   | { kind: "remoteDelete"; pbId: string; localId: string }
   /** pb record vanished (deleted elsewhere) → delete the local record */
   | { kind: "localDelete"; pbId: string; localId: string }
-  /** content equal → journal heal only (no-op everywhere) */
+  /**
+   * content equal → journal heal; emitted only when the journaled stamp
+   * actually changes (first sight or a newer remote stamp) — unchanged
+   * re-diffs emit nothing, so periodic reconciles stay write-free no-ops.
+   */
   | { kind: "heal"; pbId: string; updated: string }
 
 export type DiffSpec<L> = {
@@ -126,13 +130,21 @@ export function diffCollection<L>(spec: DiffSpec<L>): DiffResult {
       const updated = remote.updated ?? ""
       if (spec.createOnly) {
         // History is append-only: nothing to push once it exists remotely.
-        journal[remote.id] = updated
-        actions.push({ kind: "heal", pbId: remote.id, updated })
+        // The journal starts with no entry for the pb id, so first sight
+        // (undefined !== "") always heals; only a genuinely new stamp
+        // re-heals, keeping unchanged re-reconciles action-free.
+        if (journal[remote.id] !== updated) {
+          journal[remote.id] = updated
+          actions.push({ kind: "heal", pbId: remote.id, updated })
+        }
         continue
       }
       if (spec.matches(local, remote)) {
-        journal[remote.id] = updated
-        actions.push({ kind: "heal", pbId: remote.id, updated })
+        // Same heal-only-on-journal-change rule as the create-only branch.
+        if (journal[remote.id] !== updated) {
+          journal[remote.id] = updated
+          actions.push({ kind: "heal", pbId: remote.id, updated })
+        }
         continue
       }
       const journaled = journal[remote.id]

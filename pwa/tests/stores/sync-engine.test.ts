@@ -1,6 +1,8 @@
 // Engine tests with a stubbed PB/BFF client (real nanostores, no network):
 // covers engine-level behaviors the pure diff tests can't — journal stamping
-// on remote-win applies (H1) and connect serialization (H3).
+// on remote-win applies (H1), connect serialization (H3), the store-trigger
+// gating (history_events excluded from store-change reconciles) and the
+// lastSeenIds reset on sign-out.
 //
 // Both network boundaries are mocked at the module boundary (rstest
 // `rs.mock`, same pattern as the snapdom/profile-generator mocks): the
@@ -11,7 +13,11 @@
 
 import { afterEach, beforeEach, describe, expect, rs, test } from "@rstest/core"
 import { $catalog } from "@/stores/catalog"
+import { $history } from "@/stores/history"
+import { $list } from "@/stores/list"
+import { STORAGE_KEYS } from "@/stores/persistence"
 import { $syncState, reconcileAll, signIn, signOut } from "@/stores/sync/engine"
+import type { HistoryEvent } from "@/stores/types"
 import { resetStores } from "../fixtures/reset"
 
 const EMAIL = "leo@example.com"
@@ -19,6 +25,19 @@ const EMAIL = "leo@example.com"
 // stamps live in 2099 so lexicographic LWW stays monotonic against them.
 const T1 = "2026-01-01T00:00:00Z"
 const T2 = "2026-01-02T00:00:00Z"
+
+// Real timers: the engine's store-trigger debounce is 500ms and the profile
+// push (scheduled by the $user listener's immediate subscribe callback on the
+// suite's first connect) is 1000ms — waits of 1200ms flush any pending
+// reconcile before a no-change window, 700ms flush one we expect to run.
+const wait = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms))
+
+const readTombstones = (collection: string): string[] => {
+  const raw = localStorage.getItem(STORAGE_KEYS.syncTombstones)
+  const parsed = raw === null ? {} : JSON.parse(raw)
+  return (parsed as Record<string, string[]>)[collection] ?? []
+}
 
 const pbState = rs.hoisted(() => {
   type Rec = {
@@ -45,13 +64,19 @@ const pbState = rs.hoisted(() => {
       payload: Record<string, unknown>
     }>,
     deletes: [] as Array<{ collection: string; id: string }>,
+    // One entry per getFullList — a full reconcile pass fetches all four
+    // collections, so this doubles as a "did a reconcile run" probe.
+    lists: [] as string[],
     groupsCreated: 0,
   }
   let seq = 0
   const stamp = () => `2099-01-01T00:00:00.${String(++seq).padStart(6, "0")}Z`
 
   const collection = (name: string) => ({
-    getFullList: async () => [...(remote[name] ?? [])],
+    getFullList: async () => {
+      calls.lists.push(name)
+      return [...(remote[name] ?? [])]
+    },
     getOne: async (id: string) => {
       const record = (remote[name] ?? []).find((r) => r.id === id)
       if (!record) throw new Error(`404: ${name}/${id}`)
@@ -102,6 +127,7 @@ const pbState = rs.hoisted(() => {
     calls.creates.length = 0
     calls.updates.length = 0
     calls.deletes.length = 0
+    calls.lists.length = 0
     calls.groupsCreated = 0
     seq = 0
   }
@@ -213,5 +239,67 @@ describe("sync engine (stubbed clients)", () => {
 
     expect(pbState.calls.groupsCreated).toBe(1)
     expect($syncState.get().groupId).toBe("g-new")
+  })
+
+  test("history store changes schedule no reconcile; other stores still do", async () => {
+    stubAuth([{ id: "g1", name: "My list" }])
+    await signIn(EMAIL, "pw")
+    // Flush reconcile timers possibly left over from earlier tests (the
+    // 500ms store debounce from a previous sign-in, the 1000ms profile push
+    // scheduled by the suite's first connect) before judging this test's own
+    // no-change window.
+    await wait(1200)
+    pbState.calls.lists.length = 0
+
+    // History is append-only and watched by nothing: a local-only change
+    // must not schedule a reconcile (remote history arrives via the realtime
+    // subscription; local pushes go through the foreground/heartbeat
+    // triggers).
+    const event: HistoryEvent = {
+      id: "h1",
+      action: "add",
+      itemId: "i1",
+      itemName: "Milk",
+      categoryId: "uncategorized",
+      categoryName: "Uncategorized",
+      timestamp: 1,
+    }
+    $history.set([...$history.get(), event])
+    await wait(700)
+    expect(pbState.calls.lists).toEqual([])
+
+    // Sanity: the other collections still reconcile on store change.
+    $list.set([
+      { id: "e1", itemId: "i1", checked: false, addedAt: 1 },
+    ])
+    await wait(700)
+    expect(pbState.calls.lists.length).toBeGreaterThan(0)
+  })
+
+  test("signOut resets the id snapshots: the next session tracks fresh (no false tombstones)", async () => {
+    stubAuth([{ id: "g1", name: "My list" }])
+    await signIn(EMAIL, "pw")
+
+    // Session 1: A and B land in the engine's lastSeenIds snapshot.
+    $list.set([
+      { id: "A", itemId: "i1", checked: false, addedAt: 1 },
+      { id: "B", itemId: "i2", checked: false, addedAt: 2 },
+    ])
+    await signOut()
+
+    // Session 2 introduces ids C/D. lastSeenIds was cleared at sign-out, so
+    // the C/D snapshot is fresh — the stale A/B ids must not resurface as
+    // tombstones (that would delete-live A/B records on the next reconcile).
+    await signIn(EMAIL, "pw")
+    $list.set([
+      { id: "C", itemId: "i1", checked: false, addedAt: 3 },
+      { id: "D", itemId: "i2", checked: false, addedAt: 4 },
+    ])
+    expect(readTombstones("list_entries")).toEqual([])
+
+    // And the debounced reconcile that the C/D change schedules must not
+    // manufacture tombstones either.
+    await wait(700)
+    expect(readTombstones("list_entries")).toEqual([])
   })
 })

@@ -327,6 +327,11 @@ async function reconcileCollection<L>(
   // changes (heal stamps, prunes).
   const mapBefore = JSON.stringify(maps.map[spec.collection])
   const journalBefore = JSON.stringify(maps.journal[spec.collection])
+  // The diff consumes every pending tombstone (its result array is always
+  // empty), so a pass with pending tombstones must persist even when the
+  // heal-on-change rule no longer forces `changed` on unchanged records.
+  const tombstonesPending =
+    ($syncTombstones.get()[spec.collection] ?? []).length > 0
 
   const result = diffCollection({
     local: localRecords,
@@ -408,6 +413,7 @@ async function reconcileCollection<L>(
   // Persist the (possibly mutated) map/journal; tombstones are consumed.
   if (
     changed ||
+    tombstonesPending ||
     JSON.stringify(maps.map[collection]) !== mapBefore ||
     JSON.stringify(maps.journal[collection]) !== journalBefore
   ) {
@@ -617,15 +623,21 @@ function wireStoreListeners(): void {
   // would stack). Without a session the callbacks no-op instead.
   if (storeListenersWired) return
   storeListenersWired = true
-  const watch = (collection: SyncCollection, ids: () => string[]) => {
+  // history_events is deliberately not watched: it is append-only
+  // (create-only sync — its tombstones are meaningless, the diff never emits
+  // them) and remote history already arrives via the realtime subscription.
+  // Local history pushes still reconcile through the foreground/heartbeat
+  // triggers, so nothing is lost — only per-keystroke-level churn avoided.
+  const watch = (
+    collection: "categories" | "items" | "list_entries",
+    ids: () => string[]
+  ) => {
     // Snapshot-diff on every store change → tombstones for removed ids.
     ;(collection === "categories"
       ? $categories
       : collection === "items"
         ? $catalog
-        : collection === "list_entries"
-          ? $list
-          : $history
+        : $list
     ).subscribe(() => {
       if (applying || !getSession()) return
       trackIds(collection, ids())
@@ -635,7 +647,6 @@ function wireStoreListeners(): void {
   watch("categories", () => $categories.get().map((c) => c.id))
   watch("items", () => $catalog.get().map((i) => i.id))
   watch("list_entries", () => $list.get().map((e) => e.id))
-  watch("history_events", () => $history.get().map((h) => h.id))
 
   // Profile pushes are LWW-debounced.
   $user.subscribe(() => {
@@ -706,6 +717,10 @@ export async function signOut(): Promise<void> {
     list_entries: [],
     history_events: [],
   })
+  // Fresh id snapshots for the next sign-in: a stale `lastSeenIds` set from
+  // the previous session would turn the next session's first store change
+  // into false tombstones (its ids no longer exist locally).
+  for (const key of Object.keys(lastSeenIds)) delete lastSeenIds[key]
   pb.authStore.clear()
   setSyncState({ status: "off", groupId: null, lastError: null })
 }

@@ -33,7 +33,28 @@ describe("diffCollection", () => {
     ])
   })
 
-  test("matching local+remote → heal (journal update only)", () => {
+  test("first diff of a matching record heals (journal starts empty)", () => {
+    const result = diffCollection(
+      spec({
+        local: [{ id: "a", name: "Milk" }],
+        remote: [
+          {
+            id: "pb1",
+            localId: "a",
+            updated: "2026-01-01T00:00:00Z",
+            name: "Milk",
+          },
+        ],
+        map: { a: "pb1" },
+      })
+    )
+    expect(result.actions).toEqual([
+      { kind: "heal", pbId: "pb1", updated: "2026-01-01T00:00:00Z" },
+    ])
+    expect(result.journal.pb1).toBe("2026-01-01T00:00:00Z")
+  })
+
+  test("matching local+remote with a current journal → no actions", () => {
     const result = diffCollection(
       spec({
         local: [{ id: "a", name: "Milk" }],
@@ -49,9 +70,58 @@ describe("diffCollection", () => {
         journal: { pb1: "2026-01-01T00:00:00Z" },
       })
     )
-    expect(result.actions).toEqual([
+    expect(result.actions).toEqual([])
+    expect(result.journal.pb1).toBe("2026-01-01T00:00:00Z")
+  })
+
+  test("re-diff of an unchanged state emits nothing at all", () => {
+    const local = [{ id: "a", name: "Milk" }]
+    const remote = [
+      { id: "pb1", localId: "a", updated: "2026-01-01T00:00:00Z", name: "Milk" },
+    ]
+    const first = diffCollection(
+      spec({ local, remote, map: { a: "pb1" } })
+    )
+    expect(first.actions).toEqual([
       { kind: "heal", pbId: "pb1", updated: "2026-01-01T00:00:00Z" },
     ])
+
+    const second = diffCollection(
+      spec({ local, remote, map: first.map, journal: first.journal })
+    )
+    expect(second.actions).toEqual([])
+    expect(second.journal).toEqual(first.journal)
+  })
+
+  test("a newer remote stamp heals again (content unchanged)", () => {
+    const local = [{ id: "a", name: "Milk" }]
+    const first = diffCollection(
+      spec({
+        local,
+        remote: [
+          { id: "pb1", localId: "a", updated: "2026-01-01T00:00:00Z", name: "Milk" },
+        ],
+        map: { a: "pb1" },
+      })
+    )
+    expect(first.actions).toEqual([
+      { kind: "heal", pbId: "pb1", updated: "2026-01-01T00:00:00Z" },
+    ])
+
+    const second = diffCollection(
+      spec({
+        local,
+        remote: [
+          { id: "pb1", localId: "a", updated: "2026-02-01T00:00:00Z", name: "Milk" },
+        ],
+        map: first.map,
+        journal: first.journal,
+      })
+    )
+    expect(second.actions).toEqual([
+      { kind: "heal", pbId: "pb1", updated: "2026-02-01T00:00:00Z" },
+    ])
+    expect(second.journal.pb1).toBe("2026-02-01T00:00:00Z")
   })
 
   test("remote changed since journal → localApply (remote wins)", () => {
@@ -220,7 +290,7 @@ describe("diffCollection", () => {
           },
         ],
         map: { h1: "pb1" },
-        journal: { pb1: "2026-01-01T00:00:00Z" },
+        journal: { pb1: "2025-12-01T00:00:00Z" },
         tombstones: ["h1"],
       }),
       matches: () => false,
@@ -228,6 +298,72 @@ describe("diffCollection", () => {
     })
     expect(result.actions).toEqual([
       { kind: "heal", pbId: "pb1", updated: "2026-01-01T00:00:00Z" },
+    ])
+    expect(result.tombstones).toEqual([])
+  })
+
+  test("create-only: an already-journaled event re-diffs to no actions", () => {
+    const result = diffCollection({
+      ...spec({
+        local: [{ id: "h1", name: "x" }],
+        remote: [
+          {
+            id: "pb1",
+            localId: "h1",
+            updated: "2026-01-01T00:00:00Z",
+            name: "different",
+          },
+        ],
+        map: { h1: "pb1" },
+        journal: { pb1: "2026-01-01T00:00:00Z" },
+      }),
+      matches: () => false,
+      createOnly: true,
+    })
+    expect(result.actions).toEqual([])
+  })
+
+  test("create-only: a newer remote stamp heals again", () => {
+    const local = [{ id: "h1", name: "x" }]
+    const first = diffCollection({
+      ...spec({
+        local,
+        remote: [
+          {
+            id: "pb1",
+            localId: "h1",
+            updated: "2026-01-01T00:00:00Z",
+            name: "different",
+          },
+        ],
+        map: { h1: "pb1" },
+      }),
+      matches: () => false,
+      createOnly: true,
+    })
+    expect(first.actions).toEqual([
+      { kind: "heal", pbId: "pb1", updated: "2026-01-01T00:00:00Z" },
+    ])
+
+    const second = diffCollection({
+      ...spec({
+        local,
+        remote: [
+          {
+            id: "pb1",
+            localId: "h1",
+            updated: "2026-02-01T00:00:00Z",
+            name: "different",
+          },
+        ],
+        map: first.map,
+        journal: first.journal,
+      }),
+      matches: () => false,
+      createOnly: true,
+    })
+    expect(second.actions).toEqual([
+      { kind: "heal", pbId: "pb1", updated: "2026-02-01T00:00:00Z" },
     ])
   })
 
