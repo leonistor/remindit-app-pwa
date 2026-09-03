@@ -6,6 +6,12 @@
 
 const TOKEN_KEY = "remindit-admin-token"
 
+// Timeout guard: without it a hung BFF left every button pending forever.
+// 10s rather than web's 5s — web's fetch is a best-effort public stats probe
+// that should degrade fast, while these are interactive admin CRUD calls
+// against a local BFF+PB where each mutation is followed by a list reload.
+const REQUEST_TIMEOUT_MS = 10_000
+
 // SSR-safe: TanStack Start executes beforeLoad + render on the server where
 // localStorage is undefined — report "not signed in" there instead of
 // crashing renderToReadableStream.
@@ -57,16 +63,50 @@ const errorBodyToMessage = (value: unknown, fallback: string): string => {
   return JSON.stringify(value)
 }
 
+// fetch rejects with a DOMException when the abort signal fires: "TimeoutError"
+// in browsers (the abort reason of AbortSignal.timeout) or "AbortError" with a
+// TimeoutError cause under Node/undici fetch. Plain "AbortError" without a
+// TimeoutError cause is a caller-supplied signal firing — rethrown untouched.
+const isTimeoutError = (err: unknown): boolean => {
+  if (!(err instanceof Error)) return false
+  if (err.name === "TimeoutError") return true
+  if (err.name !== "AbortError") return false
+  const cause = (err as { cause?: unknown }).cause
+  return cause instanceof Error && cause.name === "TimeoutError"
+}
+
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken()
-  const res = await fetch(`${base()}${path}`, {
-    ...init,
-    headers: {
-      ...(init?.body ? { "content-type": "application/json" } : {}),
-      ...(token ? { authorization: `Bearer ${token}` } : {}),
-      ...init?.headers,
-    },
-  })
+  // No current caller passes a signal; if one ever does, combine rather than
+  // clobber so a caller abort isn't silently swallowed by the timeout signal.
+  const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+  const signal = init?.signal
+    ? AbortSignal.any([timeoutSignal, init.signal])
+    : timeoutSignal
+  let res: Response
+  try {
+    res = await fetch(`${base()}${path}`, {
+      ...init,
+      signal,
+      headers: {
+        ...(init?.body ? { "content-type": "application/json" } : {}),
+        ...(token ? { authorization: `Bearer ${token}` } : {}),
+        ...init?.headers,
+      },
+    })
+  } catch (cause) {
+    // Surface as AdminApiError so pages render it uniformly instead of
+    // leaking a DOMException; 408 (Request Timeout) is the semantically
+    // correct status for a client-side timeout and can't collide with a
+    // real BFF response (the request never got one).
+    if (isTimeoutError(cause)) {
+      throw new AdminApiError(
+        408,
+        `request timed out after ${REQUEST_TIMEOUT_MS / 1000}s — BFF unreachable or hung (${path})`
+      )
+    }
+    throw cause
+  }
   if (res.status === 401) {
     clearToken()
     // A 401 with a token attached means the session expired: bounce to /login

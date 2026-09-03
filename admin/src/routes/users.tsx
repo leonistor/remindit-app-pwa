@@ -27,6 +27,10 @@ function UsersPage() {
   const [error, setError] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
   const [busy, setBusy] = useState(false)
+  // In-flight delete row: guards the Delete buttons against double-clicks
+  // (a duplicate DELETE 404s into a spurious error message once the row is
+  // already gone).
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const [form, setForm] = useState({
     email: "",
@@ -71,15 +75,21 @@ function UsersPage() {
   }
 
   const deleteUser = async (id: string, username: string) => {
+    // Guard before the sync confirm() too: a second invocation must not reach
+    // the dialog (or queue a second DELETE) while one is already in flight.
+    if (deletingId !== null) return
     if (!window.confirm(`Delete user "${username}"? This cannot be undone.`)) {
       return
     }
+    setDeletingId(id)
     setError(null)
     try {
       await api(`/api/admin/users/${id}`, { method: "DELETE" })
       await load()
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -123,6 +133,8 @@ function UsersPage() {
                     size="compact-xs"
                     variant="light"
                     color="red"
+                    loading={deletingId === user.id}
+                    disabled={deletingId !== null}
                     onClick={() => void deleteUser(user.id, user.username)}
                   >
                     Delete

@@ -12,6 +12,10 @@ function GroupsPage() {
   useRequireAuth()
   const [groups, setGroups] = useState<AdminGroup[]>([])
   const [error, setError] = useState<string | null>(null)
+  // In-flight delete row: guards the Delete buttons against double-clicks
+  // (a duplicate DELETE 404s into a spurious error message once the group is
+  // already gone).
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     // The auth gate navigates away when the token is missing — skip the
@@ -29,6 +33,9 @@ function GroupsPage() {
   }, [load])
 
   const deleteGroup = async (id: string, name: string) => {
+    // Guard before the sync confirm() too: a second invocation must not reach
+    // the dialog (or queue a second DELETE) while one is already in flight.
+    if (deletingId !== null) return
     if (
       !window.confirm(
         `Delete group "${name}"? All of its data (categories, items, lists, history) is removed.`
@@ -36,12 +43,15 @@ function GroupsPage() {
     ) {
       return
     }
+    setDeletingId(id)
     setError(null)
     try {
       await api(`/api/admin/groups/${id}`, { method: "DELETE" })
       await load()
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -80,6 +90,8 @@ function GroupsPage() {
                     size="compact-xs"
                     variant="light"
                     color="red"
+                    loading={deletingId === group.id}
+                    disabled={deletingId !== null}
                     onClick={() => void deleteGroup(group.id, group.name)}
                   >
                     Delete
