@@ -4,7 +4,7 @@ import { app } from "../src/app"
 const server = Bun.serve({ port: 0, fetch: app.fetch })
 afterAll(() => server.stop(true))
 
-describe("SSE spike (phase 1, docs/ROADMAP.md §6)", () => {
+describe("SSE spike (phase 1, docs/ROADMAP.md §7)", () => {
   test("events arrive incrementally, not buffered until close", async () => {
     const res = await fetch(`http://127.0.0.1:${server.port}/api/sse`)
     expect(res.headers.get("content-type")).toContain("text/event-stream")

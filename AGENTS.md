@@ -3,7 +3,8 @@
 ## Repo layout
 
 Bun workspace. App code lives in the `pwa/` module (`@remindit/pwa`); shared brand constants and domain entities live in `common/` (`@remindit/common`). Root `package.json` scripts delegate into the modules (`bun run <script>` works from the repo root). Platform modules (phased rollout, one feature branch each — see
-[docs/ROADMAP.md](docs/ROADMAP.md) for the approved plan): `@remindit/bff`
+[docs/ROADMAP.md](docs/ROADMAP.md) for the approved plan, [TODO.md](TODO.md)
+for active work): `@remindit/bff`
 (PocketBase + Hono), `@remindit/web` (Rsbuild + TanStack Start),
 `@remindit/admin` (Rsbuild + TanStack Start + Mantine). Repo-level config:
 `.opencode/`, `opencode.jsonc`, `skills-lock.json`, `.hive/`, `.zed/`,

@@ -9,11 +9,11 @@ decision log: [docs/ROADMAP.md](../docs/ROADMAP.md); module rules:
 
 ```
 pwa / web / admin
-      │  Hono RPC (hc<AppType>) + PB SDK baseUrl=BFF (phase 5 decision, D2)
+      │  Hono RPC (hc<AppType>) + PB SDK baseUrl=BFF (hybrid data-plane, D2)
       ▼
 Hono (Bun.serve, PORT)                    ── public surface
   ├─ /api/*    typed endpoints (routes → services → repositories, D8)
-  └─ /pb/*     scoped PB data-plane forwarder — NOT yet built (phase 5)
+  └─ /pb/*     scoped PB data-plane forwarder (pwa sync; SSE-capable)
       ▼
 PocketBase (POCKETBASE_URL, 127.0.0.1:8090) ── never public
   └─ pb_data/ (SQLite volume, gitignored)
@@ -30,7 +30,7 @@ PocketBase (POCKETBASE_URL, 127.0.0.1:8090) ── never public
 
 ## Endpoints
 
-Phase 1+2/3 surface — full request/response contracts and the live-verified
+Full request/response contracts and the live-verified
 rule matrix: [docs/API.md](docs/API.md).
 
 | Route | Purpose |
@@ -39,7 +39,9 @@ rule matrix: [docs/API.md](docs/API.md).
 | `GET/POST /api/groups`, `GET/DELETE /api/groups/:id` | shared workspaces (creator = owner member) |
 | `GET/POST /api/groups/:id/members`, `DELETE …/:memberId` | membership management (owner-only mutations via PB rules) |
 | `GET /api/notifications`, `PATCH /api/notifications/:id` | stub (D4): list + mark-read |
-| `ANY /pb/api/*` | authenticated PB data-plane forwarder (pwa sync, phase 5 — SSE-capable) |
+| `GET /api/admin/*` | role-guarded (`users.role = "admin"`, 403 otherwise): overview counts, user/group management, create-user, delete-group |
+| `ANY /pb/api/*` | authenticated PB data-plane forwarder (pwa sync — SSE-capable) |
+| `GET /api/stats` | public aggregate counts (superuser-side, 60s-cached) for the marketing site |
 | `GET /api/health` | BFF liveness + PocketBase reachability (`pb.status: "up" \| "down"`; PB down is a reported state, not a 5xx) |
 | `GET /api/sse` | SSE spike/diagnostic — emits 3 `ping` events 150ms apart |
 
@@ -87,10 +89,16 @@ All from the root `.env` (see root `.env.example`): `PORT`,
 - `tests/health.test.ts` — contract round-trip via `app.request()` + Zod parse
 - `tests/rpc.test.ts` — live server + `hc<AppType>` client (the frontend path)
 - `tests/sse.test.ts` — incremental-chunk assertion (buffering detector)
+- `tests/schema.test.ts` — collection-builder integrity (names, ordering, common mirroring)
+- `tests/auth.test.ts` — auth boundaries (no-credentials paths)
+- `tests/api.integration.test.ts` — live auth/groups flows, responses parsed against the Zod contracts (skips when PB is down)
+- `tests/pb-forwarder.integration.test.ts` — forwarder auth gating, rule-scoped CRUD, unique-index dedupe, SSE passthrough
+- `tests/admin.integration.test.ts` — admin role guards + user/group management (live)
 
 ## pocketbase-mcp (agent ops)
 
-`opencode.jsonc` declares a `pocketbase` MCP server (disabled by default)
-wrapping `bff/scripts/pocketbase-mcp.ts`, which injects `PB_URL`/superuser
-creds from the root `.env` into `gaspechak-pocketbase-mcp`. Enable it in
-`opencode.jsonc` when working on this module.
+`opencode.jsonc` declares a `pocketbase` MCP server wrapping
+`bff/scripts/pocketbase-mcp.ts`, which injects `PB_URL`/superuser creds from
+the root `.env` into `gaspechak-pocketbase-mcp` (requires a running PB —
+`bun run dev:bff`). Enable it in `opencode.jsonc` while working on this
+module.

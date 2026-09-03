@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 
-// Phase-1 spike (docs/ROADMAP.md §6): prove SSE streams unbuffered through
+// Phase-1 spike (docs/ROADMAP.md §7): prove SSE streams unbuffered through
 // Hono on Bun.serve — whichever sync data-plane wins in phase 5, the realtime
 // transport depends on this. Doubles as a manual diagnostics endpoint.
 export const sse = new Hono().get("/", (_c) => {

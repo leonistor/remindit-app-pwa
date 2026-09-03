@@ -1,8 +1,9 @@
 # AGENTS.md — @remindit/bff
 
 Module rules for the `bff/` workspace (`@remindit/bff`). Repo-wide rules live
-in the root [AGENTS.md](../AGENTS.md); the phased rollout plan in
-[docs/ROADMAP.md](../docs/ROADMAP.md) (this module: phases 1–3).
+in the root [AGENTS.md](../AGENTS.md); the roadmap in
+[docs/ROADMAP.md](../docs/ROADMAP.md) (this module: platform phases 1–3 plus
+the sync/admin slices in phases 5–6).
 
 ## Rules
 

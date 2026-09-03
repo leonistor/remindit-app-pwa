@@ -4,7 +4,7 @@
 
 This project is a Progressive Web App (PWA) to manage a personal shopping list.
 
-- [docs/ROADMAP.md](docs/ROADMAP.md) roadmap
+- [ROADMAP.md](../docs/ROADMAP.md) roadmap (product versions + platform phases)
 
 | Light | Dark |
 | --- | --- |
@@ -16,6 +16,8 @@ This project is a Progressive Web App (PWA) to manage a personal shopping list.
 - [DESIGN.md](DESIGN.md) design system (contributors)
 - [AGENTS.md](AGENTS.md) agents instructions
 - [docs/DEV.md](docs/DEV.md) development & state architecture
+- [docs/SYNC.md](docs/SYNC.md) sync architecture (engine, reconciliation, realtime)
 - [docs/DEV-COMPONENTS.md](docs/DEV-COMPONENTS.md) Shark UI registry vs custom split
 - [docs/DEMOS.md](docs/DEMOS.md) demo video generator (scenarios, gotchas, release flow)
 - [docs/DEPLOY.md](docs/DEPLOY.md) deployment
+- [docs/LINKS.md](docs/LINKS.md) links & integrations

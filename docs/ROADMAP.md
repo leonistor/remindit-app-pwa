@@ -1,21 +1,93 @@
-# Platform roadmap — bff / web / admin
+# Remindit roadmap
 
-Cross-session plan for growing the Remindit Bun workspace beyond `pwa` +
-`common`. Each phase below is one feature branch, merged only after its
-verification gate. Check off items as they land; this file is the single
-source of truth for sequencing and status (see also root [README.md](../README.md)
-module table).
+Two layers, one file:
 
-Status: **all phases landed** (2026-09-02).
+- **Product versions** (§1) — what the app does for its users, from the
+  original `pwa`-only outline, updated to the workspace perspective (platform
+  modules and shipped phases referenced inline).
+- **Platform rollout** (§2+) — the bff / web / admin build-out: approved
+  decisions, architecture, phases, gates. Kept as the decision log now that
+  every phase has landed.
+
+Active work and sequencing live in [TODO.md](../TODO.md) — update this file
+when something ships, and TODO.md for what's in flight. Each platform phase
+was one feature branch, merged only after its verification gate. See also
+root [README.md](../README.md) for the module table.
+
+Platform status: **all phases landed** (2026-09-02). Product status: V1–V4
+shipped (pwa v4.4.0), V5 in progress, V6 not started.
 
 ---
 
-## 1. Approved decisions
+## 1. Product roadmap
+
+### [x] Version 1 — shipped
+
+- [x] The user has `items` to be added to the shopping `list`. The items are organized into `categories`. Adding/removing items from the list is logged into `history`.
+- [x] The user data is: `name`, `photo`. If no data is available, the user is prompted to provide it or accept default values, randomly generated.
+- [x] The main screen shows the list of items, organized by category. Controls are available to add/remove items, and to edit items and categories.
+
+### [x] Version 2 — shipped
+
+- [x] Based on the user's shopping history, the app provides item recommendations.
+- [x] The algorithm used for recommendations is either a time-series or a collaborative filtering algorithm. TBD.
+- [x] Users will be able to add, edit, and remove items and categories.
+- [x] Display ordering options will be available for categories, items, and the shopping list.
+
+### [x] Version 3 — shipped as v3.1.0–v3.4.0
+
+Core PWA + personalization slice (see `pwa/CHANGELOG.md`):
+
+- [x] Categorical color palettes (pool in `seed/palettes.json`, picker in Profile, Van Gogh default) — distinct sequential slots, WCAG contrast, reactive `$categoryById`
+- [x] Basic user profile + first-run onboarding (2-step: rollable `generate-random-username` + DiceBear avatar, dataset picker, `/onboarding` gate, `src/stores/onboarding.ts`)
+- [x] Inspect history (`/history`, grouped by day, snapshot `categoryName`)
+- [x] Quick search+add (`+` → grouped `Autocomplete`, recommendation-aware, create-under-Uncategorized)
+- [x] Automate screenshots in PWA manifest (`scripts/generate-mobile-screenshot.ts`, light/dark gallery in `pwa/README.md`)
+- [x] PWA checklist & hardening — installability (manifest + SW `fetch` + HTTPS + maskable icons), offline shell, `navigateFallback`, safe-area, standalone mode, update prompt (`src/components/update-prompt.tsx`), `pwa/docs/DEPLOY.md`
+- [x] App updates in browser (SW update flow, `UpdatePrompt` wired in `src/router.tsx`)
+- [x] Help content — text (`pwa/src/views/help.tsx`, `about.tsx`, `onboarding.tsx` copy; updated for floating sort + alphabetical A–Z in v3.4)
+- [x] Internal hardening pre-V4 — hooks out of `src/stores` barrel, cross-store flows in `src/stores/commands.ts`, pure helpers in `src/lib/` (`quick-add`, `history-view`, `display`, `pwa-install`), palette seeding consolidation, history snapshot + palette reactivity fixes
+
+### [x] Version 4 — shipped as v4.0.0–v4.4.0
+
+- [x] [DESIGN.md](../pwa/DESIGN.md) — design system as shipped (contributors, text-only)
+- [x] Onboarding welcome step — intro + add-items demo video (autoplay, muted, looped, no controls) with a `Steps` indicator rail (new `@shark/steps` primitive)
+- [x] Share page (`/share`): export the current shopping list as a PNG image — light-theme branded card, unchecked items grouped by category, download + copy-to-clipboard (`@zumer/snapdom`)
+- [x] Help content: guided tour (Help page embeds 5 demo videos with theme-matched variants)
+- [x] Add license (AGPL-3 LICENSE.txt at repo root)
+- [x] Multi-language support — English (default) + Romanian first (German, French, Ukrainian later); language selection as the first onboarding step, UI language switchable in Profile; Paraglide JS (shipped in v4.2.0)
+- [x] Avatar picker (12 rerollable options) + backup export/import (v4.4.0)
+
+### [~] Version 5 — in progress (sync landed on main, unreleased)
+
+Platform phase 5 (`feat/pwa-sync`) delivered the sync engine; sharing is the
+remaining slice.
+
+- [x] Sync with the server — list saved and loaded across devices: local-first engine (`pwa/src/stores/sync/`), journal + three-way reconciliation + LWW, realtime SSE, offline behavior — see `pwa/docs/SYNC.md`
+- [~] Multi-user support — multiple users share the same list and collaborate in real-time: groups + membership exist in the schema and BFF API (`groups`, `group_members`, platform phase 3), and realtime sync is live — but the pwa still auto-creates a private "My list" group (`ensureGroup`); **no UI yet** for joining an existing group / sharing a list with another user
+- [ ] Family shopping-list flow on top of sharing — invites, roles surfaced in-app (owner / member)
+
+### [ ] Version 6
+
+- [~] App website — standalone marketing site built (`web/`, platform phase 4: hero + live stats + features + download pages); **production deployment pending** (platform deployment phase, D3). Live PWA: `https://remindit.parsedwink.com`
+- [ ] Community of early adopters and feedback capture (see `pwa/docs/LINKS.md#integrations`)
+- [ ] Basic AI features
+- [ ] Integration with LLMs (MCP, skills)
+
+### Wishlist
+
+- [ ] Items might have attributes associated with them, such as photo, quantity, or price.
+- [ ] Native application
+- [ ] Notifications and live activities/updates
+
+---
+
+## 2. Approved decisions
 
 | # | Decision | Choice | Rationale |
 |---|----------|--------|-----------|
 | D1 | Groups | **Shared workspaces** — a group owns categories, items and lists; users are members with roles (owner / member) | Enables shared shopping lists; drives the whole collection schema |
-| D2 | Topology | **Everything via Hono** — PocketBase is never public (127.0.0.1); Hono is the only public surface. App-level concerns are a **typed Hono API** (Hono RPC + Zod); whether the PWA sync data-plane re-uses PB's record API via a scoped `/pb/*` forwarder or bespoke endpoints is **decided in phase 5** (hybrid recommended, see §8) | PB stays internal; one public surface, one auth guard; typed contract for frontends |
+| D2 | Topology | **Everything via Hono** — PocketBase is never public (127.0.0.1); Hono is the only public surface. App-level concerns are a **typed Hono API** (Hono RPC + Zod); whether the PWA sync data-plane re-uses PB's record API via a scoped `/pb/*` forwarder or bespoke endpoints is **decided in phase 5** (hybrid recommended, see §9) | PB stays internal; one public surface, one auth guard; typed contract for frontends |
 | D3 | Hosting | **Same VPS** as the PWA static bundle — PB binary + Hono process behind a reverse proxy, SQLite volume on disk | One server to operate; PB needs a persistent process + local SQLite |
 | D4 | Notifications | **Channel undecided** — schema reserves a `notifications` collection; channel (Web Push / email / realtime-only) decided in phase 5+ | No premature commitment |
 | D5 | Stack | BFF = **PocketBase + Hono** on Bun (Hono over Elysia: Web-standard model + runtime portability, per [analysis](https://chatgpt.com/share/6a978f02-8e68-83eb-b3e2-0a5d4a602c63)); web/admin = **Rsbuild + TanStack Start** (official `@tanstack/react-start/plugin/rsbuild` adapter); admin UI = **Mantine** | Per user brief + TanStack blog (Jun 2026): Start supports Rsbuild 2 first-class |
@@ -24,7 +96,7 @@ Status: **all phases landed** (2026-09-02).
 | D8 | BFF layering | `routes → services → repositories` inside the bff — routes never call the PB SDK directly; PB JS SDK is **server-side only** (`autoCancellation(false)`, `pb.filter()` for any untrusted filter input). Frontends consume the typed contract via Hono RPC (`hc<AppType>`) + Zod validation; `AppType` exported from a small `@remindit/bff/api` subpath and kept deliberately small | From the ChatGPT analysis: "PocketBase concerns stay in the service layer; application concerns stay in the BFF" — swap-ready infrastructure |
 | D9 | Environment | **One `.env` + one committed `.env.example`, both at the repo root** — all modules consume from there; no per-module env files | Single place to configure; no drift between modules; secrets live in one gitignored file (prod secrets come from the VPS environment, never from the repo) |
 
-## 2. Architecture
+## 3. Architecture
 
 ```
                        VPS (same host)
@@ -48,14 +120,14 @@ Status: **all phases landed** (2026-09-02).
   needs an efficient sync data-plane (bulk CRUD + realtime SSE across several
   collections): whether that is a scoped authenticated `/pb/*` forwarder
   (PB SDK client-side with `baseUrl = BFF_URL`) or bespoke BFF endpoints with
-  server-side PB SDK + custom SSE is an explicit **phase 5 decision** (§8).
+  server-side PB SDK + custom SSE is an explicit **phase 5 decision** (§9).
 - **Hono customs** (`/api/*`): auth sessions, groups management, public stats
   for the marketing site (total users/groups), notification dispatch (later),
   health — all backed by the server-side PB SDK through the service layer.
 - **Migrations** run from the repo against PB's admin API; PB itself is
   never a migration target by hand (no drift).
 
-## 3. Workspace layout (target)
+## 4. Workspace layout (target)
 
 | Module | Path | Stack | Purpose |
 |--------|------|-------|---------|
@@ -85,7 +157,7 @@ API rules: every data collection is scoped by `group_members` membership
 only `users` create/`groups` create are public-ish. Final rules drafted in
 phase 2 and validated with the MCP `pb_rules_test` tool.
 
-## 4. Environment convention (D9)
+## 5. Environment convention (D9)
 
 **Single root `.env`** (local-only, gitignored) + **single committed root
 `.env.example`**. No per-module env files. Verified mechanism (Bun 1.4): Bun
@@ -115,7 +187,7 @@ the root file, and the vars propagate through child processes even when they
 | `POCKETBASE_ADMIN_EMAIL` / `POCKETBASE_ADMIN_PASSWORD` | bff (dev, migrations, MCP) | dev creds | superuser; **dev-only**, prod via VPS secrets |
 | `PUBLIC_BFF_URL` | pwa / web / admin | `http://localhost:3100` | client `baseUrl` for PB SDK + `/api` |
 
-## 5. Dev experience
+## 6. Dev experience
 
 All scripts runnable from repo root (existing delegation pattern). Each
 module owns `dev`, `build`, `test`, `typecheck`, `lint`; the root gains
@@ -136,12 +208,12 @@ covers the whole repo (verify `biome.json` includes new dirs per phase).
 Env always comes from the root `.env` (D9): the root scripts are the entry
 point for any env-dependent run (`dev:*`, migrations, MCP creds).
 
-## 6. Phases — one feature branch each
+## 7. Phases — one feature branch each
 
 ### Phase 0 — workspace foundations · `feat/platform-foundations` ✅
 - [x] `docs/ROADMAP.md` (this file) + README/AGENTS pointers
 - [x] Root scripts: `dev` is an alias of `dev:pwa`; env-bearing delegations use `cd <module> && bun --env-file=../.env run <script>` (D9; verified — vars propagate, missing `.env` tolerated). `dev:bff|web|admin|all` land with their modules (nothing to point at yet); `typecheck` composition exists and gains modules as they land
-- [x] Root `.env.example` committed with all planned + existing vars (§4); the **tracked** `pwa/.env.example` was merged into it and removed; local `pwa/.env` migrated to root `.env` (no `.gitignore` change needed — the existing `.env` pattern already ignores it everywhere). Verified end-to-end: Rsbuild inlines `PUBLIC_*` from process.env (marker-value build test)
+- [x] Root `.env.example` committed with all planned + existing vars (§5); the **tracked** `pwa/.env.example` was merged into it and removed; local `pwa/.env` migrated to root `.env` (no `.gitignore` change needed — the existing `.env` pattern already ignores it everywhere). Verified end-to-end: Rsbuild inlines `PUBLIC_*` from process.env (marker-value build test)
 - [x] Biome/tsconfig conventions documented (AGENTS.md §Platform conventions)
 - Gate: `bun install && bun run typecheck && bun run lint` green; pwa behavior unchanged (`PUBLIC_DATASET`/`PUBLIC_SEED_HISTORY` still inlined)
 
@@ -154,12 +226,12 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - [x] pocketbase-mcp added to `opencode.jsonc` (disabled by default; wrapper `bff/scripts/pocketbase-mcp.ts` injects superuser creds from the root `.env`)
 - [x] Tests (bun test): health contract round-trip, `hc<AppType>` RPC over live HTTP, SSE buffering detector — 3 pass
 - Gate: typecheck (pwa + common + bff) + lint + tests + live smoke (`/api/health` → `pb:"up"` via real PB, SSE streaming) ✅
-- Note: root `dev:all` runs pwa + bff via `concurrently` (root devDep, per §5)
+- Note: root `dev:all` runs pwa + bff via `concurrently` (root devDep, per §6)
 
 ### Phase 2 — schema & migrations · `feat/bff-schema` ✅
 - [x] `bff/src/schema/`: PB collections JSON builders importing `@remindit/common` (frequencies, sentinels, types) — 8 collections: users, groups, group_members, categories, items, list_entries, history_events, notifications (reserved, D4)
 - [x] `bff/scripts/migrate.ts`: superuser auth from env (auto-provisions via `pocketbase-bin superuser upsert` on first run) → **pass A** create structure without rules (PB validates `@collection.*` rule references at definition time — all collections must exist first) → **pass B** canonicalized per-collection diff → patch. Never deletes; idempotency verified live (second run ⇒ all `unchanged`)
-- [x] API rules per §3 table — **live-verified rule matrix (8/8)** incl. the two uncertain patterns: create rules are evaluated against the hydrated record, and `@request.body.<relation>` resolves for membership scoping (PB 0.40.1). Details + matrix: `bff/docs/SCHEMA.md`
+- [x] API rules per §4 table — **live-verified rule matrix (8/8)** incl. the two uncertain patterns: create rules are evaluated against the hydrated record, and `@request.body.<relation>` resolves for membership scoping (PB 0.40.1). Details + matrix: `bff/docs/SCHEMA.md`
 - [x] Devdoc `bff/docs/SCHEMA.md` (mapping table, rules, migration algorithm, sentinel strategy — sentinel provisioning lands with the phase-3 groups service)
 - [x] Builder integrity tests (`tests/schema.test.ts`: unique names, relation ordering, `CATEGORY_FREQUENCIES`/`HistoryAction` mirroring) + root `migrate:bff` script
 - Gate: migrate on live PB → reconcile 15 changes → re-run ⇒ `✓ schema in sync (8 collections, no changes)`; rules matrix 8/8 ✅; typecheck + lint + 8 bun tests green
@@ -184,7 +256,7 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 
 ### Phase 5 — pwa sync · `feat/pwa-sync` ✅
 - [x] Design doc first: `pwa/docs/SYNC.md` — identity model (local ids stay; pb records carry `localId` + per-group unique indexes; per-device sync map), **journal + three-way reconciliation** (LWW by PB server-side `updated`), realtime via subscriptions, offline behavior, security notes, deferred scope
-- [x] **Data-plane decision (D2/§8): hybrid** — typed BFF RPC for account ops + scoped authenticated `/pb/*` forwarder (PB SDK client-side, `baseUrl = PUBLIC_BFF_URL + "/pb"`) for record CRUD + realtime; PB rules remain the authorization boundary
+- [x] **Data-plane decision (D2/§9): hybrid** — typed BFF RPC for account ops + scoped authenticated `/pb/*` forwarder (PB SDK client-side, `baseUrl = PUBLIC_BFF_URL + "/pb"`) for record CRUD + realtime; PB rules remain the authorization boundary
 - [x] BFF: `/pb/api/*` forwarder (auth-gated, rotated token forwarded, hop-by-hop stripped, SSE unbuffered) + integration tests (auth gating, rule-scoped CRUD, unique-index dedupe, SSE passthrough)
 - [x] Schema delta: `localId` + unique `(group, localId)` indexes on categories/items/list_entries/history_events
 - [x] pwa sync engine (`src/stores/sync/`): session store, BFF fetch client (types mirrored from the BFF contracts), pure reconcile diff (`reconcile.ts`, unit-tested — journal/three-way/LWW/tombstones/adoption), engine (group bootstrap + sentinel provisioning, reconcile apply, realtime subscriptions, tombstone detection via store snapshots, profile LWW sync)
@@ -199,7 +271,7 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - Gate: typecheck ×5 modules + lint + build ✅ + **live e2e smoke** (`dev:bff` + `dev:admin`): login → overview renders live counts (122 users / 9 groups), users + groups dashboards live, create-user → 201 + listed, non-admin sign-in client-rejected + `/api/admin/*` 403, sign-out/in clean ✅; bff suite 37 tests green
 - Gotchas recorded: TanStack Start runs `beforeLoad` server-side during SSR where the localStorage token is invisible — a guard there bounces every hard navigation to `/login` and the hydrated router trusts that resolution (stuck); auth guards must be client-side mount effects, and post-login navigation must be `router.navigate` (a full reload re-enters the SSR token-less redirect dance)
 
-## 7. Verification gates (every phase)
+## 8. Verification gates (every phase)
 
 1. `bun run typecheck` (root, covering all landed modules)
 2. `bun run lint` / `bun run check` (Biome, whole repo)
@@ -207,7 +279,7 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 4. Devdoc present/updated (module README + this file's checkboxes)
 5. No secrets committed; root `.env.example` updated when a variable is added (D9)
 
-## 8. Risks & open questions
+## 9. Risks & open questions
 
 - **Sync data-plane decision (phase 5)** — the [ChatGPT analysis](https://chatgpt.com/share/6a978f02-8e68-83eb-b3e2-0a5d4a602c63) says "don't expose the PB SDK to clients", but it predates the offline-first sync requirement; re-implementing PB's record CRUD + SSE realtime as bespoke endpoints is substantial work. Hybrid (typed RPC for app concerns + scoped `/pb/*` forwarder for the sync engine) is the working recommendation; revisit with real sync numbers.
 - **Hono RPC type instantiation** — keep the exported `AppType` small (chain only what clients need), pin `hono` versions across bff/clients (workspace catalog), and watch TS project-reference setup, per Hono's own monorepo caveats.
