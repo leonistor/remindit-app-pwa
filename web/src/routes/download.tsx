@@ -18,7 +18,7 @@ function Download() {
   // The PWA origin is env-driven (D9) — deploy-time config, not a build-time
   // brand constant. When unset at deploy, degrade to neutral copy: never
   // render a user-facing localhost link.
-  const pwaUrl = process.env.PUBLIC_PWA_URL
+  const pwaUrl = import.meta.env?.PUBLIC_PWA_URL
 
   return (
     <main className="container">

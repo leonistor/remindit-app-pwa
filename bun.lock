@@ -33,6 +33,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@hono/zod-validator": "^0.9.1",
+        "@remindit/common": "workspace:*",
         "hono": "^4.13.5",
         "pocketbase": "^0.28.0",
         "zod": "^4.5.4",
@@ -60,7 +61,7 @@
     },
     "pwa": {
       "name": "@remindit/pwa",
-      "version": "4.4.0",
+      "version": "5.0.0",
       "dependencies": {
         "@ark-ui/react": "^5.39.0",
         "@dicebear/core": "^10.7.0",

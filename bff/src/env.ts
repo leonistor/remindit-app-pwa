@@ -49,5 +49,10 @@ export const env = {
   answerAdminEmail:
     process.env.ANSWER_ADMIN_EMAIL ?? "feedback-admin@remindit.local",
   answerAdminPassword:
-    process.env.ANSWER_ADMIN_PASSWORD ?? "change-me-dev-only",
+    process.env.ANSWER_ADMIN_PASSWORD ??
+    (process.env.NODE_ENV === "production"
+      ? (() => {
+          throw new Error("ANSWER_ADMIN_PASSWORD is required in production")
+        })()
+      : "change-me-dev-only"),
 }

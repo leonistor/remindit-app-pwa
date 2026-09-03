@@ -65,6 +65,10 @@ export function NotificationsCard() {
     setMarkingId(id)
     try {
       await markRead(id)
+    } catch (error) {
+      // The store already rolled back the optimistic update.
+      // Surface the failure so the user can retry.
+      console.warn("markRead failed", error)
     } finally {
       setMarkingId(null)
     }

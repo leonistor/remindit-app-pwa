@@ -38,9 +38,11 @@ export class AdminApiError extends Error {
   }
 }
 
-// Env convention (P10): `process.env` like web — Rsbuild inlines PUBLIC_*
-// at build time (web/src/lib/stats.ts is the reference idiom).
-const base = () => process.env.PUBLIC_BFF_URL ?? "http://127.0.0.1:3100"
+// Env convention (P10): Rsbuild inlines PUBLIC_* at build time via
+// `import.meta.env` — never `process.env` (dot-access is not replaced by
+// the Rsbuild plugin, so a non-local build silently falls back to
+// localhost). web/src/lib/stats.ts is the reference idiom.
+const base = () => import.meta.env?.PUBLIC_BFF_URL ?? "http://127.0.0.1:3100"
 
 // Error bodies are usually a string, but BFF validation failures arrive as
 // Zod issue arrays — format them as "field: message" so the UI never shows

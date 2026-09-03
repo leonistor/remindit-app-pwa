@@ -74,11 +74,11 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
             {BRAND_NAME} — shopping lists that remind you.
             {/* Feedback (Apache Answer) origin — env-driven like PUBLIC_PWA_URL
                 (D9). Unset at deploy ⇒ no link, never a localhost fallback. */}
-            {process.env.PUBLIC_FEEDBACK_URL && (
+            {import.meta.env?.PUBLIC_FEEDBACK_URL && (
               <>
                 {" · "}
                 <a
-                  href={process.env.PUBLIC_FEEDBACK_URL}
+                  href={import.meta.env.PUBLIC_FEEDBACK_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

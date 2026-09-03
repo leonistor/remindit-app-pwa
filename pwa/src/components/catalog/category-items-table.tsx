@@ -53,10 +53,9 @@ export const CategoryItemsTable = ({
     setPendingDelete(null)
   }
 
-  // Mobile: swipe-to-reveal list
-  if (isMobile) {
-    return (
-      <>
+  return (
+    <>
+      {isMobile ? (
         <div className="flex flex-col gap-2 pt-2">
           {items.map((item) => (
             <SwipeableItemRow
@@ -83,92 +82,61 @@ export const CategoryItemsTable = ({
             </SwipeableItemRow>
           ))}
         </div>
-
-        <AlertDialog
-          open={!!pendingDelete}
-          onOpenChange={(details) => {
-            if (!details.open) setPendingDelete(null)
-          }}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader
-              title={
-                pendingDelete
-                  ? m.catalogDeleteItemTitle({ name: pendingDelete.name })
-                  : m.catalogDeleteItemQuestion()
-              }
-              description={m.catalogDeleteItemDescription()}
-            />
-            <AlertDialogFooter>
-              <AlertDialogClose asChild>
-                <Button variant="outline">{m.cancel()}</Button>
-              </AlertDialogClose>
-              <Button variant="destructive" onClick={handleConfirmDelete}>
-                {m.catalogDeleteItem()}
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </>
-    )
-  }
-
-  // Desktop: table with double-click to edit
-  return (
-    <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{m.catalogItemHeader()}</TableHead>
-            <TableHead className="w-12 text-right">
-              <span className="sr-only">{m.delete()}</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell className="p-0">
-                <button
-                  type="button"
-                  className="w-full px-2 py-2 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  aria-label={m.catalogEditItemDoubleClickAria({
-                    name: item.name,
-                  })}
-                  title={m.catalogDoubleClickToEdit()}
-                  onDoubleClick={() => handleEdit(item)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault()
-                      handleEdit(item)
-                    }
-                  }}
-                >
-                  <span className="block truncate">{item.name}</span>
-                </button>
-              </TableCell>
-              <TableCell className="text-right">
-                <ConfirmDelete
-                  title={m.catalogDeleteItemTitle({ name: item.name })}
-                  description={m.catalogDeleteItemDescription()}
-                  confirmLabel={m.catalogDeleteItem()}
-                  onConfirm={() => deleteCatalogItemWithCascade(item.id)}
-                >
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={m.catalogDeleteItemAria({ name: item.name })}
-                  >
-                    <TrashIcon />
-                  </Button>
-                </ConfirmDelete>
-              </TableCell>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{m.catalogItemHeader()}</TableHead>
+              <TableHead className="w-12 text-right">
+                <span className="sr-only">{m.delete()}</span>
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="p-0">
+                  <button
+                    type="button"
+                    className="w-full px-2 py-2 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label={m.catalogEditItemDoubleClickAria({
+                      name: item.name,
+                    })}
+                    title={m.catalogDoubleClickToEdit()}
+                    onDoubleClick={() => handleEdit(item)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault()
+                        handleEdit(item)
+                      }
+                    }}
+                  >
+                    <span className="block truncate">{item.name}</span>
+                  </button>
+                </TableCell>
+                <TableCell className="text-right">
+                  <ConfirmDelete
+                    title={m.catalogDeleteItemTitle({ name: item.name })}
+                    description={m.catalogDeleteItemDescription()}
+                    confirmLabel={m.catalogDeleteItem()}
+                    onConfirm={() => deleteCatalogItemWithCascade(item.id)}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={m.catalogDeleteItemAria({ name: item.name })}
+                    >
+                      <TrashIcon />
+                    </Button>
+                  </ConfirmDelete>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
 
-      {/* Fallback controlled dialog for delete triggered via swipe state (desktop path doesn't use swipe, but keep for consistency) */}
+      {/* Shared delete confirmation — triggered by swipe (mobile) via pendingDelete state */}
       <AlertDialog
         open={!!pendingDelete}
         onOpenChange={(details) => {

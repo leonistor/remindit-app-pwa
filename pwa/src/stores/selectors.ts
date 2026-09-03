@@ -1,7 +1,7 @@
 // Derived / computed views used by the main screen. Components stay dumb and
 // read these instead of recomputing grouping logic themselves.
 
-import { computed } from "nanostores"
+import { atom, computed } from "nanostores"
 import { isRecommended } from "@/lib/recommendation-tiers"
 import { $catalog } from "./catalog"
 import { $categories } from "./categories"
@@ -16,6 +16,32 @@ import type {
 } from "./types"
 import { frequencyRank, UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
 import { $selectedSort } from "./ui"
+
+// ---------------------------------------------------------------------------
+// $now — a clock atom that ticks every minute while the app is visible.
+// Included as a dependency of $recommendations so overdue/soon badges
+// recomputed periodically instead of going stale when the tab stays open.
+// ---------------------------------------------------------------------------
+
+export const $now = atom(Date.now())
+
+let nowInterval: ReturnType<typeof setInterval> | undefined
+const startNowTick = () => {
+  if (nowInterval) return
+  nowInterval = setInterval(() => $now.set(Date.now()), 60_000)
+}
+const stopNowTick = () => {
+  clearInterval(nowInterval)
+  nowInterval = undefined
+}
+
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") startNowTick()
+    else stopNowTick()
+  })
+  startNowTick()
+}
 
 // Category lookup by id, cached so components (e.g. useCategoryPalette) resolve a
 // category's color slot in O(1) and re-render when `$categories` changes.
@@ -282,8 +308,8 @@ export const $catalogByCategory = computed(
 // Recomputed whenever history, catalog, categories, or the active list change.
 // Items on the active list and "seldom"-frequency items are always excluded.
 export const $recommendations = computed(
-  [$history, $catalog, $categories, $list],
-  (history, catalog, categories, list) =>
+  [$history, $catalog, $categories, $list, $now],
+  (history, catalog, categories, list, _now) =>
     computeRecommendations(history, catalog, categories, list)
 )
 

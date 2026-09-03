@@ -139,6 +139,7 @@ let applying = false
 let profilePushTimer: ReturnType<typeof setTimeout> | null = null
 let connectPromise: Promise<void> | null = null
 let storeListenersWired = false
+let sessionGeneration = 0
 const lastSeenIds: Record<string, Set<string>> = {}
 
 // --- helpers ----------------------------------------------------------------
@@ -364,7 +365,8 @@ const SPECS: CollectionSpec<
 async function reconcileCollection<L>(
   spec: CollectionSpec<L>,
   groupId: string,
-  maps: Maps
+  maps: Maps,
+  reconcileSession: string
 ): Promise<void> {
   const localRecords = spec.local()
   const remote = maps.remote[spec.collection]
@@ -464,6 +466,9 @@ async function reconcileCollection<L>(
     JSON.stringify(maps.map[collection]) !== mapBefore ||
     JSON.stringify(maps.journal[collection]) !== journalBefore
   ) {
+    // If the group changed during reconcile (switchGroup/signOut), skip
+    // persisting stale data from the old group.
+    if ($syncGroup.get() !== reconcileSession) return
     $syncMap.set({ ...$syncMap.get(), [collection]: maps.map[collection] })
     $syncJournal.set({
       ...$syncJournal.get(),
@@ -478,6 +483,7 @@ export async function reconcileAll(): Promise<void> {
   const session = getSession()
   const groupId = $syncGroup.get()
   if (!session || !groupId || applying) return
+  const reconcileSession = $syncGroup.get()
 
   applying = true
   try {
@@ -498,7 +504,7 @@ export async function reconcileAll(): Promise<void> {
     }
     // Order matters: relations resolve against earlier collections.
     for (const spec of SPECS) {
-      await reconcileCollection(spec, groupId, maps)
+      await reconcileCollection(spec, groupId, maps, reconcileSession)
     }
     await syncProfile()
     setSyncState({ status: "online", lastError: null })
@@ -612,6 +618,11 @@ async function ensureGroup(): Promise<string> {
   const stored = $syncGroup.get()
   const active = groups.find((g) => g.id === stored) ?? groups[0]
   if (active) {
+    // When the stored group vanished (kicked / deleted), clear stale sync
+    // buffers so the vanish sweep doesn't delete the new group's records.
+    if (stored && active.id !== stored) {
+      clearSyncBuffers()
+    }
     $syncGroup.set(active.id)
     return active.id
   }
@@ -636,10 +647,12 @@ function connect(): Promise<void> {
 async function runConnect(): Promise<void> {
   const session = getSession()
   if (!session) return
+  const gen = sessionGeneration
   setSyncState({ status: "connecting", lastError: null })
   try {
     // Validate the (possibly stale) token; a BffError bubbles to `error`.
     const me = await bffApi.me(session.token)
+    if (sessionGeneration !== gen) return
     setSession({ ...session, email: me.email })
     pb.authStore.save(session.token, {
       id: session.userId,
@@ -649,10 +662,14 @@ async function runConnect(): Promise<void> {
     } as never)
 
     const groupId = await ensureGroup()
-    setSyncState({ status: "online", groupId })
+    // Re-read the group — a concurrent switchGroup() may have changed it
+    // while we were awaiting ensureGroup() or me().
+    const currentGroup = $syncGroup.get()
+    if (currentGroup !== groupId) return
+    setSyncState({ status: "online", groupId: currentGroup })
 
     await reconcileAll()
-    await subscribeRealtime(groupId)
+    await subscribeRealtime(currentGroup)
     await subscribeNotifications()
     // Notifications (D4): one refresh per successful connect (sign-in /
     // foreground reconnect) — this plus the realtime subscription covers
@@ -741,8 +758,12 @@ function wireStoreListeners(): void {
   watch("list_entries", () => $list.get().map((e) => e.id))
 
   // Profile pushes are LWW-debounced.
+  // The `applying` guard is deliberately omitted here: the timer fires
+  // unconditionally after 1 s, and reconcileAll() returns early if it is
+  // already applying — so the push is never lost even when the user edits
+  // during an in-flight reconcile.
   $user.subscribe(() => {
-    if (applying || !$syncSession.get()) return
+    if (!$syncSession.get()) return
     if (profilePushTimer) return
     profilePushTimer = setTimeout(() => {
       profilePushTimer = null
@@ -760,6 +781,7 @@ export async function signIn(email: string, password: string): Promise<void> {
     userId: auth.user.id,
     email: auth.user.email,
   })
+  sessionGeneration++
   await connect()
 }
 
@@ -783,6 +805,7 @@ export async function signUp(body: {
     userId: auth.user.id,
     email: auth.user.email,
   })
+  sessionGeneration++
   await connect()
 }
 
@@ -823,6 +846,7 @@ export async function signOut(): Promise<void> {
   for (const unsubscribe of unsubscribeFns) unsubscribe()
   unsubscribeFns = []
   setSession(null)
+  sessionGeneration++
   $syncGroup.set("")
   clearSyncBuffers()
   pb.authStore.clear()

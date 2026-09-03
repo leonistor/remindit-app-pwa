@@ -24,6 +24,7 @@ import {
   signOut,
   switchGroup,
 } from "@/stores/sync/engine"
+import { getSession } from "@/stores/sync/session"
 import type { HistoryEvent } from "@/stores/types"
 import { resetStores } from "../fixtures/reset"
 
@@ -467,5 +468,105 @@ describe("sync engine (stubbed clients)", () => {
     expect(pbState.calls.groupsCreated).toBe(1)
     expect($syncState.get().groupId).toBe("g-created")
     expect(readSyncGroup()).toBe("g-created")
+  })
+
+  test("T0-2: ensureGroup clears sync buffers when stored group is lost", async () => {
+    // Seed a session with group-A and two items that populate the sync
+    // map/journal through a reconcile pass.
+    stubAuth([{ id: "g1", name: "My list" }])
+    await signIn(EMAIL, "pw")
+    $catalog.set([
+      { id: "t1-item", name: "Milk", categoryId: "uncategorized" },
+      { id: "t2-item", name: "Eggs", categoryId: "uncategorized" },
+    ])
+    await reconcileAll()
+
+    const mapBefore = readSyncMap()
+    expect(Object.keys(mapBefore.items ?? {}).length).toBe(2)
+
+    // Remove one item locally — the store listener creates a tombstone for it.
+    // Do NOT wait: the debounced reconcile (500ms) would consume the tombstone.
+    $catalog.set([{ id: "t1-item", name: "Milk", categoryId: "uncategorized" }])
+    expect(readTombstones("items")).toEqual(["t2-item"])
+
+    // Device removed from g1, only g2 remains.
+    bffApi.listGroups.mockImplementation(async () => [
+      { id: "g2", name: "Shared" },
+    ])
+
+    await recoverActiveGroup()
+
+    // clearSyncBuffers wiped the stale tombstone — without it, the first
+    // store change in g2 would delete a live record matching "t2-item".
+    expect(readTombstones("items")).toEqual([])
+    expect($syncState.get().groupId).toBe("g2")
+  })
+
+  test("T0-3: runConnect aborts when session changes mid-flight", async () => {
+    stubAuth([{ id: "g1", name: "My list" }])
+
+    // Slow me() call: signIn starts a connect, the session is set, then me()
+    // hangs — simulating a network delay during token validation.
+    let meResolve: (v: { email: string }) => void
+    bffApi.me.mockImplementation(
+      () => new Promise((resolve) => { meResolve = resolve })
+    )
+
+    const signInPromise = signIn(EMAIL, "pw")
+    // Let login resolve and connect() reach the me() await.
+    await wait(0)
+
+    // Session is live; the connect is waiting on me().
+    expect(getSession()).toBeTruthy()
+
+    // Sign out while connect is in-flight: session is cleared,
+    // sessionGeneration is bumped.
+    await signOut()
+
+    // Release the hanging me() call.
+    meResolve!({ email: EMAIL })
+    await signInPromise
+
+    // Connect must not have set "online" with the stale session: the
+    // generation guard caught the mismatch and bailed.
+    expect($syncState.get().status).not.toBe("online")
+
+    // Re-sign in (fresh session + generation) and verify recovery works:
+    // the old connect was abandoned, a fresh one succeeds.
+    stubAuth([{ id: "g2", name: "Shared" }])
+    await signIn(EMAIL, "pw")
+    expect($syncState.get().status).toBe("online")
+    expect($syncState.get().groupId).toBe("g2")
+  })
+
+  test("T0-4: switchGroup does not reuse a stale in-flight connect", async () => {
+    stubAuth([
+      { id: "g1", name: "My list" },
+      { id: "g2", name: "Shared" },
+    ])
+
+    // Slow me(): the signIn connect is in-flight when switchGroup fires.
+    let meResolve: (v: { email: string }) => void
+    bffApi.me.mockImplementation(
+      () => new Promise((resolve) => { meResolve = resolve })
+    )
+
+    const signInPromise = signIn(EMAIL, "pw")
+    // Let login resolve and connect() reach the me() await.
+    await wait(0)
+    expect($syncState.get().status).toBe("connecting")
+
+    // While the group-A connect is in-flight, switch to group-B.
+    const switchPromise = switchGroup("g2")
+
+    // Release the hanging me() call — the shared connectPromise resolves
+    // once. runConnect re-reads $syncGroup (now "g2") and continues with
+    // group-B.
+    meResolve!({ email: EMAIL })
+    await Promise.all([signInPromise, switchPromise])
+
+    // Final state must point to group-B, not group-A.
+    expect($syncState.get().groupId).toBe("g2")
+    expect($syncState.get().status).toBe("online")
   })
 })

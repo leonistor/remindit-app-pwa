@@ -35,6 +35,25 @@ const UPSTREAM_TIMEOUT_MS = 120_000
 const FORWARDED_METHODS = new Set(["GET", "POST", "PATCH", "DELETE"])
 const ALLOW = [...FORWARDED_METHODS].join(", ")
 
+// Collections the PWA sync engine may access through the forwarder.
+// Everything else is rejected — this is the primary defense against
+// privilege escalation; PB rules are per-collection and easy to miss.
+const SYNC_COLLECTIONS = new Set([
+  "teams",
+  "categories",
+  "items",
+  "list_entries",
+  "history_events",
+  "notifications",
+  "team_members",
+  "team_member_details",
+  "team_details",
+  "category_stats",
+  "item_stats",
+  "list_entries_detailed",
+  "_pb_users_auth_",
+])
+
 /**
  * D2 guard: PB must never become a public surface, and a 3xx `location` is a
  * header the client's browser would navigate to. A location that resolves to
@@ -65,6 +84,18 @@ export const rewriteLocation = (
 
 const forward = async (c: Context<AppEnv, "/api/*">): Promise<Response> => {
   const incoming = new URL(c.req.raw.url)
+
+  // Collection allowlist guard (defense in depth — PB rules are per-collection)
+  const collectionMatch = incoming.pathname.match(
+    /^\/pb\/api\/collections\/([^/]+)/
+  )
+  if (collectionMatch) {
+    const collection = collectionMatch[1]
+    if (!SYNC_COLLECTIONS.has(collection)) {
+      return c.json({ error: "collection not allowed" }, 403)
+    }
+  }
+
   const target = new URL(env.pocketbaseUrl)
   target.pathname = incoming.pathname.replace(/^\/pb/, "")
   target.search = incoming.search

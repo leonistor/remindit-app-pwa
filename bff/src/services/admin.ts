@@ -94,7 +94,17 @@ export const adminService = {
   },
 
   async deleteUser(id: string): Promise<void> {
-    await withSuperuser((admin) => admin.collection("users").delete(id))
+    await withSuperuser(async (admin) => {
+      const ownedTeams = await admin.collection("teams").getFullList({
+        filter: admin.filter("owner = {:userId}", { userId: id }),
+      })
+      if (ownedTeams.length > 0) {
+        throw new Error(
+          `User owns ${ownedTeams.length} team(s). Reassign or delete them first.`
+        )
+      }
+      await admin.collection("users").delete(id)
+    })
   },
 
   async listGroups(): Promise<AdminGroup[]> {

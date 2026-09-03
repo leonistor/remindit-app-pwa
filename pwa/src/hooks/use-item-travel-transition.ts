@@ -81,7 +81,7 @@ export function useItemTravelTransition() {
         if (target) target.style.viewTransitionName = name
       })
 
-      transition?.finished.finally(() => clearNames(itemId))
+      transition?.finished.catch(() => {}).finally(() => clearNames(itemId))
     },
     []
   )

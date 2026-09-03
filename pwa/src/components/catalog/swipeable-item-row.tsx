@@ -1,5 +1,5 @@
 import { TrashIcon } from "@phosphor-icons/react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useSwipeable } from "react-swipeable"
 import { Button } from "@/components/ui/custom/button"
 import { cn } from "@/lib/utils"
@@ -33,12 +33,12 @@ export const SwipeableItemRow = ({
 }: SwipeableItemRowProps) => {
   const [offset, setOffset] = useState(0)
   const [revealed, setRevealed] = useState(false)
+  const offsetRef = useRef(0)
   const DELETE_WIDTH = 80
 
   // Reset if disabled (e.g. viewport resized to desktop)
   if (!enabled && (offset !== 0 || revealed)) {
-    // Defer to next tick to avoid setState during render warnings in strict mode,
-    // but sync reset is safe for this conditional.
+    offsetRef.current = 0
     setOffset(0)
     setRevealed(false)
   }
@@ -62,32 +62,37 @@ export const SwipeableItemRow = ({
     onSwiped: (data) => {
       if (!enabled) return
       if (data.dir === "Left") {
-        // If swiped left with enough velocity/distance, snap open
         if (-data.deltaX > 40 || -data.velocity > 0.3 || revealed) {
+          offsetRef.current = -DELETE_WIDTH
           setOffset(-DELETE_WIDTH)
           setRevealed(true)
         } else {
+          offsetRef.current = 0
           setOffset(0)
           setRevealed(false)
         }
       } else if (data.dir === "Right") {
+        offsetRef.current = 0
         setOffset(0)
         setRevealed(false)
       } else {
-        // Up/Down or not enough swipe: settle to current state
+        offsetRef.current = revealed ? -DELETE_WIDTH : 0
         setOffset(revealed ? -DELETE_WIDTH : 0)
       }
     },
     onTouchEndOrOnMouseUp: () => {
       if (!enabled) return
-      // Snap to nearest state if user lifted mid-swipe without triggering onSwiped
-      if (!revealed && offset < -DELETE_WIDTH / 2) {
+      const currentOffset = offsetRef.current
+      if (!revealed && currentOffset < -DELETE_WIDTH / 2) {
+        offsetRef.current = -DELETE_WIDTH
         setOffset(-DELETE_WIDTH)
         setRevealed(true)
-      } else if (revealed && offset > -DELETE_WIDTH / 2) {
+      } else if (revealed && currentOffset > -DELETE_WIDTH / 2) {
+        offsetRef.current = 0
         setOffset(0)
         setRevealed(false)
       } else {
+        offsetRef.current = revealed ? -DELETE_WIDTH : 0
         setOffset(revealed ? -DELETE_WIDTH : 0)
       }
     },
@@ -98,6 +103,7 @@ export const SwipeableItemRow = ({
   })
 
   const close = () => {
+    offsetRef.current = 0
     setOffset(0)
     setRevealed(false)
   }
@@ -136,8 +142,6 @@ export const SwipeableItemRow = ({
       </div>
 
       {/* Foreground that translates */}
-      {/* biome-ignore lint/a11y/useKeyWithClickEvents: swipe row tap-to-close is supplemental; row content handles keyboard */}
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: foreground is swipe container, not interactive itself */}
       <div
         className={cn(
           "relative flex items-center bg-card transition-transform duration-200 ease-out",
@@ -149,9 +153,9 @@ export const SwipeableItemRow = ({
           // While actively dragging, disable transition
           transitionDuration: offset !== 0 && !revealed ? "0ms" : undefined,
         }}
-        onClick={() => {
+        onClickCapture={(e) => {
           if (revealed) {
-            // Tap foreground while revealed closes it instead of triggering edit
+            e.stopPropagation()
             close()
           }
         }}

@@ -121,9 +121,13 @@ const users: CollectionDef = {
   // Email is NOT exposed: PB gates it per-record via `emailVisibility`.
   listRule: '@request.auth.id != ""',
   viewRule: '@request.auth.id != ""',
-  // Open registration for now (BFF-mediated); invites/verification in phase 3.
-  createRule: "",
-  updateRule: "id = @request.auth.id",
+  // BFF-mediated registration uses superuser (bypasses rules). The rule
+  // blocks authenticated users from creating accounts through the /pb
+  // forwarder — anon (`@request.auth.id = ""`) is required for PB API flow.
+  createRule: '@request.auth.id = ""',
+  // Users may edit their own profile but NOT escalate privileges — the
+  // :isset guard rejects any request that carries a `role` field.
+  updateRule: 'id = @request.auth.id && @request.body.role:isset = false',
   deleteRule: "id = @request.auth.id",
   fields: [
     {
@@ -167,7 +171,7 @@ const users: CollectionDef = {
       type: "select",
       name: "role",
       required: false,
-      hidden: false,
+      hidden: true,
       presentable: false,
       maxSelect: 1,
       values: ["user", "admin"],

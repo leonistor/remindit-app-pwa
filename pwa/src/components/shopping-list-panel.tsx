@@ -6,7 +6,7 @@ import {
   SortAscendingIcon,
   TextAaIcon,
 } from "@phosphor-icons/react"
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { QuickAddDialog } from "@/components/quick-add-dialog"
 import { ShoppingItem } from "@/components/shopping-item"
 import { Button } from "@/components/ui/custom/button"
@@ -48,6 +48,16 @@ export const ShoppingListPanel = () => {
     new Map()
   )
 
+  // Clean up any pending animation timeouts on unmount
+  useEffect(() => {
+    return () => {
+      for (const timeout of animationTimeouts.current.values()) {
+        clearTimeout(timeout)
+      }
+      animationTimeouts.current.clear()
+    }
+  }, [])
+
   const handleRemove = useCallback(
     (entry: SelectedViewEntry, sourceEl: HTMLElement | null) => {
       // Prevent double-clicking during a transition/exit animation.
@@ -55,7 +65,13 @@ export const ShoppingListPanel = () => {
 
       // When View Transitions are available, morph the chip back to the catalog.
       if (isSupported) {
-        runTravel(entry.itemId, sourceEl, () => removeFromList(entry.entryId))
+        // Prevent double-click during VT animation (sentinel cleared on unmount)
+        animationTimeouts.current.set(entry.entryId, setTimeout(() => {
+          animationTimeouts.current.delete(entry.entryId)
+        }, 500))
+        runTravel(entry.itemId, sourceEl, () => {
+          removeFromList(entry.entryId)
+        })
         return
       }
 

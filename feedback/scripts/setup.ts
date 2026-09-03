@@ -123,22 +123,20 @@ if (await Bun.file(configPath).exists()) {
   console.log(`[feedback] wrote conf/config.yaml (addr 0.0.0.0:${env.port})`)
 }
 
-// i18n bundles: the binary embeds them but refuses to boot until
-// answer-data/i18n/ is populated. Quirk: `answer i18n` extracts to the CWD
-// and ignores -C — so run it FROM the target dir (harmless rerun; marker =
-// i18n.yaml, the file the boot check opens).
+// Always re-extract i18n bundles — they must match the current binary version.
+// The binary embeds them but refuses to boot until answer-data/i18n/ is
+// populated. Quirk: `answer i18n` extracts to the CWD and ignores -C — so
+// run it FROM the target dir.
 const i18nDir = resolve(moduleDir, DATA_DIR, "i18n")
-const i18nMarker = resolve(i18nDir, "i18n.yaml")
-if (!(await Bun.file(i18nMarker).exists())) {
-  const proc = Bun.spawn([binaryPath, "i18n"], {
-    cwd: i18nDir,
-    stdout: "inherit",
-    stderr: "inherit",
-  })
-  if ((await proc.exited) !== 0) throw new Error("answer i18n failed")
-} else {
-  console.log("[feedback] i18n bundles present — skipping extraction")
-}
+await rm(i18nDir, { recursive: true, force: true })
+await mkdir(i18nDir, { recursive: true })
+const proc = Bun.spawn([binaryPath, "i18n"], {
+  cwd: i18nDir,
+  stdout: "inherit",
+  stderr: "inherit",
+})
+if ((await proc.exited) !== 0) throw new Error("answer i18n failed")
+console.log("[feedback] i18n bundles extracted")
 
 // Headless install (AUTO_INSTALL env flow): initializes the sqlite schema +
 // site identity + admin account from FEEDBACK_* env (D9). Answer skips

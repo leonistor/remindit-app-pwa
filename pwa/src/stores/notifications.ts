@@ -84,8 +84,13 @@ const byNewest = (a: NotificationItem, b: NotificationItem): number => {
 export async function refreshNotifications(): Promise<void> {
   const session = $syncSession.get()
   if (!session) return
+  const userId = session.userId
   try {
     const rows = await bffApi.listNotifications(session.token)
+    // Guard: session may have changed (sign-out / account switch) while the
+    // request was in-flight — silently drop the stale response.
+    const current = $syncSession.get()
+    if (!current || current.userId !== userId) return
     $notifications.set(rows.map(toNotificationItem).sort(byNewest))
   } catch (error) {
     console.warn("notification refresh failed", error)
@@ -100,6 +105,7 @@ export async function refreshNotifications(): Promise<void> {
 export async function markRead(id: string): Promise<void> {
   const session = $syncSession.get()
   if (!session) return
+  const userId = session.userId
   const previous = $notifications.get()
   $notifications.set(
     previous.map((item) => (item.id === id ? { ...item, read: true } : item))
@@ -108,7 +114,13 @@ export async function markRead(id: string): Promise<void> {
     await bffApi.markNotificationRead(session.token, id)
   } catch (error) {
     console.warn("notification mark-read failed", error)
-    $notifications.set(previous)
+    // Only roll back if the session hasn't changed — a new session means
+    // the list was (or will be) replaced by a fresh refresh, so restoring
+    // the previous user's list would be incorrect.
+    const current = $syncSession.get()
+    if (current && current.userId === userId) {
+      $notifications.set(previous)
+    }
   }
 }
 

@@ -25,5 +25,11 @@ export const env = {
   adminName: process.env.FEEDBACK_ADMIN_NAME ?? "remindit_admin",
   adminEmail:
     process.env.FEEDBACK_ADMIN_EMAIL ?? "feedback-admin@remindit.local",
-  adminPassword: process.env.FEEDBACK_ADMIN_PASSWORD ?? "change-me-dev-only",
+  adminPassword:
+    process.env.FEEDBACK_ADMIN_PASSWORD ??
+    (process.env.NODE_ENV === "production"
+      ? (() => {
+          throw new Error("FEEDBACK_ADMIN_PASSWORD is required in production")
+        })()
+      : "change-me-dev-only"),
 }

@@ -4,6 +4,7 @@
 // NOTE: the PB collections are `teams`/`team_members` (renamed from
 // groups/group_members); the public API surface stays /api/groups with the
 // `Group`/`Member` contract keys unchanged.
+import { UNCATEGORIZED_NAME } from "@remindit/common"
 import type PocketBase from "pocketbase"
 import type { Group, Member, MemberInviteBody, UserPublic } from "../contracts"
 import { toPublicUser } from "./auth"
@@ -37,8 +38,6 @@ export const groupsService = {
       name,
       owner: userId,
     })) as unknown as Record<string, unknown>
-    // The creator becomes the owner-member (schema: createRule allows it via
-    // group.owner = auth.id). Non-fatal if it fails — the group itself exists.
     try {
       await client.collection("team_members").create({
         team: group.id,
@@ -47,7 +46,23 @@ export const groupsService = {
       })
     } catch (error) {
       console.error(
-        `[groups] owner-membership create failed for ${group.id}:`,
+        `[groups] owner-membership create failed for ${group.id}, rolling back team:`,
+        error
+      )
+      await client.collection("teams").delete(group.id as string)
+      throw new Error("failed to create team ownership — please retry")
+    }
+    // Provision the sentinel (uncategorized) category — the sync layer
+    // expects every team to have one.
+    try {
+      await client.collection("categories").create({
+        name: UNCATEGORIZED_NAME,
+        frequency: "monthly",
+        team: group.id,
+      })
+    } catch (error) {
+      console.error(
+        `[groups] sentinel category create failed for ${group.id}:`,
         error
       )
     }
@@ -68,6 +83,10 @@ export const groupsService = {
   },
 
   async listMembers(client: PocketBase, teamId: string): Promise<Member[]> {
+    // Pre-flight: verify the caller has access to this team (owner or member).
+    // Without this, a non-member gets 200 [] instead of a 404 — inconsistent
+    // with GET /:id which 404s via the PB viewRule.
+    await client.collection("teams").getOne(teamId)
     // team_member_details view: memberships × public profiles pre-joined —
     // no expand chain, no fallback. The view deliberately omits email
     // (emailVisibility masking doesn't apply to view rows), so the profile

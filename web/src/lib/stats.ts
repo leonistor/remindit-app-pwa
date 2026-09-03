@@ -11,7 +11,7 @@ export type PlatformStats = {
 
 export const getStats = createServerFn({ method: "GET" }).handler(
   async (): Promise<PlatformStats> => {
-    const base = process.env.PUBLIC_BFF_URL ?? "http://127.0.0.1:3100"
+    const base = import.meta.env?.PUBLIC_BFF_URL ?? "http://127.0.0.1:3100"
     try {
       const res = await fetch(`${base}/api/stats`, {
         headers: { accept: "application/json" },

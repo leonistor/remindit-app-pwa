@@ -8,8 +8,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "strict": true,
-    "types": ["node"]
+    "strict": true
   },
   "include": ["src"]
 }

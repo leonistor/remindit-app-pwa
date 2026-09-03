@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.9.1",
+    "@remindit/common": "workspace:*",
     "hono": "^4.13.5",
     "pocketbase": "^0.28.0",
     "zod": "^4.5.4"
