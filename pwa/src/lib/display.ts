@@ -16,8 +16,8 @@ export function initials(name: string, emptyFallback = ""): string {
 // username (e.g. the menu avatar). Shared so the menu and the offline SVG avatar
 // generator can never drift on initials casing.
 export function avatarInitials(user: {
-  firstName: string
-  lastName: string
+  firstName?: string
+  lastName?: string
   username: string
 }): string {
   const fromName = `${user.firstName} ${user.lastName}`.trim()

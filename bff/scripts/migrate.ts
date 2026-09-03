@@ -294,11 +294,7 @@ async function main(): Promise<void> {
     )
 
     // Partial patch — PB merges, so only managed keys change.
-    const {
-      name: _name,
-      type: _type,
-      ...patch
-    } = fullPayload(def, wireFields)
+    const { name: _name, type: _type, ...patch } = fullPayload(def, wireFields)
     await pb.collections.update(def.name, patch)
     actions.push(`patched  ${def.name}`)
   }
@@ -307,14 +303,16 @@ async function main(): Promise<void> {
   // registered) becomes the first admin — idempotent.
   if (env.pocketbaseAdminEmail) {
     try {
-      const adminUser = await pb
-        .collection("users")
-        .getFirstListItem(pb.filter("email = {:email}", {
+      const adminUser = await pb.collection("users").getFirstListItem(
+        pb.filter("email = {:email}", {
           email: env.pocketbaseAdminEmail,
-        }))
+        })
+      )
       if (adminUser.role !== "admin") {
         await pb.collection("users").update(adminUser.id, { role: "admin" })
-        actions.push(`patched  users (role bootstrap: ${env.pocketbaseAdminEmail} → admin)`)
+        actions.push(
+          `patched  users (role bootstrap: ${env.pocketbaseAdminEmail} → admin)`
+        )
       }
     } catch {
       // No such registered user yet — nothing to promote.

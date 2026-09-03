@@ -8,7 +8,12 @@ import {
   userPublicSchema,
 } from "../contracts"
 import { validatedJson } from "../lib/validation"
-import { type AppEnv, requireAuth, SESSION_COOKIE, setSessionCookie } from "../middleware/auth"
+import {
+  type AppEnv,
+  requireAuth,
+  SESSION_COOKIE,
+  setSessionCookie,
+} from "../middleware/auth"
 import { authService } from "../services/auth"
 
 // Rate limit: 20 attempts per 15 minutes per IP.
@@ -18,9 +23,7 @@ const authRateLimiter = rateLimiter({
   windowMs: 15 * 60 * 1000,
   limit: 20,
   keyGenerator: (c) =>
-    c.req.header("x-forwarded-for") ??
-    c.req.header("x-real-ip") ??
-    "unknown",
+    c.req.header("x-forwarded-for") ?? c.req.header("x-real-ip") ?? "unknown",
 })
 
 // Auth is PB-stateless (JWT): register/login mint the token, logout is a

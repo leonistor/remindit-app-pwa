@@ -8,9 +8,10 @@
 // type-only import would still need the dependency installed for tsc. Keep
 // the two in sync — the BFF side is the source of truth.
 
+import { DEFAULT_BFF_URL } from "./sync-constants"
+
 const base = () =>
-  (import.meta.env?.PUBLIC_BFF_URL as string | undefined) ??
-  "http://127.0.0.1:3100"
+  (import.meta.env?.PUBLIC_BFF_URL as string | undefined) ?? DEFAULT_BFF_URL
 
 export type UserPublic = {
   id: string
@@ -92,8 +93,16 @@ async function request<T>(
   init: RequestInit & { token?: string }
 ): Promise<T> {
   const { token, ...rest } = init
+  // Merge caller-provided signal with a 30 s timeout so stalled BFF
+  // requests don't hang the UI indefinitely.
+  const existingSignal = rest.signal
+  const timeoutSignal = AbortSignal.timeout(30_000)
+  const signal = existingSignal
+    ? AbortSignal.any([existingSignal, timeoutSignal])
+    : timeoutSignal
   const res = await fetch(`${base()}${path}`, {
     ...rest,
+    signal,
     headers: {
       ...(rest.body ? { "content-type": "application/json" } : {}),
       ...(token ? { authorization: `Bearer ${token}` } : {}),

@@ -42,7 +42,10 @@ export class InvalidTokenError extends Error {
  */
 export class PocketBaseUnavailableError extends Error {
   constructor(cause?: unknown) {
-    super("PocketBase is temporarily unavailable, please retry", cause ? { cause } : undefined)
+    super(
+      "PocketBase is temporarily unavailable, please retry",
+      cause ? { cause } : undefined
+    )
   }
 }
 
@@ -57,7 +60,10 @@ const pbFetch = async (path: string, init?: RequestInit): Promise<Response> => {
 }
 
 /** Typed session errors are shaped once in app.onError (lib/pb-error.ts). */
-const assertSessionUsable = (status: number, invalidStatuses: number[]): void => {
+const assertSessionUsable = (
+  status: number,
+  invalidStatuses: number[]
+): void => {
   if (invalidStatuses.includes(status)) throw new InvalidTokenError()
   if (status >= 400) throw new PocketBaseUnavailableError()
 }
@@ -76,7 +82,10 @@ export const authRefresh = async (
     headers: { Authorization: token },
   })
   assertSessionUsable(res.status, [400, 401])
-  return (await res.json()) as { token: string; record: Record<string, unknown> }
+  return (await res.json()) as {
+    token: string
+    record: Record<string, unknown>
+  }
 }
 
 /**

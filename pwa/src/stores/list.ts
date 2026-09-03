@@ -61,12 +61,23 @@ export function removeFromList(entryId: string): void {
   })
 }
 
-// Removes the active-list entry for a given catalog item (if present), logging a
-// "remove" history event. Mirrors `addToList`'s itemId-based API so the catalog
-// UI never has to resolve an entry id itself.
+// Removes all list entries that reference the given catalog item, logging a
+// single "remove" history event. Multi-device merge can produce duplicates.
 export function removeFromListByItemId(itemId: string): void {
-  const entry = $list.get().find((e) => e.itemId === itemId)
-  if (entry) removeFromList(entry.id)
+  const list = $list.get()
+  const matches = list.filter((e) => e.itemId === itemId)
+  if (matches.length === 0) return
+  // Remove all matching entries at once.
+  $list.set(list.filter((e) => e.itemId !== itemId))
+  // Log one history event for the removal (first match is enough for the
+  // snapshot — item name/categoryId are identical across duplicates).
+  const item = getCatalogItem(itemId)
+  logHistory({
+    action: "remove",
+    itemId,
+    itemName: item?.name ?? "(unknown)",
+    categoryId: item?.categoryId ?? UNCATEGORIZED_ID,
+  })
 }
 
 export function setEntryChecked(entryId: string, checked: boolean): void {

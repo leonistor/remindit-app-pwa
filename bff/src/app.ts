@@ -1,8 +1,8 @@
 import { Hono } from "hono"
 import { cors } from "hono/cors"
-import { pbErrorResponse } from "./lib/pb-error"
 import { env } from "./env"
-import { requireAuth, type AppEnv } from "./middleware/auth"
+import { pbErrorResponse } from "./lib/pb-error"
+import { type AppEnv, requireAuth } from "./middleware/auth"
 import { admin } from "./routes/admin"
 import { auth } from "./routes/auth"
 import { groups } from "./routes/groups"
@@ -43,7 +43,7 @@ export const app = new Hono<AppEnv>()
       exposeHeaders: ["x-session-token"],
       credentials: true,
       maxAge: 86400,
-    }),
+    })
   )
   .route("/api/health", health)
   .route("/api/auth", auth)

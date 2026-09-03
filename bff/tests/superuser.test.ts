@@ -49,31 +49,32 @@ const statsRow = {
 let superuserClient: PocketBase
 
 beforeAll(async () => {
-  spyOn(PocketBase.prototype, "collection").mockImplementation(
-    function (this: PocketBase, _name: string) {
-      return {
-        authWithPassword: async () => {
-          authAttempts++
-          if (authDelayMs > 0) await Bun.sleep(authDelayMs)
-          if (authFailure) throw authFailure
-          // Mimic the SDK's authResponse: persist the session so
-          // authStore.isValid flips.
-          this.authStore.save(futureToken(), { id: "superuser" } as never)
-        },
-        getList: async () => {
-          listAttempts++
-          if (listFailuresRemaining > 0) {
-            listFailuresRemaining--
-            throw new ClientResponseError({
-              status: listFailureStatus,
-              response: { code: listFailureStatus },
-            })
-          }
-          return { items: [statsRow], totalItems: 1 }
-        },
-      } as never
+  spyOn(PocketBase.prototype, "collection").mockImplementation(function (
+    this: PocketBase,
+    _name: string
+  ) {
+    return {
+      authWithPassword: async () => {
+        authAttempts++
+        if (authDelayMs > 0) await Bun.sleep(authDelayMs)
+        if (authFailure) throw authFailure
+        // Mimic the SDK's authResponse: persist the session so
+        // authStore.isValid flips.
+        this.authStore.save(futureToken(), { id: "superuser" } as never)
+      },
+      getList: async () => {
+        listAttempts++
+        if (listFailuresRemaining > 0) {
+          listFailuresRemaining--
+          throw new ClientResponseError({
+            status: listFailureStatus,
+            response: { code: listFailureStatus },
+          })
+        }
+        return { items: [statsRow], totalItems: 1 }
+      },
     } as never
-  )
+  } as never)
   superuserClient = await forSuperuser()
 })
 

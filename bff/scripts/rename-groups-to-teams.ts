@@ -96,11 +96,7 @@ async function main(): Promise<void> {
   const names = new Set(existing.map((c) => c.name))
   const has = (name: string) => names.has(name)
 
-  if (
-    !has("groups") &&
-    !has("group_member_details") &&
-    !has("group_details")
-  ) {
+  if (!has("groups") && !has("group_member_details") && !has("group_details")) {
     console.log("[rename] nothing left to migrate — already done")
     return
   }
@@ -131,7 +127,9 @@ async function main(): Promise<void> {
     if (!has(name)) continue
     try {
       await pb.collections.delete(name)
-      console.log(`[rename] deleted view ${name} (recreated as team_* by the reconcile)`)
+      console.log(
+        `[rename] deleted view ${name} (recreated as team_* by the reconcile)`
+      )
     } catch {
       // Post-rename partial state: the stored query references tables that no
       // longer exist, so PB refuses the save. Recoverable only by patching

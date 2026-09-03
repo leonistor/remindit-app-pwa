@@ -43,7 +43,9 @@
     "build:admin": "cd admin && bun --env-file=../.env run build",
     "setup:feedback": "cd feedback && bun --env-file=../.env run setup",
     "dev:feedback": "cd feedback && bun --env-file=../.env run start",
-    "stop:feedback": "cd feedback && bun run stop"
+    "stop:feedback": "cd feedback && bun --env-file=../.env run stop",
+    "preview:web": "cd web && bun --env-file=../.env run preview",
+    "preview:admin": "cd admin && bun --env-file=../.env run preview"
   },
   "devDependencies": {
     "concurrently": "^10.0.5"

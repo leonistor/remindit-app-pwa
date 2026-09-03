@@ -5,6 +5,7 @@ import { XIcon } from "lucide-react"
 import { Button } from "@/components/ui/custom/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import { m } from "@/paraglide/messages"
 
 export const usePopover = usePopoverContext
 
@@ -87,7 +88,7 @@ export const PopoverContent = (props: PopoverContentProps) => {
           {!!showCloseButton && (
             <PopoverClose asChild>
               <Button
-                aria-label="Close"
+                aria-label={m.close()}
                 className="absolute inset-e-2 top-2 opacity-64 hover:opacity-100"
                 size="icon-sm"
                 variant="ghost"

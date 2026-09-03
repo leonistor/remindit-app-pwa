@@ -2,10 +2,9 @@
 //   1. resolve the Answer version (pinned FEEDBACK_VERSION, or latest release)
 //   2. download the platform tar.gz + checksums.txt, verify sha256
 //   3. extract the `answer` binary, chmod +x, stamp the version
-//   4. prepare answer-data/ folders and conf/config.yaml (docs/FEEDBACK.md)
+//   4. prepare answer-data/ folders and re-render conf/config.yaml from env
 // Re-running converges: binary download is skipped when the stamp matches,
-// and an existing config.yaml is never overwritten (Answer treats its
-// presence as "installed").
+// and config.yaml is always re-rendered to stay in sync with .env.
 import { mkdir, rename, rm } from "node:fs/promises"
 import { resolve } from "node:path"
 import { env } from "../src/env"
@@ -90,18 +89,21 @@ if (
   // the archive also carries LICENSE/NOTICE trees we don't need on disk.
   const extractDir = resolve(moduleDir, `.answer-extract-${Date.now()}`)
   await mkdir(extractDir, { recursive: true })
-  const proc = Bun.spawn(["tar", "-xzf", tarPath, "-C", extractDir])
-  const code = await proc.exited
-  if (code !== 0) throw new Error(`tar exited with ${code}`)
-  await rename(
-    resolve(
-      extractDir,
-      archiveRoot(version, asset.os, asset.arch),
-      BINARY_NAME
-    ),
-    binaryPath
-  )
-  await rm(extractDir, { recursive: true, force: true })
+  try {
+    const proc = Bun.spawn(["tar", "-xzf", tarPath, "-C", extractDir])
+    const code = await proc.exited
+    if (code !== 0) throw new Error(`tar exited with ${code}`)
+    await rename(
+      resolve(
+        extractDir,
+        archiveRoot(version, asset.os, asset.arch),
+        BINARY_NAME
+      ),
+      binaryPath
+    )
+  } finally {
+    await rm(extractDir, { recursive: true, force: true })
+  }
   await rm(tarPath)
   await Bun.spawn([`chmod`, "755", binaryPath]).exited
   await Bun.write(versionPath, version)
@@ -113,15 +115,12 @@ for (const dir of ["cache", "conf", "db", "i18n", "uploads"]) {
   await mkdir(resolve(moduleDir, DATA_DIR, dir), { recursive: true })
 }
 
-// Config: written once; afterwards it IS the install state (Answer refuses to
-// re-init when it exists), so setup never rewrites it.
+// Config: always re-rendered from env — keeps the port and site URL in sync
+// with .env changes. Answer treats an existing config as "installed" and skips
+// re-init, so overwriting is safe.
 const configPath = resolve(moduleDir, DATA_DIR, "conf", "config.yaml")
-if (await Bun.file(configPath).exists()) {
-  console.log("[feedback] conf/config.yaml exists — keeping it")
-} else {
-  await Bun.write(configPath, renderConfigYaml(env.port))
-  console.log(`[feedback] wrote conf/config.yaml (addr 0.0.0.0:${env.port})`)
-}
+await Bun.write(configPath, renderConfigYaml(env.port))
+console.log(`[feedback] wrote conf/config.yaml (addr 0.0.0.0:${env.port})`)
 
 // Always re-extract i18n bundles — they must match the current binary version.
 // The binary embeds them but refuses to boot until answer-data/i18n/ is

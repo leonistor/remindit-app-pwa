@@ -77,10 +77,6 @@ export const AutocompleteList = (
   props: React.ComponentProps<typeof ComboboxList>
 ) => <ComboboxList data-slot="autocomplete-list" {...props} />
 
-export const AutocompleteCollection = (
-  props: React.ComponentProps<typeof ComboboxList>
-) => <ComboboxList data-slot="autocomplete-collection" {...props} />
-
 export const AutocompleteSeparator = (
   props: React.ComponentProps<typeof Separator>
 ) => <Separator data-slot="autocomplete-separator" {...props} />

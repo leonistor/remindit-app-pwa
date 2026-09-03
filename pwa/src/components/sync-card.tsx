@@ -96,15 +96,16 @@ export function SyncCard() {
                   ? m.syncSignInButton()
                   : m.syncSignUpButton()}
               </Button>
-              <button
+              <Button
                 type="button"
-                className="text-muted-foreground text-sm underline"
+                variant="ghost"
+                className="text-sm underline"
                 onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
               >
                 {mode === "signin"
                   ? m.syncSwitchToSignUp()
                   : m.syncSwitchToSignIn()}
-              </button>
+              </Button>
             </div>
           </form>
         ) : (

@@ -16,10 +16,20 @@ import { forSuperuser } from "../repositories/pocketbase"
 /**
  * Map an app username onto Answer's username normalization (Answer slugifies
  * on save: lowercase, underscores → dashes — observed on this instance).
- * Deterministic; the only collision risk is inputs differing solely in case.
+ * When a userId is provided, the last 4 chars are appended as a salt to
+ * prevent case-colliding usernames from mislinking Answer accounts.
  */
-export const sanitizeAnswerUsername = (input: string): string =>
-  input.toLowerCase().replaceAll("_", "-").slice(0, 30)
+export const sanitizeAnswerUsername = (
+  input: string,
+  userId?: string
+): string => {
+  const slug = input.toLowerCase().replaceAll("_", "-").slice(0, 24)
+  if (userId) {
+    const salt = userId.slice(-4)
+    return `${slug}-${salt}`
+  }
+  return slug
+}
 
 /**
  * Throwaway password for the provisioned Answer user (defer-login decision:
@@ -51,7 +61,10 @@ export const feedbackService = {
         outcome: "already-linked",
       }
     }
-    const username = sanitizeAnswerUsername(record.username as string)
+    const username = sanitizeAnswerUsername(
+      record.username as string,
+      record.id as string
+    )
     const outcome = await (options.client ?? answerClient).createUser({
       username,
       email: (options.email ?? record.email) as string,

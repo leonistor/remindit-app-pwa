@@ -11,6 +11,7 @@ import {
   type Member,
   type UserPublic,
 } from "@/lib/bff-api"
+import { NOT_SIGNED_IN } from "@/lib/sync-constants"
 import { switchGroup } from "./engine"
 import { $syncSession } from "./session"
 
@@ -22,7 +23,7 @@ export type { Group, Member, UserPublic }
 // mapped to `syncErrorNotSignedIn` by sync-errors.
 const requireToken = (): string => {
   const token = $syncSession.get()?.token
-  if (!token) throw new Error("not signed in")
+  if (!token) throw new Error(NOT_SIGNED_IN)
   return token
 }
 

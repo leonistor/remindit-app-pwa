@@ -160,7 +160,7 @@ export const SelectGroup = (props: SelectGroupProps) => {
 
   return (
     <ArkSelect.ItemGroup data-slot="select-group" {...rest}>
-      {!heading && <SelectGroupLabel>{heading}</SelectGroupLabel>}
+      {heading && <SelectGroupLabel>{heading}</SelectGroupLabel>}
 
       {children}
     </ArkSelect.ItemGroup>

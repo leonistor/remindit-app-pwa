@@ -18,7 +18,7 @@ export function ThemeMenu() {
   return (
     <MenuSub>
       <MenuSubTrigger>
-        {OPTIONS[mode].Icon && <OptionsIcon mode={mode} />}
+        <OptionsIcon mode={mode} />
         {m.themeMenuLabel()}
       </MenuSubTrigger>
       <MenuSubContent>

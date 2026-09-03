@@ -191,7 +191,8 @@ describeIfPb("pb forwarder (live)", () => {
     expect(res.status).toBe(200)
     expect(res.headers.get("content-type")).toContain("text/event-stream")
     // Read one chunk then abort — the connection is a live stream.
-    const reader = res.body!.getReader()
+    const reader = res.body?.getReader()
+    if (!reader) return
     const first = await reader.read()
     expect(first.value?.length ?? 0).toBeGreaterThan(0)
     controller.abort()

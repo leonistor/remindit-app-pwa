@@ -21,6 +21,7 @@ export const statsService = {
       admin.collection("platform_stats").getList(1, 1)
     )
     const row = items[0] as unknown as Record<string, number>
+    if (!row) return { users: 0, groups: 0 }
     const data: Stats = { users: row.users, groups: row.teams }
     cache = { data, at: Date.now() }
     return data

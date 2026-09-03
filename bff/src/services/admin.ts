@@ -25,6 +25,14 @@ export const adminService = {
       admin.collection("platform_stats").getList(1, 1)
     )
     const row = items[0] as unknown as Record<string, number>
+    if (!row)
+      return {
+        users: 0,
+        groups: 0,
+        items: 0,
+        listEntries: 0,
+        historyEvents: 0,
+      }
     return {
       users: row.users,
       groups: row.teams,

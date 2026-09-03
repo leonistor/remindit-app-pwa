@@ -31,21 +31,13 @@ export const groups = new Hono<AppEnv>()
       await groupsService.listMembers(c.get("auth").client, c.req.param("id"))
     )
   })
-  .post(
-    "/:id/members",
-    validatedJson(memberInviteBodySchema),
-    async (c) => {
-      const { id } = c.req.param()
-      return c.json(
-        await groupsService.invite(
-          c.get("auth").client,
-          id,
-          c.req.valid("json")
-        ),
-        201
-      )
-    }
-  )
+  .post("/:id/members", validatedJson(memberInviteBodySchema), async (c) => {
+    const { id } = c.req.param()
+    return c.json(
+      await groupsService.invite(c.get("auth").client, id, c.req.valid("json")),
+      201
+    )
+  })
   .delete("/:id/members/:memberId", async (c) => {
     await groupsService.removeMember(
       c.get("auth").client,

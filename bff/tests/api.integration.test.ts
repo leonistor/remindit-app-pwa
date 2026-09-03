@@ -11,8 +11,8 @@ import { type ZodType, z } from "zod"
 import { type AppType, app } from "../src/app"
 import {
   authResponseSchema,
-  groupSchema,
   type Group,
+  groupSchema,
   type Member,
   memberSchema,
   notificationSchema,
@@ -260,7 +260,7 @@ describeIfPb("notifications API (live)", () => {
 
     const marked = await client.api.notifications[":id"].$patch(
       { param: { id: own.id }, json: { read: true } },
-      authOptions(alice.token),
+      authOptions(alice.token)
     )
     expect(marked.status).toBe(200)
     expect((await contract(marked, notificationSchema)).read).toBe(true)

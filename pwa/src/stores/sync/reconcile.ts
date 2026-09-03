@@ -148,8 +148,12 @@ export function diffCollection<L>(spec: DiffSpec<L>): DiffResult {
         continue
       }
       const journaled = journal[remote.id]
+      const remoteTs = Date.parse(updated)
+      const journaledTs = Date.parse(journaled ?? "")
       const remoteChanged =
-        journaled === undefined || updated > (journaled ?? "")
+        journaled === undefined ||
+        Number.isNaN(remoteTs) ||
+        remoteTs > journaledTs
       if (remoteChanged) {
         actions.push({
           kind: "localApply",

@@ -9,9 +9,9 @@
 // fresh token is then delivered back to the client (X-Session-Token header,
 // cookie re-issue) so stateless sessions outlive the original TTL.
 
+import type { Context } from "hono"
 import { getCookie, setCookie } from "hono/cookie"
 import { createMiddleware } from "hono/factory"
-import type { Context } from "hono"
 import type PocketBase from "pocketbase"
 import { env } from "../env"
 import {
@@ -99,10 +99,7 @@ export const shouldRotate = (
   const { exp, iat } = claims
   if (typeof exp !== "number" || !Number.isFinite(exp)) return true
   const lifetime =
-    typeof iat === "number" &&
-    Number.isFinite(iat) &&
-    iat > 0 &&
-    exp > iat
+    typeof iat === "number" && Number.isFinite(iat) && iat > 0 && exp > iat
       ? exp - iat
       : FALLBACK_LIFETIME_S
   return exp - nowS < REFRESH_RATIO * lifetime

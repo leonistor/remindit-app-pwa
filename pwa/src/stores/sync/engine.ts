@@ -14,6 +14,7 @@
 import { atom } from "nanostores"
 import PocketBase from "pocketbase"
 import { bffApi, setRotatedTokenHandler } from "@/lib/bff-api"
+import { DEFAULT_BFF_URL, NOT_SIGNED_IN } from "@/lib/sync-constants"
 import { $catalog } from "../catalog"
 import { $categories } from "../categories"
 import { $history } from "../history"
@@ -81,7 +82,7 @@ const $syncTombstones = jsonStore<Record<SyncCollection, string[]>>(
 
 // --- PB client (through the /pb/* forwarder — never direct, D2) -------------
 
-const pbBase = `${import.meta.env?.PUBLIC_BFF_URL ?? "http://127.0.0.1:3100"}/pb`
+const pbBase = `${import.meta.env?.PUBLIC_BFF_URL ?? DEFAULT_BFF_URL}/pb`
 const pb = new PocketBase(pbBase)
 pb.autoCancellation(false)
 
@@ -176,6 +177,10 @@ type Maps = {
   map: Record<SyncCollection, SyncMap>
   journal: Record<SyncCollection, SyncJournal>
   remote: Record<SyncCollection, RemoteRecord[]>
+  /** Precomputed pbId→localId per collection (rebuilt per reconcile pass). */
+  reverseMaps: Record<SyncCollection, Map<string, string>>
+  /** Precomputed localId→remoteRecord per collection (rebuilt per pass). */
+  remoteByLocalId: Record<SyncCollection, Map<string, RemoteRecord>>
 }
 
 const pbIdToLocal = (
@@ -184,10 +189,7 @@ const pbIdToLocal = (
   pbId: unknown
 ): string | null => {
   if (typeof pbId !== "string") return null
-  for (const [localId, mapped] of Object.entries(maps.map[collection])) {
-    if (mapped === pbId) return localId
-  }
-  return null
+  return maps.reverseMaps[collection].get(pbId) ?? null
 }
 
 const colorOrNull = (value: unknown): number | undefined =>
@@ -339,11 +341,9 @@ const SPECS: CollectionSpec<
       // (remote record localId = origin's local id) when possible.
       const translate = (collection: SyncCollection, raw: unknown): string => {
         if (typeof raw !== "string") return ""
-        const remoteRecord = maps.remote[collection].find(
-          (candidate) => candidate.localId === raw
-        )
-        if (!remoteRecord) return raw
-        return pbIdToLocal(maps, collection, remoteRecord.id) ?? raw
+        const remoteRecord = maps.remoteByLocalId[collection].get(raw)
+        if (!remoteRecord) return ""
+        return pbIdToLocal(maps, collection, remoteRecord.id) ?? ""
       }
       return {
         id: (r.localId as string) ?? r.id,
@@ -407,6 +407,7 @@ async function reconcileCollection<L>(
   maps.journal[spec.collection] = result.journal
 
   let changed = false
+  let adopted = false
   const collection = spec.collection
 
   for (const action of result.actions) {
@@ -416,6 +417,7 @@ async function reconcileCollection<L>(
           .collection(collection)
           .create(action.payload)) as unknown as RemoteRecord
         maps.map[collection][action.localId] = record.id
+        maps.reverseMaps[collection].set(record.id, action.localId)
         maps.journal[collection][record.id] = record.updated ?? ""
         changed = true
         break
@@ -434,17 +436,19 @@ async function reconcileCollection<L>(
         break
       }
       case "localApply": {
-        const adopted = spec.adopt(action.remote, maps)
-        if (adopted) spec.applyLocal(adopted)
+        const local = spec.adopt(action.remote, maps)
+        if (local) spec.applyLocal(local)
         changed = true
         break
       }
       case "localAdopt": {
-        const adopted = spec.adopt(action.remote, maps)
-        if (adopted) {
+        const local = spec.adopt(action.remote, maps)
+        if (local) {
           maps.map[collection][action.localId] = action.pbId
-          spec.applyLocal(adopted)
+          maps.reverseMaps[collection].set(action.pbId, action.localId)
+          spec.applyLocal(local)
           changed = true
+          adopted = true
         }
         break
       }
@@ -469,7 +473,11 @@ async function reconcileCollection<L>(
     // If the group changed during reconcile (switchGroup/signOut), skip
     // persisting stale data from the old group.
     if ($syncGroup.get() !== reconcileSession) return
-    $syncMap.set({ ...$syncMap.get(), [collection]: maps.map[collection] })
+    // Only persist the map when adoption succeeded or non-adopt map changes
+    // occurred — prevents stamping dangling entries when adopt fails.
+    if (adopted || JSON.stringify(maps.map[collection]) !== mapBefore) {
+      $syncMap.set({ ...$syncMap.get(), [collection]: maps.map[collection] })
+    }
     $syncJournal.set({
       ...$syncJournal.get(),
       [collection]: maps.journal[collection],
@@ -496,11 +504,34 @@ export async function reconcileAll(): Promise<void> {
         list_entries: [],
         history_events: [],
       },
+      reverseMaps: {
+        categories: new Map(),
+        items: new Map(),
+        list_entries: new Map(),
+        history_events: new Map(),
+      },
+      remoteByLocalId: {
+        categories: new Map(),
+        items: new Map(),
+        list_entries: new Map(),
+        history_events: new Map(),
+      },
     }
     // Fetch all remote lists first: history adoption translates ids across
     // collections (items/categories).
     for (const collection of COLLECTIONS) {
       maps.remote[collection] = await remoteList(collection, groupId)
+    }
+    // Prebuild reverse lookup maps for O(1) pbIdToLocal and translate lookups.
+    for (const collection of COLLECTIONS) {
+      for (const [localId, pbId] of Object.entries(maps.map[collection])) {
+        maps.reverseMaps[collection].set(pbId, localId)
+      }
+      for (const record of maps.remote[collection]) {
+        if (typeof record.localId === "string") {
+          maps.remoteByLocalId[collection].set(record.localId, record)
+        }
+      }
     }
     // Order matters: relations resolve against earlier collections.
     for (const spec of SPECS) {
@@ -543,8 +574,12 @@ async function syncProfile(): Promise<void> {
       (record.avatar ?? "") !== profile.avatar
 
     if (profileChanged) {
+      const remoteTs = Date.parse(remoteUpdated)
+      const profileTs = Date.parse(profileJournal ?? "")
       const remoteWins =
-        profileJournal === undefined || remoteUpdated > profileJournal
+        profileJournal === undefined ||
+        Number.isNaN(remoteTs) ||
+        remoteTs > profileTs
       if (remoteWins) {
         // Remote wins → overwrite the local profile.
         $user.set({
@@ -580,12 +615,17 @@ const trackIds = (collection: string, ids: string[]): void => {
     return
   }
   const current = new Set(ids)
-  const tombstones = $syncTombstones.get()
-  const forCollection = tombstones[collection as SyncCollection] ?? []
   const fresh = [...previous].filter((id) => !current.has(id))
   if (fresh.length > 0) {
-    tombstones[collection as SyncCollection] = [...forCollection, ...fresh]
-    $syncTombstones.set(tombstones)
+    // Copy-on-write: spread into a new object before mutating so nanostores'
+    // Object.is comparison detects the change.
+    const prev = $syncTombstones.get()
+    const updated = { ...prev }
+    updated[collection as SyncCollection] = [
+      ...(prev[collection as SyncCollection] ?? []),
+      ...fresh,
+    ]
+    $syncTombstones.set(updated)
   }
   lastSeenIds[collection] = current
 }
@@ -613,7 +653,7 @@ const scheduleNotificationRefresh = (): void => {
 
 async function ensureGroup(): Promise<string> {
   const session = getSession()
-  if (!session) throw new Error("not signed in")
+  if (!session) throw new Error(NOT_SIGNED_IN)
   const groups = await bffApi.listGroups(session.token)
   const stored = $syncGroup.get()
   const active = groups.find((g) => g.id === stored) ?? groups[0]
@@ -865,7 +905,7 @@ export async function signOut(): Promise<void> {
  */
 export async function switchGroup(groupId: string): Promise<void> {
   const session = getSession()
-  if (!session) throw new Error("not signed in")
+  if (!session) throw new Error(NOT_SIGNED_IN)
   const groups = await bffApi.listGroups(session.token)
   if (!groups.some((group) => group.id === groupId)) {
     throw new Error("group not found")

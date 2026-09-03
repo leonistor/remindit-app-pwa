@@ -4,6 +4,7 @@
 // (email is masked by PB; the BFF masks it in the contract too).
 import type PocketBase from "pocketbase"
 import type { UserPublic } from "../contracts"
+import { toPublicUser } from "../lib/user"
 
 export const usersService = {
   /**
@@ -20,14 +21,8 @@ export const usersService = {
     })
     const record = result.items[0]
     if (!record) return null
-    const r = record as unknown as Record<string, unknown>
-    return {
-      id: r.id as string,
-      email: "",
-      username: r.username as string,
-      firstName: (r.firstName as string) ?? "",
-      lastName: (r.lastName as string) ?? "",
-      avatar: (r.avatar as string) ?? "",
-    }
+    return toPublicUser(record as unknown as Record<string, unknown>, {
+      maskEmail: true,
+    })
   },
 }

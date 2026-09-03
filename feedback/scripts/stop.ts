@@ -43,7 +43,7 @@ if (!command.includes("answer")) {
     `[feedback] pid ${pid} is now "${command}" (pid reuse) — leaving it alone, removing answer.pid`
   )
   await unlink(pidPath)
-  process.exit(1)
+  process.exit(0)
 }
 
 process.kill(pid, "SIGTERM")

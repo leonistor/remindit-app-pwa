@@ -5,7 +5,15 @@
 // HTTP happens. The live end-to-end dispatch assertion lives in
 // api.integration.test.ts (skips when PB is down).
 
-import { afterAll, beforeAll, describe, expect, mock, spyOn, test } from "bun:test"
+import {
+  afterAll,
+  beforeAll,
+  describe,
+  expect,
+  mock,
+  spyOn,
+  test,
+} from "bun:test"
 import PocketBase, { ClientResponseError } from "pocketbase"
 import { memberSchema } from "../src/contracts"
 import { forSuperuser, forToken } from "../src/repositories/pocketbase"
@@ -55,46 +63,47 @@ const futureToken = () =>
 let superuserClient: PocketBase
 
 beforeAll(async () => {
-  spyOn(PocketBase.prototype, "collection").mockImplementation(
-    function (this: PocketBase, name: string) {
-      return {
-        // Superuser singleton auth — persists the session like the SDK.
-        authWithPassword: async () => {
-          this.authStore.save(futureToken(), { id: "superuser" } as never)
-        },
-        // Request-scoped caller identity (actor username/id).
-        authRefresh: async () => {
-          this.authStore.save(futureToken(), state.caller as never)
-          return { token: futureToken(), record: state.caller }
-        },
-        getOne: async () => {
-          if (name === "teams") return { ...team }
-          if (name === "team_members") return { ...membershipBob }
-          throw new ClientResponseError({ status: 404, response: { code: 404 } })
-        },
-        create: async (data: Record<string, unknown>) => {
-          if (name === "notifications") {
-            if (state.failNotifications) {
-              throw new ClientResponseError({
-                status: 400,
-                response: { code: 400, message: "Failed to create record." },
-              })
-            }
-            state.dispatched.push({
-              user: data.user as string,
-              team: data.team as string | undefined,
-              type: data.type as string,
-              payload: data.payload,
+  spyOn(PocketBase.prototype, "collection").mockImplementation(function (
+    this: PocketBase,
+    name: string
+  ) {
+    return {
+      // Superuser singleton auth — persists the session like the SDK.
+      authWithPassword: async () => {
+        this.authStore.save(futureToken(), { id: "superuser" } as never)
+      },
+      // Request-scoped caller identity (actor username/id).
+      authRefresh: async () => {
+        this.authStore.save(futureToken(), state.caller as never)
+        return { token: futureToken(), record: state.caller }
+      },
+      getOne: async () => {
+        if (name === "teams") return { ...team }
+        if (name === "team_members") return { ...membershipBob }
+        throw new ClientResponseError({ status: 404, response: { code: 404 } })
+      },
+      create: async (data: Record<string, unknown>) => {
+        if (name === "notifications") {
+          if (state.failNotifications) {
+            throw new ClientResponseError({
+              status: 400,
+              response: { code: 400, message: "Failed to create record." },
             })
-            return { id: `n-${state.dispatched.length}`, read: false, ...data }
           }
-          // team_members create (invite) — expand.user rides the query.
-          return { ...membershipBob, expand: { user: bob } }
-        },
-        delete: async () => true,
-      } as never
+          state.dispatched.push({
+            user: data.user as string,
+            team: data.team as string | undefined,
+            type: data.type as string,
+            payload: data.payload,
+          })
+          return { id: `n-${state.dispatched.length}`, read: false, ...data }
+        }
+        // team_members create (invite) — expand.user rides the query.
+        return { ...membershipBob, expand: { user: bob } }
+      },
+      delete: async () => true,
     } as never
-  )
+  } as never)
   superuserClient = await forSuperuser()
 })
 

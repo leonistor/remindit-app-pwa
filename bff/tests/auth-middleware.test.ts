@@ -134,9 +134,7 @@ describe("token rotation delivery (stubbed PB)", () => {
 })
 
 describe("PB outage (H8)", () => {
-  const withDeadPb = async (
-    run: () => Promise<void>
-  ): Promise<void> => {
+  const withDeadPb = async (run: () => Promise<void>): Promise<void> => {
     env.pocketbaseUrl = "http://127.0.0.1:1" // port 1: nothing listens
     try {
       await run()

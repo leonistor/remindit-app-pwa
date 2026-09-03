@@ -4,6 +4,7 @@
 
 import { Hono } from "hono"
 import { createMiddleware } from "hono/factory"
+import { z } from "zod"
 import { adminUserCreateBodySchema } from "../contracts"
 import { validatedJson } from "../lib/validation"
 import { type AppEnv, requireAuth } from "../middleware/auth"
@@ -18,14 +19,18 @@ const requireAdmin = createMiddleware<AppEnv>(async (c, next) => {
   await next()
 })
 
+const adminListQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  perPage: z.coerce.number().int().positive().max(200).default(50),
+  filter: z.string().optional(),
+})
+
 export const admin = new Hono<AppEnv>()
   .use(requireAuth)
   .use(requireAdmin)
   .get("/overview", async (c) => c.json(await adminService.overview()))
   .get("/users", async (c) => {
-    const page = Number(c.req.query("page") ?? "1") || 1
-    const perPage = Math.min(Number(c.req.query("perPage") ?? "50") || 50, 200)
-    const filter = c.req.query("filter") || undefined
+    const { page, perPage, filter } = adminListQuerySchema.parse(c.req.query())
     return c.json(await adminService.listUsers(page, perPage, filter))
   })
   .post("/users", validatedJson(adminUserCreateBodySchema), async (c) =>

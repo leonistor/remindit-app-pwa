@@ -7,6 +7,7 @@ import { tv, type VariantProps } from "tailwind-variants"
 import { Button } from "@/components/ui/custom/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import { m } from "@/paraglide/messages"
 
 export const useDialog = useDialogContext
 
@@ -196,7 +197,7 @@ export const DialogContent = (props: DialogContentProps) => {
           {!!showCloseButton && (
             <DialogClose asChild>
               <Button
-                aria-label="Close"
+                aria-label={m.close()}
                 className="absolute inset-e-2 top-2 opacity-64 hover:opacity-100"
                 size="icon-sm"
                 variant="ghost"

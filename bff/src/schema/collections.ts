@@ -127,7 +127,7 @@ const users: CollectionDef = {
   createRule: '@request.auth.id = ""',
   // Users may edit their own profile but NOT escalate privileges — the
   // :isset guard rejects any request that carries a `role` field.
-  updateRule: 'id = @request.auth.id && @request.body.role:isset = false',
+  updateRule: "id = @request.auth.id && @request.body.role:isset = false",
   deleteRule: "id = @request.auth.id",
   fields: [
     {

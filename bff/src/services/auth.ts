@@ -10,18 +10,9 @@ import type {
   RegisterBody,
   UserPublic,
 } from "../contracts"
+import { toPublicUser } from "../lib/user"
 import { pb } from "../repositories/pocketbase"
 import { feedbackService } from "./feedback"
-
-export const toPublicUser = (record: Record<string, unknown>): UserPublic => ({
-  id: record.id as string,
-  email: (record.email as string) ?? "",
-  username: (record.username as string) ?? "",
-  firstName: (record.firstName as string) ?? "",
-  lastName: (record.lastName as string) ?? "",
-  avatar: (record.avatar as string) ?? "",
-  role: record.role === "admin" ? "admin" : "user",
-})
 
 export const authService = {
   async register(body: RegisterBody): Promise<AuthResponse> {

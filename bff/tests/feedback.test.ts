@@ -25,8 +25,20 @@ describe("sanitizeAnswerUsername", () => {
     expect(sanitizeAnswerUsername("brave_otter_42")).toBe("brave-otter-42")
   })
 
-  test("truncates to Answer's 30-char username cap", () => {
-    expect(sanitizeAnswerUsername("a".repeat(64)).length).toBe(30)
+  test("salts with userId suffix to prevent case collisions", () => {
+    expect(sanitizeAnswerUsername("DevA22852", "abc123xyz")).toBe(
+      "deva22852-3xyz"
+    )
+  })
+
+  test("truncates slug to 24 chars before salting", () => {
+    expect(sanitizeAnswerUsername("a".repeat(64), "abcd")).toBe(
+      `${"a".repeat(24)}-abcd`
+    )
+  })
+
+  test("truncates to 24-char slug when no userId", () => {
+    expect(sanitizeAnswerUsername("a".repeat(64)).length).toBe(24)
   })
 })
 

@@ -31,7 +31,6 @@ export const errorSchema = z.object({
   error: z.string(),
   details: z.unknown().optional(),
 })
-export type ErrorBody = z.infer<typeof errorSchema>
 
 // --- auth --------------------------------------------------------------------
 

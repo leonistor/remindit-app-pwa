@@ -6,8 +6,8 @@
 // `Group`/`Member` contract keys unchanged.
 import { UNCATEGORIZED_NAME } from "@remindit/common"
 import type PocketBase from "pocketbase"
-import type { Group, Member, MemberInviteBody, UserPublic } from "../contracts"
-import { toPublicUser } from "./auth"
+import type { Group, Member, MemberInviteBody } from "../contracts"
+import { toPublicUser } from "../lib/user"
 import { dispatch } from "./notifications"
 
 const toGroup = (record: Record<string, unknown>): Group => ({
@@ -21,10 +21,10 @@ const toGroup = (record: Record<string, unknown>): Group => ({
 export const groupsService = {
   /** Groups the caller owns or is a member of (PB rules scope the list). */
   async list(client: PocketBase): Promise<Group[]> {
-    const result = await client.collection("teams").getFullList({
+    const result = await client.collection("teams").getList(1, 200, {
       sort: "-created",
     })
-    return result.map((record) =>
+    return result.items.map((record) =>
       toGroup(record as unknown as Record<string, unknown>)
     )
   },
@@ -97,14 +97,17 @@ export const groupsService = {
     })
     return result.map((record) => {
       const r = record as unknown as Record<string, unknown>
-      const user: UserPublic = {
-        id: r.userId as string,
-        email: "",
-        username: r.username as string,
-        firstName: r.firstName as string,
-        lastName: r.lastName as string,
-        avatar: r.avatar as string,
-      }
+      const user = toPublicUser(
+        {
+          id: r.userId,
+          email: "",
+          username: r.username,
+          firstName: r.firstName,
+          lastName: r.lastName,
+          avatar: r.avatar,
+        },
+        { maskEmail: true }
+      )
       return {
         id: r.id as string,
         role: r.role as Member["role"],
@@ -120,7 +123,7 @@ export const groupsService = {
     groupId: string,
     body: MemberInviteBody
   ): Promise<Member> {
-    const record = (    await client.collection("team_members").create(
+    const record = (await client.collection("team_members").create(
       {
         team: groupId,
         user: body.userId,

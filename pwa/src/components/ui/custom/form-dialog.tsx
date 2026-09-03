@@ -7,6 +7,7 @@ import {
   DialogFooter,
   DialogHeader,
 } from "@/components/ui/dialog"
+import { m } from "@/paraglide/messages"
 
 interface FormDialogProps {
   /** Whether the dialog is open. */
@@ -41,8 +42,8 @@ export const FormDialog = ({
   description,
   onSave,
   onCancel,
-  saveLabel = "Save",
-  cancelLabel = "Cancel",
+  saveLabel,
+  cancelLabel,
   saveDisabled,
   children,
 }: FormDialogProps) => (
@@ -55,11 +56,11 @@ export const FormDialog = ({
           variant="outline"
           onClick={() => (onCancel ?? (() => onOpenChange(false)))()}
         >
-          {cancelLabel}
+          {cancelLabel ?? m.cancel()}
         </Button>
         {onSave && (
           <Button onClick={onSave} disabled={saveDisabled}>
-            {saveLabel}
+            {saveLabel ?? m.save()}
           </Button>
         )}
       </DialogFooter>

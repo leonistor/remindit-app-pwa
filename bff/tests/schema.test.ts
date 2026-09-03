@@ -67,9 +67,7 @@ describe("pb schema builders", () => {
   test("view queries only reference known collections", () => {
     const known = new Set([
       "users", // created by PocketBase itself in every instance
-      ...desiredCollections
-        .filter((c) => c.type !== "view")
-        .map((c) => c.name),
+      ...desiredCollections.filter((c) => c.type !== "view").map((c) => c.name),
     ])
     for (const view of desiredCollections.filter((c) => c.type === "view")) {
       const refs = [

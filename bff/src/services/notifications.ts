@@ -47,10 +47,10 @@ export const dispatch = async (
 export const notificationsService = {
   /** Own notifications (PB listRule: user = auth.id). */
   async list(client: PocketBase): Promise<Notification[]> {
-    const result = await client.collection("notifications").getFullList({
+    const result = await client.collection("notifications").getList(1, 500, {
       sort: "-created",
     })
-    return result.map((record) =>
+    return result.items.map((record) =>
       toNotification(record as unknown as Record<string, unknown>)
     )
   },

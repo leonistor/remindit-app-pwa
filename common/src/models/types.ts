@@ -15,7 +15,8 @@ export type CategoryFrequency =
   | "unknown"
 
 // Rank of a frequency on an ascending scale (most frequent first). Drives
-// category ordering in the catalog and available-items views.
+// category ordering in the catalog and available-items views. Returns -1 for
+// frequencies not in the list (e.g. legacy or unknown values).
 export const frequencyRank = (f: CategoryFrequency): number =>
   CATEGORY_FREQUENCIES.indexOf(f)
 
@@ -78,16 +79,17 @@ export interface HistoryEvent {
 
 // Single-user profile (Phase 4 slice). username is the only mandatory field and
 // defaults to a random value on first run (see profile-generator / onboarding).
-// email is reserved for future multi-user/sync work. avatar is a self-contained
-// inline SVG data URI (DiceBear personas or a local initials fallback) so the
-// profile stays fully local-first with no network request.
+// firstName, lastName, email, and avatar are optional — the app uses empty
+// strings for unset text fields. avatar is a self-contained inline SVG data URI
+// (DiceBear personas or a local initials fallback) so the profile stays fully
+// local-first with no network request.
 export interface UserProfile {
   username: string
-  firstName: string
-  lastName: string
-  email: string
+  firstName?: string
+  lastName?: string
+  email?: string
   /** Inline SVG avatar as a data URI. */
-  avatar: string
+  avatar?: string
 }
 
 // ---------------------------------------------------------------------------

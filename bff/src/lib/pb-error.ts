@@ -13,9 +13,7 @@ import {
 
 export const pbErrorResponse = (
   error: unknown
-):
-  | { status: number; body: { error: string } }
-  | undefined => {
+): { status: number; body: { error: string } } | undefined => {
   // Session-validation failures raised by repositories/pocketbase (auth
   // middleware + record reads): 401 invalid token, 503 PB outage (H8 — a PB
   // blip must not make clients discard valid credentials).

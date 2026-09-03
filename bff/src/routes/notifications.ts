@@ -11,14 +11,10 @@ export const notifications = new Hono<AppEnv>()
   .get("/", async (c) => {
     return c.json(await notificationsService.list(c.get("auth").client))
   })
-  .patch(
-    "/:id",
-    validatedJson(notificationMarkReadBodySchema),
-    async (c) => {
-      const { id } = c.req.param()
-      const { read } = c.req.valid("json")
-      return c.json(
-        await notificationsService.markRead(c.get("auth").client, id, read)
-      )
-    }
-  )
+  .patch("/:id", validatedJson(notificationMarkReadBodySchema), async (c) => {
+    const { id } = c.req.param()
+    const { read } = c.req.valid("json")
+    return c.json(
+      await notificationsService.markRead(c.get("auth").client, id, read)
+    )
+  })
