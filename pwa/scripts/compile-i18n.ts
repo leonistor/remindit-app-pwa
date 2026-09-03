@@ -8,7 +8,9 @@
  *   preferredLanguage  → browser auto-detect before any choice (ro browsers → ro)
  *   baseLocale         → English fallback
  */
-export const PARAGLIDE_COMPILER_OPTIONS = {
+import type { CompilerOptions } from "@inlang/paraglide-js"
+
+export const PARAGLIDE_COMPILER_OPTIONS: CompilerOptions = {
   project: "./project.inlang",
   outdir: "./src/paraglide",
   strategy: ["localStorage", "preferredLanguage", "baseLocale"],

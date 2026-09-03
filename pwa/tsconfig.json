@@ -24,5 +24,11 @@
       "seed/*": ["./seed/*"]
     }
   },
-  "include": ["src", "src/styles", "seed"]
+  "include": [
+    "src",
+    "src/styles",
+    "seed",
+    "rsbuild.config.ts",
+    "pwa-manifest.config.ts"
+  ]
 }

@@ -12,10 +12,13 @@ import {
   BRAND_COLOR,
   BRAND_NAME,
 } from "@remindit/common"
+import type { WebAppManifest } from "rsbuild-plugin-pwa"
 
 const ANDROID_SIZES = [36, 48, 72, 96, 144, 192, 256, 384, 512] as const
 
-export const WEB_APP_MANIFEST = {
+// Typed against the plugin's own manifest type so literal fields
+// (`form_factor`, `purpose`, `display`, ...) can't widen to `string`.
+export const WEB_APP_MANIFEST: WebAppManifest = {
   name: BRAND_NAME,
   short_name: BRAND_NAME,
   description: "Local-first reminders that work offline.",

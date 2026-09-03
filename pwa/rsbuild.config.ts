@@ -42,17 +42,22 @@ export default defineConfig({
       "admin.remindit.localhost",
     ],
     printUrls({ urls }) {
-      urls.map((url) => console.log(`  ➜  ${url}`))
+      for (const url of urls) {
+        console.log(`  ➜  ${url}`)
+      }
       console.log()
-      // use only the last URL to generate the QR code
-      QRCode.toString(
-        urls.pop() ?? urls[0],
-        { type: "terminal" },
-        (err, url) => {
-          if (err) throw err
-          console.log(url)
-        }
-      )
+      // A QR code per URL (localhost + LAN addresses) so a phone can scan
+      // whichever host it can reach. `small: true` keeps three codes from
+      // flooding the terminal. printUrls is sync-typed in Rsbuild, so the
+      // promises are fire-and-forget: failures are logged, never thrown,
+      // because an exception inside this callback would crash the dev server.
+      for (const url of urls) {
+        QRCode.toString(url, { type: "terminal", small: true })
+          .then((qr) => console.log(`${qr}\n  ${url}\n`))
+          .catch((err) =>
+            console.error(`Failed to generate QR code for ${url}:`, err)
+          )
+      }
     },
   },
   plugins: [
