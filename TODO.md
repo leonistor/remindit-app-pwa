@@ -163,11 +163,20 @@ in-flight reconciles would close the last wipe edge case.
 
 ## Phase F — product (V5 completion, roadmap §1)
 
-- [ ] **F1** Group sharing UI in the pwa — join an existing group / share a
+- [x] **F1** Group sharing UI in the pwa — join an existing group / share a
   list with another user; today `ensureGroup` always makes a private
   "My list" (`pwa/src/stores/sync/engine.ts:528`). Needs a group picker +
-  invite flow against `/api/groups*`.
-- [ ] **F2** Surface roles in-app (owner / member), leave/remove member flows.
+  invite flow against `/api/groups*`. Done 2026-09-03: `SharedListCard` on
+  Profile (group switcher with owner markers) wired through the
+  `groupActions` wrappers (`stores/sync/group-actions.ts`, token pulled from
+  `$syncSession`) over the engine `switchGroup`/`recoverActiveGroup` and the
+  bff membership endpoints; lookup-404 and not-a-member surfaced as
+  dedicated `sharedList*` messages.
+- [x] **F2** Surface roles in-app (owner / member), leave/remove member flows.
+  Done 2026-09-03: role badges per member row, owner-gated invite (by exact
+  username) and remove, self-leave behind an alert-dialog confirm; both flows
+  call `recoverActiveGroup()` (no-op while the group is still valid) then
+  refresh; en/ro strings under the `sharedList*` family.
 - [ ] **F3** Release the sync slice as the next pwa release (sync engine +
   auth UI are on main since phase 5, unreleased at v4.4.0).
 - [ ] **F4** Notifications channel decision (D4) — Web Push vs email vs
