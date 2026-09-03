@@ -95,8 +95,10 @@ in-flight reconciles would close the last wipe edge case.
 
 ## Phase P — polish (review nice-to-haves)
 
-- [ ] **P1** bff: cache the superuser client, re-auth on 401 —
-  `bff/src/services/admin.ts`, `stats.ts` re-auth per call.
+- [x] **P1** bff: cache the superuser client, re-auth on 401 —
+  `bff/src/services/admin.ts`, `stats.ts` re-auth per call. Done 2026-09-03:
+  cached singleton + single-flight auth + `withSuperuser` 401-only retry;
+  services migrated, `feedback.ts`/scripts keep `forSuperuser` (also cached).
 - [ ] **P2** bff: move the middleware's inline auth-refresh fetch into the
   repository layer (D8 strictness) — `middleware/auth.ts:51`.
 - [ ] **P3** bff forwarder: rewrite/strip `location` on 3xx (would leak the
@@ -148,7 +150,8 @@ in-flight reconciles would close the last wipe edge case.
 - [ ] **D2** Deploy `web/` + `admin/` SSR bundles behind the reverse proxy
   (D3); protect the admin origin (VPN / IP allowlist / basic auth).
 - [ ] **D3** Prod env plumbing: `SESSION_COOKIE_SECURE`, `CORS_ORIGINS`
-  allowlist with real origins, `PUBLIC_PWA_URL` / `PUBLIC_BFF_URL` values.
+  allowlist with real origins, `PUBLIC_PWA_URL` / `PUBLIC_BFF_URL` /
+  `PUBLIC_FEEDBACK_URL` values.
 - [ ] **D4** Deploy the current pwa bundle (SW-safe release flow, see
   `pwa/docs/DEPLOY.md`).
 
@@ -160,8 +163,9 @@ Deferred follow-ups:
 
 - [x] **FB1** Footer links — `target=_blank` to the feedback URL from the pwa
   (`pwa/src/components/footer.tsx`) and web (`web/src/routes/__root.tsx`)
-  footers; `PUBLIC_FEEDBACK_URL` env + en/ro strings. web renders the link
-  only when set (no localhost fallback in prod).
+  footers; `PUBLIC_FEEDBACK_URL` env + en/ro strings. Both render the link
+  only when set (no localhost fallback in prod — pwa fallback removed
+  2026-09-03, H15-class).
 - [ ] **FB2** Submit API — params `from_module=pwa|web`, route, user, text;
   BFF-mediated post into Answer.
 - [ ] **FB3** Tags — seed `bug`, `feature-request`, `discussion`,
