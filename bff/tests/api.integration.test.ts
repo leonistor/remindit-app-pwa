@@ -173,6 +173,25 @@ describeIfPb("groups API (live)", () => {
     expect(groups.map((g) => g.name)).toContain("Home")
   })
 
+  test("invite dispatched member.added to the invitee (D4 end-to-end)", async () => {
+    // Dispatch ran superuser-side during the invite test above; the invitee
+    // reads the row back through the user-scoped listRule.
+    const items = await contract(
+      await client.api.notifications.$get(undefined, authOptions(bob.token)),
+      z.array(notificationSchema)
+    )
+    const added = items.find((n) => n.type === "member.added")
+    if (!added) throw new Error("member.added notification not found")
+    expect(added.user).toBe(bob.user.id)
+    expect(added.group).toBe(groupId)
+    expect(added.read).toBe(false)
+    expect(added.payload).toEqual({
+      teamId: groupId,
+      teamName: "Home",
+      actorUsername: `ga-${run}`,
+    })
+  })
+
   test("non-member invite attempt → 403 (PB createRule)", async () => {
     const res = await client.api.groups[":id"].members.$post(
       {

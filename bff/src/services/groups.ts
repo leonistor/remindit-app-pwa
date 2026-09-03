@@ -7,6 +7,7 @@
 import type PocketBase from "pocketbase"
 import type { Group, Member, MemberInviteBody, UserPublic } from "../contracts"
 import { toPublicUser } from "./auth"
+import { dispatch } from "./notifications"
 
 const toGroup = (record: Record<string, unknown>): Group => ({
   id: record.id as string,
@@ -113,7 +114,7 @@ export const groupsService = {
       | { user?: Record<string, unknown> }
       | undefined
     const expanded = expand?.user
-    return {
+    const member: Member = {
       id: record.id as string,
       role: record.role as Member["role"],
       group: record.team as string,
@@ -128,10 +129,73 @@ export const groupsService = {
             avatar: "",
           },
     }
+    // Lifecycle notification (D4): the ADDED user learns they joined. The
+    // team name and the actor's username are fetched on the request-scoped
+    // client (teams viewRule: owner ∨ member — the inviting owner passes;
+    // users viewRule: any authenticated user; auth-refresh also yields the
+    // caller's record without changing the route signature); the row itself
+    // is written superuser-side inside dispatch. Best-effort — a failure
+    // here never fails the invite.
+    try {
+      const [team, actor] = await Promise.all([
+        client.collection("teams").getOne(groupId),
+        client.collection("users").authRefresh(),
+      ])
+      const t = team as unknown as Record<string, unknown>
+      const a = actor.record as unknown as Record<string, unknown>
+      await dispatch(body.userId, groupId, "member.added", {
+        teamId: groupId,
+        teamName: t.name as string,
+        actorUsername: a.username as string,
+      })
+    } catch (error) {
+      console.error("[notifications] dispatch failed (member.added):", error)
+    }
+    return member
   },
 
   /** Owner removes a member, or a member removes themselves (PB deleteRule). */
   async removeMember(client: PocketBase, memberId: string): Promise<void> {
+    // Pre-fetch everything the dispatch needs BEFORE the delete: the
+    // membership (viewRule: the member themself ∨ the team owner — exactly
+    // the actors allowed to delete) tells a self-leave from a removal and
+    // names the recipient; the team record and the actor's identity must
+    // also be read while the actor still has access (a departed member can
+    // no longer read the team — teams viewRule is owner ∨ member). A denied
+    // read 404s like the old blind delete did, so the error surface is
+    // unchanged.
+    const membership = (await client
+      .collection("team_members")
+      .getOne(memberId)) as unknown as Record<string, unknown>
+    const targetUser = membership.user as string
+    const teamId = membership.team as string
+    const [team, actor] = await Promise.all([
+      client.collection("teams").getOne(teamId),
+      client.collection("users").authRefresh(),
+    ])
     await client.collection("team_members").delete(memberId)
+    // Lifecycle notification (D4): a self-leave notifies the OWNER, a
+    // removal notifies the REMOVED user. Same best-effort contract as
+    // invite() — never fails the removal.
+    try {
+      const t = team as unknown as Record<string, unknown>
+      const a = actor.record as unknown as Record<string, unknown>
+      const selfLeft = (a.id as string) === targetUser
+      await dispatch(
+        selfLeft ? (t.owner as string) : targetUser,
+        teamId,
+        selfLeft ? "member.left" : "member.removed",
+        {
+          teamId,
+          teamName: t.name as string,
+          actorUsername: a.username as string,
+        }
+      )
+    } catch (error) {
+      console.error(
+        "[notifications] dispatch failed (membership removal):",
+        error
+      )
+    }
   },
 }
