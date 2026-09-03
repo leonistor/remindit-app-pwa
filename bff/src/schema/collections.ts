@@ -75,18 +75,18 @@ export type CollectionDef = {
 
 // ---------------------------------------------------------------------------
 // Rule fragments — the shared-membership pattern (D1): a record is visible
-// and writable by the group owner and by group members.
+// and writable by the team owner and by team members.
 // ---------------------------------------------------------------------------
-const MEMBER_OF_GROUP = `@collection.group_members.user ?= @request.auth.id && @collection.group_members.group ?= group`
-const MEMBER_OF_GROUP_BY_BODY = `@collection.group_members.user ?= @request.auth.id && @collection.group_members.group ?= @request.body.group`
-const GROUP_ACCESS = `group.owner = @request.auth.id || ${MEMBER_OF_GROUP}`
-const GROUP_ACCESS_CREATE = `group.owner = @request.auth.id || ${MEMBER_OF_GROUP_BY_BODY}`
+const MEMBER_OF_TEAM = `@collection.team_members.user ?= @request.auth.id && @collection.team_members.team ?= team`
+const MEMBER_OF_TEAM_BY_BODY = `@collection.team_members.user ?= @request.auth.id && @collection.team_members.team ?= @request.body.team`
+const TEAM_ACCESS = `team.owner = @request.auth.id || ${MEMBER_OF_TEAM}`
+const TEAM_ACCESS_CREATE = `team.owner = @request.auth.id || ${MEMBER_OF_TEAM_BY_BODY}`
 
-// View variants: rows that carry a `group` column use the shared fragments
-// unchanged; rows that ARE a group (`group_details` — row id = group id) use
+// View variants: rows that carry a `team` column use the shared fragments
+// unchanged; rows that ARE a team (`team_details` — row id = team id) use
 // the `id` form.
-const MEMBER_OF_GROUP_ROW = `@collection.group_members.user ?= @request.auth.id && @collection.group_members.group ?= id`
-const GROUP_ACCESS_ROW = `owner = @request.auth.id || ${MEMBER_OF_GROUP_ROW}`
+const MEMBER_OF_TEAM_ROW = `@collection.team_members.user ?= @request.auth.id && @collection.team_members.team ?= id`
+const TEAM_ACCESS_ROW = `owner = @request.auth.id || ${MEMBER_OF_TEAM_ROW}`
 
 // Record timestamps (PB 0.40 only has them if defined) — the sync layer
 // (phase 5) keys last-write-wins off `updated`.
@@ -116,8 +116,8 @@ const users: CollectionDef = {
   name: "users",
   type: "auth",
   passwordAuth: { enabled: true, identityFields: ["email"] },
-  // Profiles are visible to any authenticated user (needed for group member
-  // lists — "shared group" correlation is not expressible in flat PB rules).
+  // Profiles are visible to any authenticated user (needed for team member
+  // lists — "shared team" correlation is not expressible in flat PB rules).
   // Email is NOT exposed: PB gates it per-record via `emailVisibility`.
   listRule: '@request.auth.id != ""',
   viewRule: '@request.auth.id != ""',
@@ -187,18 +187,15 @@ const users: CollectionDef = {
   indexes: ["CREATE UNIQUE INDEX `idx_users_username` ON `users` (`username`)"],
 }
 
-// groups --------------------------------------------------------------------
-// A group is a shared workspace (D1): it owns categories, items, lists.
-// Rules written explicitly (a member-of-group fragment with `group` swapped
-// for `id` via regex would also clobber the field name inside
-// `@collection.group_members.group`).
-const groups: CollectionDef = {
-  name: "groups",
+// teams ----------------------------------------------------------------------
+// A team is a shared workspace (D1): it owns categories, items, lists.
+// Renamed from `groups` — the SQL keyword collision invited bugs in view
+// queries; the one-off scripts/rename-groups-to-teams.ts migrates live data.
+const teams: CollectionDef = {
+  name: "teams",
   type: "base",
-  listRule:
-    "owner = @request.auth.id || @collection.group_members.user ?= @request.auth.id && @collection.group_members.group ?= id",
-  viewRule:
-    "owner = @request.auth.id || @collection.group_members.user ?= @request.auth.id && @collection.group_members.group ?= id",
+  listRule: TEAM_ACCESS_ROW,
+  viewRule: TEAM_ACCESS_ROW,
   createRule:
     '@request.auth.id != "" && @request.body.owner = @request.auth.id',
   updateRule: "owner = @request.auth.id",
@@ -230,19 +227,19 @@ const groups: CollectionDef = {
   ],
 }
 
-// group_members -------------------------------------------------------------
-// Join collection: user ↔ group with role. Drives every membership rule.
-const groupMembers: CollectionDef = {
-  name: "group_members",
+// team_members -------------------------------------------------------------
+// Join collection: user ↔ team with role. Drives every membership rule.
+const teamMembers: CollectionDef = {
+  name: "team_members",
   type: "base",
-  listRule: "user = @request.auth.id || group.owner = @request.auth.id",
-  viewRule: "user = @request.auth.id || group.owner = @request.auth.id",
+  listRule: "user = @request.auth.id || team.owner = @request.auth.id",
+  viewRule: "user = @request.auth.id || team.owner = @request.auth.id",
   // Create evaluated against the hydrated record (validated by the phase-2
   // gate); owner invites, members can't self-add.
-  createRule: "group.owner = @request.auth.id",
+  createRule: "team.owner = @request.auth.id",
   updateRule: null,
   // Owner removes members; members can leave on their own.
-  deleteRule: "group.owner = @request.auth.id || user = @request.auth.id",
+  deleteRule: "team.owner = @request.auth.id || user = @request.auth.id",
   fields: [
     {
       type: "select",
@@ -255,11 +252,11 @@ const groupMembers: CollectionDef = {
     },
     {
       type: "relation",
-      name: "group",
+      name: "team",
       required: true,
       hidden: false,
       presentable: false,
-      collectionName: "groups",
+      collectionName: "teams",
       cascadeDelete: true,
       minSelect: 1,
       maxSelect: 1,
@@ -278,21 +275,21 @@ const groupMembers: CollectionDef = {
     ...stamps(),
   ],
   indexes: [
-    "CREATE UNIQUE INDEX `idx_group_members_unique` ON `group_members` (`group`, `user`)",
+    "CREATE UNIQUE INDEX `idx_team_members_unique` ON `team_members` (`team`, `user`)",
   ],
 }
 
 // categories ----------------------------------------------------------------
 // Category (common `Category`); the `uncategorized` sentinel is provisioned
-// per group by the groups service (phase 3), matched by name.
+// per team by the teams service (phase 3), matched by name.
 const categories: CollectionDef = {
   name: "categories",
   type: "base",
-  listRule: GROUP_ACCESS,
-  viewRule: GROUP_ACCESS,
-  createRule: GROUP_ACCESS_CREATE,
-  updateRule: GROUP_ACCESS,
-  deleteRule: GROUP_ACCESS,
+  listRule: TEAM_ACCESS,
+  viewRule: TEAM_ACCESS,
+  createRule: TEAM_ACCESS_CREATE,
+  updateRule: TEAM_ACCESS,
+  deleteRule: TEAM_ACCESS,
   fields: [
         {
       type: "text",
@@ -339,18 +336,18 @@ const categories: CollectionDef = {
     },
     {
       type: "relation",
-      name: "group",
+      name: "team",
       required: true,
       hidden: false,
       presentable: false,
-      collectionName: "groups",
+      collectionName: "teams",
       cascadeDelete: true,
       minSelect: 1,
       maxSelect: 1,
     },
     ...stamps(),
   ],
-  indexes: ["CREATE UNIQUE INDEX `idx_categories_group_local` ON `categories` (`group`, `localId`)"],
+  indexes: ["CREATE UNIQUE INDEX `idx_categories_team_local` ON `categories` (`team`, `localId`)"],
 }
 
 // items ---------------------------------------------------------------------
@@ -359,11 +356,11 @@ const categories: CollectionDef = {
 const items: CollectionDef = {
   name: "items",
   type: "base",
-  listRule: GROUP_ACCESS,
-  viewRule: GROUP_ACCESS,
-  createRule: GROUP_ACCESS_CREATE,
-  updateRule: GROUP_ACCESS,
-  deleteRule: GROUP_ACCESS,
+  listRule: TEAM_ACCESS,
+  viewRule: TEAM_ACCESS,
+  createRule: TEAM_ACCESS_CREATE,
+  updateRule: TEAM_ACCESS,
+  deleteRule: TEAM_ACCESS,
   fields: [
         {
       type: "text",
@@ -400,18 +397,18 @@ const items: CollectionDef = {
     },
     {
       type: "relation",
-      name: "group",
+      name: "team",
       required: true,
       hidden: false,
       presentable: false,
-      collectionName: "groups",
+      collectionName: "teams",
       cascadeDelete: true,
       minSelect: 1,
       maxSelect: 1,
     },
     ...stamps(),
   ],
-  indexes: ["CREATE UNIQUE INDEX `idx_items_group_local` ON `items` (`group`, `localId`)"],
+  indexes: ["CREATE UNIQUE INDEX `idx_items_team_local` ON `items` (`team`, `localId`)"],
 }
 
 // list_entries --------------------------------------------------------------
@@ -419,11 +416,11 @@ const items: CollectionDef = {
 const listEntries: CollectionDef = {
   name: "list_entries",
   type: "base",
-  listRule: GROUP_ACCESS,
-  viewRule: GROUP_ACCESS,
-  createRule: GROUP_ACCESS_CREATE,
-  updateRule: GROUP_ACCESS,
-  deleteRule: GROUP_ACCESS,
+  listRule: TEAM_ACCESS,
+  viewRule: TEAM_ACCESS,
+  createRule: TEAM_ACCESS_CREATE,
+  updateRule: TEAM_ACCESS,
+  deleteRule: TEAM_ACCESS,
   fields: [
         {
       type: "text",
@@ -466,18 +463,18 @@ const listEntries: CollectionDef = {
     },
     {
       type: "relation",
-      name: "group",
+      name: "team",
       required: true,
       hidden: false,
       presentable: false,
-      collectionName: "groups",
+      collectionName: "teams",
       cascadeDelete: true,
       minSelect: 1,
       maxSelect: 1,
     },
     ...stamps(),
   ],
-  indexes: ["CREATE UNIQUE INDEX `idx_list_entries_group_local` ON `list_entries` (`group`, `localId`)"],
+  indexes: ["CREATE UNIQUE INDEX `idx_list_entries_team_local` ON `list_entries` (`team`, `localId`)"],
 }
 
 // history_events ------------------------------------------------------------
@@ -487,9 +484,9 @@ const listEntries: CollectionDef = {
 const historyEvents: CollectionDef = {
   name: "history_events",
   type: "base",
-  listRule: GROUP_ACCESS,
-  viewRule: GROUP_ACCESS,
-  createRule: GROUP_ACCESS_CREATE,
+  listRule: TEAM_ACCESS,
+  viewRule: TEAM_ACCESS,
+  createRule: TEAM_ACCESS_CREATE,
   updateRule: null,
   deleteRule: null,
   fields: [
@@ -569,18 +566,18 @@ const historyEvents: CollectionDef = {
     },
     {
       type: "relation",
-      name: "group",
+      name: "team",
       required: true,
       hidden: false,
       presentable: false,
-      collectionName: "groups",
+      collectionName: "teams",
       cascadeDelete: true,
       minSelect: 1,
       maxSelect: 1,
     },
     ...stamps(),
   ],
-  indexes: ["CREATE UNIQUE INDEX `idx_history_events_group_local` ON `history_events` (`group`, `localId`)"],
+  indexes: ["CREATE UNIQUE INDEX `idx_history_events_team_local` ON `history_events` (`team`, `localId`)"],
 }
 
 // notifications -------------------------------------------------------------
@@ -633,11 +630,11 @@ const notifications: CollectionDef = {
     },
     {
       type: "relation",
-      name: "group",
+      name: "team",
       required: false,
       hidden: false,
       presentable: false,
-      collectionName: "groups",
+      collectionName: "teams",
       cascadeDelete: true,
       minSelect: 0,
       maxSelect: 1,
@@ -649,7 +646,7 @@ const notifications: CollectionDef = {
 // ---------------------------------------------------------------------------
 // View collections — read-only, PB-computed from SQL:
 // - the SELECT runs directly against the SQLite tables (base-collection rules
-//   don't apply inside it) → every group-scoped view re-states the membership
+//   don't apply inside it) → every team-scoped view re-states the membership
 //   rule on its own rows; `platform_stats` stays superuser-only;
 // - `fields` is empty by design — PB derives the schema from `viewQuery`;
 // - no realtime events and no indexes on views — the sync layer (phase 5)
@@ -658,54 +655,54 @@ const notifications: CollectionDef = {
 // ---------------------------------------------------------------------------
 
 // Flattened memberships × profiles: replaces the `expand: "user"` + fallback
-// dance in the groups service; also scopes profiles to shared groups per-row
+// dance in the teams service; also scopes profiles to shared teams per-row
 // (the users-collection relaxation "any authenticated user" can shrink later).
-const groupMemberDetails: CollectionDef = {
-  name: "group_member_details",
+const teamMemberDetails: CollectionDef = {
+  name: "team_member_details",
   type: "view",
   viewQuery: `
     SELECT
-      group_members.id,
-      group_members.\`group\`,
-      group_members.role,
-      group_members.created AS joinedAt,
+      team_members.id,
+      team_members.team,
+      team_members.role,
+      team_members.created AS joinedAt,
       users.id AS userId,
       users.username,
       users.firstName,
       users.lastName,
       users.avatar
-    FROM group_members
-    JOIN users ON users.id = group_members.user
+    FROM team_members
+    JOIN users ON users.id = team_members.user
   `,
-  listRule: MEMBER_OF_GROUP,
-  viewRule: MEMBER_OF_GROUP,
+  listRule: MEMBER_OF_TEAM,
+  viewRule: MEMBER_OF_TEAM,
   fields: [],
 }
 
-// Per-group dashboard row: owner username + counts, replacing the two
+// Per-team dashboard row: owner username + counts, replacing the two
 // full-list fetches + JS joins in the admin service (listGroups).
-const groupDetails: CollectionDef = {
-  name: "group_details",
+const teamDetails: CollectionDef = {
+  name: "team_details",
   type: "view",
   viewQuery: `
     SELECT
-      groups.id,
-      groups.name,
-      groups.owner,
-      groups.created,
-      (SELECT users.username FROM users WHERE users.id = groups.owner) AS ownerUsername,
-      COUNT(group_members.id) AS membersCount,
-      (SELECT COUNT(*) FROM items WHERE items.\`group\` = groups.id) AS itemsCount,
+      teams.id,
+      teams.name,
+      teams.owner,
+      teams.created,
+      (SELECT users.username FROM users WHERE users.id = teams.owner) AS ownerUsername,
+      COUNT(team_members.id) AS membersCount,
+      (SELECT COUNT(*) FROM items WHERE items.team = teams.id) AS itemsCount,
       (SELECT COUNT(*) FROM list_entries
-        WHERE list_entries.\`group\` = groups.id AND list_entries.checked = 0) AS pendingCount,
+        WHERE list_entries.team = teams.id AND list_entries.checked = 0) AS pendingCount,
       (SELECT MAX(list_entries.addedAt) FROM list_entries
-        WHERE list_entries.\`group\` = groups.id) AS lastActivityAt
-    FROM groups
-    LEFT JOIN group_members ON group_members.\`group\` = groups.id
-    GROUP BY groups.id
+        WHERE list_entries.team = teams.id) AS lastActivityAt
+    FROM teams
+    LEFT JOIN team_members ON team_members.team = teams.id
+    GROUP BY teams.id
   `,
-  listRule: GROUP_ACCESS_ROW,
-  viewRule: GROUP_ACCESS_ROW,
+  listRule: TEAM_ACCESS_ROW,
+  viewRule: TEAM_ACCESS_ROW,
   fields: [],
 }
 
@@ -719,7 +716,7 @@ const platformStats: CollectionDef = {
     SELECT
       'platform' AS id,
       (SELECT COUNT(*) FROM users) AS users,
-      (SELECT COUNT(*) FROM groups) AS groups,
+      (SELECT COUNT(*) FROM teams) AS teams,
       (SELECT COUNT(*) FROM items) AS items,
       (SELECT COUNT(*) FROM list_entries) AS listEntries,
       (SELECT COUNT(*) FROM history_events) AS historyEvents
@@ -736,7 +733,7 @@ const listEntriesDetailed: CollectionDef = {
   viewQuery: `
     SELECT
       list_entries.id,
-      list_entries.\`group\`,
+      list_entries.team,
       list_entries.localId,
       list_entries.checked,
       list_entries.addedAt,
@@ -750,8 +747,8 @@ const listEntriesDetailed: CollectionDef = {
     JOIN items ON items.id = list_entries.item
     JOIN categories ON categories.id = items.category
   `,
-  listRule: MEMBER_OF_GROUP,
-  viewRule: MEMBER_OF_GROUP,
+  listRule: MEMBER_OF_TEAM,
+  viewRule: MEMBER_OF_TEAM,
   fields: [],
 }
 
@@ -762,7 +759,7 @@ const categoryStats: CollectionDef = {
   viewQuery: `
     SELECT
       categories.id,
-      categories.\`group\`,
+      categories.team,
       categories.name,
       categories.frequency,
       categories.color,
@@ -772,8 +769,8 @@ const categoryStats: CollectionDef = {
         WHERE items.category = categories.id AND list_entries.checked = 0) AS pendingCount
     FROM categories
   `,
-  listRule: MEMBER_OF_GROUP,
-  viewRule: MEMBER_OF_GROUP,
+  listRule: MEMBER_OF_TEAM,
+  viewRule: MEMBER_OF_TEAM,
   fields: [],
 }
 
@@ -786,7 +783,7 @@ const itemStats: CollectionDef = {
   viewQuery: `
     SELECT
       items.id,
-      items.\`group\`,
+      items.team,
       items.name,
       items.category,
       COUNT(CASE WHEN history_events.action = 'add' THEN 1 END) AS purchaseCount,
@@ -796,8 +793,8 @@ const itemStats: CollectionDef = {
     LEFT JOIN history_events ON history_events.itemId = items.id
     GROUP BY items.id
   `,
-  listRule: MEMBER_OF_GROUP,
-  viewRule: MEMBER_OF_GROUP,
+  listRule: MEMBER_OF_TEAM,
+  viewRule: MEMBER_OF_TEAM,
   fields: [],
 }
 
@@ -807,20 +804,20 @@ const itemStats: CollectionDef = {
 // collections (the migrate script's structure pass creates in order).
 export const desiredCollections: CollectionDef[] = [
   users,
-  groups,
-  groupMembers,
+  teams,
+  teamMembers,
   categories,
   items,
   listEntries,
   historyEvents,
   notifications,
-  groupMemberDetails,
-  groupDetails,
+  teamMemberDetails,
+  teamDetails,
   platformStats,
   listEntriesDetailed,
   categoryStats,
   itemStats,
 ]
 
-/** The sentinel category name provisioned per group (phase 3 groups service). */
+/** The sentinel category name provisioned per team (phase 3 teams service). */
 export const SENTINEL_CATEGORY_NAME = UNCATEGORIZED_NAME

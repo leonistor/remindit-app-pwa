@@ -239,15 +239,33 @@ async function main(): Promise<void> {
 
   // Pass B — reconcile definitions: rules, indexes, field drift, auth opts.
   for (const def of desiredCollections) {
-    const managed = managedView(
-      fullPayload(def, toWireFields(def.fields, nameToId))
-    )
     const current = byName.get(def.name)
     if (!current) {
       throw new Error(
         `collection "${def.name}" vanished between passes — rerun the migration`
       )
     }
+
+    // Inject live field ids into the patch payload, matched by name — PB's
+    // field sync treats id-less incoming fields as rebuild candidates
+    // (column drop+recreate), which fails whenever a view pins those
+    // columns. Sending ids (like the dashboard does) keeps unchanged
+    // columns in place; the canonical diff is unaffected (ids are stripped
+    // as server noise on both sides).
+    const liveFieldIds = new Map(
+      (
+        (current.fields as Array<{ name?: string; id?: string }> | undefined) ??
+        []
+      )
+        .filter((field) => field.name && field.id)
+        .map((field) => [field.name as string, field.id as string])
+    )
+    const wireFields = toWireFields(def.fields, nameToId).map((field) => {
+      const id = liveFieldIds.get(field.name as string)
+      return id ? { ...field, id } : field
+    })
+
+    const managed = managedView(fullPayload(def, wireFields))
 
     if (managedView(current) === managed) {
       actions.push(`unchanged ${def.name}`)
@@ -256,9 +274,7 @@ async function main(): Promise<void> {
 
     // Partial patch — PB merges, so only managed keys change. Log which
     // managed keys diverged so schema drift stays explainable.
-    const desiredCanonical = managedView(
-      fullPayload(def, toWireFields(def.fields, nameToId))
-    )
+    const desiredCanonical = managedView(fullPayload(def, wireFields))
     const currentCanonical = managedView(current)
     const diffKeys = managedKeysFor(def.type).filter((key) => {
       const a = JSON.parse(desiredCanonical)[key]
@@ -282,7 +298,7 @@ async function main(): Promise<void> {
       name: _name,
       type: _type,
       ...patch
-    } = fullPayload(def, toWireFields(def.fields, nameToId))
+    } = fullPayload(def, wireFields)
     await pb.collections.update(def.name, patch)
     actions.push(`patched  ${def.name}`)
   }

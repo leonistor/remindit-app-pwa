@@ -10,7 +10,7 @@ const toNotification = (record: Record<string, unknown>): Notification => ({
   payload: record.payload as unknown,
   read: Boolean(record.read),
   user: record.user as string,
-  group: (record.group as string) || undefined,
+  group: (record.team as string) || undefined,
 })
 
 export const notificationsService = {

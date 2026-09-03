@@ -16,10 +16,11 @@ export const statsService = {
     }
     const admin = await forSuperuser()
     // perPage 1 — we only need totalItems from the page metadata.
-    // (SDK 0.28 signature: getList(page, perPage, options).)
+    // (SDK 0.28 signature: getList(page, perPage, options).) PB collection
+    // is `teams` (renamed from groups); the Stats contract key stays `groups`.
     const [users, groups] = await Promise.all([
       admin.collection("users").getList(1, 1),
-      admin.collection("groups").getList(1, 1),
+      admin.collection("teams").getList(1, 1),
     ])
     const data: Stats = { users: users.totalItems, groups: groups.totalItems }
     cache = { data, at: Date.now() }

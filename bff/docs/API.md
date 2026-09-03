@@ -5,6 +5,8 @@ Typed Hono RPC surface — frontends consume `hc<AppType>` from
 contract in `src/contracts.ts`; responses are parsed against those schemas in
 `tests/api.integration.test.ts` (live, 10/10 against PB 0.40.1).
 
+> PB collections are `teams`/`team_members` (renamed); the HTTP surface and contract keys below keep the groups naming for stability.
+
 ## Authentication
 
 PB tokens are stateless JWTs; there is no server session store.

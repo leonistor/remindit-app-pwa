@@ -36,7 +36,7 @@ rule matrix: [docs/API.md](docs/API.md).
 | Route | Purpose |
 |-------|---------|
 | `POST /api/auth/register` / `login` / `logout`, `GET /api/auth/me` | PB auth pass-through (Bearer **and** HttpOnly session cookie; tokens rotate via auth-refresh) |
-| `GET/POST /api/groups`, `GET/DELETE /api/groups/:id` | shared workspaces (creator = owner member) |
+| `GET/POST /api/groups`, `GET/DELETE /api/groups/:id` | shared workspaces (creator = owner member; underlying PB collections: `teams`/`team_members`) |
 | `GET/POST /api/groups/:id/members`, `DELETE …/:memberId` | membership management (owner-only mutations via PB rules) |
 | `GET /api/notifications`, `PATCH /api/notifications/:id` | stub (D4): list + mark-read |
 | `GET /api/admin/*` | role-guarded (`users.role = "admin"`, 403 otherwise): overview counts, user/group management, create-user, delete-group |

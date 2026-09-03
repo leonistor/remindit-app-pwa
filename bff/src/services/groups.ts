@@ -1,6 +1,9 @@
-// Groups service (phase 3): shared-workspace management (D1). Every call runs
+// Teams service (phase 3): shared-workspace management (D1). Every call runs
 // on the request-scoped PB client (the member's token) — PB's API rules are
 // the authorization boundary (owner ∨ member); the BFF only shapes payloads.
+// NOTE: the PB collections are `teams`/`team_members` (renamed from
+// groups/group_members); the public API surface stays /api/groups with the
+// `Group`/`Member` contract keys unchanged.
 import type PocketBase from "pocketbase"
 import type { Group, Member, MemberInviteBody, UserPublic } from "../contracts"
 import { toPublicUser } from "./auth"
@@ -16,7 +19,7 @@ const toGroup = (record: Record<string, unknown>): Group => ({
 export const groupsService = {
   /** Groups the caller owns or is a member of (PB rules scope the list). */
   async list(client: PocketBase): Promise<Group[]> {
-    const result = await client.collection("groups").getFullList({
+    const result = await client.collection("teams").getFullList({
       sort: "-created",
     })
     return result.map((record) =>
@@ -29,15 +32,15 @@ export const groupsService = {
     userId: string,
     name: string
   ): Promise<Group> {
-    const group = (await client.collection("groups").create({
+    const group = (await client.collection("teams").create({
       name,
       owner: userId,
     })) as unknown as Record<string, unknown>
     // The creator becomes the owner-member (schema: createRule allows it via
     // group.owner = auth.id). Non-fatal if it fails — the group itself exists.
     try {
-      await client.collection("group_members").create({
-        group: group.id,
+      await client.collection("team_members").create({
+        team: group.id,
         user: userId,
         role: "owner",
       })
@@ -52,7 +55,7 @@ export const groupsService = {
 
   async get(client: PocketBase, id: string): Promise<Group> {
     const record = (await client
-      .collection("groups")
+      .collection("teams")
       .getOne(id)) as unknown as Record<string, unknown>
     return toGroup(record)
   },
@@ -60,12 +63,12 @@ export const groupsService = {
   // Group deletion cascades its data (schema: group-owned fields are
   // cascadeDelete) and is owner-only via the PB rule.
   async remove(client: PocketBase, id: string): Promise<void> {
-    await client.collection("groups").delete(id)
+    await client.collection("teams").delete(id)
   },
 
-  async listMembers(client: PocketBase, groupId: string): Promise<Member[]> {
-    const result = await client.collection("group_members").getFullList({
-      filter: client.filter("group = {:groupId}", { groupId }),
+  async listMembers(client: PocketBase, teamId: string): Promise<Member[]> {
+    const result = await client.collection("team_members").getFullList({
+      filter: client.filter("team = {:teamId}", { teamId }),
       expand: "user",
       sort: "created",
     })
@@ -89,7 +92,7 @@ export const groupsService = {
       return {
         id: record.id,
         role: record.role as Member["role"],
-        group: record.group as string,
+        group: record.team as string,
         user,
       }
     })
@@ -101,9 +104,9 @@ export const groupsService = {
     groupId: string,
     body: MemberInviteBody
   ): Promise<Member> {
-    const record = (await client.collection("group_members").create(
+    const record = (    await client.collection("team_members").create(
       {
-        group: groupId,
+        team: groupId,
         user: body.userId,
         role: body.role,
       },
@@ -117,7 +120,7 @@ export const groupsService = {
     return {
       id: record.id as string,
       role: record.role as Member["role"],
-      group: record.group as string,
+      group: record.team as string,
       user: expanded
         ? toPublicUser(expanded)
         : {
@@ -133,6 +136,6 @@ export const groupsService = {
 
   /** Owner removes a member, or a member removes themselves (PB deleteRule). */
   async removeMember(client: PocketBase, memberId: string): Promise<void> {
-    await client.collection("group_members").delete(memberId)
+    await client.collection("team_members").delete(memberId)
   },
 }

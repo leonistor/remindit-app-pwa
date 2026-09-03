@@ -1,6 +1,6 @@
 // Integration tests for the /pb/* forwarder (phase 5 data-plane) — live PB
 // required, skip otherwise. These prove: auth gating, rule-scoped record CRUD
-// through the proxy, server-side dedupe via the (group, localId) unique
+// through the proxy, server-side dedupe via the (team, localId) unique
 // index, and SSE passthrough.
 
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
@@ -36,7 +36,7 @@ const register = async (username: string) => {
 
 describeIfPb("pb forwarder (live)", () => {
   let owner: { token: string; user: { id: string } }
-  let groupId: string
+  let teamId: string
 
   beforeAll(async () => {
     owner = await register(`pf-${run}`)
@@ -44,7 +44,7 @@ describeIfPb("pb forwarder (live)", () => {
       { json: { name: "Forwarder" } },
       { headers: { authorization: `Bearer ${owner.token}` } },
     )
-    groupId = ((await res.json()) as { id: string }).id
+    teamId = ((await res.json()) as { id: string }).id
   })
 
   const pbFetch = (
@@ -86,11 +86,11 @@ describeIfPb("pb forwarder (live)", () => {
     expect(record.id).toBe(owner.user.id)
   })
 
-  test("create with localId; duplicate (group, localId) rejected by the index", async () => {
+  test("create with localId; duplicate (team, localId) rejected by the index", async () => {
     const localId = `cat-${run}`
     const created = await pbFetch("/api/collections/categories/records", owner.token, {
       method: "POST",
-      json: { group: groupId, localId, name: "Produce", frequency: "weekly" },
+      json: { team: teamId, localId, name: "Produce", frequency: "weekly" },
     })
     expect(created.status).toBe(200)
     const record = (await created.json()) as { id: string; localId: string }
@@ -98,7 +98,7 @@ describeIfPb("pb forwarder (live)", () => {
 
     const duplicate = await pbFetch("/api/collections/categories/records", owner.token, {
       method: "POST",
-      json: { group: groupId, localId, name: "Dupe", frequency: "weekly" },
+      json: { team: teamId, localId, name: "Dupe", frequency: "weekly" },
     })
     expect(duplicate.status).toBe(400)
   })

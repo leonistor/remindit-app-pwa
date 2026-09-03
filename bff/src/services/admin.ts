@@ -21,7 +21,7 @@ export const adminService = {
     const admin = await forSuperuser()
     const collections = [
       "users",
-      "groups",
+      "teams",
       "items",
       "list_entries",
       "history_events",
@@ -91,10 +91,12 @@ export const adminService = {
   },
 
   async listGroups(): Promise<AdminGroup[]> {
+    // PB collections are teams/team_members (renamed from groups/*); the
+    // AdminGroup contract keys stay unchanged.
     const admin = await forSuperuser()
     const [groups, memberships] = await Promise.all([
-      admin.collection("groups").getFullList({ sort: "-created" }),
-      admin.collection("group_members").getFullList({ expand: "user" }),
+      admin.collection("teams").getFullList({ sort: "-created" }),
+      admin.collection("team_members").getFullList({ expand: "user" }),
     ])
     const ownerUsernames = new Map<string, string>()
     for (const membership of memberships) {
@@ -102,13 +104,13 @@ export const adminService = {
       if (r.role === "owner") {
         const expand = r.expand as { user?: Record<string, unknown> } | undefined
         const user = expand?.user
-        if (user) ownerUsernames.set(r.group as string, user.username as string)
+        if (user) ownerUsernames.set(r.team as string, user.username as string)
       }
     }
     const counts = new Map<string, number>()
     for (const membership of memberships) {
       const r = membership as unknown as Record<string, unknown>
-      counts.set(r.group as string, (counts.get(r.group as string) ?? 0) + 1)
+      counts.set(r.team as string, (counts.get(r.team as string) ?? 0) + 1)
     }
     return groups.map((record) => {
       const r = record as unknown as Record<string, unknown>
@@ -125,6 +127,6 @@ export const adminService = {
 
   async deleteGroup(id: string): Promise<void> {
     const admin = await forSuperuser()
-    await admin.collection("groups").delete(id)
+    await admin.collection("teams").delete(id)
   },
 }
