@@ -67,32 +67,28 @@ export const groupsService = {
   },
 
   async listMembers(client: PocketBase, teamId: string): Promise<Member[]> {
-    const result = await client.collection("team_members").getFullList({
+    // team_member_details view: memberships × public profiles pre-joined —
+    // no expand chain, no fallback. The view deliberately omits email
+    // (emailVisibility masking doesn't apply to view rows), so the profile
+    // is built with an empty email; the UserPublic contract allows it.
+    const result = await client.collection("team_member_details").getFullList({
       filter: client.filter("team = {:teamId}", { teamId }),
-      expand: "user",
-      sort: "created",
+      sort: "joinedAt",
     })
     return result.map((record) => {
-      const expand = (record as unknown as Record<string, unknown>).expand as
-        | { user?: Record<string, unknown> }
-        | undefined
-      const expanded = expand?.user
-      const user: UserPublic = expanded
-        ? toPublicUser(expanded)
-        : {
-            // Rule-scoped fallback: expand can be denied if the caller can't
-            // view the user; members can (viewRule self), owners traverse.
-            id: record.user as string,
-            email: "",
-            username: "",
-            firstName: "",
-            lastName: "",
-            avatar: "",
-          }
+      const r = record as unknown as Record<string, unknown>
+      const user: UserPublic = {
+        id: r.userId as string,
+        email: "",
+        username: r.username as string,
+        firstName: r.firstName as string,
+        lastName: r.lastName as string,
+        avatar: r.avatar as string,
+      }
       return {
-        id: record.id,
-        role: record.role as Member["role"],
-        group: record.team as string,
+        id: r.id as string,
+        role: r.role as Member["role"],
+        group: r.team as string,
         user,
       }
     })

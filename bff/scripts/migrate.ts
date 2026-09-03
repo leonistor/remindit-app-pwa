@@ -54,15 +54,15 @@ const MANAGED_KEYS = [
   "passwordAuth",
 ] as const
 
-// Per-type managed keys: base/auth never carry viewQuery; views get their
-// fields auto-derived by PB from the query (never managed) and don't support
-// indexes — diffing them would make the reconcile loop forever.
-const managedKeysFor = (type: unknown): readonly string[] => {
-  const keys = MANAGED_KEYS.filter((key) => key !== "viewQuery")
-  return type === "view"
-    ? keys.filter((key) => key !== "fields" && key !== "indexes")
-    : keys
-}
+// Per-type managed keys: views get their fields auto-derived by PB from the
+// query (never managed) and don't support indexes; base/auth never carry a
+// viewQuery. viewQuery itself IS managed for views.
+const managedKeysFor = (type: unknown): readonly string[] =>
+  MANAGED_KEYS.filter((key) =>
+    type === "view"
+      ? key !== "fields" && key !== "indexes"
+      : key !== "viewQuery"
+  )
 
 const managedView = (collection: Record<string, unknown>): string =>
   JSON.stringify(

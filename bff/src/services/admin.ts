@@ -19,20 +19,18 @@ const stamps = (record: Record<string, unknown>) => ({
 export const adminService = {
   async overview(): Promise<AdminOverview> {
     const admin = await forSuperuser()
-    const collections = [
-      "users",
-      "teams",
-      "items",
-      "list_entries",
-      "history_events",
-    ] as const
-    const results = await Promise.all(
-      collections.map((name) => admin.collection(name).getList(1, 1))
-    )
-    const [users, groups, items, listEntries, historyEvents] = results.map(
-      (r) => r.totalItems
-    )
-    return { users, groups, items, listEntries, historyEvents }
+    // Single-row platform_stats view — one query instead of five perPage-1
+    // metadata pokes. Contract keys stay groups-named; the view's team
+    // counter is aliased `teams`.
+    const { items } = await admin.collection("platform_stats").getList(1, 1)
+    const row = items[0] as unknown as Record<string, number>
+    return {
+      users: row.users,
+      groups: row.teams,
+      items: row.items,
+      listEntries: row.listEntries,
+      historyEvents: row.historyEvents,
+    }
   },
 
   async listUsers(page = 1, perPage = 50): Promise<{
@@ -91,35 +89,21 @@ export const adminService = {
   },
 
   async listGroups(): Promise<AdminGroup[]> {
-    // PB collections are teams/team_members (renamed from groups/*); the
-    // AdminGroup contract keys stay unchanged.
+    // team_details view: ownerUsername + membersCount pre-joined by the
+    // schema — no two-fetch + JS-map join. (PB collections are
+    // teams/team_members; AdminGroup keys unchanged.)
     const admin = await forSuperuser()
-    const [groups, memberships] = await Promise.all([
-      admin.collection("teams").getFullList({ sort: "-created" }),
-      admin.collection("team_members").getFullList({ expand: "user" }),
-    ])
-    const ownerUsernames = new Map<string, string>()
-    for (const membership of memberships) {
-      const r = membership as unknown as Record<string, unknown>
-      if (r.role === "owner") {
-        const expand = r.expand as { user?: Record<string, unknown> } | undefined
-        const user = expand?.user
-        if (user) ownerUsernames.set(r.team as string, user.username as string)
-      }
-    }
-    const counts = new Map<string, number>()
-    for (const membership of memberships) {
-      const r = membership as unknown as Record<string, unknown>
-      counts.set(r.team as string, (counts.get(r.team as string) ?? 0) + 1)
-    }
-    return groups.map((record) => {
+    const teams = await admin.collection("team_details").getFullList({
+      sort: "-created",
+    })
+    return teams.map((record) => {
       const r = record as unknown as Record<string, unknown>
       return {
         id: r.id as string,
         name: r.name as string,
         owner: r.owner as string,
-        ownerUsername: ownerUsernames.get(r.id as string),
-        membersCount: counts.get(r.id as string) ?? 0,
+        ownerUsername: (r.ownerUsername as string) || undefined,
+        membersCount: (r.membersCount as number) ?? 0,
         ...stamps(r),
       }
     })
