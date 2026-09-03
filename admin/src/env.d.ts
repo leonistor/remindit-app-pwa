@@ -1,6 +1,8 @@
 /**
  * Ambient declarations for the admin module (mirrors web/src/env.d.ts):
  * `*.svg?raw` (brand via @remindit/common) + `*.css` side-effect imports.
+ * PUBLIC_* env reads use `process.env` (typed via @types/node) — no
+ * ImportMeta.env declaration needed since the P10 convention switch.
  */
 declare module "*.svg?raw" {
   const content: string
@@ -8,13 +10,3 @@ declare module "*.svg?raw" {
 }
 
 declare module "*.css"
-
-// Rsbuild's PUBLIC_* env convention (see root .env.example, D9). This file
-// is a global script (no imports/exports), so declarations merge with the
-// lib DOM types directly.
-interface ImportMeta {
-  env?: {
-    PUBLIC_BFF_URL?: string
-    [key: string]: unknown
-  }
-}
