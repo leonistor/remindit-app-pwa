@@ -141,11 +141,18 @@ in-flight reconciles would close the last wipe edge case.
   10s timeout → `AdminApiError` 408 (browser/undici abort shapes both
   handled, caller signals combined); per-row `deletingId` guard placed before
   the confirm dialog, in-flight row `loading` + all rows `disabled`.
-- [ ] **P9** pwa: align the token-rotation comment with reality or implement
-  header capture — `stores/sync/session.ts:1` vs `engine.ts:552`.
-- [ ] **P10** Pick one env-access convention for the Rsbuild modules
+- [x] **P9** pwa: align the token-rotation comment with reality or implement
+  header capture — `stores/sync/session.ts:1` vs `engine.ts:552`. Done
+  2026-09-03 (implemented, not just the comment): `X-Session-Token` capture on
+  both response paths (pb `afterSend` + injected bff-api handler — stores →
+  lib layering), `patchSessionToken` with a same-token loop guard, authStore
+  kept fresh. Sessions now outlive the original login token's TTL.
+- [x] **P10** Pick one env-access convention for the Rsbuild modules
   (`process.env` vs `import.meta.env`) — web uses the former, admin the
-  latter.
+  latter. Done 2026-09-03: `process.env` everywhere (root AGENTS.md's
+  documented convention); admin's `base()` switched, dead `ImportMeta.env`
+  declaration removed, build verified to inline the real value (fallback
+  DCE'd).
 - [x] **P11** bff integration tests accumulate fixture users forever —
   `admin.integration.test.ts` pulled `perPage=200` assuming the fixture is in
   the page; the instance crossed 200 users (flake hit 2026-09-03, fixtures
