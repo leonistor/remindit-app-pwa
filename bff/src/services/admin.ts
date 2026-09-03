@@ -9,7 +9,7 @@ import type {
   AdminUser,
   AdminUserCreateBody,
 } from "../contracts"
-import { forSuperuser } from "../repositories/pocketbase"
+import { withSuperuser } from "../repositories/pocketbase"
 
 const stamps = (record: Record<string, unknown>) => ({
   created: record.created as string | undefined,
@@ -18,11 +18,12 @@ const stamps = (record: Record<string, unknown>) => ({
 
 export const adminService = {
   async overview(): Promise<AdminOverview> {
-    const admin = await forSuperuser()
     // Single-row platform_stats view — one query instead of five perPage-1
     // metadata pokes. Contract keys stay groups-named; the view's team
     // counter is aliased `teams`.
-    const { items } = await admin.collection("platform_stats").getList(1, 1)
+    const { items } = await withSuperuser((admin) =>
+      admin.collection("platform_stats").getList(1, 1)
+    )
     const row = items[0] as unknown as Record<string, number>
     return {
       users: row.users,
@@ -42,12 +43,13 @@ export const adminService = {
     items: AdminUser[]
     total: number
   }> {
-    const admin = await forSuperuser()
     // NOTE: no sort — auth collections have no created/updated autodate
     // fields in PB 0.40 and sorting on them 400s.
-    const result = await admin.collection("users").getList(page, perPage, {
-      filter,
-    })
+    const result = await withSuperuser((admin) =>
+      admin.collection("users").getList(page, perPage, {
+        filter,
+      })
+    )
     return {
       items: result.items.map((record) => {
         const r = record as unknown as Record<string, unknown>
@@ -67,17 +69,18 @@ export const adminService = {
   },
 
   async createUser(body: AdminUserCreateBody): Promise<AdminUser> {
-    const admin = await forSuperuser()
-    const record = (await admin.collection("users").create({
-      email: body.email,
-      password: body.password,
-      passwordConfirm: body.password,
-      username: body.username,
-      role: body.role,
-      firstName: body.firstName ?? "",
-      lastName: body.lastName ?? "",
-      avatar: "",
-    })) as unknown as Record<string, unknown>
+    const record = (await withSuperuser((admin) =>
+      admin.collection("users").create({
+        email: body.email,
+        password: body.password,
+        passwordConfirm: body.password,
+        username: body.username,
+        role: body.role,
+        firstName: body.firstName ?? "",
+        lastName: body.lastName ?? "",
+        avatar: "",
+      })
+    )) as unknown as Record<string, unknown>
     return {
       id: record.id as string,
       email: (record.email as string) ?? "",
@@ -91,18 +94,18 @@ export const adminService = {
   },
 
   async deleteUser(id: string): Promise<void> {
-    const admin = await forSuperuser()
-    await admin.collection("users").delete(id)
+    await withSuperuser((admin) => admin.collection("users").delete(id))
   },
 
   async listGroups(): Promise<AdminGroup[]> {
     // team_details view: ownerUsername + membersCount pre-joined by the
     // schema — no two-fetch + JS-map join. (PB collections are
     // teams/team_members; AdminGroup keys unchanged.)
-    const admin = await forSuperuser()
-    const teams = await admin.collection("team_details").getFullList({
-      sort: "-created",
-    })
+    const teams = await withSuperuser((admin) =>
+      admin.collection("team_details").getFullList({
+        sort: "-created",
+      })
+    )
     return teams.map((record) => {
       const r = record as unknown as Record<string, unknown>
       return {
@@ -117,7 +120,6 @@ export const adminService = {
   },
 
   async deleteGroup(id: string): Promise<void> {
-    const admin = await forSuperuser()
-    await admin.collection("teams").delete(id)
+    await withSuperuser((admin) => admin.collection("teams").delete(id))
   },
 }
