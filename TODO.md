@@ -104,8 +104,11 @@ in-flight reconciles would close the last wipe edge case.
   satisfied by the H7/H8 rewrite: `authRefresh` lives in
   `repositories/pocketbase.ts` since f504aac; no `fetch(` remains in
   `bff/src/middleware/` (verified 2026-09-03).
-- [ ] **P3** bff forwarder: rewrite/strip `location` on 3xx (would leak the
+- [x] **P3** bff forwarder: rewrite/strip `location` on 3xx (would leak the
   internal PB URL), enumerate verbs instead of `.all` (`routes/pb.ts:28,46`).
+  Done 2026-09-03: GET/POST/PATCH/DELETE enumerated (+405 fallback with
+  `Allow`), `rewriteLocation` re-prefixes internal redirects onto the
+  client-facing `/pb` origin and strips third-party/unparseable ones.
 - [ ] **P4** bff tests: cookie-auth path, CORS allowlist behavior, `DELETE
   /api/admin/groups/:id`, forwarder PUT/PATCH/DELETE + query forwarding, admin
   create-admin role escalation.
