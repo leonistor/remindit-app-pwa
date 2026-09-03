@@ -195,6 +195,10 @@ in-flight reconciles would close the last wipe edge case.
 
 ## Phase D — platform deployment (unblocks V6)
 
+**Gated on deployment research (2026-09-03):** process-manager + backup
+choices for the VPS (D1) need a research pass before any of D1–D4 start;
+nothing is pushed yet (local commits through v5.0.0).
+
 - [ ] **D1** VPS process manager for the bff (Hono + PB), automated
   `pb_data/` backups (PB built-in backup endpoints / MCP `pb_backup`).
 - [ ] **D2** Deploy `web/` + `admin/` SSR bundles behind the reverse proxy
@@ -226,6 +230,25 @@ Deferred follow-ups:
   provisioned with undisclosed throwaway passwords today.
 - [ ] **FB6** Branding from `@remindit/common` (logo, colors) in the Answer
   theme.
+
+---
+
+## Known edges (non-blocking, surfaced by review)
+
+- **`switchGroup` in-flight-connect race** — a switch landing while a connect
+  is already in flight reuses that connect (H3 serialization); the old
+  group's realtime subscription can survive until the next
+  foreground/heartbeat reconnect. Self-healing; reconcile output stays
+  correct. Harden by cancelling/awaiting the in-flight connect in the switch
+  path.
+- **Cancelable in-flight reconciles** — the last wipe edge case from the
+  Phase H review (reconcile racing `wipeAllData`). Carried since then; the
+  `applying` flag prevents stacking but doesn't cancel.
+- **Notifications groundwork deferred (minimal by decision, D4)** — plain
+  text types + untyped payload, no dedupe key, `getFullList` without
+  pagination. When Web Push or digests arrive: typed `type` enum +
+  discriminated payload in contracts, `dedupeKey` + `(user, created)` indexes
+  via the idempotent migrate, paginated list.
 
 ---
 

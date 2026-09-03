@@ -37,8 +37,9 @@ rule matrix: [docs/API.md](docs/API.md).
 |-------|---------|
 | `POST /api/auth/register` / `login` / `logout`, `GET /api/auth/me` | PB auth pass-through (Bearer **and** HttpOnly session cookie; tokens rotate via auth-refresh) |
 | `GET/POST /api/groups`, `GET/DELETE /api/groups/:id` | shared workspaces (creator = owner member; underlying PB collections: `teams`/`team_members`) |
-| `GET/POST /api/groups/:id/members`, `DELETE …/:memberId` | membership management (owner-only mutations via PB rules) |
-| `GET /api/notifications`, `PATCH /api/notifications/:id` | stub (D4): list + mark-read |
+| `GET/POST /api/groups/:id/members`, `DELETE …/:memberId` | membership management (owner-only mutations via PB rules); lifecycle notification rows dispatched on membership changes (D4) |
+| `GET /api/users/lookup?username=` | exact-match username → minimal public profile (email masked) — resolves invitees for the pwa share flow |
+| `GET /api/notifications`, `PATCH /api/notifications/:id` | in-app notifications (D4): list + mark-read; rows are written by the groups service's dispatch (best-effort, superuser-side) |
 | `GET /api/admin/*` | role-guarded (`users.role = "admin"`, 403 otherwise): overview counts, user/group management, create-user, delete-group |
 | `ANY /pb/api/*` | authenticated PB data-plane forwarder (pwa sync — SSE-capable) |
 | `GET /api/stats` | public aggregate counts (superuser-side, 60s-cached) for the marketing site |

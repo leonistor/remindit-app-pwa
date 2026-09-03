@@ -66,16 +66,26 @@ BFF's error mapper with `{ error, details? }`.
 | `GET /api/groups/:id` | — | `200 Group` | member/owner only |
 | `DELETE /api/groups/:id` | — | `204` | owner only; PB cascades group data |
 | `GET /api/groups/:id/members` | — | `200 Member[]` | `{ id, role, group, user }` with expanded profile |
-| `POST /api/groups/:id/members` | `{ userId, role }` | `201 Member` | **owner only** (PB hydrated-record createRule); member invite → 400 |
-| `DELETE /api/groups/:id/members/:memberId` | — | `204` | owner removes anyone, members remove themselves |
+| `POST /api/groups/:id/members` | `{ userId, role }` | `201 Member` | **owner only** (PB hydrated-record createRule); member invite → 400; dispatches `member.added` to the invitee (D4) |
+| `DELETE /api/groups/:id/members/:memberId` | — | `204` | owner removes anyone, members remove themselves; dispatches `member.removed` (→ removed user) or `member.left` (→ owner, on self-leave) — membership/team/actor are read *before* the delete, since a departed member loses team read access |
 
-### Endpoints — notifications (stub, D4)
+### Endpoints — users
 
-Channel undecided; only the read path exists (dispatch in phase 5+).
+| Method & path | Auth | Query | Response | Notes |
+|---|---|---|---|---|
+| `GET /api/users/lookup` | Bearer/cookie | `username` (exact, `usernameSchema`-validated) | `200 UserPublic` (email `""`) / `404 { error: "user not found" }` | profile visibility per the `users` listRule (any authenticated user); resolves invitees for the pwa share flow |
+
+### Endpoints — notifications (D4 — in-app realtime)
+
+Channel decided 2026-09-03 (Web Push deferred, email rejected — ROADMAP D4).
+The rows are **written by the groups service** (best-effort, superuser-side —
+the createRule is self-only) on membership lifecycle events; these endpoints
+are the read/mark path only. Types are plain text; payload is untyped json:
+`{ teamId, teamName, actorUsername }`.
 
 | Method & path | Body | Response | Notes |
 |---|---|---|---|
-| `GET /api/notifications` | — | `200 Notification[]` | own only (`user = auth.id`) |
+| `GET /api/notifications` | — | `200 Notification[]` | own only (`user = auth.id`), newest order is caller-side |
 | `PATCH /api/notifications/:id` | `{ read }` | `200 Notification` | mark-read/unread |
 
 ### Endpoints — misc

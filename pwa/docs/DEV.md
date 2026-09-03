@@ -150,7 +150,7 @@ App state lives in **framework-agnostic [nanostores](https://github.com/nanostor
 
 All collections are persisted to `localStorage` with `@nanostores/persistent` (key prefix `remindit:`).
 
-**Sync (phase 5):** an overlay reconciles these local stores with the backend when a session exists — local-first stays the source of truth for every feature. Design, data-plane decision and conflict policy: [SYNC.md](SYNC.md); the control surface is the Sync card in the Profile view (`src/components/sync-card.tsx`, engine under `src/stores/sync/`).
+**Sync (phase 5):** an overlay reconciles these local stores with the backend when a session exists — local-first stays the source of truth for every feature. Design, data-plane decision and conflict policy: [SYNC.md](SYNC.md); the control surface is the sync card cluster in the Profile view — `SyncCard` (sign-in/up/out + status, `src/components/sync-card.tsx`), `SharedListCard` (group switcher, invite-by-username, member leave/remove — `src/components/shared-list-card.tsx`, via `groupActions` in `src/stores/sync/group-actions.ts`), and `NotificationsCard` (`src/components/notifications-card.tsx`, fed by the `$notifications` store + a user-scoped PB realtime subscription wired in the engine). Engine under `src/stores/sync/`.
 
 ### Model: Catalog + active list
 
@@ -172,6 +172,7 @@ All collections are persisted to `localStorage` with `@nanostores/persistent` (k
 | `history.ts`     | `$history`, `logHistory`, `clearHistory`                                                                                                                |
 | `commands.ts`    | Cross-store flows — `deleteCategoryWithReassign`, `deleteCatalogItemWithCascade`, `createItemAndAddToList`, full factory wipe `wipeAllData` (used by the local-data erase), backup restore `restoreLocalData` (see below) |
 | `user.ts`        | `$user`, `getUser`, `updateUser`, `randomUser` (offline initials fallback via `localAvatar`)                                                            |
+| `notifications.ts` | In-app notifications (D4, server state — never persisted): `$notifications` (newest-first), `$unreadCount`, `refreshNotifications()`, `markRead(id)`; cleared when `$syncSession` goes null. Realtime + connect-time refresh are wired in the sync engine; see [SYNC.md §Notifications](SYNC.md) |
 | `selectors.ts`   | computed `$itemsByCategory`, `$categoryById`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$selectedOrdered`, `$listItemIds`, `$catalogByCategory`, `$catalogByCategoryAll`, `$recommendations`, `$recommendationsByItemId` |
 | `recommender.ts` | `computeItemStats`, `getExpectedInterval`, `scoreItem`, `computeRecommendations`, `FREQ_TO_DAYS`                                                        |
 | `ui.ts`          | UI-preference state — `$accordionOpen`, `setAccordionOpen` (persists the available-items panel's accordion open-state) + list sort — `SelectedSort`, `$selectedSort`, `SELECTED_SORT_ORDER`, `cycleSelectedSort` (see [List sort feature](#list-sort-feature)) |
