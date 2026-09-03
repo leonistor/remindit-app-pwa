@@ -123,9 +123,13 @@ in-flight reconciles would close the last wipe edge case.
   history watch removed (interval/realtime still push), `lastSeenIds` cleared
   on signOut; the sign-out `bffApi.me` was already gone. Note: SYNC.md's
   trigger list doesn't mention the history exclusion yet.
-- [ ] **P6** pwa: remove unreachable drawer machinery —
+- [x] **P6** pwa: remove unreachable drawer machinery —
   `components/drawer-context.tsx`, `components/item-detail-drawer.tsx`, the
-  `$itemDetail` LRU in `stores/selectors.ts:324` (~80 lines of dead UI).
+  `$itemDetail` LRU in `stores/selectors.ts:324` (~80 lines of dead UI). Done
+  2026-09-03: also removed the now-consumer-less Shark `ui/drawer.tsx`
+  (re-addable via `bunx shadcn add @shark/drawer`), orphaned
+  `itemDetails`/`itemDetailsHint` i18n keys, and the stale DEV.md/DESIGN.md
+  references.
 - [ ] **P7** pwa: map `sync.lastError`/BFF messages to paraglide messages
   (`components/sync-card.tsx:64,89`); i18n the "Loading…" fallback
   (`router.tsx:60`).
