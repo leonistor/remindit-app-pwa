@@ -109,9 +109,12 @@ in-flight reconciles would close the last wipe edge case.
   Done 2026-09-03: GET/POST/PATCH/DELETE enumerated (+405 fallback with
   `Allow`), `rewriteLocation` re-prefixes internal redirects onto the
   client-facing `/pb` origin and strips third-party/unparseable ones.
-- [ ] **P4** bff tests: cookie-auth path, CORS allowlist behavior, `DELETE
+- [x] **P4** bff tests: cookie-auth path, CORS allowlist behavior, `DELETE
   /api/admin/groups/:id`, forwarder PUT/PATCH/DELETE + query forwarding, admin
-  create-admin role escalation.
+  create-admin role escalation. Done 2026-09-03: cookie fast-path + Bearer
+  precedence, CORS allowlist unit suite, admin group delete (+404 pin),
+  end-to-end admin-role escalation, query forwarding (PUT/PATCH/DELETE had
+  already landed with P3).
 - [ ] **P5** pwa sync: emit `heal` only on actual journal change
   (`reconcile.ts:130`), exclude `history_events` from store-change-triggered
   reconciles, reset `lastSeenIds` on signOut (`engine.ts:93`), remove the
