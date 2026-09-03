@@ -43,6 +43,7 @@ const canonicalize = (value: unknown): unknown => {
 
 const MANAGED_KEYS = [
   "type",
+  "viewQuery",
   "fields",
   "listRule",
   "viewRule",
@@ -53,11 +54,26 @@ const MANAGED_KEYS = [
   "passwordAuth",
 ] as const
 
+// Per-type managed keys: base/auth never carry viewQuery; views get their
+// fields auto-derived by PB from the query (never managed) and don't support
+// indexes — diffing them would make the reconcile loop forever.
+const managedKeysFor = (type: unknown): readonly string[] => {
+  const keys = MANAGED_KEYS.filter((key) => key !== "viewQuery")
+  return type === "view"
+    ? keys.filter((key) => key !== "fields" && key !== "indexes")
+    : keys
+}
+
 const managedView = (collection: Record<string, unknown>): string =>
   JSON.stringify(
     Object.fromEntries(
-      MANAGED_KEYS.map((key) => {
+      managedKeysFor(collection.type).map((key) => {
         let value = collection[key] ?? null
+        // PB stores the view query verbatim — compare whitespace-insensitively
+        // so reformatting the SQL in the builders stays a no-op.
+        if (key === "viewQuery" && typeof value === "string") {
+          value = value.replace(/\s+/g, " ").trim()
+        }
         // Exclude PB-managed fields (the PK "id" plus every field flagged
         // `system` — auth collections carry several, e.g. password/email).
         if (key === "fields" && Array.isArray(value)) {
@@ -97,6 +113,14 @@ const toWireFields = (
     const { collectionName: _drop, ...wire } = field
     return { ...wire, collectionId: id }
   })
+
+// View builders must carry their query — PB derives the fields from it.
+const requireViewQuery = (def: CollectionDef): string => {
+  if (!def.viewQuery) {
+    throw new Error(`view "${def.name}" is missing viewQuery`)
+  }
+  return def.viewQuery
+}
 
 // --- superuser bootstrap ----------------------------------------------------
 // Auth as the dev superuser; when the account doesn't exist yet, provision it
@@ -164,30 +188,50 @@ async function main(): Promise<void> {
   const fullPayload = (
     def: CollectionDef,
     fields: Record<string, unknown>[]
-  ) => ({
-    name: def.name,
-    type: def.type,
-    fields,
-    listRule: def.listRule ?? null,
-    viewRule: def.viewRule ?? null,
-    createRule: def.createRule ?? null,
-    updateRule: def.updateRule ?? null,
-    deleteRule: def.deleteRule ?? null,
-    indexes: def.indexes ?? [],
-    ...(def.passwordAuth ? { passwordAuth: def.passwordAuth } : {}),
-  })
+  ) =>
+    def.type === "view"
+      ? {
+          name: def.name,
+          type: def.type,
+          viewQuery: requireViewQuery(def),
+          listRule: def.listRule ?? null,
+          viewRule: def.viewRule ?? null,
+          // Views are read-only — mutation rules are always null.
+          createRule: null,
+          updateRule: null,
+          deleteRule: null,
+        }
+      : {
+          name: def.name,
+          type: def.type,
+          fields,
+          listRule: def.listRule ?? null,
+          viewRule: def.viewRule ?? null,
+          createRule: def.createRule ?? null,
+          updateRule: def.updateRule ?? null,
+          deleteRule: def.deleteRule ?? null,
+          indexes: def.indexes ?? [],
+          ...(def.passwordAuth ? { passwordAuth: def.passwordAuth } : {}),
+        }
 
   // Pass A — structure first: create missing collections WITHOUT rules.
   // Rules reference other collections by name (@collection.*), and PB
   // validates them at definition time, so all collections must exist before
-  // any rule is written. Relations only point backwards, so fields are safe.
+  // any rule is written. Relations only point backwards, and view queries
+  // select only tables declared earlier in the builders — so fields/queries
+  // are safe here. Views are created WITH their query (PB derives and
+  // validates the fields from it at save time).
   for (const def of desiredCollections) {
     if (byName.has(def.name)) continue
-    const created = await pb.collections.create({
-      name: def.name,
-      type: def.type,
-      fields: toWireFields(def.fields, nameToId),
-    })
+    const created = await pb.collections.create(
+      def.type === "view"
+        ? { name: def.name, type: def.type, viewQuery: requireViewQuery(def) }
+        : {
+            name: def.name,
+            type: def.type,
+            fields: toWireFields(def.fields, nameToId),
+          }
+    )
     nameToId.set(def.name, created.id)
     byName.set(def.name, created as unknown as Record<string, unknown>)
     actions.push(`created  ${def.name}`)
@@ -216,7 +260,7 @@ async function main(): Promise<void> {
       fullPayload(def, toWireFields(def.fields, nameToId))
     )
     const currentCanonical = managedView(current)
-    const diffKeys = MANAGED_KEYS.filter((key) => {
+    const diffKeys = managedKeysFor(def.type).filter((key) => {
       const a = JSON.parse(desiredCanonical)[key]
       const b = JSON.parse(currentCanonical)[key]
       return JSON.stringify(a) !== JSON.stringify(b)

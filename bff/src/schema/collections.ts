@@ -53,7 +53,15 @@ export type FieldDef = {
 
 export type CollectionDef = {
   name: string
-  type: "base" | "auth"
+  type: "base" | "view" | "auth"
+  /**
+   * View collections only: the SQL SELECT the collection is computed from.
+   * PB auto-derives the fields from the query (`fields` stays empty) and
+   * requires every query to select an `id` column. The SELECT runs directly
+   * against the SQLite tables — base-collection API rules do NOT apply inside
+   * it, so the view's own list/view rules are the only authorization guard.
+   */
+  viewQuery?: string
   fields: FieldDef[]
   /** PB rule semantics: "" = anyone (incl. anon), null/undefined = nobody (superuser only) */
   listRule?: string | null
@@ -73,6 +81,12 @@ const MEMBER_OF_GROUP = `@collection.group_members.user ?= @request.auth.id && @
 const MEMBER_OF_GROUP_BY_BODY = `@collection.group_members.user ?= @request.auth.id && @collection.group_members.group ?= @request.body.group`
 const GROUP_ACCESS = `group.owner = @request.auth.id || ${MEMBER_OF_GROUP}`
 const GROUP_ACCESS_CREATE = `group.owner = @request.auth.id || ${MEMBER_OF_GROUP_BY_BODY}`
+
+// View variants: rows that carry a `group` column use the shared fragments
+// unchanged; rows that ARE a group (`group_details` — row id = group id) use
+// the `id` form.
+const MEMBER_OF_GROUP_ROW = `@collection.group_members.user ?= @request.auth.id && @collection.group_members.group ?= id`
+const GROUP_ACCESS_ROW = `owner = @request.auth.id || ${MEMBER_OF_GROUP_ROW}`
 
 // Record timestamps (PB 0.40 only has them if defined) — the sync layer
 // (phase 5) keys last-write-wins off `updated`.
@@ -632,8 +646,165 @@ const notifications: CollectionDef = {
   ],
 }
 
+// ---------------------------------------------------------------------------
+// View collections — read-only, PB-computed from SQL:
+// - the SELECT runs directly against the SQLite tables (base-collection rules
+//   don't apply inside it) → every group-scoped view re-states the membership
+//   rule on its own rows; `platform_stats` stays superuser-only;
+// - `fields` is empty by design — PB derives the schema from `viewQuery`;
+// - no realtime events and no indexes on views — the sync layer (phase 5)
+//   keeps subscribing to the base collections; views are read-shape helpers
+//   for the BFF services and the pwa (via the /pb forwarder).
+// ---------------------------------------------------------------------------
+
+// Flattened memberships × profiles: replaces the `expand: "user"` + fallback
+// dance in the groups service; also scopes profiles to shared groups per-row
+// (the users-collection relaxation "any authenticated user" can shrink later).
+const groupMemberDetails: CollectionDef = {
+  name: "group_member_details",
+  type: "view",
+  viewQuery: `
+    SELECT
+      group_members.id,
+      group_members.\`group\`,
+      group_members.role,
+      group_members.created AS joinedAt,
+      users.id AS userId,
+      users.username,
+      users.firstName,
+      users.lastName,
+      users.avatar
+    FROM group_members
+    JOIN users ON users.id = group_members.user
+  `,
+  listRule: MEMBER_OF_GROUP,
+  viewRule: MEMBER_OF_GROUP,
+  fields: [],
+}
+
+// Per-group dashboard row: owner username + counts, replacing the two
+// full-list fetches + JS joins in the admin service (listGroups).
+const groupDetails: CollectionDef = {
+  name: "group_details",
+  type: "view",
+  viewQuery: `
+    SELECT
+      groups.id,
+      groups.name,
+      groups.owner,
+      groups.created,
+      (SELECT users.username FROM users WHERE users.id = groups.owner) AS ownerUsername,
+      COUNT(group_members.id) AS membersCount,
+      (SELECT COUNT(*) FROM items WHERE items.\`group\` = groups.id) AS itemsCount,
+      (SELECT COUNT(*) FROM list_entries
+        WHERE list_entries.\`group\` = groups.id AND list_entries.checked = 0) AS pendingCount,
+      (SELECT MAX(list_entries.addedAt) FROM list_entries
+        WHERE list_entries.\`group\` = groups.id) AS lastActivityAt
+    FROM groups
+    LEFT JOIN group_members ON group_members.\`group\` = groups.id
+    GROUP BY groups.id
+  `,
+  listRule: GROUP_ACCESS_ROW,
+  viewRule: GROUP_ACCESS_ROW,
+  fields: [],
+}
+
+// Single-row platform counters (constant `id`): one query for the marketing
+// /api/stats and the admin overview instead of N × getList(1, 1) metadata pokes.
+// Superuser-only (null rules) — both consumers read superuser-side anyway.
+const platformStats: CollectionDef = {
+  name: "platform_stats",
+  type: "view",
+  viewQuery: `
+    SELECT
+      'platform' AS id,
+      (SELECT COUNT(*) FROM users) AS users,
+      (SELECT COUNT(*) FROM groups) AS groups,
+      (SELECT COUNT(*) FROM items) AS items,
+      (SELECT COUNT(*) FROM list_entries) AS listEntries,
+      (SELECT COUNT(*) FROM history_events) AS historyEvents
+  `,
+  listRule: null,
+  viewRule: null,
+  fields: [],
+}
+
+// The shopping-list screen in one query: entry + item + category name/color.
+const listEntriesDetailed: CollectionDef = {
+  name: "list_entries_detailed",
+  type: "view",
+  viewQuery: `
+    SELECT
+      list_entries.id,
+      list_entries.\`group\`,
+      list_entries.localId,
+      list_entries.checked,
+      list_entries.addedAt,
+      items.id AS itemId,
+      items.name AS itemName,
+      items.localId AS itemLocalId,
+      categories.id AS categoryId,
+      categories.name AS categoryName,
+      categories.color AS categoryColor
+    FROM list_entries
+    JOIN items ON items.id = list_entries.item
+    JOIN categories ON categories.id = items.category
+  `,
+  listRule: MEMBER_OF_GROUP,
+  viewRule: MEMBER_OF_GROUP,
+  fields: [],
+}
+
+// Per-category item/pending counts (category screen, "in use" delete-guards).
+const categoryStats: CollectionDef = {
+  name: "category_stats",
+  type: "view",
+  viewQuery: `
+    SELECT
+      categories.id,
+      categories.\`group\`,
+      categories.name,
+      categories.frequency,
+      categories.color,
+      (SELECT COUNT(*) FROM items WHERE items.category = categories.id) AS itemsCount,
+      (SELECT COUNT(*) FROM list_entries
+        JOIN items ON items.id = list_entries.item
+        WHERE items.category = categories.id AND list_entries.checked = 0) AS pendingCount
+    FROM categories
+  `,
+  listRule: MEMBER_OF_GROUP,
+  viewRule: MEMBER_OF_GROUP,
+  fields: [],
+}
+
+// Purchase intelligence derived from the append-only history (join on the
+// itemId text snapshot, so renamed/deleted items can't break the view):
+// groundwork for "buy again" suggestions in later phases.
+const itemStats: CollectionDef = {
+  name: "item_stats",
+  type: "view",
+  viewQuery: `
+    SELECT
+      items.id,
+      items.\`group\`,
+      items.name,
+      items.category,
+      COUNT(CASE WHEN history_events.action = 'add' THEN 1 END) AS purchaseCount,
+      MAX(CASE WHEN history_events.action = 'add'
+          THEN history_events.timestamp END) AS lastPurchasedAt
+    FROM items
+    LEFT JOIN history_events ON history_events.itemId = items.id
+    GROUP BY items.id
+  `,
+  listRule: MEMBER_OF_GROUP,
+  viewRule: MEMBER_OF_GROUP,
+  fields: [],
+}
+
 // Dependency order: relations always reference collections defined earlier
-// (users exists by default in every PB instance).
+// (users exists by default in every PB instance); view queries select only
+// tables that exist, so every view is declared AFTER all base/auth
+// collections (the migrate script's structure pass creates in order).
 export const desiredCollections: CollectionDef[] = [
   users,
   groups,
@@ -643,6 +814,12 @@ export const desiredCollections: CollectionDef[] = [
   listEntries,
   historyEvents,
   notifications,
+  groupMemberDetails,
+  groupDetails,
+  platformStats,
+  listEntriesDetailed,
+  categoryStats,
+  itemStats,
 ]
 
 /** The sentinel category name provisioned per group (phase 3 groups service). */

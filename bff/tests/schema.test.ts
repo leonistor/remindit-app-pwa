@@ -43,4 +43,52 @@ describe("pb schema builders", () => {
   test("sentinel category name comes from common", () => {
     expect(SENTINEL_CATEGORY_NAME).toBe(UNCATEGORIZED_NAME)
   })
+
+  test("view collections are read-only: query present, no fields/indexes, null mutation rules", () => {
+    const views = desiredCollections.filter((c) => c.type === "view")
+    expect(views.length).toBeGreaterThan(0)
+    for (const view of views) {
+      expect(view.viewQuery?.trim()).toBeTruthy()
+      expect(view.fields).toEqual([])
+      expect(view.indexes ?? []).toEqual([])
+      expect(view.createRule ?? null).toBeNull()
+      expect(view.updateRule ?? null).toBeNull()
+      expect(view.deleteRule ?? null).toBeNull()
+    }
+  })
+
+  test("every view query selects an id column (PB requirement)", () => {
+    for (const view of desiredCollections.filter((c) => c.type === "view")) {
+      expect(view.viewQuery).toMatch(/SELECT/i)
+      expect(view.viewQuery).toMatch(/\bid\b/)
+    }
+  })
+
+  test("view queries only reference known collections", () => {
+    const known = new Set([
+      "users", // created by PocketBase itself in every instance
+      ...desiredCollections
+        .filter((c) => c.type !== "view")
+        .map((c) => c.name),
+    ])
+    for (const view of desiredCollections.filter((c) => c.type === "view")) {
+      const refs = [
+        ...(view.viewQuery ?? "").matchAll(/(?:FROM|JOIN)\s+([a-z_]+)/gi),
+      ].map((match) => match[1])
+      expect(refs.length).toBeGreaterThan(0)
+      for (const ref of refs) {
+        expect(known.has(ref)).toBe(true)
+      }
+    }
+  })
+
+  test("views are declared after every base/auth collection (structure pass creates tables before views)", () => {
+    const firstView = desiredCollections.findIndex((c) => c.type === "view")
+    const lastBase = desiredCollections.reduce(
+      (last, c, i) => (c.type === "view" ? last : i),
+      -1
+    )
+    expect(firstView).toBeGreaterThan(-1)
+    expect(firstView).toBeGreaterThan(lastBase)
+  })
 })
