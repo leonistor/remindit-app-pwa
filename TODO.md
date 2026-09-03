@@ -115,10 +115,14 @@ in-flight reconciles would close the last wipe edge case.
   precedence, CORS allowlist unit suite, admin group delete (+404 pin),
   end-to-end admin-role escalation, query forwarding (PUT/PATCH/DELETE had
   already landed with P3).
-- [ ] **P5** pwa sync: emit `heal` only on actual journal change
+- [x] **P5** pwa sync: emit `heal` only on actual journal change
   (`reconcile.ts:130`), exclude `history_events` from store-change-triggered
   reconciles, reset `lastSeenIds` on signOut (`engine.ts:93`), remove the
-  no-op `bffApi.me` call in `signOut` (`engine.ts:657`).
+  no-op `bffApi.me` call in `signOut` (`engine.ts:657`). Done 2026-09-03:
+  heal-on-change in both branches (+ persist guard for tombstone-only passes),
+  history watch removed (interval/realtime still push), `lastSeenIds` cleared
+  on signOut; the sign-out `bffApi.me` was already gone. Note: SYNC.md's
+  trigger list doesn't mention the history exclusion yet.
 - [ ] **P6** pwa: remove unreachable drawer machinery —
   `components/drawer-context.tsx`, `components/item-detail-drawer.tsx`, the
   `$itemDetail` LRU in `stores/selectors.ts:324` (~80 lines of dead UI).
