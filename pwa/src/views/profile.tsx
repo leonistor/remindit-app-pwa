@@ -11,6 +11,7 @@ import { type ChangeEvent, useEffect, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { AvatarPicker } from "@/components/avatar-picker"
+import { NotificationsCard } from "@/components/notifications-card"
 import { SyncCard } from "@/components/sync-card"
 import { SharedListCard } from "@/components/shared-list-card"
 import { BackButton } from "@/components/back-button"
@@ -287,6 +288,8 @@ const ProfileView = () => {
       {/* Sync & account (phase 5) — self-contained card. */}
       <SyncCard />
       <SharedListCard />
+      {/* Notifications (D4) — the activity feed of the sharing above. */}
+      <NotificationsCard />
 
       <Card className="w-full max-w-xl">
         <CardHeader

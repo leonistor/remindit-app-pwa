@@ -181,4 +181,14 @@ export const bffApi = {
 
   listNotifications: (token: string) =>
     request<Notification[]>("/api/notifications", { method: "GET", token }),
+
+  // Per-id mark-read (no mark-all endpoint): PATCH { read: true }. The
+  // response body (updated row) is ignored by the client — the store applies
+  // its own optimistic update.
+  markNotificationRead: (token: string, id: string) =>
+    request<void>(`/api/notifications/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ read: true }),
+      token,
+    }),
 }

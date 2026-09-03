@@ -18,6 +18,7 @@ import { $catalog } from "../catalog"
 import { $categories } from "../categories"
 import { $history } from "../history"
 import { $list } from "../list"
+import { refreshNotifications } from "../notifications"
 import { jsonStore, STORAGE_KEYS } from "../persistence"
 import type {
   CatalogItem,
@@ -133,6 +134,7 @@ const COLLECTIONS: SyncCollection[] = [
 
 let unsubscribeFns: Array<() => void> = []
 let reconcileTimer: ReturnType<typeof setTimeout> | null = null
+let notificationRefreshTimer: ReturnType<typeof setTimeout> | null = null
 let applying = false
 let profilePushTimer: ReturnType<typeof setTimeout> | null = null
 let connectPromise: Promise<void> | null = null
@@ -590,6 +592,17 @@ const scheduleReconcile = (): void => {
   }, 500)
 }
 
+// Notifications (D4): realtime bursts (invite + membership changes landing
+// together) collapse into one refresh — same debounce style as
+// scheduleReconcile, with a 1s window since the feed is non-urgent.
+const scheduleNotificationRefresh = (): void => {
+  if (notificationRefreshTimer) return
+  notificationRefreshTimer = setTimeout(() => {
+    notificationRefreshTimer = null
+    void refreshNotifications()
+  }, 1000)
+}
+
 // --- bootstrap / sign-in ----------------------------------------------------
 
 async function ensureGroup(): Promise<string> {
@@ -640,6 +653,12 @@ async function runConnect(): Promise<void> {
 
     await reconcileAll()
     await subscribeRealtime(groupId)
+    await subscribeNotifications()
+    // Notifications (D4): one refresh per successful connect (sign-in /
+    // foreground reconnect) — this plus the realtime subscription covers
+    // docs/SYNC.md's "listed on sign-in + poll on reconcile" plan without a
+    // poll per reconcile. Non-fatal: errors are swallowed in the store.
+    void refreshNotifications()
     wireStoreListeners()
   } catch (error) {
     setSyncState({
@@ -659,6 +678,34 @@ async function subscribeRealtime(groupId: string): Promise<void> {
     unsubscribeFns.push(() => {
       pb.collection(collection).unsubscribe("*")
     })
+  }
+}
+
+/**
+ * Notifications subscription (D4): user-scoped, not group-scoped like the
+ * data plane — the `notifications` rows carry `user`, so the filter keys on
+ * the session's user id and the subscription survives group switches (it is
+ * torn down and re-subscribed with everything else on reconnect, which is
+ * harmless). The unsubscribe rides `unsubscribeFns`, so the signOut /
+ * switchGroup teardown stays automatic. Not in COLLECTIONS/SPECS: this is
+ * not a synced collection. A failed subscribe must not fail the connect —
+ * notifications are best-effort (the connect-time refresh still lists what
+ * is there).
+ */
+async function subscribeNotifications(): Promise<void> {
+  const session = getSession()
+  if (!session) return
+  try {
+    await pb
+      .collection("notifications")
+      .subscribe("*", () => scheduleNotificationRefresh(), {
+        filter: pb.filter("user = {:userId}", { userId: session.userId }),
+      })
+    unsubscribeFns.push(() => {
+      pb.collection("notifications").unsubscribe("*")
+    })
+  } catch {
+    // Non-fatal: the data plane connects regardless.
   }
 }
 

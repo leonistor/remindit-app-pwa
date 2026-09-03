@@ -378,5 +378,15 @@
   "sharedListLeaveConfirmBody": "Acest dispozitiv nu mai sincronizează grupul respectiv și revine la lista ta proprie. Poți fi invitat(ă) din nou mai târziu.",
   "sharedListErrorNotFound": "Nu există niciun utilizator cu acest nume de utilizator.",
   "sharedListErrorNotMember": "Nu ești membru al grupului respectiv.",
+  "notificationsTitle": "Notificări",
+  "notificationsDescription": "Activitate recentă pe listele tale partajate.",
+  "notificationsUnreadOne": "1 necitită",
+  "notificationsUnreadOther": "{count} necitite",
+  "notificationsEmpty": "Nimic încă — activitatea pe listele tale partajate va apărea aici.",
+  "notificationsMarkRead": "Marchează ca citită",
+  "notificationMemberAdded": "{actor} te-a adăugat la „{team}”",
+  "notificationMemberLeft": "{actor} a părăsit „{team}”",
+  "notificationMemberRemoved": "Ai fost eliminat(ă) din „{team}”",
+  "notificationGeneric": "Activitate pe lista partajată.",
   "footerFeedback": "Feedback"
 }

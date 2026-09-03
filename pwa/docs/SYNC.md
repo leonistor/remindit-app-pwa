@@ -90,12 +90,26 @@ idempotent, so self-echoes are harmless.
 (LWW), pull on sign-in when the remote record is newer than the journal.
 `email` is auth-owned (login identity) — never synced from the profile.
 
-## Notifications (D4 status)
+## Notifications (D4 — decided 2026-09-03)
 
-The channel decision stays **open** (no push/email in this phase). The
-consumer is in-app only: `/api/notifications` listed on sign-in + poll on
-reconcile, surfaced in the Profile view. Dispatch (what creates
-notifications) arrives with the channel decision.
+Channel: **in-app realtime** (Web Push deferred, email rejected — see the D4
+row in [docs/ROADMAP.md](../../docs/ROADMAP.md)).
+
+- **Dispatch (BFF-side, best-effort):** the groups service writes
+  `notifications` rows superuser-side (createRule is self-only) on membership
+  lifecycle events only — `member.added` (→ added user), `member.left` (→
+  owner, on self-leave), `member.removed` (→ removed user, on owner-removal)
+  — payload `{ teamId, teamName, actorUsername }`. A dispatch failure never
+  fails the primary operation; there is no dedupe key by design.
+- **Consumer (pwa):** `$notifications` store; connect-time
+  `refreshNotifications()` + a user-scoped PB realtime subscription (not
+  group-scoped like the data plane — rows carry `user`), surfaced in the
+  Profile view with per-row mark-read (`PATCH /api/notifications/:id`). Not a
+  synced collection — no journal/map/tombstones.
+- List activity (items added/checked) deliberately dispatches nothing: the
+  shared list already updates live via the data plane, and per-item
+  notifications would be noise. A batched design ("added 6 items") is the
+  eventual shape if wanted.
 
 ## Security
 

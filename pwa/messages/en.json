@@ -378,5 +378,15 @@
   "sharedListLeaveConfirmBody": "This device stops syncing that group and goes back to your own list. You can be invited again later.",
   "sharedListErrorNotFound": "No user with that username.",
   "sharedListErrorNotMember": "You're not a member of that group.",
+  "notificationsTitle": "Notifications",
+  "notificationsDescription": "Recent activity on your shared lists.",
+  "notificationsUnreadOne": "1 unread",
+  "notificationsUnreadOther": "{count} unread",
+  "notificationsEmpty": "Nothing yet — activity on your shared lists will show up here.",
+  "notificationsMarkRead": "Mark read",
+  "notificationMemberAdded": "{actor} added you to “{team}”",
+  "notificationMemberLeft": "{actor} left “{team}”",
+  "notificationMemberRemoved": "You were removed from “{team}”",
+  "notificationGeneric": "Shared list activity.",
   "footerFeedback": "Feedback"
 }
