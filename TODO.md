@@ -136,8 +136,11 @@ in-flight reconciles would close the last wipe edge case.
   BFF contract strings (+ engine throw, fetch TypeError) to 8 `syncError*`
   keys with a generic fallback; router fallback reuses the existing `loading`
   key.
-- [ ] **P8** admin: fetch timeout in `api()` (web uses `AbortSignal.timeout`);
-  busy-guard the delete buttons (`users.tsx`, `groups.tsx`).
+- [x] **P8** admin: fetch timeout in `api()` (web uses `AbortSignal.timeout`);
+  busy-guard the delete buttons (`users.tsx`, `groups.tsx`). Done 2026-09-03:
+  10s timeout → `AdminApiError` 408 (browser/undici abort shapes both
+  handled, caller signals combined); per-row `deletingId` guard placed before
+  the confirm dialog, in-flight row `loading` + all rows `disabled`.
 - [ ] **P9** pwa: align the token-rotation comment with reality or implement
   header capture — `stores/sync/session.ts:1` vs `engine.ts:552`.
 - [ ] **P10** Pick one env-access convention for the Rsbuild modules
