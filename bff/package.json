@@ -11,7 +11,8 @@
     "dev": "bun scripts/dev.ts",
     "start": "bun src/index.ts",
     "migrate": "bun scripts/migrate.ts",
-    "test": "bun test",
+    "backfill:feedback": "bun scripts/backfill-feedback.ts",
+    "test": "FEEDBACK_BRIDGE=off bun test",
     "typecheck": "tsc --noEmit --pretty",
     "lint": "biome lint",
     "check": "biome check --write --unsafe"

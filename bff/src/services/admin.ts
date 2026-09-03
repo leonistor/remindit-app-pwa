@@ -33,14 +33,21 @@ export const adminService = {
     }
   },
 
-  async listUsers(page = 1, perPage = 50): Promise<{
+  async listUsers(
+    page = 1,
+    perPage = 50,
+    /** Optional PB filter — lets callers scope the page (e.g. by username). */
+    filter?: string
+  ): Promise<{
     items: AdminUser[]
     total: number
   }> {
     const admin = await forSuperuser()
     // NOTE: no sort — auth collections have no created/updated autodate
     // fields in PB 0.40 and sorting on them 400s.
-    const result = await admin.collection("users").getList(page, perPage)
+    const result = await admin.collection("users").getList(page, perPage, {
+      filter,
+    })
     return {
       items: result.items.map((record) => {
         const r = record as unknown as Record<string, unknown>

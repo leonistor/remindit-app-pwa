@@ -11,6 +11,7 @@ import type {
   UserPublic,
 } from "../contracts"
 import { pb } from "../repositories/pocketbase"
+import { feedbackService } from "./feedback"
 
 export const toPublicUser = (record: Record<string, unknown>): UserPublic => ({
   id: record.id as string,
@@ -24,7 +25,7 @@ export const toPublicUser = (record: Record<string, unknown>): UserPublic => ({
 
 export const authService = {
   async register(body: RegisterBody): Promise<AuthResponse> {
-    await pb.collection("users").create({
+    const created = await pb.collection("users").create({
       username: body.username,
       email: body.email,
       password: body.password,
@@ -33,6 +34,13 @@ export const authService = {
       lastName: body.lastName ?? "",
       avatar: "",
     })
+    // One-way feedback bridge — awaited (not fire-and-forget): PB record
+    // PATCHes are load-merge-write, so a provisioning update racing a
+    // subsequent same-record update loses fields (seen as wiped role fields in
+    // the admin integration suite). Non-fatal inside — an Answer outage never
+    // fails registration (the backfill script covers skipped users later).
+    // The email is passed explicitly: PB hides it on create responses.
+    await feedbackService.provisionQuietly(created, { email: body.email })
     // PB create does not return a token — authenticate to mint one.
     return authService.login({ email: body.email, password: body.password })
   },
@@ -48,7 +56,9 @@ export const authService = {
   },
 
   /** Returns the validated user from the auth middleware's auth context. */
-  me(auth: { record: () => Promise<Record<string, unknown>> }): Promise<UserPublic> {
+  me(auth: {
+    record: () => Promise<Record<string, unknown>>
+  }): Promise<UserPublic> {
     return auth.record().then(toPublicUser)
   },
 }

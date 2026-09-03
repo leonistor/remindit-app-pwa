@@ -183,6 +183,20 @@ const users: CollectionDef = {
       pattern: "",
       autogeneratePattern: "",
     },
+    // One-way feedback bridge (phase: feedback): the Answer-side username
+    // provisioned at registration (or backfill). Hidden — internal linkage
+    // written/read by the BFF only, never surfaced to clients.
+    {
+      type: "text",
+      name: "feedback_username",
+      required: false,
+      hidden: true,
+      presentable: false,
+      min: 0,
+      max: 64,
+      pattern: "",
+      autogeneratePattern: "",
+    },
   ],
   indexes: ["CREATE UNIQUE INDEX `idx_users_username` ON `users` (`username`)"],
 }
@@ -291,7 +305,7 @@ const categories: CollectionDef = {
   updateRule: TEAM_ACCESS,
   deleteRule: TEAM_ACCESS,
   fields: [
-        {
+    {
       type: "text",
       name: "localId",
       required: false,
@@ -347,7 +361,9 @@ const categories: CollectionDef = {
     },
     ...stamps(),
   ],
-  indexes: ["CREATE UNIQUE INDEX `idx_categories_team_local` ON `categories` (`team`, `localId`)"],
+  indexes: [
+    "CREATE UNIQUE INDEX `idx_categories_team_local` ON `categories` (`team`, `localId`)",
+  ],
 }
 
 // items ---------------------------------------------------------------------
@@ -362,7 +378,7 @@ const items: CollectionDef = {
   updateRule: TEAM_ACCESS,
   deleteRule: TEAM_ACCESS,
   fields: [
-        {
+    {
       type: "text",
       name: "localId",
       required: false,
@@ -408,7 +424,9 @@ const items: CollectionDef = {
     },
     ...stamps(),
   ],
-  indexes: ["CREATE UNIQUE INDEX `idx_items_team_local` ON `items` (`team`, `localId`)"],
+  indexes: [
+    "CREATE UNIQUE INDEX `idx_items_team_local` ON `items` (`team`, `localId`)",
+  ],
 }
 
 // list_entries --------------------------------------------------------------
@@ -422,7 +440,7 @@ const listEntries: CollectionDef = {
   updateRule: TEAM_ACCESS,
   deleteRule: TEAM_ACCESS,
   fields: [
-        {
+    {
       type: "text",
       name: "localId",
       required: false,
@@ -474,7 +492,9 @@ const listEntries: CollectionDef = {
     },
     ...stamps(),
   ],
-  indexes: ["CREATE UNIQUE INDEX `idx_list_entries_team_local` ON `list_entries` (`team`, `localId`)"],
+  indexes: [
+    "CREATE UNIQUE INDEX `idx_list_entries_team_local` ON `list_entries` (`team`, `localId`)",
+  ],
 }
 
 // history_events ------------------------------------------------------------
@@ -490,7 +510,7 @@ const historyEvents: CollectionDef = {
   updateRule: null,
   deleteRule: null,
   fields: [
-        {
+    {
       type: "text",
       name: "localId",
       required: false,
@@ -577,7 +597,9 @@ const historyEvents: CollectionDef = {
     },
     ...stamps(),
   ],
-  indexes: ["CREATE UNIQUE INDEX `idx_history_events_team_local` ON `history_events` (`team`, `localId`)"],
+  indexes: [
+    "CREATE UNIQUE INDEX `idx_history_events_team_local` ON `history_events` (`team`, `localId`)",
+  ],
 }
 
 // notifications -------------------------------------------------------------

@@ -1,0 +1,19 @@
+{
+  "name": "@remindit/feedback",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "bun scripts/setup.ts",
+    "start": "bun scripts/start.ts",
+    "stop": "bun scripts/stop.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit --pretty",
+    "lint": "biome lint",
+    "check": "biome check --write --unsafe"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.0",
+    "typescript": "^7.0.2"
+  }
+}

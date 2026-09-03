@@ -11,6 +11,7 @@ Bun workspace for the Remindit project.
 | `@remindit/bff`     | bff/     | PocketBase + Hono backend-for-frontend — see [bff/README.md](bff/README.md)     |
 | `@remindit/web`     | web/     | Marketing site (Rsbuild + TanStack Start) — see [web/README.md](web/README.md)  |
 | `@remindit/admin`   | admin/   | Admin dashboard (Rsbuild + TanStack Start + Mantine) — see [admin/README.md](admin/README.md) |
+| `@remindit/feedback` | feedback/ | Apache Answer sidecar (community Q&A/feedback, port 5555) — see [feedback/README.md](feedback/README.md) |
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the roadmap (product versions +
 platform decision log) and [TODO.md](TODO.md) for active work.

@@ -121,6 +121,11 @@ in-flight reconciles would close the last wipe edge case.
 - [ ] **P10** Pick one env-access convention for the Rsbuild modules
   (`process.env` vs `import.meta.env`) — web uses the former, admin the
   latter.
+- [x] **P11** bff integration tests accumulate fixture users forever —
+  `admin.integration.test.ts` pulled `perPage=200` assuming the fixture is in
+  the page; the instance crossed 200 users (flake hit 2026-09-03, fixtures
+  pruned by hand). Fixed: `listUsers` gained a `filter` param and the test
+  scopes to its fixture username.
 
 ---
 
@@ -147,10 +152,33 @@ in-flight reconciles would close the last wipe edge case.
 - [ ] **D4** Deploy the current pwa bundle (SW-safe release flow, see
   `pwa/docs/DEPLOY.md`).
 
+## Phase FB — feedback module (V6 feedback capture) — setup + bridge done 2026-09-03
+
+Apache Answer sidecar (`feedback/`, branch `feat/feedback`): setup/start/stop
+scripts + Caddy host + one-way user bridge (register hook + backfill).
+Deferred follow-ups:
+
+- [ ] **FB1** Footer links — `target=_blank` to the feedback URL from the pwa
+  (`pwa/src/components/footer.tsx`) and web (`web/src/routes/__root.tsx`)
+  footers; `PUBLIC_FEEDBACK_URL` env + en/ro strings.
+- [ ] **FB2** Submit API — params `from_module=pwa|web`, route, user, text;
+  BFF-mediated post into Answer.
+- [ ] **FB3** Tags — seed `bug`, `feature-request`, `discussion`,
+  `development` (docs/FEEDBACK.md).
+- [ ] **FB4** Plugin quick-links (apache/answer-plugins quick-links) + links
+  to bug / feature-request / discussion.
+- [ ] **FB5** Login story for bridged users (SSO / email-invite) — they are
+  provisioned with undisclosed throwaway passwords today.
+- [ ] **FB6** Branding from `@remindit/common` (logo, colors) in the Answer
+  theme.
+
+---
+
 ## Later (roadmap §1 V6 + wishlist)
 
-Community & feedback capture, basic AI features, LLM/MCP integration; item
-attributes (photo/quantity/price), native app, notifications & live updates.
+Community & feedback capture (phase FB above), basic AI features, LLM/MCP
+integration; item attributes (photo/quantity/price), native app, notifications
+& live updates.
 
 ### Evaluated & rejected (2026-09-03)
 

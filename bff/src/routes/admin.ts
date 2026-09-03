@@ -2,11 +2,11 @@
 // the session and the guard checks `record.role` server-side. Non-admins get
 // 403 before any superuser-side query runs.
 
-import { createMiddleware } from "hono/factory"
 import { Hono } from "hono"
+import { createMiddleware } from "hono/factory"
 import { adminUserCreateBodySchema } from "../contracts"
 import { validatedJson } from "../lib/validation"
-import { requireAuth, type AppEnv } from "../middleware/auth"
+import { type AppEnv, requireAuth } from "../middleware/auth"
 import { adminService } from "../services/admin"
 
 const requireAdmin = createMiddleware<AppEnv>(async (c, next) => {
@@ -25,12 +25,11 @@ export const admin = new Hono<AppEnv>()
   .get("/users", async (c) => {
     const page = Number(c.req.query("page") ?? "1") || 1
     const perPage = Math.min(Number(c.req.query("perPage") ?? "50") || 50, 200)
-    return c.json(await adminService.listUsers(page, perPage))
+    const filter = c.req.query("filter") || undefined
+    return c.json(await adminService.listUsers(page, perPage, filter))
   })
-  .post(
-    "/users",
-    validatedJson(adminUserCreateBodySchema),
-    async (c) => c.json(await adminService.createUser(c.req.valid("json")), 201),
+  .post("/users", validatedJson(adminUserCreateBodySchema), async (c) =>
+    c.json(await adminService.createUser(c.req.valid("json")), 201)
   )
   .delete("/users/:id", async (c) => {
     if (c.req.param("id") === c.get("auth").userId) {

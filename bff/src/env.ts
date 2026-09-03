@@ -39,4 +39,15 @@ export const env = {
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean),
+  /**
+   * Apache Answer (feedback sidecar) — internal base URL + admin credentials.
+   * The bridge logs in as this admin to provision app users at registration
+   * (one-way; see services/feedback.ts). Defaults match .env.example.
+   */
+  answerInternalUrl: process.env.ANSWER_INTERNAL_URL ?? "http://127.0.0.1:5555",
+  answerAdminName: process.env.ANSWER_ADMIN_NAME ?? "remindit_admin",
+  answerAdminEmail:
+    process.env.ANSWER_ADMIN_EMAIL ?? "feedback-admin@remindit.local",
+  answerAdminPassword:
+    process.env.ANSWER_ADMIN_PASSWORD ?? "change-me-dev-only",
 }

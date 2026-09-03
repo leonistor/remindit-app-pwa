@@ -13,11 +13,13 @@
 #   web.remindit.localhost   -> web dev server  (Rsbuild, :3200)
 #   admin.remindit.localhost -> admin dev server (Rsbuild, :3300)
 #   bff.remindit.localhost   -> Hono BFF        (:3100)
+#   feedback.remindit.localhost -> Apache Answer (:5555)
 #
 # PocketBase is intentionally NOT proxied (D2: never a public surface) — its
 # admin UI stays on http://127.0.0.1:8090/_/ .
-# The dev servers must be running (`bun run dev:all`), otherwise Caddy
-# answers 502; direct-port URLs (http://localhost:3000) keep working.
+# The dev servers must be running (`bun run dev:all`, feedback via
+# `bun run dev:feedback`), otherwise Caddy answers 502; direct-port URLs
+# (http://localhost:3000) keep working.
 
 pwa.remindit.localhost {
 	reverse_proxy 127.0.0.1:3000
@@ -33,4 +35,8 @@ admin.remindit.localhost {
 
 bff.remindit.localhost {
 	reverse_proxy 127.0.0.1:3100
+}
+
+feedback.remindit.localhost {
+	reverse_proxy 127.0.0.1:5555
 }

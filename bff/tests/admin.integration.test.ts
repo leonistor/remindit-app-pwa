@@ -5,12 +5,12 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 import { hc } from "hono/client"
 import type { ZodType } from "zod"
+import { type AppType, app } from "../src/app"
 import {
   adminOverviewSchema,
   adminUserPageSchema,
   userPublicSchema,
 } from "../src/contracts"
-import { app, type AppType } from "../src/app"
 import { env } from "../src/env"
 import { forSuperuser } from "../src/repositories/pocketbase"
 
@@ -96,10 +96,10 @@ describeIfPb("admin API (live)", () => {
   })
 
   test("users list includes email + role (admin-only fields)", async () => {
-    // The instance accumulates users across runs — pull a large page so the
-    // fixture is included.
+    // Scope to the fixture: the instance accumulates users across runs, so a
+    // bare page cannot be assumed to contain the newest records.
     const res = await client.api.admin.users.$get(
-      { query: { perPage: "200" } },
+      { query: { filter: `username = "adm-${run}"` } },
       authOptions(adminToken)
     )
     expect(res.status).toBe(200)
