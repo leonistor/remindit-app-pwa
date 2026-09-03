@@ -739,11 +739,15 @@ export async function signUp(body: {
   await connect()
 }
 
-export async function signOut(): Promise<void> {
-  for (const unsubscribe of unsubscribeFns) unsubscribe()
-  unsubscribeFns = []
-  setSession(null)
-  $syncGroup.set("")
+/**
+ * Empties the group-scoped sync buffers (map/journal/tombstones) and the
+ * in-memory lastSeenIds snapshots. Shared by signOut (full teardown) and
+ * switchGroup (group-scoped teardown keeping session + local data): stale
+ * buffers from the previous group would mis-judge the next group's records —
+ * a stale journal entry judges a still-remote record as "locally deleted",
+ * stale lastSeenIds manufacture false tombstones on the first store change.
+ */
+function clearSyncBuffers(): void {
   $syncMap.set({
     categories: {},
     items: {},
@@ -762,12 +766,64 @@ export async function signOut(): Promise<void> {
     list_entries: [],
     history_events: [],
   })
-  // Fresh id snapshots for the next sign-in: a stale `lastSeenIds` set from
-  // the previous session would turn the next session's first store change
-  // into false tombstones (its ids no longer exist locally).
+  // Fresh id snapshots for the next session/group: a stale `lastSeenIds` set
+  // from the previous one would turn the first store change into false
+  // tombstones (its ids no longer exist locally).
   for (const key of Object.keys(lastSeenIds)) delete lastSeenIds[key]
+}
+
+export async function signOut(): Promise<void> {
+  for (const unsubscribe of unsubscribeFns) unsubscribe()
+  unsubscribeFns = []
+  setSession(null)
+  $syncGroup.set("")
+  clearSyncBuffers()
   pb.authStore.clear()
   setSyncState({ status: "off", groupId: null, lastError: null })
+}
+
+/**
+ * Switch the active group: tear down sync state (NOT the session, NOT local
+ * data), repoint $syncGroup, reconnect — the next reconcile merges local data
+ * into the selected group and adopts its remote records (docs/SYNC.md "group
+ * switch" trigger, merge semantics). Rejects before any teardown when there
+ * is no session or the group is not among the caller's groups — state stays
+ * fully intact on rejection. Like connect, the tail serializes on
+ * `connectPromise` (H3): a concurrent in-flight connect is reused, never
+ * duplicated.
+ */
+export async function switchGroup(groupId: string): Promise<void> {
+  const session = getSession()
+  if (!session) throw new Error("not signed in")
+  const groups = await bffApi.listGroups(session.token)
+  if (!groups.some((group) => group.id === groupId)) {
+    throw new Error("group not found")
+  }
+  // Unsubscribe the old group's realtime first: once $syncGroup is repointed,
+  // stale events for the previous group would schedule reconciles keyed to
+  // the new active group. connect() re-subscribes for the new group.
+  for (const unsubscribe of unsubscribeFns) unsubscribe()
+  unsubscribeFns = []
+  $syncGroup.set(groupId)
+  clearSyncBuffers()
+  setSyncState({ groupId, status: "connecting", lastError: null })
+  await connect()
+}
+
+/**
+ * After a leave/remove: if the stored active group is no longer in the
+ * caller's groups, re-point to the first remaining group (or create "My
+ * list") via switchGroup. No-op when the current group is still valid. The
+ * just-created group passes switchGroup's membership check because the BFF
+ * creates the owner membership row inside the same createGroup request.
+ */
+export async function recoverActiveGroup(): Promise<void> {
+  const session = getSession()
+  if (!session) return
+  const groups = await bffApi.listGroups(session.token)
+  if (groups.some((group) => group.id === $syncGroup.get())) return
+  const next = groups[0]?.id ?? (await bffApi.createGroup(session.token, "My list")).id
+  await switchGroup(next)
 }
 
 /** Called once from the app bootstrap (after initStores). */

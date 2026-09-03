@@ -16,7 +16,14 @@ import { $catalog } from "@/stores/catalog"
 import { $history } from "@/stores/history"
 import { $list } from "@/stores/list"
 import { STORAGE_KEYS } from "@/stores/persistence"
-import { $syncState, reconcileAll, signIn, signOut } from "@/stores/sync/engine"
+import {
+  $syncState,
+  reconcileAll,
+  recoverActiveGroup,
+  signIn,
+  signOut,
+  switchGroup,
+} from "@/stores/sync/engine"
 import type { HistoryEvent } from "@/stores/types"
 import { resetStores } from "../fixtures/reset"
 
@@ -37,6 +44,14 @@ const readTombstones = (collection: string): string[] => {
   const raw = localStorage.getItem(STORAGE_KEYS.syncTombstones)
   const parsed = raw === null ? {} : JSON.parse(raw)
   return (parsed as Record<string, string[]>)[collection] ?? []
+}
+
+const readSyncGroup = (): string =>
+  JSON.parse(localStorage.getItem(STORAGE_KEYS.syncGroup) ?? '""') as string
+
+const readSyncMap = (): Record<string, Record<string, string>> => {
+  const raw = localStorage.getItem(STORAGE_KEYS.syncMap)
+  return raw === null ? {} : JSON.parse(raw)
 }
 
 const pbState = rs.hoisted(() => {
@@ -309,5 +324,148 @@ describe("sync engine (stubbed clients)", () => {
     // manufacture tombstones either.
     await wait(700)
     expect(readTombstones("list_entries")).toEqual([])
+  })
+
+  test("switchGroup rejects a non-member group and leaves the sync state untouched", async () => {
+    stubAuth([{ id: "g1", name: "My list" }])
+    await signIn(EMAIL, "pw")
+    $catalog.set([{ id: "t1-item", name: "Milk", categoryId: "uncategorized" }])
+    await reconcileAll()
+
+    const listsBefore = pbState.calls.lists.length
+    const mapBefore = readSyncMap()
+
+    await expect(switchGroup("g-other")).rejects.toThrow("group not found")
+
+    // The rejection happened before any teardown: the active group, the
+    // persisted group id, the sync map and the reconcile cadence are intact.
+    expect($syncState.get().groupId).toBe("g1")
+    expect(readSyncGroup()).toBe("g1")
+    expect(readSyncMap()).toEqual(mapBefore)
+    expect(pbState.calls.lists.length).toBe(listsBefore)
+
+    // And without a session it rejects like ensureGroup does.
+    await signOut()
+    await expect(switchGroup("g1")).rejects.toThrow("not signed in")
+  })
+
+  test("switchGroup clears the sync buffers and re-reconciles against the new group", async () => {
+    stubAuth([
+      { id: "g1", name: "My list" },
+      { id: "g2", name: "Shared" },
+    ])
+    await signIn(EMAIL, "pw")
+    expect($syncState.get().groupId).toBe("g1")
+
+    // Local data lands in g1 (and "t1-item" in the lastSeenIds snapshot).
+    $catalog.set([{ id: "t1-item", name: "Milk", categoryId: "uncategorized" }])
+    await reconcileAll()
+    expect(
+      pbState.calls.creates.some(
+        (c) => c.collection === "items" && c.payload.group === "g1"
+      )
+    ).toBe(true)
+
+    // The stubbed getFullList ignores group filters, so emulate the server
+    // side: g1's records are gone from view, g2 exposes a shared item.
+    pbState.remote.items = [
+      { id: "pb-i2", localId: "t2-item", updated: T1, name: "Tea", group: "g2" },
+    ]
+
+    await switchGroup("g2")
+
+    expect($syncState.get().groupId).toBe("g2")
+    expect($syncState.get().status).toBe("online")
+
+    // Map/journal were cleared: the local item is re-pushed into g2 (not
+    // adopted against a stale mapping) and g2's shared item is adopted.
+    expect(
+      pbState.calls.creates.some(
+        (c) =>
+          c.collection === "items" &&
+          c.payload.group === "g2" &&
+          c.payload.localId === "t1-item"
+      )
+    ).toBe(true)
+    expect($catalog.get().map((item) => item.name).sort()).toEqual([
+      "Milk",
+      "Tea",
+    ])
+
+    // lastSeenIds was cleared too: dropping the pre-switch id must not
+    // manufacture a tombstone (a stale snapshot would mark "t1-item"
+    // deleted on the spot).
+    $catalog.set($catalog.get().filter((item) => item.name !== "Milk"))
+    expect(readTombstones("items")).toEqual([])
+    await wait(700)
+    expect(readTombstones("items")).toEqual([])
+  })
+
+  test("recoverActiveGroup no-ops while the stored group is still a membership", async () => {
+    stubAuth([
+      { id: "g1", name: "My list" },
+      { id: "g2", name: "Shared" },
+    ])
+    await signIn(EMAIL, "pw")
+    // The lists probe doubles as a "did a reconcile run" check: a no-op
+    // recovery must not trigger a second connect/reconcile pass.
+    pbState.calls.lists.length = 0
+
+    await recoverActiveGroup()
+
+    expect($syncState.get().groupId).toBe("g1")
+    expect(readSyncGroup()).toBe("g1")
+    expect(pbState.calls.lists).toEqual([])
+  })
+
+  test("recoverActiveGroup re-points to the first remaining group after a removal", async () => {
+    stubAuth([{ id: "g1", name: "My list" }])
+    await signIn(EMAIL, "pw")
+    $catalog.set([{ id: "t1-item", name: "Milk", categoryId: "uncategorized" }])
+    await reconcileAll()
+
+    // The device was removed from g1 but is still a member of g2. The
+    // stubbed getFullList ignores group filters, so emulate the server
+    // side: g1's records are no longer visible after the removal.
+    bffApi.listGroups.mockImplementation(async () => [
+      { id: "g2", name: "Shared" },
+    ])
+    pbState.remote.items = pbState.remote.items.filter((r) => r.group === "g2")
+
+    await recoverActiveGroup()
+
+    expect($syncState.get().groupId).toBe("g2")
+    // The local data was merged into the new active group.
+    expect(
+      pbState.calls.creates.some(
+        (c) =>
+          c.collection === "items" &&
+          c.payload.group === "g2" &&
+          c.payload.localId === "t1-item"
+      )
+    ).toBe(true)
+  })
+
+  test("recoverActiveGroup creates 'My list' when no groups remain", async () => {
+    stubAuth([{ id: "g1", name: "My list" }])
+    await signIn(EMAIL, "pw")
+
+    // Server model: createGroup appends the owner membership, so the
+    // freshly created group shows up in the next listGroups (switchGroup's
+    // membership check depends on that).
+    const groups: Array<{ id: string; name: string }> = []
+    bffApi.listGroups.mockImplementation(async () => [...groups])
+    bffApi.createGroup.mockImplementation(async () => {
+      pbState.calls.groupsCreated += 1
+      const group = { id: "g-created", name: "My list" }
+      groups.push(group)
+      return group
+    })
+
+    await recoverActiveGroup()
+
+    expect(pbState.calls.groupsCreated).toBe(1)
+    expect($syncState.get().groupId).toBe("g-created")
+    expect(readSyncGroup()).toBe("g-created")
   })
 })

@@ -33,6 +33,13 @@ export type Group = {
 
 export type MemberRole = "owner" | "member"
 
+export type Member = {
+  id: string
+  role: MemberRole
+  group: string
+  user: UserPublic
+}
+
 export type Notification = {
   id: string
   type: string
@@ -136,6 +143,12 @@ export const bffApi = {
   me: (token: string) =>
     request<UserPublic>("/api/auth/me", { method: "GET", token }),
 
+  lookupUser: (token: string, username: string) =>
+    request<UserPublic>(
+      `/api/users/lookup?username=${encodeURIComponent(username)}`,
+      { method: "GET", token }
+    ),
+
   createGroup: (token: string, name: string) =>
     request<Group>("/api/groups", {
       method: "POST",
@@ -145,6 +158,26 @@ export const bffApi = {
 
   listGroups: (token: string) =>
     request<Group[]>("/api/groups", { method: "GET", token }),
+
+  listMembers: (token: string, groupId: string) =>
+    request<Member[]>(`/api/groups/${encodeURIComponent(groupId)}/members`, {
+      method: "GET",
+      token,
+    }),
+
+  // Role is fixed to "member" for V5: only owners may grant "owner" later.
+  inviteMember: (token: string, groupId: string, userId: string) =>
+    request<Member>(`/api/groups/${encodeURIComponent(groupId)}/members`, {
+      method: "POST",
+      body: JSON.stringify({ userId, role: "member" }),
+      token,
+    }),
+
+  removeMember: (token: string, groupId: string, memberId: string) =>
+    request<void>(
+      `/api/groups/${encodeURIComponent(groupId)}/members/${encodeURIComponent(memberId)}`,
+      { method: "DELETE", token }
+    ),
 
   listNotifications: (token: string) =>
     request<Notification[]>("/api/notifications", { method: "GET", token }),

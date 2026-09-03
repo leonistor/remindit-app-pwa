@@ -119,10 +119,29 @@ notifications) arrives with the channel decision.
   serialization); the live two-"device" scenario is covered by the phase
   gate (dev:all + two browser profiles).
 
+## Groups & sharing
+
+The active-group model is **one dataset per device**: the engine keys off a
+single active group (`remindit:sync-group`) and reconciles only that group's
+records. Switching groups is a **merge**, not a copy — the device's local data
+mirrors into the selected group on the next reconcile (local-only records are
+created remotely, remote records are adopted), so duplicates across groups are
+possible and harmless.
+
+The Profile `SharedListCard` is the control surface (the `groupActions`
+wrappers in `stores/sync/group-actions.ts` are the only path from the UI to
+these endpoints):
+
+- **Switch** — pick any group the session belongs to; the engine re-points
+  the active group, re-subscribes realtime, and reconciles.
+- **Invite** — owner-only: exact username → `GET /api/users/lookup`, then
+  `POST /api/groups/:id/members` with the fixed "member" role.
+- **Leave / remove** — `DELETE /api/groups/:id/members/:memberId` (self-leave
+  is allowed by the PB rule). Afterwards `recoverActiveGroup()` re-points the
+  device at a still-valid group, falling back to a fresh "My list".
+
 ## Explicitly deferred
 
-- Multi-group switcher UI (engine keys off one `activeGroupId`; adding the
-  picker later is UI-only).
 - Attachment/file sync (avatars stay data-URIs).
 - Push/email channels + notification dispatch (D4).
 - Conflict UI (manual merge) — LWW is the documented policy.
