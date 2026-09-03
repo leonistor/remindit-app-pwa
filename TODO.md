@@ -158,9 +158,10 @@ Apache Answer sidecar (`feedback/`, branch `feat/feedback`): setup/start/stop
 scripts + Caddy host + one-way user bridge (register hook + backfill).
 Deferred follow-ups:
 
-- [ ] **FB1** Footer links — `target=_blank` to the feedback URL from the pwa
+- [x] **FB1** Footer links — `target=_blank` to the feedback URL from the pwa
   (`pwa/src/components/footer.tsx`) and web (`web/src/routes/__root.tsx`)
-  footers; `PUBLIC_FEEDBACK_URL` env + en/ro strings.
+  footers; `PUBLIC_FEEDBACK_URL` env + en/ro strings. web renders the link
+  only when set (no localhost fallback in prod).
 - [ ] **FB2** Submit API — params `from_module=pwa|web`, route, user, text;
   BFF-mediated post into Answer.
 - [ ] **FB3** Tags — seed `bug`, `feature-request`, `discussion`,

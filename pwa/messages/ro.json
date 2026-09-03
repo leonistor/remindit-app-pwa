@@ -348,5 +348,6 @@
   "syncStatusOnline": "Sincronizat și la zi",
   "syncStatusConnecting": "Se conectează…",
   "syncStatusError": "Eroare de sincronizare",
-  "syncStatusOff": "Sincronizarea e oprită — datele rămân pe acest dispozitiv"
+  "syncStatusOff": "Sincronizarea e oprită — datele rămân pe acest dispozitiv",
+  "footerFeedback": "Feedback"
 }

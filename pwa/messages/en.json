@@ -348,5 +348,6 @@
   "syncStatusOnline": "Synced and up to date",
   "syncStatusConnecting": "Connecting…",
   "syncStatusError": "Sync error",
-  "syncStatusOff": "Sync is off — data stays on this device"
+  "syncStatusOff": "Sync is off — data stays on this device",
+  "footerFeedback": "Feedback"
 }
