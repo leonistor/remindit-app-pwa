@@ -130,9 +130,12 @@ in-flight reconciles would close the last wipe edge case.
   (re-addable via `bunx shadcn add @shark/drawer`), orphaned
   `itemDetails`/`itemDetailsHint` i18n keys, and the stale DEV.md/DESIGN.md
   references.
-- [ ] **P7** pwa: map `sync.lastError`/BFF messages to paraglide messages
+- [x] **P7** pwa: map `sync.lastError`/BFF messages to paraglide messages
   (`components/sync-card.tsx:64,89`); i18n the "Loading…" fallback
-  (`router.tsx:60`).
+  (`router.tsx:60`). Done 2026-09-03: `lib/sync-errors.ts` maps the published
+  BFF contract strings (+ engine throw, fetch TypeError) to 8 `syncError*`
+  keys with a generic fallback; router fallback reuses the existing `loading`
+  key.
 - [ ] **P8** admin: fetch timeout in `api()` (web uses `AbortSignal.timeout`);
   busy-guard the delete buttons (`users.tsx`, `groups.tsx`).
 - [ ] **P9** pwa: align the token-rotation comment with reality or implement
