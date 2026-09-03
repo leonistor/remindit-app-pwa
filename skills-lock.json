@@ -1,17 +1,29 @@
 {
   "version": 1,
   "skills": {
+    "hono": {
+      "source": "honojs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/hono/SKILL.md",
+      "computedHash": "9627afbe5bc8fec711a7d546aa1e0db0eefcea21a35577e932621bacf588d07a"
+    },
+    "mantine-combobox": {
+      "source": "mantinedev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/mantine-combobox/SKILL.md",
+      "computedHash": "fb3002c7bb704a111b1f4c596573aa9905e1b8dd728ad15dbba8cdf7a53ed98a"
+    },
+    "mantine-form": {
+      "source": "mantinedev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/mantine-form/SKILL.md",
+      "computedHash": "1bf98bd02676810bf420019b501ffaaba61774869b2b758dd5518620311ef518"
+    },
     "nanostores": {
       "source": "terminalskills/skills",
       "sourceType": "github",
       "skillPath": "skills/nanostores/SKILL.md",
       "computedHash": "02c2164a3215beebad6b3fb31f3c14a89226b734e3a30fcf087592d8a45d6e4d"
-    },
-    "phosphor-icons": {
-      "source": "lasaths/phosphor-icons",
-      "sourceType": "github",
-      "skillPath": "skills/phosphor-icons/SKILL.md",
-      "computedHash": "008d48e4e60d22332a76d898e492e08305af212401335dcdc7585db33f43e5bc"
     },
     "rsbuild-best-practices": {
       "source": "rstackjs/agent-skills",
@@ -36,6 +48,18 @@
       "sourceType": "github",
       "skillPath": "skills/shark-ui/SKILL.md",
       "computedHash": "a64e44b218843413d9ef1ea1514dd0941e631defe04eedabf72f125f2e36a99f"
+    },
+    "tailwind-4-docs": {
+      "source": "lombiq/tailwind-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/tailwind-4-docs/SKILL.md",
+      "computedHash": "de756f5f03cc20a029983875b00b9dfef9d0ba8567d242c5cbb0262037d0a134"
+    },
+    "tanstack-start": {
+      "source": "tanstack-skills/tanstack-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/tanstack-start/skills/tanstack-start/SKILL.md",
+      "computedHash": "e9d8355fe3e47b118e739081f1123c52aa0ecde57da840722177e1ad5caf9908"
     },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",
