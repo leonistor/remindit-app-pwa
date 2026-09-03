@@ -101,6 +101,14 @@ export const memberInviteBodySchema = z.object({
 })
 export type MemberInviteBody = z.infer<typeof memberInviteBodySchema>
 
+// Username → userId resolution for the invite flow (GET /api/users/lookup).
+// The response reuses userPublicSchema; the service masks email to "" (same
+// precedent as team_member_details rows — UserPublic allows it).
+export const userLookupQuerySchema = z.object({
+  username: usernameSchema,
+})
+export type UserLookupQuery = z.infer<typeof userLookupQuerySchema>
+
 // --- notifications (reserved, D4 — list + mark-read only for now) ------------
 
 export const notificationSchema = z.object({

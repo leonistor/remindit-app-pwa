@@ -14,3 +14,15 @@ export const validatedJson = <T extends z.ZodType>(schema: T) =>
       )
     }
   })
+
+// Same contract hook for query strings (GET filters) — target-agnostic
+// zValidator, so the H10 error shape holds for query validation too.
+export const validatedQuery = <T extends z.ZodType>(schema: T) =>
+  zValidator("query", schema, (result, c) => {
+    if (!result.success) {
+      return c.json(
+        { error: "validation failed", details: z.flattenError(result.error) },
+        400
+      )
+    }
+  })

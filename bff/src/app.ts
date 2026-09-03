@@ -11,6 +11,7 @@ import { notifications } from "./routes/notifications"
 import { pb } from "./routes/pb"
 import { sse } from "./routes/sse"
 import { stats } from "./routes/stats"
+import { users } from "./routes/users"
 
 // The BFF application. Route modules are chained so the inferred AppType
 // stays precise for Hono RPC clients (D8). Frontends do
@@ -47,6 +48,7 @@ export const app = new Hono<AppEnv>()
   .route("/api/health", health)
   .route("/api/auth", auth)
   .route("/api/groups", groups)
+  .route("/api/users", users)
   .route("/api/notifications", notifications)
   .route("/api/admin", admin)
   .route("/api/stats", stats)
