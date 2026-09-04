@@ -227,32 +227,54 @@ through v5.0.0; VPS provisioning not yet done.
   (already in `infra/Caddyfile`), run in `dev:all`. FB2–FB6 remain deferred
   product work (submit API, tags, plugins, login story, branding).
 
-## Phase FB — feedback module (V6 feedback capture) — setup + bridge done 2026-09-03
+## Phase FB — feedback module (V6 feedback capture) — done 2026-09-04
 
 Deployment of the feedback module is folded into Phase D (D5): same bm2
 ecosystem + Caddy host `feedback.remindit.me` as the rest of the platform, and it
-runs in `dev:all`. The items below are deferred product/feature work on top of
-the already-deployed instance.
+runs in `dev:all`. All items below shipped 2026-09-04 as one slice (branch
+`feat/feedback`, uncommitted at write time). Live-verified against the running
+Answer sidecar: Answer ignores the `username` field and derives the username
+from `display_name` (preserving underscores) — the bridge uses
+`canonicalAnswerUsername` (slug of record.username, no salt); `listTags` needs
+`page=1`; the activation endpoint answers 2xx with an HTML/redirect body
+(accepted as success); question content min is 6.
 
 Apache Answer sidecar (`feedback/`, branch `feat/feedback`): setup/start/stop
-scripts + Caddy host + one-way user bridge (register hook + backfill).
-Deferred follow-ups:
+scripts + Caddy host + one-way user bridge (register hook + backfill). Shipped:
 
 - [x] **FB1** Footer links — `target=_blank` to the feedback URL from the pwa
   (`pwa/src/components/footer.tsx`) and web (`web/src/routes/__root.tsx`)
   footers; `PUBLIC_FEEDBACK_URL` env + en/ro strings. Both render the link
   only when set (no localhost fallback in prod — pwa fallback removed
   2026-09-03, H15-class).
-- [ ] **FB2** Submit API — params `from_module=pwa|web`, route, user, text;
-  BFF-mediated post into Answer.
-- [ ] **FB3** Tags — seed `bug`, `feature-request`, `discussion`,
-  `development` (docs/FEEDBACK.md).
-- [ ] **FB4** Plugin quick-links (apache/answer-plugins quick-links) + links
-  to bug / feature-request / discussion.
-- [ ] **FB5** Login story for bridged users (SSO / email-invite) — they are
-  provisioned with undisclosed throwaway passwords today.
-- [ ] **FB6** Branding from `@remindit/common` (logo, colors) in the Answer
-  theme.
+- [x] **FB2** Submit API — `POST /api/feedback` (authenticated, from pwa/web)
+  and `POST /api/feedback/guest` (public, web form). BFF-mediated post into
+  Answer as the user's twin (deterministic HMAC password from
+  `ANSWER_BRIDGE_SECRET` — reset → login → create question) or the shared
+  `web-guest` twin. `X-Session-Token`-safe, rate-limited (10/15 min), errors
+  mapped 503 (Answer down) / 502 (Answer rejected). Contracts + service in
+  `bff/src/contracts.ts` / `services/feedback.ts` / `routes/feedback.ts`.
+- [x] **FB3** Tags — `bun run configure:feedback tags` seeds `bug`,
+  `feature-request`, `discussion`, `development` idempotently (docs/FEEDBACK.md
+  descriptions). Question content min raised to 6 to match Answer's validator.
+- [x] **FB4** Quick-links — plugin path rejected (Answer plugins must be
+  compiled into the binary — no runtime install). Shipped as tag-filtered
+  footer deep links (`/questions?tag=bug|feature-request|discussion`) in the
+  pwa + web footers, gated on `PUBLIC_FEEDBACK_URL`.
+- [x] **FB5** Login story — SMTP config via `configure:feedback smtp` (Inbucket
+  dev host `maildev.parsedw.ink:2500` in `.env`/`.env.example`; the instance
+  currently answers 451 "Failed to store message" — Inbucket storage issue,
+  not ours), `POST /api/feedback/activate` (accepts 2xx HTML-body responses)
+  + pwa "Email me a login link" action.
+- [x] **FB6** Branding from `@remindit/common` — `configure:feedback branding`
+  sets site name/description, theme `primary_color` (`BRAND_COLOR`) and custom
+  CSS via the admin API; logo documented as manual (the ~4 KB SVG exceeds
+  Answer's 512-char branding-URL cap).
+
+Gate: root `typecheck` + `lint` clean; `test:bff` 156 pass; web build green;
+`test:quick` has one PRE-EXISTING failure (`sync-engine.test.ts` concurrent
+connects — reproduced without this slice, untouched). `hono-rate-limiter`
+declared in `bff/package.json` (was used-but-undeclared).
 
 ---
 

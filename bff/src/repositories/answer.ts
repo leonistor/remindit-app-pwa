@@ -70,7 +70,16 @@ export class AnswerClient {
     return this.token
   }
 
-  private async request<T>(path: string, init: RequestInit): Promise<T> {
+  /**
+   * Raw request with the HTTP status — needed for endpoints that answer with
+   * a non-JSON success body (activation redirects to the SPA HTML on 200).
+   * `request` is built on this so every caller shares the 401-clears-token
+   * memo and the 3s transport bound.
+   */
+  private async requestRaw(
+    path: string,
+    init: RequestInit
+  ): Promise<{ status: number; body: unknown }> {
     let res: Response
     try {
       // Bounded: the bridge runs inline in register — a hung Answer must not
@@ -83,8 +92,13 @@ export class AnswerClient {
       throw new AnswerUnavailableError(cause)
     }
     if (res.status === 401) this.token = undefined
-    const body = (await res.json().catch(() => ({}))) as T
-    return body
+    const body = await res.json().catch(() => ({}))
+    return { status: res.status, body }
+  }
+
+  private async request<T>(path: string, init: RequestInit): Promise<T> {
+    const { body } = await this.requestRaw(path, init)
+    return body as T
   }
 
   /**
@@ -120,6 +134,201 @@ export class AnswerClient {
       data.reason,
       data.code
     )
+  }
+
+  /** List existing tags (public) — for idempotent tag seeding. */
+  async listTags(): Promise<
+    { slugName: string; displayName: string; originalText: string }[]
+  > {
+    const data = await this.request<
+      AnswerEnvelope & {
+        data: {
+          list?: Array<{
+            slug_name?: string
+            display_name?: string
+            original_text?: string
+          }>
+        }
+      }
+    >("/answer/api/v1/tags/page?page=1&page_size=100", { method: "GET" })
+    if (data.code !== 200) {
+      throw new AnswerError("Answer tag list failed", data.reason, data.code)
+    }
+    return (data.data?.list ?? []).map((tag) => ({
+      slugName: tag.slug_name ?? "",
+      displayName: tag.display_name ?? "",
+      originalText: tag.original_text ?? "",
+    }))
+  }
+
+  /** Create a tag (admin). Non-200 → AnswerError. */
+  async createTag(input: {
+    displayName: string
+    originalText: string
+    slugName: string
+  }): Promise<void> {
+    const token = await this.adminToken()
+    const data = await this.request<AnswerEnvelope>("/answer/api/v1/tag", {
+      method: "POST",
+      headers: { Authorization: token, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        display_name: input.displayName,
+        original_text: input.originalText,
+        slug_name: input.slugName,
+      }),
+    })
+    if (data.code !== 200) {
+      throw new AnswerError(
+        `Answer tag creation failed: ${data.msg ?? data.reason}`,
+        data.reason,
+        data.code
+      )
+    }
+  }
+
+  /**
+   * Resolve an Answer user_id by username (or email) via the admin search.
+   * Answer keys page items by `user_id` (newer) or `id` — handle both.
+   */
+  async resolveUserId(username: string): Promise<string | null> {
+    const token = await this.adminToken()
+    const data = await this.request<
+      AnswerEnvelope & { data?: { list?: Array<Record<string, unknown>> } }
+    >(`/answer/admin/api/users/page?query=${encodeURIComponent(username)}`, {
+      method: "GET",
+      headers: { Authorization: token },
+    })
+    if (data.code !== 200) {
+      throw new AnswerError("Answer user search failed", data.reason, data.code)
+    }
+    const match = (data.data?.list ?? []).find(
+      (item) => item.username === username || item.email === username
+    )
+    const id = match ? (match.user_id ?? match.id) : undefined
+    return typeof id === "string" && id.length > 0 ? id : null
+  }
+
+  /** Reset a user's password (admin) — the deterministic submit-login path. */
+  async resetUserPassword(userId: string, password: string): Promise<void> {
+    const token = await this.adminToken()
+    const data = await this.request<AnswerEnvelope>(
+      "/answer/admin/api/user/password",
+      {
+        method: "PUT",
+        headers: { Authorization: token, "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, password }),
+      }
+    )
+    if (data.code !== 200) {
+      throw new AnswerError(
+        `Answer password reset failed: ${data.msg ?? data.reason}`,
+        data.reason,
+        data.code
+      )
+    }
+  }
+
+  /**
+   * Send the user their "set your password" email (admin). Idempotent.
+   * Success is judged by the HTTP status alone: Answer answers 200 with the
+   * SPA HTML (a redirect the fetch follows), so there is no JSON envelope to
+   * parse — the existing request() would see `{}` and throw on success.
+   */
+  async activateUser(userId: string): Promise<void> {
+    const token = await this.adminToken()
+    const { status } = await this.requestRaw(
+      "/answer/admin/api/users/activation",
+      {
+        method: "POST",
+        headers: { Authorization: token, "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId }),
+      }
+    )
+    if (status < 200 || status >= 300) {
+      throw new AnswerError(
+        `Answer user activation failed (http ${status})`,
+        `http ${status}`,
+        status
+      )
+    }
+  }
+
+  /** User-scoped token via email login — used to create questions as the user. */
+  async loginAsUser(email: string, password: string): Promise<string> {
+    const data = await this.request<
+      AnswerEnvelope & { data?: { access_token?: string } }
+    >("/answer/api/v1/user/login/email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ e_mail: email, pass: password }),
+    })
+    if (data.code !== 200 || !data.data?.access_token) {
+      throw new AnswerError("Answer user login failed", data.reason, data.code)
+    }
+    return data.data.access_token
+  }
+
+  /**
+   * Create a question as the given user; returns the public question URL.
+   * The user token is passed in (it is not admin-scoped).
+   */
+  async createQuestion(
+    token: string,
+    input: { title: string; content: string; tags: string[] }
+  ): Promise<string> {
+    const data = await this.request<AnswerEnvelope & { data?: object }>(
+      "/answer/api/v1/question",
+      {
+        method: "POST",
+        headers: { Authorization: token, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: input.title,
+          content: input.content,
+          tags: input.tags.map((slugName) => ({
+            display_name: slugName,
+            original_text: slugName,
+            slug_name: slugName,
+          })),
+        }),
+      }
+    )
+    if (data.code !== 200 || !data.data) {
+      throw new AnswerError(
+        `Answer question creation failed: ${data.msg ?? data.reason}`,
+        data.reason,
+        data.code
+      )
+    }
+    const created = data.data as { id?: unknown; question_id?: unknown }
+    const id = created.id ?? created.question_id
+    if (typeof id !== "string" || id.length === 0) {
+      throw new AnswerError(
+        "Answer question creation returned no id",
+        data.reason,
+        data.code
+      )
+    }
+    return `${env.feedbackPublicUrl}/questions/${id}`
+  }
+
+  /**
+   * Authenticated admin PUT (script tooling: SMTP + siteinfo configure).
+   * Shared by `configure:feedback`; the concrete admin endpoints wrap it.
+   */
+  async adminPut(path: string, body: unknown): Promise<void> {
+    const token = await this.adminToken()
+    const data = await this.request<AnswerEnvelope>(path, {
+      method: "PUT",
+      headers: { Authorization: token, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+    if (data.code !== 200) {
+      throw new AnswerError(
+        `Answer admin request failed (${path}): ${data.msg ?? data.reason}`,
+        data.reason,
+        data.code
+      )
+    }
   }
 }
 

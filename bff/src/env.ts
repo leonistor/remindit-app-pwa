@@ -55,4 +55,39 @@ export const env = {
           throw new Error("ANSWER_ADMIN_PASSWORD is required in production")
         })()
       : "change-me-dev-only"),
+  /**
+   * Bridge secret for deriving deterministic per-user Answer passwords
+   * (HMAC-SHA256, see services/feedback.ts). Must never leak — knowing it lets
+   * anyone derive (and therefore log in as) every provisioned Answer twin.
+   */
+  answerBridgeSecret:
+    process.env.ANSWER_BRIDGE_SECRET ??
+    (process.env.NODE_ENV === "production"
+      ? (() => {
+          throw new Error("ANSWER_BRIDGE_SECRET is required in production")
+        })()
+      : "dev-bridge-secret-change-me"),
+  /** Public feedback base URL — used to build the public question URL. */
+  feedbackPublicUrl:
+    process.env.PUBLIC_FEEDBACK_URL ??
+    process.env.ANSWER_INTERNAL_URL ??
+    "http://127.0.0.1:5555",
+  /** Fixed identity for the shared guest twin (web feedback, no PB linkage). */
+  feedbackGuestEmail:
+    process.env.ANSWER_GUEST_EMAIL ?? "feedback-guest@remindit.local",
+  /**
+   * SMTP settings for the `configure:feedback smtp` script. Values may be
+   * undefined — the script errors clearly when host/from are missing.
+   */
+  smtp: {
+    host: process.env.SMTP_HOST,
+    port: positiveInt(process.env.SMTP_PORT, 587),
+    user: process.env.SMTP_USER,
+    password: process.env.SMTP_PASSWORD,
+    from: process.env.SMTP_FROM,
+    fromName: process.env.SMTP_FROM_NAME,
+    encryption: process.env.SMTP_ENCRYPTION ?? "",
+  },
+  /** Optional test-recipient for the SMTP configure script. */
+  smtpTestEmail: process.env.SMTP_TEST_EMAIL,
 }

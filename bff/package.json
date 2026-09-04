@@ -12,6 +12,7 @@
     "start": "bun src/index.ts",
     "migrate": "bun scripts/migrate.ts",
     "backfill:feedback": "bun scripts/backfill-feedback.ts",
+    "configure:feedback": "bun scripts/configure-feedback.ts",
     "test": "FEEDBACK_BRIDGE=off bun test",
     "typecheck": "tsc --noEmit --pretty",
     "lint": "biome lint",
@@ -21,6 +22,7 @@
     "@hono/zod-validator": "^0.9.1",
     "@remindit/common": "workspace:*",
     "hono": "^4.13.5",
+    "hono-rate-limiter": "^0.5.3",
     "pocketbase": "^0.28.0",
     "zod": "^4.5.4"
   },

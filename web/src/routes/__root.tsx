@@ -41,6 +41,10 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  // Feedback (Apache Answer) origin — env-driven like PUBLIC_PWA_URL (D9).
+  // Unset at deploy ⇒ no external links, never a localhost fallback.
+  const feedbackUrl = import.meta.env?.PUBLIC_FEEDBACK_URL
+
   return (
     // Background/theme colors come from the brand constants (single source
     // of truth, @remindit/common) — kept in sync via inline vars.
@@ -72,17 +76,41 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <footer className="site-footer">
           <div className="container">
             {BRAND_NAME} — shopping lists that remind you.
-            {/* Feedback (Apache Answer) origin — env-driven like PUBLIC_PWA_URL
-                (D9). Unset at deploy ⇒ no link, never a localhost fallback. */}
-            {import.meta.env?.PUBLIC_FEEDBACK_URL && (
+            {" · "}
+            <Link to="/feedback">Send feedback</Link>
+            {feedbackUrl && (
               <>
                 {" · "}
                 <a
-                  href={import.meta.env.PUBLIC_FEEDBACK_URL}
+                  href={feedbackUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   Feedback
+                </a>
+                {" · "}
+                <a
+                  href={`${feedbackUrl}/questions?tag=bug`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Report a bug
+                </a>
+                {" · "}
+                <a
+                  href={`${feedbackUrl}/questions?tag=feature-request`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Request a feature
+                </a>
+                {" · "}
+                <a
+                  href={`${feedbackUrl}/questions?tag=discussion`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Discuss
                 </a>
               </>
             )}

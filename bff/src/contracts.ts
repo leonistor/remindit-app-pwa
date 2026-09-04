@@ -178,6 +178,38 @@ export const adminGroupSchema = z
   .merge(recordStamps)
 export type AdminGroup = z.infer<typeof adminGroupSchema>
 
+// --- feedback (phase 5) — the Answer sidecar bridge --------------------------
+
+export const feedbackTagSchema = z.enum([
+  "bug",
+  "feature-request",
+  "discussion",
+])
+export type FeedbackTag = z.infer<typeof feedbackTagSchema>
+
+export const feedbackFromModuleSchema = z.enum(["pwa", "web"])
+export type FeedbackFromModule = z.infer<typeof feedbackFromModuleSchema>
+
+export const feedbackSubmitBodySchema = z.object({
+  subject: z.string().min(6).max(150),
+  text: z.string().min(6).max(5000),
+  tag: feedbackTagSchema,
+  fromModule: feedbackFromModuleSchema,
+  route: z.string().max(300).optional(),
+})
+export type FeedbackSubmitBody = z.infer<typeof feedbackSubmitBodySchema>
+
+export const feedbackGuestBodySchema = z.object({
+  subject: z.string().min(6).max(150),
+  text: z.string().min(6).max(5000),
+  tag: feedbackTagSchema,
+  contactEmail: z.string().email().optional(),
+})
+export type FeedbackGuestBody = z.infer<typeof feedbackGuestBodySchema>
+
+export const feedbackResponseSchema = z.object({ questionUrl: z.string() })
+export type FeedbackResponse = z.infer<typeof feedbackResponseSchema>
+
 // --- stats (public, aggregate-only — marketing site, phase 4) -----------------
 
 export const statsSchema = z.object({
