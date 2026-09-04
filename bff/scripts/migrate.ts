@@ -122,6 +122,37 @@ const requireViewQuery = (def: CollectionDef): string => {
   return def.viewQuery
 }
 
+// Id to send for an incoming field: the live field's id when the TYPE matches,
+// undefined otherwise. PB refuses type changes on an existing field id (e.g. a
+// fresh install's default users.avatar is a file field, ours is text) — an
+// id-less field lets PB rebuild the column instead. Safe before views exist
+// (Pass C); converged installs have no type drift, so they keep their ids.
+const wireFieldId = (
+  current: Record<string, unknown>,
+  field: Record<string, unknown>
+): Record<string, unknown> => {
+  const name = field.name as string
+  const live = (
+    (current.fields as Array<{ name?: string; type?: string }> | undefined) ??
+    []
+  ).find((f) => f.name === name)
+  const id =
+    live && live.type === field.type
+      ? (live as { id?: string }).id
+      : undefined
+  return id ? { ...field, id } : field
+}
+
+// Current fields reduced to the managed shape (PB-managed `id`/`system` fields
+// excluded — same filter as managedView's) for drift comparison.
+const managedCurrentFields = (current: Record<string, unknown>): unknown =>
+  canonicalize(
+    (
+      (current.fields as Array<{ name?: string; system?: boolean }> | undefined) ??
+      []
+    ).filter((field) => field.name !== "id" && field.system !== true)
+  )
+
 // --- superuser bootstrap ----------------------------------------------------
 // Auth as the dev superuser; when the account doesn't exist yet, provision it
 // via the pinned pocketbase-bin CLI (same creds from the root .env).
@@ -214,30 +245,63 @@ async function main(): Promise<void> {
           ...(def.passwordAuth ? { passwordAuth: def.passwordAuth } : {}),
         }
 
-  // Pass A — structure first: create missing collections WITHOUT rules.
-  // Rules reference other collections by name (@collection.*), and PB
+  // Pass A — base structure: create missing NON-view collections WITHOUT
+  // rules. Rules reference other collections by name (@collection.*), and PB
   // validates them at definition time, so all collections must exist before
-  // any rule is written. Relations only point backwards, and view queries
-  // select only tables declared earlier in the builders — so fields/queries
-  // are safe here. Views are created WITH their query (PB derives and
-  // validates the fields from it at save time).
+  // any rule is written. Relations only point backwards, so fields are safe
+  // here. Views are deferred to Pass C (see there).
   for (const def of desiredCollections) {
-    if (byName.has(def.name)) continue
-    const created = await pb.collections.create(
-      def.type === "view"
-        ? { name: def.name, type: def.type, viewQuery: requireViewQuery(def) }
-        : {
-            name: def.name,
-            type: def.type,
-            fields: toWireFields(def.fields, nameToId),
-          }
-    )
+    if (def.type === "view" || byName.has(def.name)) continue
+    const created = await pb.collections.create({
+      name: def.name,
+      type: def.type,
+      fields: toWireFields(def.fields, nameToId),
+    })
     nameToId.set(def.name, created.id)
     byName.set(def.name, created as unknown as Record<string, unknown>)
     actions.push(`created  ${def.name}`)
   }
 
-  // Pass B — reconcile definitions: rules, indexes, field drift, auth opts.
+  // Pass B — existing-collection field drift, BEFORE any view is created. On
+  // a fresh install PB bootstraps its own default `users` auth collection
+  // (which has no `username` column in PB ≥0.23, and a file-typed avatar),
+  // and a view's query is validated by executing it at save time — so every
+  // referenced column must exist first. Structure only: rules may reference
+  // collections that don't exist yet (Pass D writes them), and indexes stay
+  // Pass D's business.
+  for (const def of desiredCollections) {
+    if (def.type === "view" || !byName.has(def.name)) continue
+    const current = byName.get(def.name)!
+    const wireFields = toWireFields(def.fields, nameToId).map((field) =>
+      wireFieldId(current, field)
+    )
+    if (
+      JSON.stringify(managedCurrentFields(current)) ===
+      JSON.stringify(canonicalize(wireFields))
+    ) {
+      continue
+    }
+    await pb.collections.update(def.name, { fields: wireFields })
+    actions.push(`patched  ${def.name} (fields)`)
+  }
+
+  // Pass C — view structure: PB derives and validates the fields from the
+  // query at save time, so every queried table/column must exist by now
+  // (Pass A + Pass B guarantee that).
+  for (const def of desiredCollections) {
+    if (def.type !== "view" || byName.has(def.name)) continue
+    const created = await pb.collections.create({
+      name: def.name,
+      type: def.type,
+      viewQuery: requireViewQuery(def),
+    })
+    nameToId.set(def.name, created.id)
+    byName.set(def.name, created as unknown as Record<string, unknown>)
+    actions.push(`created  ${def.name}`)
+  }
+
+  // Pass D — reconcile definitions: rules, indexes, remaining field drift,
+  // auth opts.
   for (const def of desiredCollections) {
     const current = byName.get(def.name)
     if (!current) {
@@ -246,24 +310,15 @@ async function main(): Promise<void> {
       )
     }
 
-    // Inject live field ids into the patch payload, matched by name — PB's
-    // field sync treats id-less incoming fields as rebuild candidates
-    // (column drop+recreate), which fails whenever a view pins those
-    // columns. Sending ids (like the dashboard does) keeps unchanged
-    // columns in place; the canonical diff is unaffected (ids are stripped
-    // as server noise on both sides).
-    const liveFieldIds = new Map(
-      (
-        (current.fields as Array<{ name?: string; id?: string }> | undefined) ??
-        []
-      )
-        .filter((field) => field.name && field.id)
-        .map((field) => [field.name as string, field.id as string])
+    // Inject live field ids into the patch payload via wireFieldId (matched
+    // by name AND type — see there): PB's field sync treats id-less incoming
+    // fields as rebuild candidates (column drop+recreate), which fails
+    // whenever a view pins those columns. Sending ids (like the dashboard
+    // does) keeps unchanged columns in place; the canonical diff is
+    // unaffected (ids are stripped as server noise on both sides).
+    const wireFields = toWireFields(def.fields, nameToId).map((field) =>
+      wireFieldId(current, field)
     )
-    const wireFields = toWireFields(def.fields, nameToId).map((field) => {
-      const id = liveFieldIds.get(field.name as string)
-      return id ? { ...field, id } : field
-    })
 
     const managed = managedView(fullPayload(def, wireFields))
 
