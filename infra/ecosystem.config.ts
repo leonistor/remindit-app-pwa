@@ -11,13 +11,18 @@
 // Ports (all loopback; Caddy proxies the public subdomains):
 //   pb :8090 (internal only, D2) | bff :3100 | web :3200 | admin :3300
 //   feedback :5555 (Apache Answer sidecar)
+import { resolve } from "node:path"
 import type { EcosystemConfig } from "bm2/types"
+
+// bm2 resolves relative script paths against the ecosystem file's directory
+// (not the shell cwd) — pass absolute paths so the config works from anywhere.
+const launcher = (name: string) => resolve(import.meta.dir, "bin", name)
 
 const config: EcosystemConfig = {
   apps: [
     {
       name: "pb",
-      script: "infra/bin/start-pb.sh",
+      script: launcher("start-pb.sh"),
       interpreter: "sh",
       autorestart: true,
       maxRestarts: 50,
@@ -32,7 +37,7 @@ const config: EcosystemConfig = {
     },
     {
       name: "bff",
-      script: "infra/bin/start-bff.sh",
+      script: launcher("start-bff.sh"),
       interpreter: "sh",
       autorestart: true,
       maxRestarts: 50,
@@ -47,7 +52,7 @@ const config: EcosystemConfig = {
     },
     {
       name: "web",
-      script: "infra/bin/start-web.sh",
+      script: launcher("start-web.sh"),
       interpreter: "sh",
       autorestart: true,
       maxRestarts: 50,
@@ -62,7 +67,7 @@ const config: EcosystemConfig = {
     },
     {
       name: "admin",
-      script: "infra/bin/start-admin.sh",
+      script: launcher("start-admin.sh"),
       interpreter: "sh",
       autorestart: true,
       maxRestarts: 50,
@@ -77,7 +82,7 @@ const config: EcosystemConfig = {
     },
     {
       name: "feedback",
-      script: "infra/bin/start-feedback.sh",
+      script: launcher("start-feedback.sh"),
       interpreter: "sh",
       autorestart: true,
       maxRestarts: 50,
