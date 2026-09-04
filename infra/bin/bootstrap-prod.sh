@@ -36,8 +36,11 @@ systemctl reload caddy
 echo "admin.remindit.me basicauth → admin / $ADMIN_PASS  (store it now)"
 
 echo "=== 3/4 bm2: persist process list + reboot unit ==="
-sudo -u leo /home/leo/.bun/bin/bm2 save
-/home/leo/.bun/bin/bm2 startup install
+# sudo/strip ~/.bun/bin from PATH — bm2's shebang (`env bun`) needs it, and
+# `save` must run as leo to reach the daemon leo started.
+BM2_ENV="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/leo/.bun/bin"
+sudo -u leo env HOME=/home/leo "$BM2_ENV" /home/leo/.bun/bin/bm2 save
+env HOME=/home/leo "$BM2_ENV" /home/leo/.bun/bin/bm2 startup install
 
 echo "=== 4/4 exposure check (nothing new should be public) ==="
 ss -tln | awk 'NR>1 {split($4,a,":"); port=a[length(a)]; if (port==8090 || port==9615 || port==9616) print "  WARNING: port " port " is listening publicly!"}' | grep . || echo "  ok: 8090/9615/9616 not publicly listening"
