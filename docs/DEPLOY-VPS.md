@@ -131,8 +131,10 @@ sudo cp infra/Caddyfile /etc/caddy/remindit.caddyfile
 sudo caddy reload
 ```
 
-Protect the admin origin: generate a hash and uncomment `basicauth` (and/or the
-IP allowlist) in `infra/Caddyfile`, then reload.
+The admin origin is protected by `basic_auth` (D2): `infra/Caddyfile` ships a
+placeholder hash that `infra/bin/bootstrap-prod.sh` replaces with a generated
+password (printed once when it runs). An optional IP allowlist can be
+uncommented in the same block; reload Caddy after changing it.
 
 Verify: `curl -I https://remindit.me`, `https://www.remindit.me`,
 `https://api.remindit.me/api/health` (expect `pb:"up"`),

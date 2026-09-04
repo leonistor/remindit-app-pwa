@@ -34,11 +34,12 @@ www.remindit.me {
 }
 
 admin.remindit.me {
-	# Protect the admin origin (D2). Generate a hash:
-	#   caddy hash-password >> then paste the output below.
-	# basicauth {
-	# 	admin $2a$14$REPLACE_WITH_HASHED_PASSWORD
-	# }
+	# Protect the admin origin (D2). infra/bin/bootstrap-prod.sh replaces the
+	# placeholder with a generated bcrypt hash (caddy hash-password) before the
+	# first caddy reload — the placeholder fails validation if left in place.
+	basic_auth {
+		admin REPLACE_WITH_HASHED_PASSWORD
+	}
 	# Optional IP allowlist (uncomment and set your office/VPN ranges):
 	# @allowed remote_ip 203.0.113.0/24
 	# respond @not_allowed 403

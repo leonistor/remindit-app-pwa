@@ -18,13 +18,17 @@ systemctl enable --now remindit-backup.timer
 
 echo "=== 2/4 Caddy: site blocks + admin basicauth ==="
 cp "$REPO/infra/Caddyfile" /etc/caddy/remindit.caddyfile
-ADMIN_PASS=$(openssl rand -hex 10)
-HASH=$(caddy hash-password --plaintext "$ADMIN_PASS")
-# Uncomment the basicauth block and inject the generated hash. Rerun-safe:
-# both the commented (first run) and uncommented (later runs) lines match, so
-# each run replaces the previous hash with the fresh one.
-sed -E -i "s|^[[:space:]]*#?[[:space:]]*basicauth \{|\tbasicauth {|" /etc/caddy/remindit.caddyfile
-sed -E -i "s|^[[:space:]]*#?[[:space:]]*admin .*|\tadmin $HASH|" /etc/caddy/remindit.caddyfile
+# The repo Caddyfile ships a basic_auth placeholder (D2) — swap in a generated
+# hash on first run; on reruns the existing hash is kept and the password is
+# NOT regenerated (it would be printed without the old one staying valid).
+if grep -q REPLACE_WITH_HASHED_PASSWORD /etc/caddy/remindit.caddyfile; then
+  ADMIN_PASS=$(openssl rand -hex 10)
+  HASH=$(caddy hash-password --plaintext "$ADMIN_PASS")
+  sed -i "s|REPLACE_WITH_HASHED_PASSWORD|$HASH|" /etc/caddy/remindit.caddyfile
+  echo "admin.remindit.me basicauth → admin / $ADMIN_PASS  (store it now)"
+else
+  echo "admin basicauth already configured — password unchanged"
+fi
 grep -q "remindit.caddyfile" /etc/caddy/Caddyfile ||
   echo "import /etc/caddy/remindit.caddyfile" >>/etc/caddy/Caddyfile
 caddy validate --config /etc/caddy/Caddyfile >/dev/null
