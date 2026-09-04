@@ -7,7 +7,7 @@ Bun workspace for the Remindit project.
 | Module              | Path     | Description                                                                    |
 | ------------------- | -------- | ------------------------------------------------------------------------------ |
 | `@remindit/pwa`     | pwa/     | Local-first shopping-list / reminders PWA — see [pwa/README.md](pwa/README.md) |
-| `@remindit/common`  | common/  | Shared brand constants (name, colors, logo) + domain entities                   |
+| `@remindit/common`  | common/  | Shared brand constants (name, colors, logo) + domain entities — app description in [common/DESCRIPTION.md](common/DESCRIPTION.md) |
 | `@remindit/bff`     | bff/     | PocketBase + Hono backend-for-frontend — see [bff/README.md](bff/README.md)     |
 | `@remindit/web`     | web/     | Marketing site (Rsbuild + TanStack Start) — see [web/README.md](web/README.md)  |
 | `@remindit/admin`   | admin/   | Admin dashboard (Rsbuild + TanStack Start + Mantine) — see [admin/README.md](admin/README.md) |
