@@ -49,6 +49,6 @@ api.remindit.me {
 	reverse_proxy 127.0.0.1:3100
 }
 
-# feedback.remindit.me {
-# 	reverse_proxy 127.0.0.1:5555
-# }
+feedback.remindit.me {
+	reverse_proxy 127.0.0.1:5555
+}

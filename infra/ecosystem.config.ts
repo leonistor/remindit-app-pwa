@@ -9,7 +9,8 @@
 // (and thus all children) survive reboots.
 //
 // Ports (all loopback; Caddy proxies the public subdomains):
-//   pb  :8090 (internal only, D2) | bff :3100 | web :3200 | admin :3300
+//   pb :8090 (internal only, D2) | bff :3100 | web :3200 | admin :3300
+//   feedback :5555 (Apache Answer sidecar)
 import type { EcosystemConfig } from "bm2/types"
 
 const config: EcosystemConfig = {
@@ -67,6 +68,21 @@ const config: EcosystemConfig = {
       maxRestarts: 50,
       minUptime: 3000,
       healthCheckUrl: "http://127.0.0.1:3300/",
+      healthCheckInterval: 30000,
+      healthCheckTimeout: 5000,
+      healthCheckMaxFails: 5,
+      logMaxSize: "20M",
+      logRetain: 10,
+      logCompress: true,
+    },
+    {
+      name: "feedback",
+      script: "infra/bin/start-feedback.sh",
+      interpreter: "sh",
+      autorestart: true,
+      maxRestarts: 50,
+      minUptime: 3000,
+      healthCheckUrl: "http://127.0.0.1:5555/",
       healthCheckInterval: 30000,
       healthCheckTimeout: 5000,
       healthCheckMaxFails: 5,

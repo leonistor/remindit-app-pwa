@@ -16,7 +16,7 @@ remindit.me       → pwa static   (/var/www/remindit, SPA fallback)
 www.remindit.me   → web SSR       (:3200)
 admin.remindit.me → admin SSR     (:3300) + basicauth / IP allowlist
 api.remindit.me   → bff           (:3100) → /api/* + /pb/*
-feedback.remindit.me → Answer     (:5555)  [later]
+feedback.remindit.me → Answer     (:5555)  [Apache Answer sidecar, Phase D/D5]
 # pb :8090 internal only, never proxied
 ```
 
@@ -24,7 +24,7 @@ feedback.remindit.me → Answer     (:5555)  [later]
 
 | Path | Purpose |
 | --- | --- |
-| `infra/ecosystem.config.ts` | bm2 topology — `pb`, `bff`, `web`, `admin` |
+| `infra/ecosystem.config.ts` | bm2 topology — `pb`, `bff`, `web`, `admin`, `feedback` |
 | `infra/bin/start-*.sh` | per-app launchers (source repo-root `.env`, self-locate repo) |
 | `infra/bin/backup.sh` | runs `bff/scripts/backup-pb.ts` |
 | `bff/scripts/serve-pb.ts` | spawns the pinned PB binary (loopback) |
@@ -64,6 +64,10 @@ bun --env-file=.env run build:admin    # → admin/dist
 bun --env-file=.env run deploy         # → deploy/deploy-*.zip
 sudo mkdir -p /var/www/remindit
 sudo unzip -o deploy/deploy-*.zip -d /var/www/remindit
+# Feedback (Apache Answer): one-time binary download + data-dir/config prep.
+# bm2's feedback process runs `bun run start`, which self-bootstraps the binary
+# and config on first boot, so this is optional ahead of time.
+bun --env-file=.env run setup:feedback
 ```
 
 ## Start the processes
@@ -107,6 +111,13 @@ Retains the most recent `PB_BACKUP_KEEP` zips (default 10) in
 `pocketbase backups restore <name>` against the data dir. Off-box copy is a
 later step (decision: local snapshots only for Phase D).
 
+**Feedback data backup (D1 task):** the feedback module's `feedback/answer-data/`
+(Apache Answer sqlite DB + uploads + `conf/config.yaml`) must be backed up
+alongside `pb_data/`. Add this to the same backup job/timer — the backup
+strategy (snapshotting the live sqlite, retention, off-box copy) is to be
+analyzed after this plan update; for now capture `answer-data/` in the same
+`infra/bin/backup.sh` run.
+
 ## Reverse proxy
 
 Install `infra/Caddyfile` into the system Caddy's import path (global options —
@@ -122,8 +133,9 @@ Protect the admin origin: generate a hash and uncomment `basicauth` (and/or the
 IP allowlist) in `infra/Caddyfile`, then reload.
 
 Verify: `curl -I https://remindit.me`, `https://www.remindit.me`,
-`https://api.remindit.me/api/health` (expect `pb:"up"`), and that
-`admin.remindit.me` rejects unauthenticated requests.
+`https://api.remindit.me/api/health` (expect `pb:"up"`),
+`https://feedback.remindit.me` (Answer UI), and that `admin.remindit.me` rejects
+unauthenticated requests.
 
 ## Deploy / update flow (zero-downtime)
 
@@ -131,6 +143,9 @@ Verify: `curl -I https://remindit.me`, `https://www.remindit.me`,
   pb` only if the PB version pin changed). bm2 does a graceful reload.
 - **web / admin:** rebuild (`bun --env-file=.env run build:web`), then
   `bm2 reload web` (preview serves the new `dist`).
+- **feedback:** no build step (binary + data dir managed by `feedback/scripts`);
+  `bm2 reload feedback` after a config/env change (`feedback start` reuses an
+  already-running instance, so a plain `bm2 start` is also safe).
 - **pwa:** rebuild the zip with the new `PUBLIC_BFF_URL`
   (`https://api.remindit.me`), extract to `/var/www/remindit`, reload Caddy.
   Assets are fingerprinted so the SW-safe release is a drop-in; bump the version

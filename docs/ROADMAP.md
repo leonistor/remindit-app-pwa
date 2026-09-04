@@ -111,11 +111,13 @@ remaining slice.
 │                    │            server-side)        │
 │                    │  /pb/*  → scoped data-plane    │
 │                    │           forwarder → PB       │
-│   feedback.remindit.me → Apache Answer (:5555) [FB]  │
+│   feedback.remindit.me → Apache Answer (:5555) [FB, D5]│
 │                                                    │
 │   supervised by bm2 (infra/ecosystem.config.ts):     │
 │   pb (:8090, internal only) + bff + web + admin     │
+│     + feedback (Apache Answer sidecar)              │
 │   backups: systemd timer → pb_data/backups (local)  │
+│     + feedback/answer-data (strategy TBD)           │
 └──────────────────────────────────────────────────────┘
 ```
 

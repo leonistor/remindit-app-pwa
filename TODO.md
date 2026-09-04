@@ -193,33 +193,46 @@ in-flight reconciles would close the last wipe edge case.
   mark-read; en/ro. Plain text types, untyped payload (minimal groundwork —
   a future push/digest design adds the typed enum + dedupeKey migration).
 
-## Phase D — platform deployment (unblocks V6)
+## Phase D — platform deployment (unblocks V6) + Feedback module
 
 **Process manager chosen: [bm2](https://github.com/Bunsgate/bm2) (Bun-native PM2
 replacement, pinned `1.1.0)** — fits the all-Bun stack, one ecosystem file for
 the whole topology, built-in health checks / log rotation / zero-downtime reload
 / reboot persistence / Prometheus. Backups are a separate systemd-timer job (bm2
-does not handle them). Repo scaffolding for D1–D4 is in place:
-`infra/ecosystem.config.ts` + `infra/bin/start-*.sh`, `bff/scripts/{serve,backup}-pb.ts`,
-`infra/Caddyfile`, `infra/backup.{service,timer}`, `docs/DEPLOY-VPS.md`, prod
-`allowedHosts` + `.env.example` values. Local commits through v5.0.0; VPS
-provisioning not yet done.
+does not handle them). The Feedback module (Apache Answer sidecar) is deployed
+alongside the platform — same bm2 ecosystem, same Caddy host. Repo scaffolding
+for D1–D5 is in place: `infra/ecosystem.config.ts` + `infra/bin/start-*.sh`,
+`bff/scripts/{serve,backup}-pb.ts`, `infra/Caddyfile`,
+`infra/backup.{service,timer}`, `docs/DEPLOY-VPS.md`, prod `allowedHosts` +
+`.env.example` values, and `feedback` wired into `dev:all`. Local commits
+through v5.0.0; VPS provisioning not yet done.
 
 - [ ] **D1** VPS: `bun add -g bm2`, `bm2 start infra/ecosystem.config.ts` →
-  `save` → `startup install`; verify all 4 online + reboot persistence. Automate
-  `pb_data/` backups via `infra/backup.{service,timer}` (local snapshots,
-  `PB_BACKUP_KEEP` retained).
+  `save` → `startup install`; verify all 5 online (pb, bff, web, admin,
+  feedback) + reboot persistence. Automate `pb_data/` backups via
+  `infra/backup.{service,timer}` (local snapshots, `PB_BACKUP_KEEP` retained).
+  **Back up the feedback module's `answer-data/` alongside `pb_data/`** (same
+  timer / strategy — backup approach to be analyzed after this plan update).
 - [ ] **D2** Build + deploy `web/` + `admin/` SSR behind Caddy
   (`www.remindit.me` / `admin.remindit.me`); protect admin origin (basicauth +
-  IP allowlist in `infra/Caddyfile`). `feedback.remindit.me` reserved for FB.
+  IP allowlist in `infra/Caddyfile`).
 - [ ] **D3** Prod env plumbing on the VPS repo-root `.env`:
   `SESSION_COOKIE_SECURE=true`, `CORS_ORIGINS` real origins,
   `PUBLIC_PWA_URL=https://remindit.me` / `PUBLIC_BFF_URL=https://api.remindit.me`
-  / `PUBLIC_FEEDBACK_URL` (when FB ships).
+  / `PUBLIC_FEEDBACK_URL=https://feedback.remindit.me`.
 - [ ] **D4** Deploy current pwa bundle to `remindit.me` (SW-safe release flow,
   `pwa/docs/DEPLOY.md`); DNS cutover from `remindit.parsedwink.com`.
+- [ ] **D5** Deploy the Feedback module (Apache Answer) as part of the platform
+  rollout: bm2-managed `feedback` process + Caddy host `feedback.remindit.me`
+  (already in `infra/Caddyfile`), run in `dev:all`. FB2–FB6 remain deferred
+  product work (submit API, tags, plugins, login story, branding).
 
 ## Phase FB — feedback module (V6 feedback capture) — setup + bridge done 2026-09-03
+
+Deployment of the feedback module is folded into Phase D (D5): same bm2
+ecosystem + Caddy host `feedback.remindit.me` as the rest of the platform, and it
+runs in `dev:all`. The items below are deferred product/feature work on top of
+the already-deployed instance.
 
 Apache Answer sidecar (`feedback/`, branch `feat/feedback`): setup/start/stop
 scripts + Caddy host + one-way user bridge (register hook + backfill).
