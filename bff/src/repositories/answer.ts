@@ -230,24 +230,27 @@ export class AnswerClient {
 
   /**
    * Send the user their "set your password" email (admin). Idempotent.
-   * Success is judged by the HTTP status alone: Answer answers 200 with the
-   * SPA HTML (a redirect the fetch follows), so there is no JSON envelope to
-   * parse — the existing request() would see `{}` and throw on success.
+   * Path note: the Swagger @Router annotation says `users/activation` (plural),
+   * but the real gin route is `user/activation` (singular) — the plural path
+   * returns the SPA HTML shell with 200 and never reaches the handler (verified
+   * live 2026-09-04). Require the JSON envelope so a wrong path or a shell
+   * response fails loudly instead of silently no-op'ing.
    */
   async activateUser(userId: string): Promise<void> {
     const token = await this.adminToken()
-    const { status } = await this.requestRaw(
-      "/answer/admin/api/users/activation",
+    const { status, body } = await this.requestRaw(
+      "/answer/admin/api/user/activation",
       {
         method: "POST",
         headers: { Authorization: token, "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: userId }),
       }
     )
-    if (status < 200 || status >= 300) {
+    const envelope = body as AnswerEnvelope
+    if (status < 200 || status >= 300 || envelope.code !== 200) {
       throw new AnswerError(
-        `Answer user activation failed (http ${status})`,
-        `http ${status}`,
+        `Answer user activation failed (http ${status}, code ${envelope.code ?? "?"})`,
+        envelope.reason ?? `http ${status}`,
         status
       )
     }

@@ -236,8 +236,9 @@ runs in `dev:all`. All items below shipped 2026-09-04 as one slice (branch
 Answer sidecar: Answer ignores the `username` field and derives the username
 from `display_name` (preserving underscores) — the bridge uses
 `canonicalAnswerUsername` (slug of record.username, no salt); `listTags` needs
-`page=1`; the activation endpoint answers 2xx with an HTML/redirect body
-(accepted as success); question content min is 6.
+`page=1`; the activation route is `user/activation` (singular — the swagger's
+plural `users/activation` returns the SPA shell and never reaches the handler);
+question content min is 6.
 
 Apache Answer sidecar (`feedback/`, branch `feat/feedback`): setup/start/stop
 scripts + Caddy host + one-way user bridge (register hook + backfill). Shipped:
@@ -262,10 +263,12 @@ scripts + Caddy host + one-way user bridge (register hook + backfill). Shipped:
   footer deep links (`/questions?tag=bug|feature-request|discussion`) in the
   pwa + web footers, gated on `PUBLIC_FEEDBACK_URL`.
 - [x] **FB5** Login story — SMTP config via `configure:feedback smtp` (Inbucket
-  dev host `maildev.parsedw.ink:2500` in `.env`/`.env.example`; the instance
-  currently answers 451 "Failed to store message" — Inbucket storage issue,
-  not ours), `POST /api/feedback/activate` (accepts 2xx HTML-body responses)
-  + pwa "Email me a login link" action.
+  dev host `maildev.parsedw.ink:2500` in `.env`/`.env.example`; mailbox naming
+  is `domain` — messages for `x@remindit.local` appear under the
+  `remindit.local` mailbox on the Inbucket web UI), `POST /api/feedback/activate`
+  + pwa "Email me a login link" action. Activation e2e-verified live
+  2026-09-04: the singular `user/activation` route emails the "Confirm your new
+  account" link and it lands in Inbucket.
 - [x] **FB6** Branding from `@remindit/common` — `configure:feedback branding`
   sets site name/description, theme `primary_color` (`BRAND_COLOR`) and custom
   CSS via the admin API; logo documented as manual (the ~4 KB SVG exceeds

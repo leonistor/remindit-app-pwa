@@ -353,20 +353,29 @@ describe("AnswerClient", () => {
   })
 
   describe("activateUser", () => {
-    test("succeeds on a 2xx with a non-JSON body (Answer answers HTML)", async () => {
+    test("posts to the singular route and succeeds on the JSON envelope", async () => {
       const { client, fetchCalls, loginThen } = makeClient()
-      loginThen(
-        () =>
-          // Real wire shape: 200 + SPA HTML (fetch followed Answer's redirect).
-          new Response("<html><body>ok</body></html>", { status: 200 })
+      loginThen(() =>
+        envelope({ code: 200, reason: "base.success", data: null })
       )
       await client.activateUser("abc")
+      // The real gin route is singular; the plural path returns the SPA shell.
       expect(fetchCalls[1]?.url).toBe(
-        `${env.answerInternalUrl}/answer/admin/api/users/activation`
+        `${env.answerInternalUrl}/answer/admin/api/user/activation`
       )
       expect(JSON.parse(fetchCalls[1]?.init?.body as string)).toEqual({
         user_id: "abc",
       })
+    })
+
+    test("fails loudly on a 2xx non-envelope body (SPA shell — wrong route)", async () => {
+      const { client, loginThen } = makeClient()
+      loginThen(
+        () => new Response("<html><body>ok</body></html>", { status: 200 })
+      )
+      expect(client.activateUser("abc")).rejects.toThrow(
+        "Answer user activation failed"
+      )
     })
 
     test("throws AnswerError on a non-2xx status", async () => {
