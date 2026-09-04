@@ -195,19 +195,29 @@ in-flight reconciles would close the last wipe edge case.
 
 ## Phase D — platform deployment (unblocks V6)
 
-**Gated on deployment research (2026-09-03):** process-manager + backup
-choices for the VPS (D1) need a research pass before any of D1–D4 start;
-nothing is pushed yet (local commits through v5.0.0).
+**Process manager chosen: [bm2](https://github.com/Bunsgate/bm2) (Bun-native PM2
+replacement, pinned `1.1.0)** — fits the all-Bun stack, one ecosystem file for
+the whole topology, built-in health checks / log rotation / zero-downtime reload
+/ reboot persistence / Prometheus. Backups are a separate systemd-timer job (bm2
+does not handle them). Repo scaffolding for D1–D4 is in place:
+`infra/ecosystem.config.ts` + `infra/bin/start-*.sh`, `bff/scripts/{serve,backup}-pb.ts`,
+`infra/Caddyfile`, `infra/backup.{service,timer}`, `docs/DEPLOY-VPS.md`, prod
+`allowedHosts` + `.env.example` values. Local commits through v5.0.0; VPS
+provisioning not yet done.
 
-- [ ] **D1** VPS process manager for the bff (Hono + PB), automated
-  `pb_data/` backups (PB built-in backup endpoints / MCP `pb_backup`).
-- [ ] **D2** Deploy `web/` + `admin/` SSR bundles behind the reverse proxy
-  (D3); protect the admin origin (VPN / IP allowlist / basic auth).
-- [ ] **D3** Prod env plumbing: `SESSION_COOKIE_SECURE`, `CORS_ORIGINS`
-  allowlist with real origins, `PUBLIC_PWA_URL` / `PUBLIC_BFF_URL` /
-  `PUBLIC_FEEDBACK_URL` values.
-- [ ] **D4** Deploy the current pwa bundle (SW-safe release flow, see
-  `pwa/docs/DEPLOY.md`).
+- [ ] **D1** VPS: `bun add -g bm2`, `bm2 start infra/ecosystem.config.ts` →
+  `save` → `startup install`; verify all 4 online + reboot persistence. Automate
+  `pb_data/` backups via `infra/backup.{service,timer}` (local snapshots,
+  `PB_BACKUP_KEEP` retained).
+- [ ] **D2** Build + deploy `web/` + `admin/` SSR behind Caddy
+  (`www.remindit.me` / `admin.remindit.me`); protect admin origin (basicauth +
+  IP allowlist in `infra/Caddyfile`). `feedback.remindit.me` reserved for FB.
+- [ ] **D3** Prod env plumbing on the VPS repo-root `.env`:
+  `SESSION_COOKIE_SECURE=true`, `CORS_ORIGINS` real origins,
+  `PUBLIC_PWA_URL=https://remindit.me` / `PUBLIC_BFF_URL=https://api.remindit.me`
+  / `PUBLIC_FEEDBACK_URL` (when FB ships).
+- [ ] **D4** Deploy current pwa bundle to `remindit.me` (SW-safe release flow,
+  `pwa/docs/DEPLOY.md`); DNS cutover from `remindit.parsedwink.com`.
 
 ## Phase FB — feedback module (V6 feedback capture) — setup + bridge done 2026-09-03
 

@@ -48,6 +48,7 @@
     "preview:admin": "cd admin && bun --env-file=../.env run preview"
   },
   "devDependencies": {
+    "bm2": "1.1.0",
     "concurrently": "^10.0.5"
   }
 }

@@ -1,6 +1,6 @@
 # remindit-app-pwa
 
-**Live app: [remindit.parsedwink.com](https://remindit.parsedwink.com)**
+**Live app: [remindit.me](https://remindit.me)**
 
 This project is a Progressive Web App (PWA) to manage a personal shopping list.
 

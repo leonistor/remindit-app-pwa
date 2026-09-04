@@ -1,0 +1,11 @@
+[Unit]
+Description=RemindIt PocketBase backup timer
+
+[Timer]
+# Local snapshots (decision: local only for Phase D). Tune to taste; Persistent
+# ensures a missed run fires on next boot.
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target

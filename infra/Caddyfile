@@ -1,0 +1,54 @@
+# RemindIt production reverse proxy — site blocks only.
+#
+# Loaded by the system Caddy (global options: automatic TLS via ACME for
+# *.remindit.me, managed in /etc/caddy/Caddyfile). This file (infra/Caddyfile) is
+# `import`ed by the global Caddyfile (global options live there, not here —
+# Caddy rejects global blocks in imported files, same split as the local repo
+# Caddyfile).
+#
+# Topology (decision: apex = PWA):
+#   remindit.me      → pwa static (built zip extracted to /var/www/remindit)
+#   www.remindit.me  → web SSR  (:3200)
+#   admin.remindit.me → admin SSR (:3300) + basicauth / IP allowlist
+#   api.remindit.me  → bff      (:3100)  → /api/* + /pb/*
+#   feedback.remindit.me → Answer (:5555)  [reserved, enabled with FB phase]
+#
+# PocketBase (:8090) is intentionally NOT proxied (D2) — its admin UI stays on
+# 127.0.0.1:8090/_/. All app processes bind loopback; Caddy is the only public
+# surface. bm2's dashboard (:9615) and metrics (:9616) are NOT started in prod
+# — do not expose them.
+
+remindit.me {
+	root * /var/www/remindit
+	encode zstd gzip
+	file_server
+	# SPA fallback for client-side routing
+	try_files {path} /index.html
+	# Cache fingerprinted static assets aggressively (hashed filenames)
+	@static path /static/*
+	header @static Cache-Control "public, immutable, max-age=31536000"
+}
+
+www.remindit.me {
+	reverse_proxy 127.0.0.1:3200
+}
+
+admin.remindit.me {
+	# Protect the admin origin (D2). Generate a hash:
+	#   caddy hash-password >> then paste the output below.
+	# basicauth {
+	# 	admin $2a$14$REPLACE_WITH_HASHED_PASSWORD
+	# }
+	# Optional IP allowlist (uncomment and set your office/VPN ranges):
+	# @allowed remote_ip 203.0.113.0/24
+	# respond @not_allowed 403
+	reverse_proxy 127.0.0.1:3300
+}
+
+api.remindit.me {
+	reverse_proxy 127.0.0.1:3100
+}
+
+# feedback.remindit.me {
+# 	reverse_proxy 127.0.0.1:5555
+# }

@@ -1,0 +1,10 @@
+[Unit]
+Description=RemindIt PocketBase local backup (oneshot)
+After=network.target
+
+[Service]
+Type=oneshot
+# The wrapper self-locates the repo root and sources its .env; set WorkingDirectory
+# to wherever the repo is cloned on the VPS (e.g. /srv/remindit).
+WorkingDirectory=/srv/remindit
+ExecStart=/bin/sh /srv/remindit/infra/bin/backup.sh

@@ -99,19 +99,23 @@ remaining slice.
 ## 3. Architecture
 
 ```
-                       VPS (same host)
+                        VPS (same host)
 ┌──────────────────────────────────────────────────────┐
-│ reverse proxy (Caddy/nginx, TLS)                     │
-│   /            → pwa static (dist/, existing deploy) │
-│   app.example  → web static/SSR (TanStack Start)     │
-│   admin.example→ admin static/SSR (TanStack Start)   │
-│   api.example  → Hono BFF (Bun.serve, :<BFF_PORT>)   │
+│ reverse proxy (Caddy, auto-TLS *.remindit.me)         │
+│   remindit.me     → pwa static (/var/www/remindit)   │
+│   www.remindit.me → web SSR     (TanStack Start :3200)│
+│   admin.remindit.me→ admin SSR  (:3300) + basicauth  │
+│   api.remindit.me → Hono BFF  (Bun.serve, :3100)     │
 │                    │  /api/* → typed Hono RPC       │
 │                    │           (Zod, PB SDK         │
 │                    │            server-side)        │
 │                    │  /pb/*  → scoped data-plane    │
 │                    │           forwarder → PB       │
-│                    │           (phase 5 decision)   │
+│   feedback.remindit.me → Apache Answer (:5555) [FB]  │
+│                                                    │
+│   supervised by bm2 (infra/ecosystem.config.ts):     │
+│   pb (:8090, internal only) + bff + web + admin     │
+│   backups: systemd timer → pb_data/backups (local)  │
 └──────────────────────────────────────────────────────┘
 ```
 

@@ -1,6 +1,10 @@
 # Deployment
 
-Production URL: `https://remindit.parsedwink.com`
+Production URL: `https://remindit.me` (apex). The PWA was previously hosted at
+`https://remindit.parsedwink.com`; see the cutover note at the end of this file.
+
+Full VPS runbook (process supervisor, reverse proxy, backups):
+[../../docs/DEPLOY-VPS.md](../../docs/DEPLOY-VPS.md).
 
 ## Prerequisites
 
@@ -60,3 +64,13 @@ server {
   repo root. No runtime environment variables are needed.
 - The app remains fully usable without a backend — local-first, and sync is
   opt-in.
+
+## Production cutover (parsedwink → remindit.me)
+
+- Build with `PUBLIC_BFF_URL=https://api.remindit.me` (and `PUBLIC_PWA_URL=https://remindit.me`)
+  so sync/sign-in target the new BFF origin; `bun run deploy` then extracts the
+  zip to `/var/www/remindit` behind the Caddy `remindit.me` site block.
+- Assets are fingerprinted, so the new service worker + shell are a drop-in; bump
+  the version so existing clients adopt the updated SW.
+- Optionally 301-redirect `remindit.parsedwink.com` → `remindit.me` at the old
+  host. The old SW keeps working until clients migrate.

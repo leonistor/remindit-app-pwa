@@ -14,11 +14,14 @@ export default defineConfig({
     host: "127.0.0.1",
     // Local Caddy proxy (docs/CADDY-LOCAL.md) rewrites the Host header to
     // *.remindit.localhost — dev servers reject unknown Host headers by
-    // default, so the proxied names must be allowlisted.
+    // default, so the proxied names must be allowlisted. Production hostnames
+    // (deploy/Caddyfile) are included too so the same config serves behind the
+    // prod reverse proxy without a separate build.
     allowedHosts: [
       "admin.remindit.localhost",
       "pwa.remindit.localhost",
       "web.remindit.localhost",
+      "admin.remindit.me",
     ],
   },
   plugins: [
