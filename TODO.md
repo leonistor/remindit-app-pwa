@@ -10,8 +10,16 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 
 ## In flight
 
-- Nothing — the platform is deployed (`remindit.me` + `www`/`admin`/`api`/
-  `feedback`, v5.1.0 live) and every review phase is closed.
+- **de/fr/uk translation drafts** — kick-started 2026-09-05 with
+  `bun scripts/kickstart-locale.ts` (local Ollama, translategemma:12b, tuned
+  prompt; see `pwa/docs/DEV.md` §Internationalization). ~40 keys across the
+  three files kept English after safety-net rejections (invented/renamed
+  `{tokens}`, mostly sentence-fragment keys) — listed in the run output and
+  need human review before the locales ship. Shipping caveat: locales in
+  `project.inlang/settings.json` get compiled by paraglide and **auto-served**
+  to matching browsers via the `preferredLanguage` strategy on the next
+  release — decide ship order / `APP_LOCALES` gating if the drafts aren't
+  reviewed by then. The language selector (`APP_LOCALES`) is still en+ro.
 
 ## Next (V6 + wishlist, roadmap §1)
 
