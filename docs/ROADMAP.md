@@ -58,19 +58,19 @@ Core PWA + personalization slice (see `pwa/CHANGELOG.md`):
 - [x] Multi-language support — English (default) + Romanian first (German, French, Ukrainian later); language selection as the first onboarding step, UI language switchable in Profile; Paraglide JS (shipped in v4.2.0)
 - [x] Avatar picker (12 rerollable options) + backup export/import (v4.4.0)
 
-### [~] Version 5 — in progress (sync landed on main, unreleased)
+### [x] Version 5 — shipped v5.0.0 (2026-09-03)
 
-Platform phase 5 (`feat/pwa-sync`) delivered the sync engine; sharing is the
-remaining slice.
+Sync + sharing + notifications, one major release.
 
 - [x] Sync with the server — list saved and loaded across devices: local-first engine (`pwa/src/stores/sync/`), journal + three-way reconciliation + LWW, realtime SSE, offline behavior — see `pwa/docs/SYNC.md`
-- [~] Multi-user support — multiple users share the same list and collaborate in real-time: groups + membership exist in the schema and BFF API (`groups`, `group_members`, platform phase 3), and realtime sync is live — but the pwa still auto-creates a private "My list" group (`ensureGroup`); **no UI yet** for joining an existing group / sharing a list with another user
-- [ ] Family shopping-list flow on top of sharing — invites, roles surfaced in-app (owner / member)
+- [x] Multi-user support — shared lists with a group switcher on Profile, owner-gated invite by exact username, owner/member role badges, remove/leave flows (`SharedListCard` + `stores/sync/group-actions.ts`)
+- [x] Family shopping-list flow on top of sharing — invites and roles surfaced in-app (owner / member)
+- [x] In-app notifications for membership changes (realtime; Web Push deferred — D4 in the decision log)
 
 ### [ ] Version 6
 
-- [~] App website — standalone marketing site built (`web/`, platform phase 4: hero + live stats + features + download pages); **production deployment pending** (platform deployment phase, D3). Live PWA: `https://remindit.parsedwink.com`
-- [ ] Community of early adopters and feedback capture (see `pwa/docs/LINKS.md#integrations`)
+- [x] App website — standalone marketing site (`web/`: hero + live stats + features + download pages); live at `https://www.remindit.me` (deployed with the platform, Phase D 2026-09-04). Live PWA: `https://remindit.me`
+- [x] Community of early adopters and feedback capture — Apache Answer sidecar at `https://feedback.remindit.me`, submit API (member + guest), tag-seeded quick links, login-link flow, branding (phase FB); see `pwa/docs/LINKS.md#integrations`
 - [ ] Basic AI features
 - [ ] Integration with LLMs (MCP, skills)
 

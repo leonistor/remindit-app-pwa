@@ -1,7 +1,8 @@
 # Deployment
 
-Production URL: `https://remindit.me` (apex). The PWA was previously hosted at
-`https://remindit.parsedwink.com`; see the cutover note at the end of this file.
+Production URL: `https://remindit.me` (apex), deployed 2026-09-04. The PWA was
+previously hosted at `https://remindit.parsedwink.com` — that host still serves
+the previous bundle (optional 301 pending); see the cutover note at the end.
 
 Full VPS runbook (process supervisor, reverse proxy, backups):
 [../../docs/DEPLOY-VPS.md](../../docs/DEPLOY-VPS.md).
@@ -22,6 +23,8 @@ This runs a production build and creates a timestamped zip archive in the `deplo
 Output example: `deploy/deploy-2026-08-24_09-15.zip`
 
 ## Server Setup
+
+On the production VPS this is Caddy (see [../../docs/DEPLOY-VPS.md](../../docs/DEPLOY-VPS.md)); the nginx block below is the generic reference.
 
 1. Extract the archive contents into the web server root directory (e.g. `/var/www/remindit/`)
 2. Configure the web server to serve `index.html` for all routes (SPA fallback)
@@ -65,12 +68,15 @@ server {
 - The app remains fully usable without a backend — local-first, and sync is
   opt-in.
 
-## Production cutover (parsedwink → remindit.me)
+## Production cutover (parsedwink → remindit.me) — done 2026-09-04
 
-- Build with `PUBLIC_BFF_URL=https://api.remindit.me` (and `PUBLIC_PWA_URL=https://remindit.me`)
-  so sync/sign-in target the new BFF origin; `bun run deploy` then extracts the
-  zip to `/var/www/remindit` behind the Caddy `remindit.me` site block.
+- Build with the prod URLs EXPLICITLY — the root `.env` holds dev values, and
+  `scripts/deploy.sh` does not override them:
+  `PUBLIC_BFF_URL=https://api.remindit.me PUBLIC_PWA_URL=https://remindit.me
+  PUBLIC_FEEDBACK_URL=https://feedback.remindit.me bun run deploy` (from the
+  repo root), then extract the zip to `/var/www/remindit` behind the Caddy
+  `remindit.me` site block.
 - Assets are fingerprinted, so the new service worker + shell are a drop-in; bump
   the version so existing clients adopt the updated SW.
-- Optionally 301-redirect `remindit.parsedwink.com` → `remindit.me` at the old
-  host. The old SW keeps working until clients migrate.
+- Optional follow-up: 301-redirect `remindit.parsedwink.com` → `remindit.me`.
+  The old SW keeps working until clients migrate.

@@ -44,9 +44,10 @@ bun run dev:all     # pwa + bff + web concurrently
 bun run build:web   # production build → dist/ (client + SSR server)
 ```
 
-## Deployment (later phase)
+## Deployment
 
-The build outputs a Node-runnable SSR server (`dist/server/index.js`) plus
-static client assets. Hosting options (VPS behind the same reverse proxy as
-the PWA/BFF, per roadmap D3) are decided during the deployment phase; the
-start command and env plumbing land then.
+Deployed 2026-09-04 (Phase D): bm2-managed SSR at `:3200` behind Caddy at
+`https://www.remindit.me` (see `infra/bin/start-web.sh`). The build outputs a
+Node-runnable SSR server (`dist/server/index.js`) plus static client assets;
+rebuild + `bm2 reload web` to update. Full topology:
+[docs/DEPLOY-VPS.md](../docs/DEPLOY-VPS.md).
