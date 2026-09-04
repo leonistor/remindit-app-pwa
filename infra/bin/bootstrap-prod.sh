@@ -7,7 +7,12 @@ set -e
 REPO=/srv/remindit
 
 echo "=== 1/4 backup timer (pb_data + answer-data, hourly) ==="
-cp "$REPO/infra/backup.service" "$REPO/infra/backup.timer" /etc/systemd/system/
+# Copy under the systemd unit names — cp preserves basenames, and the timer
+# pairs with its service by filename (remindit-backup.*).
+cp "$REPO/infra/backup.service" /etc/systemd/system/remindit-backup.service
+cp "$REPO/infra/backup.timer" /etc/systemd/system/remindit-backup.timer
+# Stale mis-named copies from an earlier bootstrap run.
+rm -f /etc/systemd/system/backup.service /etc/systemd/system/backup.timer
 systemctl daemon-reload
 systemctl enable --now remindit-backup.timer
 
@@ -15,10 +20,11 @@ echo "=== 2/4 Caddy: site blocks + admin basicauth ==="
 cp "$REPO/infra/Caddyfile" /etc/caddy/remindit.caddyfile
 ADMIN_PASS=$(openssl rand -hex 10)
 HASH=$(caddy hash-password --plaintext "$ADMIN_PASS")
-# Uncomment the basicauth block and inject the generated hash (sed idempotent:
-# reruns replace the previous hash and re-comment nothing).
-sed -i "s|^[[:space:]]*#[[:space:]]*basicauth {|\tbasicauth {|" /etc/caddy/remindit.caddyfile
-sed -i "s|^[[:space:]]*#[[:space:]]*admin .2a.14.*|\tadmin $HASH|" /etc/caddy/remindit.caddyfile
+# Uncomment the basicauth block and inject the generated hash. Rerun-safe:
+# both the commented (first run) and uncommented (later runs) lines match, so
+# each run replaces the previous hash with the fresh one.
+sed -E -i "s|^[[:space:]]*#?[[:space:]]*basicauth \{|\tbasicauth {|" /etc/caddy/remindit.caddyfile
+sed -E -i "s|^[[:space:]]*#?[[:space:]]*admin .*|\tadmin $HASH|" /etc/caddy/remindit.caddyfile
 grep -q "remindit.caddyfile" /etc/caddy/Caddyfile ||
   echo "import /etc/caddy/remindit.caddyfile" >>/etc/caddy/Caddyfile
 caddy validate --config /etc/caddy/Caddyfile >/dev/null
