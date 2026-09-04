@@ -283,20 +283,36 @@ declared in `bff/package.json` (was used-but-undeclared).
 
 ## Known edges (non-blocking, surfaced by review)
 
-- **`switchGroup` in-flight-connect race** — a switch landing while a connect
+- [x] **`switchGroup` in-flight-connect race** — a switch landing while a connect
   is already in flight reuses that connect (H3 serialization); the old
   group's realtime subscription can survive until the next
   foreground/heartbeat reconnect. Self-healing; reconcile output stays
-  correct. Harden by cancelling/awaiting the in-flight connect in the switch
-  path.
-- **Cancelable in-flight reconciles** — the last wipe edge case from the
+  correct. Done 2026-09-04: `ensureGroup` now compare-and-sets `$syncGroup`
+  (a concurrent switch's repoint is never clobbered) and `runConnect`
+  continues for the CURRENT group instead of bailing when a switch lands
+  mid-connect — the switch's group gets its reconcile + realtime wired
+  immediately. Deterministic engine test added.
+- [x] **Cancelable in-flight reconciles** — the last wipe edge case from the
   Phase H review (reconcile racing `wipeAllData`). Carried since then; the
-  `applying` flag prevents stacking but doesn't cancel.
+  `applying` flag prevents stacking but doesn't cancel. Done 2026-09-04:
+  `reconcileCollection` returns early at the next action boundary when the
+  session/group is torn down mid-pass (sign-out / wipe / switch), and
+  `reconcileAll` aborts the pass (no profile push, no "online" status) when a
+  collection reports the cancellation.
 - **Notifications groundwork deferred (minimal by decision, D4)** — plain
   text types + untyped payload, no dedupe key, `getFullList` without
   pagination. When Web Push or digests arrive: typed `type` enum +
   discriminated payload in contracts, `dedupeKey` + `(user, created)` indexes
   via the idempotent migrate, paginated list.
+
+Also closed 2026-09-04: the pre-existing `test:quick` failure
+(`sync-engine.test.ts` "concurrent connects create the group exactly once" —
+`groupsCreated` was 0 because the second concurrent `signIn` bumped
+`sessionGeneration` and aborted the shared in-flight connect). Fix:
+`signIn`/`signUp` now bump the generation only when the session identity
+actually changes (`applySession`), so identical concurrent connects reuse the
+in-flight one. `test:quick` (256) + full pwa suite (313) green; lint warnings
+in the engine test file cleared.
 
 ---
 

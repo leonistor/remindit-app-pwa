@@ -42,6 +42,7 @@ import {
   getSession,
   patchSessionToken,
   setSession,
+  type SyncSession,
 } from "./session"
 
 // --- state ------------------------------------------------------------------
@@ -367,7 +368,7 @@ async function reconcileCollection<L>(
   groupId: string,
   maps: Maps,
   reconcileSession: string
-): Promise<void> {
+): Promise<boolean> {
   const localRecords = spec.local()
   const remote = maps.remote[spec.collection]
 
@@ -411,6 +412,12 @@ async function reconcileCollection<L>(
   const collection = spec.collection
 
   for (const action of result.actions) {
+    // Cancel an in-flight pass when the session or group is torn down under
+    // it (sign-out / wipe / switch landing while an earlier action was
+    // awaiting): stop executing writes against the stale group. The
+    // `applying` flag prevents stacking but cannot interrupt a running pass —
+    // this guard stops it at the next action boundary.
+    if (!getSession() || $syncGroup.get() !== reconcileSession) return false
     switch (action.kind) {
       case "remoteCreate": {
         const record = (await pb
@@ -484,6 +491,7 @@ async function reconcileCollection<L>(
     })
     $syncTombstones.set({ ...$syncTombstones.get(), [collection]: [] })
   }
+  return true
 }
 
 /** Runs a full reconcile pass. Exported for the engine tests; not in the public barrel. */
@@ -533,9 +541,18 @@ export async function reconcileAll(): Promise<void> {
         }
       }
     }
-    // Order matters: relations resolve against earlier collections.
+    // Order matters: relations resolve against earlier collections. A
+    // cancelled pass (session/group torn down mid-pass) aborts the whole
+    // reconcile — the maps are stale and "online" would describe the old
+    // group, so skip the profile push and status flip entirely.
     for (const spec of SPECS) {
-      await reconcileCollection(spec, groupId, maps, reconcileSession)
+      const continued = await reconcileCollection(
+        spec,
+        groupId,
+        maps,
+        reconcileSession
+      )
+      if (!continued) return
     }
     await syncProfile()
     setSyncState({ status: "online", lastError: null })
@@ -663,7 +680,12 @@ async function ensureGroup(): Promise<string> {
     if (stored && active.id !== stored) {
       clearSyncBuffers()
     }
-    $syncGroup.set(active.id)
+    // CAS: a concurrent switchGroup may have repointed $syncGroup while we
+    // were awaiting listGroups. Never clobber its choice — runConnect reads
+    // $syncGroup again and connects for the CURRENT group, so a stale
+    // ensureGroup writing over the switch's pick would mis-point the whole
+    // connect (subscribe the old group, leave the new one blind to realtime).
+    if ($syncGroup.get() === stored) $syncGroup.set(active.id)
     return active.id
   }
   // First sign-in without any group: create one; the local data becomes its
@@ -701,14 +723,22 @@ async function runConnect(): Promise<void> {
       collectionName: "users",
     } as never)
 
-    const groupId = await ensureGroup()
-    // Re-read the group — a concurrent switchGroup() may have changed it
-    // while we were awaiting ensureGroup() or me().
+    await ensureGroup()
+    // A concurrent switchGroup may have repointed $syncGroup while we were
+    // awaiting ensureGroup (whose CAS guard kept its pick); a sign-out/wipe
+    // clears the session. Bail on a dead session; otherwise connect for the
+    // CURRENT group — the switch awaits this same connect promise, so it
+    // needs the reconcile + realtime for its group, not the group ensureGroup
+    // resolved for (which would leave the new group blind until the next
+    // scheduled reconnect).
     const currentGroup = $syncGroup.get()
-    if (currentGroup !== groupId) return
+    if (!getSession() || !currentGroup) return
     setSyncState({ status: "online", groupId: currentGroup })
 
     await reconcileAll()
+    // The session may have died or another switch landed mid-reconcile —
+    // don't wire realtime for a torn-down/old group.
+    if (!getSession() || $syncGroup.get() !== currentGroup) return
     await subscribeRealtime(currentGroup)
     await subscribeNotifications()
     // Notifications (D4): one refresh per successful connect (sign-in /
@@ -814,14 +844,30 @@ function wireStoreListeners(): void {
 
 // --- public API -------------------------------------------------------------
 
+/**
+ * Seed a new session and bump the connect generation only when the session
+ * identity actually changes. Two concurrent sign-ins with the same account
+ * (e.g. a sign-in racing an `online` reconnect) set the identical session —
+ * bumping unconditionally would abort the first sign-in's in-flight connect
+ * (the T0-3 generation guard) and, because `connect()` shares that aborted
+ * promise, leave nothing to complete it. A genuinely different token or user
+ * still bumps, so a stale connect never applies another account's state.
+ */
+const applySession = (session: SyncSession): void => {
+  const prev = getSession()
+  const changed =
+    prev?.token !== session.token || prev?.userId !== session.userId
+  setSession(session)
+  if (changed) sessionGeneration++
+}
+
 export async function signIn(email: string, password: string): Promise<void> {
   const auth = await bffApi.login(email, password)
-  setSession({
+  applySession({
     token: auth.token,
     userId: auth.user.id,
     email: auth.user.email,
   })
-  sessionGeneration++
   await connect()
 }
 
@@ -840,12 +886,11 @@ export async function signUp(body: {
     firstName: $user.get().firstName,
     lastName: $user.get().lastName,
   })
-  setSession({
+  applySession({
     token: auth.token,
     userId: auth.user.id,
     email: auth.user.email,
   })
-  sessionGeneration++
   await connect()
 }
 

@@ -507,9 +507,12 @@ describe("sync engine (stubbed clients)", () => {
 
     // Slow me() call: signIn starts a connect, the session is set, then me()
     // hangs — simulating a network delay during token validation.
-    let meResolve: (v: { email: string }) => void
+    let meResolve: ((v: { email: string }) => void) | undefined
     bffApi.me.mockImplementation(
-      () => new Promise((resolve) => { meResolve = resolve })
+      () =>
+        new Promise((resolve) => {
+          meResolve = resolve
+        })
     )
 
     const signInPromise = signIn(EMAIL, "pw")
@@ -524,7 +527,7 @@ describe("sync engine (stubbed clients)", () => {
     await signOut()
 
     // Release the hanging me() call.
-    meResolve!({ email: EMAIL })
+    meResolve?.({ email: EMAIL })
     await signInPromise
 
     // Connect must not have set "online" with the stale session: the
@@ -546,9 +549,12 @@ describe("sync engine (stubbed clients)", () => {
     ])
 
     // Slow me(): the signIn connect is in-flight when switchGroup fires.
-    let meResolve: (v: { email: string }) => void
+    let meResolve: ((v: { email: string }) => void) | undefined
     bffApi.me.mockImplementation(
-      () => new Promise((resolve) => { meResolve = resolve })
+      () =>
+        new Promise((resolve) => {
+          meResolve = resolve
+        })
     )
 
     const signInPromise = signIn(EMAIL, "pw")
@@ -562,10 +568,58 @@ describe("sync engine (stubbed clients)", () => {
     // Release the hanging me() call — the shared connectPromise resolves
     // once. runConnect re-reads $syncGroup (now "g2") and continues with
     // group-B.
-    meResolve!({ email: EMAIL })
+    meResolve?.({ email: EMAIL })
     await Promise.all([signInPromise, switchPromise])
 
     // Final state must point to group-B, not group-A.
+    expect($syncState.get().groupId).toBe("g2")
+    expect($syncState.get().status).toBe("online")
+  })
+
+  test("switchGroup landing while a connect is inside ensureGroup keeps the switch's group", async () => {
+    stubAuth([
+      { id: "g1", name: "My list" },
+      { id: "g2", name: "Shared" },
+    ])
+    // Slow listGroups: signIn's connect blocks inside ensureGroup while the
+    // switch fires. Both calls are intercepted so resolution order is
+    // deterministic — the switch's membership check resolves first (repointing
+    // $syncGroup to g2), then ensureGroup's list resolves.
+    const listResolvers: Array<
+      (v: Array<{ id: string; name: string }>) => void
+    > = []
+    bffApi.listGroups.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          listResolvers.push(resolve)
+        })
+    )
+
+    const signInPromise = signIn(EMAIL, "pw")
+    await wait(0)
+    expect($syncState.get().status).toBe("connecting")
+
+    const switchPromise = switchGroup("g2")
+    await wait(0)
+    expect(listResolvers.length).toBe(2)
+
+    // Resolve the switch's membership check first: it repoints $syncGroup to
+    // g2 and awaits the shared connect. THEN resolve ensureGroup's list —
+    // without the CAS guard it would clobber $syncGroup back to g1.
+    listResolvers[1]?.([
+      { id: "g1", name: "My list" },
+      { id: "g2", name: "Shared" },
+    ])
+    await wait(0)
+    listResolvers[0]?.([
+      { id: "g1", name: "My list" },
+      { id: "g2", name: "Shared" },
+    ])
+
+    await Promise.all([signInPromise, switchPromise])
+
+    // The connect finished for the group the switch chose (and wired its
+    // realtime), not the group ensureGroup resolved before the switch.
     expect($syncState.get().groupId).toBe("g2")
     expect($syncState.get().status).toBe("online")
   })
