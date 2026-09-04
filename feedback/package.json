@@ -7,6 +7,7 @@
     "setup": "bun scripts/setup.ts",
     "start": "bun scripts/start.ts",
     "stop": "bun scripts/stop.ts",
+    "backup": "bun scripts/backup-answer.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit --pretty",
     "lint": "biome lint",

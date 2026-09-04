@@ -2,7 +2,7 @@
 
 Production platform for RemindIt. Single VPS, Caddy as the public reverse proxy,
 **bm2** as the Bun-native process supervisor for the whole topology, PocketBase
-backed up locally on a timer.
+and the feedback sidecar backed up locally on a timer.
 
 - Process supervisor: [bm2](https://github.com/Bunsgate/bm2) (Bun-native PM2
   replacement, GPL-3.0). Pinned at `1.1.0`.
@@ -26,9 +26,10 @@ feedback.remindit.me → Answer     (:5555)  [Apache Answer sidecar, Phase D/D5]
 | --- | --- |
 | `infra/ecosystem.config.ts` | bm2 topology — `pb`, `bff`, `web`, `admin`, `feedback` |
 | `infra/bin/start-*.sh` | per-app launchers (source repo-root `.env`, self-locate repo) |
-| `infra/bin/backup.sh` | runs `bff/scripts/backup-pb.ts` |
+| `infra/bin/backup.sh` | runs `feedback/scripts/backup-answer.ts` (best-effort) then `bff/scripts/backup-pb.ts` |
 | `bff/scripts/serve-pb.ts` | spawns the pinned PB binary (loopback) |
 | `bff/scripts/backup-pb.ts` | local `pb_data/` backup via the superuser API |
+| `feedback/scripts/backup-answer.ts` | local `answer-data/` backup (sqlite `VACUUM INTO` snapshot + uploads/config tar) |
 | `infra/Caddyfile` | production site blocks (imported by system Caddy) |
 | `infra/backup.{service,timer}` | systemd units for the backup job |
 
@@ -104,19 +105,20 @@ sudo systemctl enable --now remindit-backup.timer
 # Manual run / verify:
 sudo /bin/sh "$(pwd)/infra/bin/backup.sh"
 ls bff/pb_data/backups      # remindit-<ts>.zip files
+ls feedback/answer-data/backups   # answer-<ts>.tar.gz files
 ```
 
 Retains the most recent `PB_BACKUP_KEEP` zips (default 10) in
-`bff/pb_data/backups`. Restore via the PB dashboard (Settings → Backups) or
-`pocketbase backups restore <name>` against the data dir. Off-box copy is a
-later step (decision: local snapshots only for Phase D).
-
-**Feedback data backup (D1 task):** the feedback module's `feedback/answer-data/`
-(Apache Answer sqlite DB + uploads + `conf/config.yaml`) must be backed up
-alongside `pb_data/`. Add this to the same backup job/timer — the backup
-strategy (snapshotting the live sqlite, retention, off-box copy) is to be
-analyzed after this plan update; for now capture `answer-data/` in the same
-`infra/bin/backup.sh` run.
+`bff/pb_data/backups` and the most recent `ANSWER_BACKUP_KEEP` tarballs
+(default 10) in `feedback/answer-data/backups`. Restore PB via the PB dashboard
+(Settings → Backups) or `pocketbase backups restore <name>` against the data
+dir. Restore Answer: stop the feedback process (`bm2 stop feedback`), then
+`tar -xzf <archive> -C <repo>/feedback` — the entries overlay
+`answer-data/db/answer.db` (a consistent `VACUUM INTO` snapshot, safe against
+a live writer), `answer-data/uploads/` and `answer-data/conf/config.yaml` in
+place — then `bm2 start feedback`. The answer half of `backup.sh` is
+best-effort: if it fails the run continues with `pb_data/` (warning on stderr).
+Off-box copy is a later step (decision: local snapshots only for Phase D).
 
 ## Reverse proxy
 

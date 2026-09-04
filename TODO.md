@@ -181,8 +181,8 @@ in-flight reconciles would close the last wipe edge case.
   auth UI are on main since phase 5, unreleased at v4.4.0). Done 2026-09-03:
   tagged v5.0.0 (major, mirroring roadmap V5) — changelog, About/Help sync +
   shared-list sections (en/ro), DEPLOY.md build-time env note, regenerated
-  screenshots; release-gate `test:pre` green. Commit + tag are local — push
-  and the server deploy are the D4 step.
+  screenshots; release-gate `test:pre` green. Commit + tag pushed to origin
+  2026-09-04; the server deploy is the D4 step.
 - [x] **F4** Notifications channel decision (D4) — Web Push vs email vs
   realtime-only; then dispatch in the bff + the in-app consumer. Done
   2026-09-03 (in-app realtime; Web Push deferred, email rejected — D4 row
@@ -212,10 +212,19 @@ through v5.0.0; VPS provisioning not yet done.
   feedback) + reboot persistence. Automate `pb_data/` backups via
   `infra/backup.{service,timer}` (local snapshots, `PB_BACKUP_KEEP` retained).
   **Back up the feedback module's `answer-data/` alongside `pb_data/`** (same
-  timer / strategy — backup approach to be analyzed after this plan update).
+  timer / strategy). Done 2026-09-04 (code side, decision recorded):
+  `feedback/scripts/backup-answer.ts` snapshots the live sqlite via `VACUUM
+  INTO` (page-consistent against a live writer; Bun 1.4.1 has no
+  `db.backup()` — verified) + `quick_check` validation, tars snapshot +
+  uploads/config with `ANSWER_BACKUP_KEEP` retention; wired best-effort into
+  `infra/bin/backup.sh` before the PB backup (a feedback-side failure never
+  blocks `pb_data/`). Local archive + restore round-trip verified. The VPS
+  provisioning itself is the remaining D1 work.
 - [ ] **D2** Build + deploy `web/` + `admin/` SSR behind Caddy
   (`www.remindit.me` / `admin.remindit.me`); protect admin origin (basicauth +
-  IP allowlist in `infra/Caddyfile`).
+  IP allowlist in `infra/Caddyfile`). DNS A records for the subdomains go in
+  first (Caddy needs them for cert issuance — decided 2026-09-04); the apex
+  moves last, as the D4 cutover.
 - [ ] **D3** Prod env plumbing on the VPS repo-root `.env`:
   `SESSION_COOKIE_SECURE=true`, `CORS_ORIGINS` real origins,
   `PUBLIC_PWA_URL=https://remindit.me` / `PUBLIC_BFF_URL=https://api.remindit.me`

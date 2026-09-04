@@ -28,6 +28,10 @@ platform, single Go binary) as a local sidecar on `:5555`, sub-host
 - `bun run start` — ensure setup, then run Answer in the foreground with
   auto-install env; reuses an already-running instance (health probe)
 - `bun run stop` — SIGTERM the pid recorded in `answer.pid` (pid-reuse guarded)
+- `bun run backup` — snapshot `answer-data/` to
+  `answer-data/backups/answer-<ts>.tar.gz` (sqlite `VACUUM INTO` — consistent
+  against a live writer — + uploads/config, `ANSWER_BACKUP_KEEP` retention);
+  also wired into the prod `infra/bin/backup.sh` timer (best-effort)
 - `bun run test` / `typecheck` / `lint` / `check` — standard toolchain
 
 Run from the repo root: `bun run setup:feedback`, `bun run dev:feedback`,
