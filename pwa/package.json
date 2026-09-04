@@ -17,6 +17,7 @@
     "demos": "bun scripts/demo-scenarios.ts",
     "generate:palettes": "bun scripts/generate-palettes.ts",
     "i18n:compile": "bun scripts/compile-i18n.ts",
+    "i18n:check": "bun run i18n:compile && rstest tests/i18n-drift.test.ts",
     "test": "bun run i18n:compile && rstest",
     "test:quick": "bun run i18n:compile && rstest -c rstest.quick.config.ts",
     "test:changed": "bun run i18n:compile && rstest --changed",
