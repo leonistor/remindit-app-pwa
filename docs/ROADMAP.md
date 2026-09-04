@@ -95,6 +95,8 @@ Sync + sharing + notifications, one major release.
 | D7 | Schema source of truth | **`bff` consumes `@remindit/common`** to build and migrate PB collections | Domain types live in common; PB schema must never drift from them |
 | D8 | BFF layering | `routes → services → repositories` inside the bff — routes never call the PB SDK directly; PB JS SDK is **server-side only** (`autoCancellation(false)`, `pb.filter()` for any untrusted filter input). Frontends consume the typed contract via Hono RPC (`hc<AppType>`) + Zod validation; `AppType` exported from a small `@remindit/bff/api` subpath and kept deliberately small | From the ChatGPT analysis: "PocketBase concerns stay in the service layer; application concerns stay in the BFF" — swap-ready infrastructure |
 | D9 | Environment | **One `.env` + one committed `.env.example`, both at the repo root** — all modules consume from there; no per-module env files | Single place to configure; no drift between modules; secrets live in one gitignored file (prod secrets come from the VPS environment, never from the repo) |
+| D10 | Deployment | **bm2 (Bun-native PM2, pinned 1.1.0) + Caddy** on the single VPS (D3) — one ecosystem file (`infra/ecosystem.config.ts`: pb, bff, web, admin, feedback; all loopback, health-checked, log-rotated), Caddy as the only public surface (`remindit.me` = pwa static, `www` = web, `admin` = admin behind `basic_auth`, `api` = bff, `feedback` = Answer; PB `:8090` never proxied). Deploy = `git push vps main` (worktree repo at `/srv/remindit`); one-time privileged setup = `infra/bin/bootstrap-prod.sh` | All-Bun supervision with health checks, log rotation, zero-downtime reload, reboot persistence; admin origin gated at the proxy (decided 2026-09-04, phase D) |
+| D11 | Backups | **Hourly local snapshots** via `remindit-backup.timer`: PB via its superuser backup API (`PB_BACKUP_KEEP`), Answer's `answer-data/` via sqlite `VACUUM INTO` (page-consistent against a live writer; Bun 1.4.1 has no `db.backup()`) + uploads/config tar (`ANSWER_BACKUP_KEEP`); the answer half is best-effort and can never block the PB backup. Off-box copy deferred | Consistent-while-running snapshots without downtime on a single VPS; retention mirrors the PB convention (decided 2026-09-04, phase D) |
 
 ## 3. Architecture
 
@@ -277,6 +279,15 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - Gate: typecheck ×5 modules + lint + build ✅ + **live e2e smoke** (`dev:bff` + `dev:admin`): login → overview renders live counts (122 users / 9 groups), users + groups dashboards live, create-user → 201 + listed, non-admin sign-in client-rejected + `/api/admin/*` 403, sign-out/in clean ✅; bff suite 37 tests green
 - Gotchas recorded: TanStack Start runs `beforeLoad` server-side during SSR where the localStorage token is invisible — a guard there bounces every hard navigation to `/login` and the hydrated router trusts that resolution (stuck); auth guards must be client-side mount effects, and post-login navigation must be `router.navigate` (a full reload re-enters the SSR token-less redirect dance)
 
+### Phase 7 — platform deployment + feedback · deployed 2026-09-04 ✅
+- [x] VPS topology live per D10: bm2 5/5 online (pb, bff, web, admin, feedback), Caddy site blocks with auto-TLS, admin `basic_auth`, reboot persistence via `bm2 save`/`startup`
+- [x] Runbook `docs/DEPLOY-VPS.md` (env plumbing, build/deploy flows, backup/restore, cutover); one-time privileged bootstrap: `infra/bin/bootstrap-prod.sh`
+- [x] Feedback module (Apache Answer sidecar): tags/branding/SMTP configured on prod; submit API (member + guest) live-verified; pwa/web footer links + in-app feedback card (`FeedbackCard`)
+- [x] Backups per D11, verified live (both archive types created by a real service run)
+- [x] Releases: v5.0.0 (sync + sharing + notifications), v5.1.0 (in-app feedback + notifications, sync reliability fixes)
+- Gotchas recorded: bm2 resolves ecosystem `script:` paths against the config dir (use absolute launchers); systemd/sudo strip `~/.bun/bin` from PATH ("bun: not found"); fresh-install schema reconcile must land existing-collection field drift BEFORE creating views (PB's default `users` has no `username` column, and view queries are validated by execution); dotenv files are unsafe to `sh`-source — wrappers load env via `bun --env-file`
+- Gate: all five public hosts verified (health, CORS preflight, admin 401-anon, guest submit round-trip) + release-gate `test:pre` green
+
 ## 8. Verification gates (every phase)
 
 1. `bun run typecheck` (root, covering all landed modules)
@@ -287,7 +298,7 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 
 ## 9. Risks & open questions
 
-- **Sync data-plane decision (phase 5)** — the [ChatGPT analysis](https://chatgpt.com/share/6a978f02-8e68-83eb-b3e2-0a5d4a602c63) says "don't expose the PB SDK to clients", but it predates the offline-first sync requirement; re-implementing PB's record CRUD + SSE realtime as bespoke endpoints is substantial work. Hybrid (typed RPC for app concerns + scoped `/pb/*` forwarder for the sync engine) is the working recommendation; revisit with real sync numbers.
+- **Sync data-plane (RESOLVED, phase 5)** — the [ChatGPT analysis](https://chatgpt.com/share/6a978f02-8e68-83eb-b3e2-0a5d4a602c63) said "don't expose the PB SDK to clients" but predates offline-first sync; the hybrid shipped: typed RPC for app concerns + scoped `/pb/*` forwarder for the sync engine (D2).
 - **Hono RPC type instantiation** — keep the exported `AppType` small (chain only what clients need), pin `hono` versions across bff/clients (workspace catalog), and watch TS project-reference setup, per Hono's own monorepo caveats.
 - **PB schema import is wholesale-replace** — migrations must fetch → diff →
   merge; never blind-import. Idempotency test required (phase 2).
@@ -298,6 +309,4 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - **web/admin design language** — `pwa/DESIGN.md` is PWA-scoped; marketing
   should follow brand constants from `common`, with its own lighter design
   notes.
-- Deployment automation (bff on the VPS: process manager, backups of
-  `pb_data/`) — decide during phase 3/4; PB has built-in backup endpoints
-  (MCP `pb_backup`).
+- **Deployment automation (RESOLVED, phase D)** — bm2 + Caddy + hourly local backups on the VPS (D10/D11); remaining open item: off-box backup copy.
