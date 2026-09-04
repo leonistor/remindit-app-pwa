@@ -4,7 +4,14 @@ After=network.target
 
 [Service]
 Type=oneshot
+# Runs as leo: bun lives in ~/.bun/bin (not on root's PATH — the root script
+# dies with "bun: not found"), and the backup dirs (bff/pb_data/backups,
+# feedback/answer-data/backups) are leo-owned.
+User=leo
+Group=leo
 # The wrapper self-locates the repo root and loads its .env via bun --env-file;
 # set WorkingDirectory to wherever the repo is cloned on the VPS (e.g. /srv/remindit).
 WorkingDirectory=/srv/remindit
+# Systemd services get a minimal default PATH — include leo's bun explicitly.
+Environment=PATH=/home/leo/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart=/bin/sh /srv/remindit/infra/bin/backup.sh
