@@ -31,7 +31,8 @@ feedback.remindit.me → Answer     (:5555)  [Apache Answer sidecar, Phase D/D5]
 | `bff/scripts/backup-pb.ts` | local `pb_data/` backup via the superuser API |
 | `feedback/scripts/backup-answer.ts` | local `answer-data/` backup (sqlite `VACUUM INTO` snapshot + uploads/config tar) |
 | `infra/Caddyfile` | production site blocks (imported by system Caddy) |
-| `infra/backup.{service,timer}` | systemd units for the backup job |
+| `infra/backup.{service,timer}` | systemd units for the backup job (installed as `remindit-backup.*` by the bootstrap) |
+| `infra/bin/bootstrap-prod.sh` | one-time privileged bootstrap: backup timer, Caddy + admin hash, `bm2 save`/`startup` |
 
 ## Prerequisites (one-time)
 
@@ -40,7 +41,11 @@ feedback.remindit.me → Answer     (:5555)  [Apache Answer sidecar, Phase D/D5]
   metrics — never started in prod, but keep them closed).
 - DNS A/AAAA for `remindit.me`, `www`, `admin`, `api` (and `feedback` later) →
   VPS. Caddy obtains Let's Encrypt certs automatically.
-- Clone the repo; `bun install`.
+- Repo: `git init -b main /srv/remindit && git -C /srv/remindit config
+  receive.denyCurrentBranch updateInstead`, then from the dev machine
+  `git remote add vps leo@<vps>:/srv/remindit && git push vps main` — pushes
+  update the worktree in place (no GitHub creds needed on the VPS);
+  `bun install`.
 - Create the **repo-root `.env`** on the VPS (gitignored) with real prod values —
   mirror `.env.example` and set at minimum: `SESSION_COOKIE_SECURE=true`,
   `CORS_ORIGINS` (real origins), `PUBLIC_BFF_URL=https://api.remindit.me`,
@@ -143,8 +148,12 @@ unauthenticated requests.
 
 ## Deploy / update flow (zero-downtime)
 
-- **bff / pb:** `git pull && bun install`, then `bm2 reload bff` (and `bm2 reload
-  pb` only if the PB version pin changed). bm2 does a graceful reload.
+- **bff / pb:** `git push vps main` (worktree updates in place) && `bun install`
+  on the VPS, then `bm2 reload bff` (and `bm2 reload pb` only if the PB version
+  pin changed). bm2 does a graceful reload. Schema changes: run `bff`'s
+  `bun --env-file=../.env run migrate` (idempotent — also handles fresh
+  installs; it reconciles existing-collection field drift before creating
+  views).
 - **web / admin:** rebuild (`bun --env-file=.env run build:web`), then
   `bm2 reload web` (preview serves the new `dist`).
 - **feedback:** no build step (binary + data dir managed by `feedback/scripts`);

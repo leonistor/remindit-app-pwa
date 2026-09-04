@@ -6,6 +6,10 @@
 set -e
 REPO=/srv/remindit
 
+echo "=== 0/4 repo + webroot dirs (idempotent) ==="
+mkdir -p "$REPO" /var/www/remindit
+chown leo:leo "$REPO" /var/www/remindit
+
 echo "=== 1/4 backup timer (pb_data + answer-data, hourly) ==="
 # Copy under the systemd unit names — cp preserves basenames, and the timer
 # pairs with its service by filename (remindit-backup.*).
