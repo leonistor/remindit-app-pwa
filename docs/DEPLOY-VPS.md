@@ -107,8 +107,9 @@ Verify reboot persistence: `sudo reboot`, then `bm2 list` once the daemon is up
 sudo cp infra/backup.service infra/backup.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now remindit-backup.timer
-# Manual run / verify:
-sudo /bin/sh "$(pwd)/infra/bin/backup.sh"
+# Manual run / verify (as leo — NOT sudo: bun lives in ~/.bun/bin, and the
+# unit runs unprivileged for the same reason):
+/bin/sh "$(pwd)/infra/bin/backup.sh"
 ls bff/pb_data/backups      # remindit-<ts>.zip files
 ls feedback/answer-data/backups   # answer-<ts>.tar.gz files
 ```
@@ -123,7 +124,19 @@ dir. Restore Answer: stop the feedback process (`bm2 stop feedback`), then
 a live writer), `answer-data/uploads/` and `answer-data/conf/config.yaml` in
 place — then `bm2 start feedback`. The answer half of `backup.sh` is
 best-effort: if it fails the run continues with `pb_data/` (warning on stderr).
-Off-box copy is a later step (decision: local snapshots only for Phase D).
+
+**Off-box copy (Scaleway S3, wired 2026-09-04):** after both local backups,
+`backup.sh` mirrors the two dirs to `s3.<SCW_REGION>.scw.cloud/<SCW_BUCKET>`
+(`pb/…` and `answer/…` prefixes) via rclone, configured at runtime from the
+`SCW_*` vars in the repo-root `.env` — no `rclone.conf`. `rclone copy` never
+deletes remotely and off-box retention is its own 30-day window
+(`rclone delete --min-age 30d`), independent of the local 10-archive keep —
+a local wipe cannot take the off-box copies down with it. The copy is
+best-effort (warning on failure; local archives remain the source of truth)
+and is skipped when `SCW_*` is unset or rclone is missing. Restore from S3:
+`rclone copy s3.<region>.scw.cloud:<bucket>/pb/ bff/pb_data/backups/` (and
+`answer/` likewise), then follow the local restore steps. The PB zips carry
+PocketBase's own `.attrs` metadata sidecars — keep them together with the zips.
 
 ## Reverse proxy
 

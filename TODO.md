@@ -29,7 +29,6 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 - **Feedback follow-ups** — real SMTP provider (Inbucket is dev-grade; swap
   via `configure:feedback smtp`), logo upload in the Answer admin (API cap),
   delete the deployment smoke-test question.
-- **Backups** — off-box copy (local snapshots only for Phase D, D11).
 - **Old host** — optional 301 `remindit.parsedwink.com` → `remindit.me`.
 - **`pbtsdb` re-evaluation** — if TanStack DB ships GA offline persistence.
 
