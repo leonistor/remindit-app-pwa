@@ -299,6 +299,8 @@
   "helpDataResetPrefix": "Reset or reseed anytime from",
   "helpDataResetSuffix": "— your profile and theme preference are kept.",
   "helpFeedbackPrefix": "Questions or ideas? Open an issue on",
+  "helpFeedbackBoardPrefix": "Questions or ideas? Post them on our",
+  "helpFeedbackBoardName": "feedback board",
   "aboutTitle": "About",
   "aboutChangelogPrefix": "See what’s new in",
   "aboutChangelogLink": "the changelog",

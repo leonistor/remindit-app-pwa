@@ -299,6 +299,8 @@
   "helpDataResetPrefix": "Resetează sau regenerează oricând din",
   "helpDataResetSuffix": "— profilul și preferința de temă sunt păstrate.",
   "helpFeedbackPrefix": "Ai întrebări sau idei? Deschide un issue pe",
+  "helpFeedbackBoardPrefix": "Ai întrebări sau idei? Publică-le pe",
+  "helpFeedbackBoardName": "panoul de feedback",
   "aboutTitle": "Despre",
   "aboutChangelogPrefix": "Vezi ce e nou în",
   "aboutChangelogLink": "jurnalul de modificări",

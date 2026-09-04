@@ -4,6 +4,10 @@ import { DemoVideo } from "@/components/demo-video"
 import { RECOMMENDATION_TIERS } from "@/lib/recommendation-tiers"
 import { m } from "@/paraglide/messages"
 
+// Same gate as the footer quick links — the board link only renders when the
+// feedback site is configured; otherwise the GitHub fallback stays.
+const feedbackUrl = import.meta.env?.PUBLIC_FEEDBACK_URL as string | undefined
+
 const HelpView = () => (
   <div className="mx-auto flex max-w-2xl flex-col gap-6 py-8">
     <div className="flex items-center gap-2">
@@ -207,14 +211,14 @@ const HelpView = () => (
     </section>
 
     <p className="text-muted-foreground">
-      {m.helpFeedbackPrefix()}{" "}
+      {feedbackUrl ? m.helpFeedbackBoardPrefix() : m.helpFeedbackPrefix()}{" "}
       <a
         className="text-primary underline underline-offset-4 hover:opacity-90"
-        href="https://github.com/leonistor/remindit-app-pwa/"
+        href={feedbackUrl ?? "https://github.com/leonistor/remindit-app-pwa/"}
         rel="noreferrer"
         target="_blank"
       >
-        GitHub
+        {feedbackUrl ? m.helpFeedbackBoardName() : "GitHub"}
       </a>
       .
     </p>

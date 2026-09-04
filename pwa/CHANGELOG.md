@@ -2,6 +2,23 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v5.1.0 — 2026-09-04
+
+_Get heard — report bugs and ideas from inside the app, and see what's happening on your shared lists._
+
+### ✨ New Features
+
+- **In-app notifications**: when someone joins or leaves your shared list, you'll see it on Profile — mark items read as you go
+- **Feedback from inside the app**: Profile → Feedback lets you post a bug, feature request or discussion straight to our community board — no GitHub account needed. On the website, guests can post too
+- **Feedback quick links**: the footer links jump straight to the right part of the board — report a bug, request a feature, or start a discussion
+- **Feedback login link**: want to follow up on the board? "Email me a login link" sends a sign-in link to your account's email
+
+### 🐛 Fixes
+
+- **Calmer shared-list switching**: switching lists while a sync connection is still being set up now continues cleanly for the list you switched to, instead of leaving the old connection behind
+- **Race-free sign-in**: signing in on two devices at the same time no longer breaks first-time list setup
+- **Clean sign-outs**: signing out, wiping data or switching lists mid-sync now cancels the in-flight pass instead of racing it
+
 ## v5.0.0 — 2026-09-03
 
 _Your list, on every device — sign in to sync, or share a list with the people you shop with._
