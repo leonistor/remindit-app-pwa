@@ -209,7 +209,10 @@ for D1–D5 is in place: `infra/ecosystem.config.ts` + `infra/bin/start-*.sh`,
 **Deployed 2026-09-04** on `server.parsedw.ink` (Hetzner, Debian 13): all five
 processes bm2-managed and healthy, all five public hosts live behind Caddy
 (auto-TLS), admin behind `basic_auth`, hourly backup timer enabled (pb_data +
-answer-data), prod `.env` on the VPS with generated secrets. Fixes that fell
+answer-data), prod `.env` on the VPS with generated secrets. First
+post-platform release shipped same day: **v5.1.0** (in-app feedback +
+notifications, sync reliability fixes) — built with explicit prod `PUBLIC_*`,
+drop-in to `/var/www/remindit`, tagged + pushed. Fixes that fell
 out of the first real deploy: bm2 resolves ecosystem `script:` paths against
 the config dir (absolute launchers now); all infra wrappers load `.env` via
 `bun --env-file` (unquoted values crash `sh` sourcing); `migrate` reconciles
