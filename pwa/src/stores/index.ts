@@ -6,6 +6,7 @@
 // never triggers persistence writes or logging on its own.
 
 import { logger } from "@nanostores/logger"
+import { env } from "@/lib/env"
 import { generateShoppingHistory, getDataset, resolveDatasetId } from "seed"
 import { $catalog } from "./catalog"
 import {
@@ -29,24 +30,6 @@ import { initTheme } from "./theme"
 import type { Category, UserProfile } from "./types"
 import { UNCATEGORIZED_ID, UNCATEGORIZED_NAME } from "./types"
 import { $user, randomUser, updateUser } from "./user"
-
-// Rsbuild exposes import.meta.env.DEV at build time. Declared here so the
-// project's tsconfig (which does not ship Rsbuild client types) type-checks.
-declare global {
-  interface ImportMeta {
-    env?: {
-      DEV?: boolean
-      PROD?: boolean
-      MODE?: string
-      // Public (client-exposed via Rsbuild's `PUBLIC_` convention). Selects the
-      // seed dataset on first run — see .env / .env.example.
-      PUBLIC_DATASET?: string
-      // BFF origin — sync RPC + the /pb/* data-plane forwarder (phase 5).
-      PUBLIC_BFF_URL?: string
-      [key: string]: unknown
-    }
-  }
-}
 
 // Prepends the "uncategorized" sentinel and assigns sequential palette color
 // slots so the dataset categories are display-ready. Shared by `initStores`
@@ -95,10 +78,7 @@ export function initStores(): void {
     // recommender has data to surface on a fresh install. Always on; set
     // PUBLIC_SEED_HISTORY=0 in .env to skip. Only runs when history is empty,
     // so it is a no-op once a user has any history of their own.
-    if (
-      import.meta.env?.PUBLIC_SEED_HISTORY !== "0" &&
-      $history.get().length === 0
-    ) {
+    if (env.seedHistoryEnabled && $history.get().length === 0) {
       $history.set(
         generateShoppingHistory({ catalog, categories, days: 180, seed: 42 })
       )
@@ -151,7 +131,7 @@ export function seedFromDataset(
   $categories.set(seedCategories(categories))
   $catalog.set(catalog)
 
-  if (import.meta.env?.PUBLIC_SEED_HISTORY !== "0") {
+  if (env.seedHistoryEnabled) {
     $history.set(
       generateShoppingHistory({ catalog, categories, days: 180, seed: 42 })
     )
@@ -165,7 +145,7 @@ export function seedFromDataset(
 // no-op outside development builds. Kept out of `initStores` so the logger is
 // never wired just by importing a store.
 export function setupDevLogging(): void {
-  if (!import.meta.env?.DEV) return
+  if (!env.dev) return
   logger({
     catalog: $catalog,
     list: $list,

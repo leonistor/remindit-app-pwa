@@ -14,7 +14,8 @@
 import { atom } from "nanostores"
 import PocketBase from "pocketbase"
 import { bffApi, setRotatedTokenHandler, setUnauthorizedHandler } from "@/lib/bff-api"
-import { DEFAULT_BFF_URL, NOT_SIGNED_IN } from "@/lib/sync-constants"
+import { env } from "@/lib/env"
+import { NOT_SIGNED_IN } from "@/lib/sync-constants"
 import { $catalog } from "../catalog"
 import { $categories } from "../categories"
 import { $history } from "../history"
@@ -89,7 +90,7 @@ const $syncTombstones = jsonStore<Record<SyncCollection, string[]>>(
 // engine is actually exercised (a connect/sign-in/capture path), never at
 // import time. `pbBase` is a plain string — safe at module scope.
 
-const pbBase = `${import.meta.env?.PUBLIC_BFF_URL ?? DEFAULT_BFF_URL}/pb`
+const pbBase = `${env.bffUrl}/pb`
 let pb: PocketBase | null = null
 let pbWired = false
 const getPb = (): PocketBase => {

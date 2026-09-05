@@ -10,6 +10,7 @@ import {
 import { type ChangeEvent, useEffect, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
+import { env } from "@/lib/env"
 import { AvatarPicker } from "@/components/avatar-picker"
 import { BackButton } from "@/components/back-button"
 import { LanguageChooser } from "@/components/language-chooser"
@@ -61,7 +62,7 @@ import {
 } from "@/stores"
 
 // First-run dataset (build-time) used as the default picker selection.
-const INITIAL_DATASET = import.meta.env.PUBLIC_DATASET ?? DEFAULT_DATASET_ID
+const INITIAL_DATASET = env.datasetId ?? DEFAULT_DATASET_ID
 
 // How long the "reseeded" confirmation stays visible before the redirect to
 // the main view — long enough to read one line, short enough to feel snappy.

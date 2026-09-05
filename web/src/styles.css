@@ -1,9 +1,7 @@
-/* Brand tokens — the single source of truth lives in @remindit/common (the
-   logo SVG arrives as a raw string via the `?raw` import, Rspack-native). */
+/* Brand CSS vars (`--brand-color`, `--brand-background`) are injected inline
+   from @remindit/common/brand by __root.tsx — the single source of truth. */
 
 :root {
-  --brand-color: #262626;
-  --brand-background: #ffffff;
   --text-muted: #52525b;
   --border: #e4e4e7;
 }

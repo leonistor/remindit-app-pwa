@@ -7,6 +7,7 @@
 // in `./index` (it needs `seedFromDataset` + `updateUser`) to avoid an import
 // cycle; this module stays free of those dependencies.
 
+import { env } from "@/lib/env"
 import { resolveDatasetId } from "seed"
 import { jsonStore, STORAGE_KEYS } from "./persistence"
 
@@ -39,7 +40,7 @@ export function setSelectedDataset(id: string): void {
 // build-time PUBLIC_DATASET, else the registered default.
 export function resolveSelectedDataset(): string {
   return resolveDatasetId(
-    $selectedDatasetId.get() || import.meta.env?.PUBLIC_DATASET
+    $selectedDatasetId.get() || env.datasetId
   )
 }
 

@@ -51,6 +51,10 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     <html lang={getLocale()} style={{ background: BRAND_BACKGROUND_COLOR }}>
       <head>
         <HeadContent />
+        {/* Brand CSS vars come from the constants (single source of truth,
+            @remindit/common/brand) so styles.css stays a pure presentational
+            stylesheet with no duplicated brand values. */}
+        <style>{`:root{--brand-color:${BRAND_COLOR};--brand-background:${BRAND_BACKGROUND_COLOR}}`}</style>
       </head>
       <body>
         <header className="site-header">

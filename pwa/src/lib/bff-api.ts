@@ -6,7 +6,7 @@
 // contracts module) as type-only imports — nothing from the server graph is
 // bundled at runtime. The BFF contracts file is the source of truth.
 
-import { DEFAULT_BFF_URL } from "./sync-constants"
+import { env } from "./env"
 import type {
   AuthResponse,
   Group,
@@ -25,8 +25,7 @@ export type {
   UserPublic,
 }
 
-const base = () =>
-  (import.meta.env?.PUBLIC_BFF_URL as string | undefined) ?? DEFAULT_BFF_URL
+const base = () => env.bffUrl
 
 export class BffError extends Error {
   readonly status: number
