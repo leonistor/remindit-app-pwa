@@ -14,6 +14,7 @@ import {
 } from "@remindit/common/brand"
 import { m } from "../paraglide/messages"
 import { getLocale } from "../paraglide/runtime"
+import { LanguageSwitcher } from "../components/language-switcher"
 import "../styles.css"
 
 // Inline SVG data URI — works in SSR markup with no extra asset pipeline.
@@ -74,6 +75,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
               <Link to="/{-$locale}/features">{m.navFeatures()}</Link>
               <Link to="/{-$locale}/download">{m.navGetTheApp()}</Link>
             </nav>
+            <LanguageSwitcher />
           </div>
         </header>
         {children}

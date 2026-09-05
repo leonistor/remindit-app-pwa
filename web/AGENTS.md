@@ -19,10 +19,14 @@ in the root [AGENTS.md](../AGENTS.md); the phased rollout plan in
 - **Locale routing (URL-based, five locales)** — `strategy: ["url",
   "baseLocale"]` with en unprefixed at `/` and `/ro`/`/de`/`/fr`/`/uk` prefixed
   (paraglide's default url pattern). `src/server.ts` wraps the request handler
-  with `paraglideMiddleware` + a request-scoped `AsyncLocalStorage` that drives
-  SSR `getLocale()`; the router matches the optional `{-$locale}` segment so the
-  prefix survives client-side navigation. Keep links on `{-$locale}` routes and
-  add new pages under `src/routes/{-$locale}/`.
+  in `paraglideMiddleware` (its AsyncLocalStorage drives SSR `getLocale()`);
+  the router matches the optional `{-$locale}` segment so the prefix survives
+  client-side navigation. `src/components/language-switcher.tsx` (header
+  `<select>`) switches locale via `setLocale`. Keep links on `{-$locale}`
+  routes and add new pages under `src/routes/{-$locale}/`. SEO: every route's
+  `head()` emits `canonical` + `hreflang` (incl. `x-default`) from
+  `src/lib/canonical.ts`, and an explicit `/en/*` prefix 301s to the
+  unprefixed URL in `src/server.ts`.
 - **Env (D9):** `PUBLIC_BFF_URL` (server-side stats fetch),
   `PUBLIC_PWA_URL` (download CTA), `WEB_PORT` (dev server, default 3200).
   Read through `process.env` — no module env file.

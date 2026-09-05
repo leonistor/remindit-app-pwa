@@ -73,6 +73,29 @@ img.brand-logo {
   color: var(--brand-color);
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.language-switcher select {
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-muted);
+  background: var(--brand-background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
 .hero {
   text-align: center;
   padding: 96px 0 72px;

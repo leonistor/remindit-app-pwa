@@ -19,7 +19,10 @@ prefixed. See [AGENTS.md](AGENTS.md) §Locale routing.
 
 SEO: per-route `head()` meta (title, description, Open Graph) + favicon as an
 inline SVG data URI rendered from `BRAND_LOGO_SVG` (no asset pipeline needed).
-An OG image is not wired yet — add a static asset when brand art exists.
+Each page also emits a `canonical` link + the full `hreflang` alternate set
+(including `x-default` → en) via `src/lib/canonical.ts`. An explicit `/en/*`
+prefix is 301-redirected to the unprefixed base-locale URL (`src/server.ts`).
+An OG **image** is not wired yet — add a static asset when brand art exists.
 
 ## Data flow
 
@@ -56,11 +59,17 @@ via Paraglide JS — never hardcoded. `web/scripts/compile-i18n.ts` →
 `web/src/paraglide` (gitignored) with the **`["url", "baseLocale"]` strategy**:
 **en unprefixed at `/`, `/ro`/`/de`/`/fr`/`/uk` prefixed**, using Paraglide's
 default url pattern (baseLocale unprefixed). `src/server.ts` wraps the request
-handler with `paraglideMiddleware` and a request-scoped `AsyncLocalStorage`
-(`getLocale()` is overwritten once, at module scope, to read from it) so SSR
-renders the URL's locale — including under streaming — while the router matches
-the optional `{-$locale}` route segment to keep the prefix on client-side
-navigation. Locale fallback for missing keys is English (baseLocale).
+handler in `paraglideMiddleware` — its AsyncLocalStorage drives SSR
+`getLocale()` — while the router matches the optional `{-$locale}` route
+segment to keep the prefix on client-side navigation. A header
+`LanguageSwitcher` (`src/components/language-switcher.tsx`) calls `setLocale()`
+to switch (the url strategy localizes the current URL + reloads, so the same
+page is served in the new language). Locale fallback for missing keys is
+English (baseLocale).
+
+SEO per page: `canonical` + `hreflang` alternates (incl. `x-default` → en)
+from `src/lib/canonical.ts`; `/en/*` is 301-redirected to `/` in
+`src/server.ts`.
 
 - `bun run i18n:compile` (chained into `typecheck`; also run by the rsbuild
   plugin in dev/build, so message edits hot-recompile)

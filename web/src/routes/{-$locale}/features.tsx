@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { BRAND_NAME } from "@remindit/common/brand"
 import { m } from "../../paraglide/messages"
+import { canonicalLinkTags } from "../../lib/canonical"
 
 export const Route = createFileRoute("/{-$locale}/features")({
-  head: () => ({
+  head: ({ match }) => ({
     meta: [
       { title: `${m.navFeatures()} — ${BRAND_NAME}` },
       {
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/{-$locale}/features")({
         content: m.webFeaturesMetaDescription(),
       },
     ],
+    links: canonicalLinkTags(match.pathname),
   }),
   component: Features,
 })

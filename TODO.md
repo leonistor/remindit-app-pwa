@@ -34,18 +34,19 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 
 Delivered the URL-based per-locale routing on the **Rsbuild** adapter (no Vite
 move). `web/src/server.ts` wraps the injected-default `createStartHandler`
-with `paraglideMiddleware` + a request-scoped `AsyncLocalStorage` (`getLocale`
-overwritten once, at module scope, to read the store — survives streaming
-SSR); `strategy: ["url", "baseLocale"]` (en unprefixed, /ro//de//fr//uk
+in `paraglideMiddleware` (its AsyncLocalStorage drives SSR `getLocale`);
+`strategy: ["url", "baseLocale"]` (en unprefixed, /ro//de//fr//uk
 prefixed — Paraglide's **default** url pattern; the earlier custom
 `urlPatterns` catch-all matched `/de` as en, so they were dropped); routes
 moved under the optional `{-$locale}` segment so Links keep the prefix
-client-side. Verified: SSR in all five locales (dev + `bun run preview`),
-client nav keeps the prefix, no hydration errors. Follow-ups on this branch:
-an in-page language switcher (`setLocale`), canonical/hreflang meta, and
-redirecting `/en/*` → `/`. (This replaces the "Next session" plan text; the
-premise research, staged plan, and `IgorSzymanski/tanstack-start-paraglide`
-reference live in git history + `docs/ROADMAP.md` §7.)
+client-side. Follow-ups **shipped** the same day: an in-page language
+switcher (`setLocale`), per-page `canonical` + `hreflang` (incl. `x-default`)
+via `web/src/lib/canonical.ts`, and a 301 `/en/*` → `/` rewrite in
+`src/server.ts`. Verified: SSR in all five locales (dev + `bun run preview`),
+client nav keeps the prefix, switcher navigates locale-to-locale, no hydration
+or console errors. (Planning material — premise research, staged plan, the
+`IgorSzymanski/tanstack-start-paraglide` reference — lives in git history +
+`docs/ROADMAP.md` §7.)
 
 ## Architecture hardening — shipped 2026-09-05
 

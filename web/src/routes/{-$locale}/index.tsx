@@ -2,9 +2,10 @@ import { Link, createFileRoute } from "@tanstack/react-router"
 import { BRAND_LOGO_SVG, BRAND_NAME } from "@remindit/common/brand"
 import { m } from "../../paraglide/messages"
 import { getStats } from "../../lib/stats"
+import { canonicalLinkTags } from "../../lib/canonical"
 
 export const Route = createFileRoute("/{-$locale}/")({
-  head: () => ({
+  head: ({ match }) => ({
     meta: [
       {
         title: `${BRAND_NAME} — ${m.webTagline()}`,
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/{-$locale}/")({
       },
       { property: "og:type", content: "website" },
     ],
+    links: canonicalLinkTags(match.pathname),
   }),
   loader: () => getStats(),
   component: Home,
