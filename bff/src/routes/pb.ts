@@ -12,6 +12,7 @@ import { type Context, Hono } from "hono"
 import { env } from "../env"
 import { type AppEnv, requireAuth } from "../middleware/auth"
 import { PocketBaseUnavailableError } from "../repositories/pocketbase"
+import { COLLECTION_NAMES } from "../schema/collections"
 
 const HOP_BY_HOP = new Set([
   "connection",
@@ -38,19 +39,13 @@ const ALLOW = [...FORWARDED_METHODS].join(", ")
 // Collections the PWA sync engine may access through the forwarder.
 // Everything else is rejected — this is the primary defense against
 // privilege escalation; PB rules are per-collection and easy to miss.
-const SYNC_COLLECTIONS = new Set([
-  "teams",
-  "categories",
-  "items",
-  "list_entries",
-  "history_events",
-  "notifications",
-  "team_members",
-  "team_member_details",
-  "team_details",
-  "category_stats",
-  "item_stats",
-  "list_entries_detailed",
+// Derived from the schema's collection-name constants (single source of
+// truth) so the allowlist can never drift from `src/schema/collections.ts`;
+// `_pb_users_auth_` is PB's internal auth-users collection marker, not a
+// schema collection, and is required for the SDK's own auth calls through
+// the forwarder.
+const SYNC_COLLECTIONS = new Set<string>([
+  ...Object.values(COLLECTION_NAMES),
   "_pb_users_auth_",
 ])
 

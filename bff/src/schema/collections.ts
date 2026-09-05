@@ -73,6 +73,29 @@ export type CollectionDef = {
   passwordAuth?: { enabled?: boolean; identityFields: string[] }
 }
 
+// Collection names — the single source of truth. The migrate script, the
+// /pb forwarder allowlist (`routes/pb.ts` SYNC_COLLECTIONS) and every builder
+// reference these, so a rename can never drift between the schema and its
+// consumers.
+export const COLLECTION_NAMES = {
+  users: "users",
+  teams: "teams",
+  teamMembers: "team_members",
+  categories: "categories",
+  items: "items",
+  listEntries: "list_entries",
+  historyEvents: "history_events",
+  notifications: "notifications",
+  teamMemberDetails: "team_member_details",
+  teamDetails: "team_details",
+  platformStats: "platform_stats",
+  listEntriesDetailed: "list_entries_detailed",
+  categoryStats: "category_stats",
+  itemStats: "item_stats",
+} as const
+
+export type CollectionName = (typeof COLLECTION_NAMES)[keyof typeof COLLECTION_NAMES]
+
 // ---------------------------------------------------------------------------
 // Rule fragments — the shared-membership pattern (D1): a record is visible
 // and writable by the team owner and by team members.
@@ -113,7 +136,7 @@ const stamps = (): FieldDef[] => [
 // Mirrors UserProfile (username, firstName, lastName, avatar as inline SVG
 // data-URI text). email/verification/password are PB auth system fields.
 const users: CollectionDef = {
-  name: "users",
+  name: COLLECTION_NAMES.users,
   type: "auth",
   passwordAuth: { enabled: true, identityFields: ["email"] },
   // Profiles are visible to any authenticated user (needed for team member
@@ -201,7 +224,7 @@ const users: CollectionDef = {
 // Renamed from `groups` — the SQL keyword collision invited bugs in view
 // queries; the one-off scripts/rename-groups-to-teams.ts migrates live data.
 const teams: CollectionDef = {
-  name: "teams",
+  name: COLLECTION_NAMES.teams,
   type: "base",
   listRule: TEAM_ACCESS_ROW,
   viewRule: TEAM_ACCESS_ROW,
@@ -239,7 +262,7 @@ const teams: CollectionDef = {
 // team_members -------------------------------------------------------------
 // Join collection: user ↔ team with role. Drives every membership rule.
 const teamMembers: CollectionDef = {
-  name: "team_members",
+  name: COLLECTION_NAMES.teamMembers,
   type: "base",
   listRule: "user = @request.auth.id || team.owner = @request.auth.id",
   viewRule: "user = @request.auth.id || team.owner = @request.auth.id",
@@ -292,7 +315,7 @@ const teamMembers: CollectionDef = {
 // Category (common `Category`); the `uncategorized` sentinel is provisioned
 // per team by the teams service (phase 3), matched by name.
 const categories: CollectionDef = {
-  name: "categories",
+  name: COLLECTION_NAMES.categories,
   type: "base",
   listRule: TEAM_ACCESS,
   viewRule: TEAM_ACCESS,
@@ -365,7 +388,7 @@ const categories: CollectionDef = {
 // CatalogItem (common): name + category reference (reassignment to the
 // sentinel is app-level, hence cascadeDelete: false on category).
 const items: CollectionDef = {
-  name: "items",
+  name: COLLECTION_NAMES.items,
   type: "base",
   listRule: TEAM_ACCESS,
   viewRule: TEAM_ACCESS,
@@ -427,7 +450,7 @@ const items: CollectionDef = {
 // list_entries --------------------------------------------------------------
 // ListEntry (common): a specific entry of an item on the pending list.
 const listEntries: CollectionDef = {
-  name: "list_entries",
+  name: COLLECTION_NAMES.listEntries,
   type: "base",
   listRule: TEAM_ACCESS,
   viewRule: TEAM_ACCESS,
@@ -502,7 +525,7 @@ const listEntries: CollectionDef = {
 // referenced item may be renamed or deleted; snapshots keep history stable).
 // itemId/categoryId stay plain text (not relations) for that reason.
 const historyEvents: CollectionDef = {
-  name: "history_events",
+  name: COLLECTION_NAMES.historyEvents,
   type: "base",
   listRule: TEAM_ACCESS,
   viewRule: TEAM_ACCESS,
@@ -607,7 +630,7 @@ const historyEvents: CollectionDef = {
 // notifications -------------------------------------------------------------
 // Reserved (D4 — channel undecided). User-scoped stub; refined in phase 5+.
 const notifications: CollectionDef = {
-  name: "notifications",
+  name: COLLECTION_NAMES.notifications,
   type: "base",
   listRule: "user = @request.auth.id",
   viewRule: "user = @request.auth.id",
@@ -682,7 +705,7 @@ const notifications: CollectionDef = {
 // dance in the teams service; also scopes profiles to shared teams per-row
 // (the users-collection relaxation "any authenticated user" can shrink later).
 const teamMemberDetails: CollectionDef = {
-  name: "team_member_details",
+  name: COLLECTION_NAMES.teamMemberDetails,
   type: "view",
   viewQuery: `
     SELECT
@@ -706,7 +729,7 @@ const teamMemberDetails: CollectionDef = {
 // Per-team dashboard row: owner username + counts, replacing the two
 // full-list fetches + JS joins in the admin service (listGroups).
 const teamDetails: CollectionDef = {
-  name: "team_details",
+  name: COLLECTION_NAMES.teamDetails,
   type: "view",
   viewQuery: `
     SELECT
@@ -734,7 +757,7 @@ const teamDetails: CollectionDef = {
 // /api/stats and the admin overview instead of N × getList(1, 1) metadata pokes.
 // Superuser-only (null rules) — both consumers read superuser-side anyway.
 const platformStats: CollectionDef = {
-  name: "platform_stats",
+  name: COLLECTION_NAMES.platformStats,
   type: "view",
   viewQuery: `
     SELECT
@@ -752,7 +775,7 @@ const platformStats: CollectionDef = {
 
 // The shopping-list screen in one query: entry + item + category name/color.
 const listEntriesDetailed: CollectionDef = {
-  name: "list_entries_detailed",
+  name: COLLECTION_NAMES.listEntriesDetailed,
   type: "view",
   viewQuery: `
     SELECT
@@ -778,7 +801,7 @@ const listEntriesDetailed: CollectionDef = {
 
 // Per-category item/pending counts (category screen, "in use" delete-guards).
 const categoryStats: CollectionDef = {
-  name: "category_stats",
+  name: COLLECTION_NAMES.categoryStats,
   type: "view",
   viewQuery: `
     SELECT
@@ -802,7 +825,7 @@ const categoryStats: CollectionDef = {
 // itemId text snapshot, so renamed/deleted items can't break the view):
 // groundwork for "buy again" suggestions in later phases.
 const itemStats: CollectionDef = {
-  name: "item_stats",
+  name: COLLECTION_NAMES.itemStats,
   type: "view",
   viewQuery: `
     SELECT
