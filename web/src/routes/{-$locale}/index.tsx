@@ -96,7 +96,7 @@ function Home() {
               src="/screenshots/mobile-list-light.png"
               alt={`${m.webShotDeviceMobile()} · ${m.webShotPageList()}`}
               width={220}
-              height={458}
+              height={478}
             />
           </figure>
           <figure>
@@ -104,7 +104,7 @@ function Home() {
               src="/screenshots/mobile-list-dark.png"
               alt={`${m.webShotDeviceMobile()} · ${m.webShotPageList()}`}
               width={220}
-              height={458}
+              height={478}
             />
           </figure>
         </div>
