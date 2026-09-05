@@ -72,6 +72,38 @@ smoke of the 4 routes for SSR/hydration):
 mirror the official example); server-fn exclusion; `PUBLIC_*` prefix (highest
 blast radius — assert stats + PWA URL in a smoke); vite is new to this repo.
 
+## Next session: architecture hardening — module APIs & separation of concerns
+
+**Goal:** close the cross-module contract seams from the 2026-09-05 audit (4
+read-only deep-dives across bff/pwa/common/web/admin + direct verification of
+every headline). The front-end layers are well-separated (stores→hooks→views,
+single `fetch` site, zero `@ark-ui/react` leaks, clean routes→services); the
+weak seam is **cross-module contracts — all convention, none compiler-enforced**.
+Tests not the focus.
+
+**Verified facts** (audit 2026-09-05, confirmed against source):
+- **D8 is practiced by no consumer.** `rg "hc\(|AppType|@remindit/bff" pwa/src admin/src web/src` = 0. pwa hand-re-declares `UserPublic/AuthResponse/Group/Member/Notification`; admin re-declares admin types; web re-types `PlatformStats` + casts.
+- **Drift is live, not hypothetical:** pwa `UserPublic` omits `role` (bff `lib/user.ts:13` always sends it); admin drops `AdminUserPage.total` (`bff/src/contracts.ts:154-158`) and invents an inline `{ items }` page type.
+- **Phantom deps:** `web/package.json` + `admin/package.json` import `@remindit/common` without declaring it — resolves only via workspace hoist (pwa/bff depend on it).
+- **Seed logic ×3:** `pwa/seed/hash.ts` is byte-identical to `common/src/seeds/hash.ts`; `FREQ_TO_DAYS` in `pwa/src/stores/recommender.ts`, `pwa/seed/history.ts`, `common/src/seeds/history.ts`; history simulator ported with a *different default seed* (42 vs 1); avatar duplicated (`common/src/seeds/avatar.ts` ↔ `pwa/src/stores/user.ts`).
+- **Root `lint`/`check`/`format` only cover pwa** (`cd pwa && bun run …`) while `biome.json` `files.includes: **`.
+- **Sync side-effects at import:** `stores/index.ts` promises no side effects (DEV.md:267), but `export * from "./commands"` → `commands.ts:29` → `sync/engine.ts:87` does `new PocketBase()` + `:128` registers the global token hook at module load.
+- **Auth triplication:** BFF accepts Bearer XOR cookie + `X-Session-Token`; the **cookie path has zero consumers** (pwa/admin send Bearer only); pwa vs admin 401 handling diverges (admin clears+redirects, pwa only throws).
+- **`scripts/migrate.ts` (398 lines)** is the canonical-diff/migrate engine, untestable in a script; collection names are ~30 literals; `routes/pb.ts:41-55` `SYNC_COLLECTIONS` allowlist can drift from `schema/collections.ts`.
+
+**Execution order** (items 1-4 small/independent/high-value — do first). Each
+gated by: root `typecheck`, `lint`, `i18n:check`, relevant tests.
+1. **Wire BFF contract types** into pwa + admin as `import type` from `@remindit/bff/api` (type-only, erased — never pulls the server graph; no `hc()` needed). Delete the hand-mirrors; fix `role`/`total` drift it surfaces. Align `bff` `"."`/`"./api"` so a type import can't drag the server bundle.
+2. **Declare `@remindit/common` in `web` + `admin`** (`"workspace:*"`).
+3. **pwa/seed consume `@remindit/common/seeds`** (hash/history/avatar) + hoist `FREQ_TO_DAYS` into common; add parity test (same input→same output).
+4. **Root lint/check/format across all workspaces** (run biome from root, or loop all five like `typecheck`).
+5. Lazy-construct the sync PB client inside `initSync()`; consider `src/stores/sync/` → `src/sync/`.
+6. Extract `migrate` → `src/schema/reconcile.ts`; export collection-name constants; derive `SYNC_COLLECTIONS` from schema; add per-collection repos (teams/members/notifications).
+7. Delete the dead cookie-path or document reserved; unify client 401 policy.
+8. Low tier: shared ambient declarations (`*.svg?raw`, one `ImportMeta.env`), `pwa/src/lib/env.ts` config module, `useAdminResource` hook for admin routes, brand-color vars out of `web/src/styles.css`, `NOTIFICATION_TYPES` const, decide response-validate policy (validate all routes or drop ad-hoc parses).
+
+**Done so far:** audit + this write-up (2026-09-05). Nothing implemented yet.
+
 ## Deferred (by decision — revisit when triggered)
 
 - **Notifications hardening** — when Web Push or digests arrive: typed `type`
