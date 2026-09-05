@@ -77,13 +77,25 @@ describeIfPb("pb forwarder (live)", () => {
   })
 
   test("record CRUD through the proxy is rule-scoped", async () => {
-    const res = await pbFetch(
+    // `users` is deliberately NOT in the forwarder allowlist (D2 — the sync
+    // engine must never read the identity collection); assert it is rejected
+    // before the proxy, then prove the owner's own team reads through it.
+    const usersRes = await pbFetch(
       `/api/collections/users/records/${owner.user.id}`,
       owner.token
     )
-    expect(res.status).toBe(200)
-    const record = (await res.json()) as { id: string; username: string }
-    expect(record.id).toBe(owner.user.id)
+    expect(usersRes.status).toBe(403)
+    const usersBody = (await usersRes.json()) as { error: string }
+    expect(usersBody.error).toBe("collection not allowed")
+
+    const teamRes = await pbFetch(
+      `/api/collections/teams/records/${teamId}`,
+      owner.token
+    )
+    expect(teamRes.status).toBe(200)
+    const team = (await teamRes.json()) as { id: string; name: string }
+    expect(team.id).toBe(teamId)
+    expect(team.name).toBe("Forwarder")
   })
 
   test("create with localId; duplicate (team, localId) rejected by the index", async () => {

@@ -7,6 +7,7 @@ import {
   registerBodySchema,
   userPublicSchema,
 } from "../contracts"
+import { env } from "../env"
 import { validatedJson } from "../lib/validation"
 import {
   type AppEnv,
@@ -16,12 +17,12 @@ import {
 } from "../middleware/auth"
 import { authService } from "../services/auth"
 
-// Rate limit: 20 attempts per 15 minutes per IP.
-// Protects against brute-force login and registration amplification
-// (register fans out to the Answer sidecar).
+// Rate limit: 20 attempts per 15 minutes per IP (default; AUTH_RATE_LIMIT
+// overrides — see env.ts). Protects against brute-force login and
+// registration amplification (register fans out to the Answer sidecar).
 const authRateLimiter = rateLimiter({
   windowMs: 15 * 60 * 1000,
-  limit: 20,
+  limit: env.authRateLimit,
   keyGenerator: (c) =>
     c.req.header("x-forwarded-for") ?? c.req.header("x-real-ip") ?? "unknown",
 })

@@ -13,6 +13,12 @@ const bool = (raw: string | undefined, fallback: boolean): boolean =>
 export const env = {
   /** Hono (Bun.serve) port. */
   port: positiveInt(process.env.PORT, 3100),
+  /**
+   * Auth (/api/auth/*) brute-force window — attempts per 15 minutes per IP.
+   * Env-tunable so test harnesses (many parallel in-process registrations share
+   * the in-memory key "unknown") can raise it; prod keeps the default 20.
+   */
+  authRateLimit: positiveInt(process.env.AUTH_RATE_LIMIT, 20),
   /** PocketBase internal URL — bound to localhost, never public (D2). */
   pocketbaseUrl: process.env.POCKETBASE_URL ?? "http://127.0.0.1:8090",
   /** PocketBase data dir, resolved from the repo root (gitignored). */

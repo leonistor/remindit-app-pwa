@@ -24,7 +24,7 @@
     "backfill:feedback": "cd bff && bun --env-file=../.env run backfill:feedback",
     "seed:bff": "cd bff && bun --env-file=../.env run seed",
     "configure:feedback": "cd bff && bun --env-file=../.env run configure:feedback",
-    "test:bff": "cd bff && bun --env-file=../.env test",
+    "test:bff": "cd bff && FEEDBACK_BRIDGE=off AUTH_RATE_LIMIT=10000 bun --env-file=../.env test",
     "demos": "cd pwa && bun run demos",
     "format": "cd pwa && bun run format",
     "generate:palettes": "cd pwa && bun run generate:palettes",
