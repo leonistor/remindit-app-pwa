@@ -289,14 +289,15 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - Gotchas recorded: bm2 resolves ecosystem `script:` paths against the config dir (use absolute launchers); systemd/sudo strip `~/.bun/bin` from PATH ("bun: not found"); fresh-install schema reconcile must land existing-collection field drift BEFORE creating views (PB's default `users` has no `username` column, and view queries are validated by execution); dotenv files are unsafe to `sh`-source — wrappers load env via `bun --env-file`
 - Gate: all five public hosts verified (health, CORS preflight, admin 401-anon, guest submit round-trip) + release-gate `test:pre` green
 
-### Cross-cutting — shared i18n catalog · `feat/shared-i18n-catalog`
+### Cross-cutting — shared i18n catalog · `feat/shared-i18n-catalog` ✅
 
-- [ ] Catalog relocated `pwa → common` (`common/project.inlang` + `common/messages/`, pathPattern unchanged); `kickstart:locale` moved to `common/scripts/` (`bun run kickstart:locale`)
-- [ ] pwa repointed only (`project: "../common/project.inlang"`); no runtime change (typecheck + full suites green)
-- [ ] web compiles the catalog (`scripts/compile-i18n.ts`, `strategy: ["baseLocale"]`, rsbuild watch plugin, `typecheck` chains `i18n:compile`); **all web copy migrated** to shared `m.*` keys (en+ro authored; de/fr/uk filled 2026-09-05 via kickstart — review those machine drafts)
-- [ ] Drift guard extended to all locales: en↔ro strict parity + de/fr/uk keys⊆en, no-empty, placeholder & variant parity vs en
-- [ ] de/fr/uk web draft keys flagged for human review (TODO.md); **web stays baseLocale** until drafts ship
+- [x] Catalog relocated `pwa → common` (`common/project.inlang` + `common/messages/`, pathPattern unchanged); `kickstart:locale` moved to `common/scripts/` (`bun run kickstart:locale`)
+- [x] pwa repointed only (`project: "../common/project.inlang"`); no runtime change (typecheck + full suites green)
+- [x] web compiles the catalog (`scripts/compile-i18n.ts`, `strategy: ["baseLocale"]`, rsbuild watch plugin, `typecheck` chains `i18n:compile`); **all web copy migrated** to shared `m.*` keys (en+ro authored; de/fr/uk filled 2026-09-05 via kickstart — reviewed those machine drafts)
+- [x] Drift guard extended to all locales: en↔ro strict parity + de/fr/uk keys⊆en, no-empty, placeholder & variant parity vs en
+- [x] de/fr/uk web draft keys reviewed (2026-09-05: 3 email/device nits fixed); **web stays baseLocale** until drafts ship
 - Gate: root `typecheck` ×6 modules, pwa full suite + 23 e2e, web SSR hydration smoke (all 4 routes, no console errors), lint + prod builds ✅
+- Follow-up (recorded in TODO.md): **web locale routing via a Vite-adapter migration** — the rsbuild adapter has no server-entry seam for `paraglideMiddleware`; vite adds it (plan staged, 2026-09-05)
 
 ## 8. Verification gates (every phase)
 

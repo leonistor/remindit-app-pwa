@@ -63,7 +63,7 @@
     },
     "pwa": {
       "name": "@remindit/pwa",
-      "version": "5.1.0",
+      "version": "5.2.0",
       "dependencies": {
         "@ark-ui/react": "^5.39.0",
         "@dicebear/core": "^10.7.0",

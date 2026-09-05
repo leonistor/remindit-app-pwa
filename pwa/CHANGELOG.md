@@ -2,6 +2,17 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v5.2.0 — 2026-09-05
+
+_Foundation for more languages: every screen now draws from one shared translation catalog, and the website is ready for them too._
+
+### 🔧 Improvements
+
+- **One catalog, every screen**: app text and website text now live in a single shared translation catalog — a fix or a new string lands once and reaches both the app and the marketing pages. No more copy drifts between them
+- **The website speaks the same language**: the marketing pages (Features, Download, Feedback) no longer ship hard-coded text — every string is managed like the app's, so the site is ready to be localized as soon as new languages ship
+- **More languages on deck**: German, French, and Ukrainian translation drafts are now filled in for both the app and the website (the app still offers English + Romanian — the drafts need a review pass before they go live)
+- **Safer translation workflow**: a drift guard now watches every language at once, so a placeholder accidentally renamed during translation can never silently break a screen
+
 ## v5.1.0 — 2026-09-04
 
 _Get heard — report bugs and ideas from inside the app, and see what's happening on your shared lists._
