@@ -111,8 +111,23 @@ gated by: root `typecheck`, `lint`, `i18n:check`, relevant tests.
   `FREQ_TO_DAYS` hoisted into common + a seed-parity test; root lint/check/
   format now run biome repo-wide (317 files, was pwa-only 207), which surfaced
   and fixed a `noNonNullAssertion` in `bff/scripts/migrate.ts` and missing
-  `<title>` on the brand SVGs. Commits: `e761083`, `b15c69a`, `e58af06`,
-  `10e3212`.
+  `<title>` on the brand SVGs.
+- Items 5–8 shipped (2026-09-05, same session): the sync PB client is now a
+  lazy singleton (`getPb()` — no `new PocketBase()`/hook wiring at module
+  load; import-only contract test); migrate engine extracted to testable
+  `src/schema/reconcile.ts` with `COLLECTION_NAMES` constants driving both the
+  builders and the derived `SYNC_COLLECTIONS` forwarder allowlist; per-collection
+  repos (teams/members/notifications) route services off raw SDK calls; client
+  401 policy unified (pwa signs out via a `setUnauthorizedHandler` hook, cookie
+  transport documented-reserved for web SSR auth); low-tier: `pwa/src/lib/env.ts`
+  centralizes `import.meta.env` reads, web brand CSS vars now injected from
+  `@remindit/common/brand`, `useAdminResource` hook for the three admin list
+  dashboards, `NOTIFICATION_TYPES` const in common, and a decided
+  response-validation policy (every contract-shaped route response zod-parsed).
+  Commits: `3b9f56d`, `d38d96d`, `0f81ee8`, `de29b80`, `75df77b`, `1ccd7fd`,
+  `b715eb7`. Ambient-decl sharing (item 8a) was evaluated and NOT done: TS only
+  applies ambient declarations from files in a module's own program, so each
+  consumer needs its `*.svg?raw` copy — common's copy is the authoritative one.
 
 ## Deferred (by decision — revisit when triggered)
 
