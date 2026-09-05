@@ -1,8 +1,7 @@
 // opencode MCP wrapper (wired in opencode.jsonc → "pocketbase", disabled by
-// default). Reads the root .env (Bun auto-loads it from the repo-root cwd,
-// where opencode runs) and injects the PB_URL/credentials expected by
-// gaspechak-pocketbase-mcp — so dev superuser credentials live only in .env,
-// never in the committed opencode.jsonc.
+// default). Runs under `bun --bun` so .env is auto-loaded from the repo-root
+// cwd, then injects PB_URL/credentials into the MCP server process via npx
+// (bunx has a broken temp cache for this package's ajv dep).
 import { env } from "../src/env"
 
 if (!env.pocketbaseAdminEmail || !env.pocketbaseAdminPassword) {
@@ -13,7 +12,7 @@ if (!env.pocketbaseAdminEmail || !env.pocketbaseAdminPassword) {
 }
 
 const proc = Bun.spawn({
-  cmd: ["bunx", "-y", "gaspechak-pocketbase-mcp"],
+  cmd: ["npx", "-y", "gaspechak-pocketbase-mcp"],
   env: {
     ...process.env,
     PB_URL: env.pocketbaseUrl,

@@ -25,13 +25,14 @@
       "command": ["bunx", "-y", "chrome-devtools-mcp@latest"]
     },
     // PocketBase agent ops (gaspechak-pocketbase-mcp) — enable while working
-    // on bff/. The wrapper injects PB_URL + dev superuser creds from the root
-    // .env (never hardcoded here); requires `bun run dev:bff` (or a running
-    // PB) and POCKETBASE_ADMIN_* set in the root .env.
+    // on bff/. The wrapper loads the root .env (Bun auto-loads it) and injects
+    // PB_URL + dev superuser creds into the MCP server process; requires
+    // `bun run dev:bff` (or a running PB) and POCKETBASE_ADMIN_* in .env.
+    // `bun --bun` forces Bun runtime (opencode itself is Node).
     "pocketbase": {
       "enabled": true,
       "type": "local",
-      "command": ["bun", "bff/scripts/pocketbase-mcp.ts"]
+      "command": ["bun", "--bun", "bff/scripts/pocketbase-mcp.ts"]
     }
   }
 }
