@@ -8,8 +8,9 @@ React, no UI kit, no DOM types.
 
 `messages/{locale}.json` (inlang message format, flat files) plus the inlang
 project in `project.inlang/settings.json` are the **single source of truth**
-for UI strings. `en` is the `baseLocale` (authoritative); `ro` is shipped;
-`de`/`fr`/`uk` are drafts that fall back to English for missing keys.
+for UI strings. `en` is the `baseLocale` (authoritative); `ro`, `de`, `fr`,
+`uk` all ship — missing keys fall back to English (the `de`/`fr`/`uk` catalogs
+are machine-translated drafts accepted as-is, so some keys still read English).
 
 Consumers compile the catalog with **Paraglide JS** into their own gitignored
 output — the catalog is never imported directly:

@@ -30,7 +30,9 @@ export interface AppLocale {
 export const APP_LOCALES: readonly AppLocale[] = [
   { code: "en", nativeName: "English" },
   { code: "ro", nativeName: "Română" },
-  // Later: German, French, Ukrainian
+  { code: "de", nativeName: "Deutsch" },
+  { code: "fr", nativeName: "Français" },
+  { code: "uk", nativeName: "Українська" },
 ]
 
 /** The currently active locale, resolved through the strategy chain. */

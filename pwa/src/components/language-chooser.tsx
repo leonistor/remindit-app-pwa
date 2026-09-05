@@ -7,7 +7,7 @@ import { m } from "@/paraglide/messages"
 /**
  * Language picker shared by the onboarding language step (first step) and the
  * Profile language card. A vertical stack of secondary buttons — scales to any
- * number of locales (DE/FR/UK are next). The active locale carries
+ * number of locales. The active locale carries
  * `aria-pressed` + a check mark; selecting persists via the Paraglide strategy
  * and reloads the document in the new language, so the
  * active locale is read non-reactively: after a switch the whole document

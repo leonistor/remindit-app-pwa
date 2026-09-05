@@ -203,14 +203,30 @@ Import store atoms/actions from the barrel: `import { $list, addToList } from "@
 
 UI strings are managed with **Paraglide JS v2** (`@inlang/paraglide-js`, compiler-first i18n).
 
-- **Source of truth:** the shared catalog in `@remindit/common` — `common/messages/{locale}.json` (inlang message format, flat files — `en` is `baseLocale`, `ro` shipped) plus the inlang project `common/project.inlang/settings.json`. pwa and web both compile from it into their own gitignored output.
+- **Source of truth:** the shared catalog in `@remindit/common` — `common/messages/{locale}.json` (inlang message format, flat files — `en` is `baseLocale`; `ro`/`de`/`fr`/`uk` ship, missing keys fall back to English) plus the inlang project `common/project.inlang/settings.json`. pwa and web both compile from it into their own gitignored output.
 - **Compilation:** the official `paraglideRspackPlugin` runs inside `rsbuild.config.ts` (`tools.rspack.plugins`), so dev **watch-compiles** message edits; `bun run i18n:compile` (programmatic `compile()` in `scripts/compile-i18n.ts`, sharing `PARAGLIDE_COMPILER_OPTIONS`) covers entry points that run outside the bundler — it is chained into `typecheck`, `test`, `test:quick`, `test:changed`, and `test:watch`. The compiler generates `pwa/src/paraglide/` (self-gitignored) into typed, tree-shakable ESM `m.*` functions.
 - **Usage:** `import { m } from "@/paraglide/messages"` then `m.key({ param })` — no provider/context, works alongside nanostores. Resolve messages **inside render bodies or functions only** — a module-scope `m.*` call freezes the string at import time. Plurals use the array-of-match variants syntax; the ICU `#` shorthand is **not** supported — repeat the variable (`{count}`) inside variants.
 - **Locale resolution:** strategy chain `["localStorage", "preferredLanguage", "baseLocale"]` with `localStorageKey: "remindit:locale"` — persisted user choice first, then browser language, then English. `src/index.tsx` sets `document.documentElement.lang` before first paint (mirrors `initTheme()`).
 - **Language UX:** chosen in onboarding **step 1** and switchable in the **Profile** language card via `LanguageChooser` (`src/components/language-chooser.tsx`, locales listed in `APP_LOCALES` in `src/lib/locale.ts`). Switching persists the choice and performs a **full document reload** (deliberate — all state is persisted; the SW-served shell makes it fast). `localStorage.clear()` in the erase path wipes the choice, so erase re-triggers the language prompt.
 - **Data is not UI:** catalog item names, category names, dataset names, and the `uncategorized` sentinel stay **data** (seeded/user-entered) — never wrapped in messages. Locale native names in `APP_LOCALES` are likewise static.
 - **Drift check:** `tests/i18n-drift.test.ts` (runs in every test suite; focused: `bun run i18n:check`) keeps the locale files in lockstep — **en↔ro strict parity** (a missing ro key silently falls back to English at runtime), **de/fr/uk keys ⊆ en** (drafts may lag en, but no empty values and no extra keys), `{token}` placeholders must match per key, and match variants must align on every locale (an invented `{token}` in any locale widens the compiled input types for all consumers). Workflow: add the key to `common/messages/en.json` + `common/messages/ro.json` in the same commit with identical `{tokens}`, then let the suite flag anything missed.
-- **Kick-starting a new locale:** `cd common && bun run kickstart:locale -- de,fr,uk translategemma:12b` (needs a running [Ollama](https://ollama.com) with the model pulled) machine-translates every `en.json` key into the new locale(s) and writes `common/messages/{locale}.json` **drafts**. The prompt is tuned for RemindIt (informal "you" — tu form, verbatim `{tokens}`, no invented punctuation, exactly one translation — evaluated 2026-09-04 against the human ro translation; selected over `@inlang/cli`'s free service, which rate-limits at project scale). The script adds the locale to `common/project.inlang/settings.json`, runs merge mode (reruns only fill gaps), strips a trailing "." the source lacks, and reports keys that kept English after repeated failures — review those by hand. Two caveats: drafts need a human pass before they ship, and adding a locale to settings makes paraglide compile it, so the `preferredLanguage` strategy will **auto-serve it** to matching browsers on the next release — gate via `APP_LOCALES`/ship order if the drafts aren't ready.
+- **Kick-starting a new locale:** `cd common && bun run kickstart:locale -- de,fr,uk translategemma:12b` (needs a running [Ollama](https://ollama.com) with the model pulled) machine-translates every `en.json` key into the new locale(s) and writes
+`common/messages/{locale}.json` **drafts**. The prompt is tuned for RemindIt
+(informal "you" — tu form, verbatim `{tokens}`, no invented punctuation,
+exactly one translation — evaluated 2026-09-04 against the human ro
+translation; selected over `@inlang/cli`'s free service, which rate-limits at
+project scale). The script adds the locale to
+`common/project.inlang/settings.json`, runs merge mode (reruns only fill
+gaps), strips a trailing "." the source lacks, and reports keys that kept
+English after repeated failures — review those by hand. Two caveats: drafts
+need a human pass before they ship, and adding a locale to settings makes
+paraglide compile it, so the `preferredLanguage` strategy will **auto-serve
+it** to matching browsers on the next release — gate via `APP_LOCALES`/ship
+order if the drafts aren't ready. Precedent: the `de`/`fr`/`uk` drafts shipped
+**accepted as-is** 2026-09-05 (no review pass; ~40 pwa keys still render
+English after the safety net rejected invented/renamed `{tokens}` and fragment
+keys) — the picker exposes all four and browsers with those language
+preferences are auto-served.
 - **Adding a language** (e.g. German): add the code to `locales` in `common/project.inlang/settings.json`, create + translate `common/messages/{locale}.json` (or kick-start a draft), add an `APP_LOCALES` entry, run `bun run i18n:compile`.
 
 ### List sort feature

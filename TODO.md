@@ -10,20 +10,18 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 
 ## In flight
 
-- **de/fr/uk translation drafts** — kick-started 2026-09-05 with
-  `bun run kickstart:locale` in `common/` (local Ollama, translategemma:12b;
-  see `pwa/docs/DEV.md` §Internationalization). The shared-catalog migration's
-  `web*` keys were filled in the same pass and **reviewed** the same day (the
-  flagged email/device-label nits are fixed). ~40 pre-existing pwa keys across
-  the three files still keep English after safety-net rejections (invented/
-  renamed `{tokens}`, sentence-fragment keys) — listed in the kickstart output
-  and need human review before those locales ship. Shipping caveat: locales in
-  `common/project.inlang/settings.json` get compiled by paraglide and
-  **auto-served** to matching browsers via the `preferredLanguage` strategy on
-  the next release — decide ship order / `APP_LOCALES` gating if the drafts
-  aren't reviewed by then. The language selector (`APP_LOCALES`) is still
-  en+ro; **web stays baseLocale** (English-only) until the drafts are reviewed
-  and the Vite-adapter locale routing lands (see next-session section below).
+- none — all open lanes live in the sections below.
+
+## Shipped since the 2026-09-04 rewrite
+
+- **de/fr/uk translation drafts** — completed 2026-09-05, accepted **as-is**
+  (no review pass): kick-started via `bun run kickstart:locale` (translat
+  egemma:12b), ~40 pwa keys keep English fallback where the safety net rejected
+  invented/renamed `{tokens}` and fragment keys. Locales are registered in
+  `common/project.inlang/settings.json`, so they compile and auto-serve to
+  matching browsers (`preferredLanguage` strategy); `APP_LOCALES` in the pwa
+  now offers the full set (en/ro/de/fr/uk). Web still serves `baseLocale`
+  English only — blocked on the URL-routing migration in the next section.
 
 ## Next (V6 + wishlist, roadmap §1)
 
@@ -67,7 +65,9 @@ smoke of the 4 routes for SSR/hydration):
    (en unprefixed at `/`, then `/ro`, `/de`, `/fr`, `/uk`), router `rewrite`,
    `paraglideMiddleware` in `server.ts`, `routeStrategies` excluding `/_serverFn/*`.
 3. **Ship.** Rebuild + `bm2 reload web`; verify prod URLs + canonical/hreflang.
-4. **Flip drafts live** (gated on de/fr/uk review) when ready.
+4. **Flip the languages live.** The de/fr/uk catalogs are **accepted as-is**
+   (2026-09-05) — no review gate remains on the languages themselves; flipping
+   them on web is purely this migration.
 **Risks:** React-plugin order (`tanstackStart()` before `react()` on vite —
 mirror the official example); server-fn exclusion; `PUBLIC_*` prefix (highest
 blast radius — assert stats + PWA URL in a smoke); vite is new to this repo.
