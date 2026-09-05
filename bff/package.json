@@ -5,7 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/app.ts",
-    "./api": "./src/app.ts"
+    "./api": "./src/contracts.ts"
   },
   "scripts": {
     "dev": "bun scripts/dev.ts",

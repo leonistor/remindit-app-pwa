@@ -2,53 +2,31 @@
 // uses (phase 5). Data-plane CRUD goes through the PB SDK pointed at the
 // /pb/* forwarder instead (see stores/sync + docs/SYNC.md).
 //
-// The request/response shapes mirror `bff/src/contracts.ts` (zod-tested over
-// there). They are duplicated here deliberately: importing the BFF package at
-// runtime would drag the whole server graph into the client bundle, and a
-// type-only import would still need the dependency installed for tsc. Keep
-// the two in sync — the BFF side is the source of truth.
+// The request/response shapes come from `@remindit/bff/api` (the zod-only
+// contracts module) as type-only imports — nothing from the server graph is
+// bundled at runtime. The BFF contracts file is the source of truth.
 
 import { DEFAULT_BFF_URL } from "./sync-constants"
+import type {
+  AuthResponse,
+  Group,
+  Member,
+  MemberRole,
+  Notification,
+  UserPublic,
+} from "@remindit/bff/api"
+
+export type {
+  AuthResponse,
+  Group,
+  Member,
+  MemberRole,
+  Notification,
+  UserPublic,
+}
 
 const base = () =>
   (import.meta.env?.PUBLIC_BFF_URL as string | undefined) ?? DEFAULT_BFF_URL
-
-export type UserPublic = {
-  id: string
-  email: string
-  username: string
-  firstName: string
-  lastName: string
-  avatar: string
-}
-
-export type AuthResponse = { token: string; user: UserPublic }
-
-export type Group = {
-  id: string
-  name: string
-  owner: string
-  created?: string
-  updated?: string
-}
-
-export type MemberRole = "owner" | "member"
-
-export type Member = {
-  id: string
-  role: MemberRole
-  group: string
-  user: UserPublic
-}
-
-export type Notification = {
-  id: string
-  type: string
-  payload?: unknown
-  read: boolean
-  user: string
-  group?: string
-}
 
 export class BffError extends Error {
   readonly status: number

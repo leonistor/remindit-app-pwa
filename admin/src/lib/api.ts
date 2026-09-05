@@ -1,8 +1,19 @@
-// Admin API client + session storage (phase 6). Mirrors the BFF admin
-// contracts (bff/src/contracts.ts — the source of truth); Bearer-token auth
+// Admin API client + session storage (phase 6). Bearer-token auth
 // like the pwa (the session cookie is HttpOnly on the BFF origin and the
 // admin runs on its own origin, so localStorage + Bearer is the simplest
 // correct transport for a standalone admin tool).
+//
+// Contract types come from `@remindit/bff/api` (the zod-only contracts
+// module) as type-only imports — the BFF contracts file is the source of truth.
+
+export type {
+  AdminGroup,
+  AdminOverview,
+  AdminUser,
+  AdminUserCreateBody,
+  AdminUserPage,
+  UserRole,
+} from "@remindit/bff/api"
 
 const TOKEN_KEY = "remindit-admin-token"
 
@@ -133,38 +144,4 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   }
   if (res.status === 204) return undefined as T
   return (await res.json()) as T
-}
-
-// --- mirrored BFF contract types (keep in sync with bff/src/contracts.ts) ---
-
-export type UserRole = "user" | "admin"
-
-export type AdminOverview = {
-  users: number
-  groups: number
-  items: number
-  listEntries: number
-  historyEvents: number
-}
-
-export type AdminUser = {
-  id: string
-  email: string
-  username: string
-  firstName: string
-  lastName: string
-  avatar: string
-  role: UserRole
-  created?: string
-  updated?: string
-}
-
-export type AdminGroup = {
-  id: string
-  name: string
-  owner: string
-  ownerUsername?: string
-  membersCount: number
-  created?: string
-  updated?: string
 }

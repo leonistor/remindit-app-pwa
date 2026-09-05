@@ -14,7 +14,7 @@ import {
 } from "@mantine/core"
 import { createFileRoute } from "@tanstack/react-router"
 import { useCallback, useEffect, useState } from "react"
-import { type AdminUser, api, getToken, type UserRole } from "../lib/api"
+import { type AdminUser, type AdminUserCreateBody, api, type AdminUserPage, getToken, type UserRole } from "../lib/api"
 import { useRequireAuth } from "../lib/auth"
 
 export const Route = createFileRoute("/users")({
@@ -44,7 +44,7 @@ function UsersPage() {
     // doomed request (it would 401 and clear a token that isn't there).
     if (!getToken()) return
     try {
-      const page = await api<{ items: AdminUser[] }>("/api/admin/users")
+      const page = await api<AdminUserPage>("/api/admin/users")
       setUsers(page.items)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
@@ -62,7 +62,7 @@ function UsersPage() {
     try {
       await api("/api/admin/users", {
         method: "POST",
-        body: JSON.stringify(form),
+        body: JSON.stringify(form satisfies AdminUserCreateBody),
       })
       setCreating(false)
       setForm({ email: "", username: "", password: "", role: "user" })
