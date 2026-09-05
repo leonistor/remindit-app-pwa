@@ -8,7 +8,7 @@
 
 import type { CatalogItem, Category, CategoryFrequency } from "@/stores/types"
 import { UNCATEGORIZED_ID } from "@/stores/types"
-import { hashId } from "./hash"
+import { hashId } from "@remindit/common/seeds"
 import rawItemsCategories from "./items_categories.json"
 import rawLeoRomanian from "./leo_romanian.json"
 import rawMinimal from "./minimal.json"

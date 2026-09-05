@@ -5,7 +5,7 @@
 // generator lives in `src/lib/profile-generator.ts` and is loaded lazily so it
 // stays out of the main bundle.
 
-import { initials } from "@/lib/display"
+import { initialsAvatar } from "@remindit/common/seeds"
 import { jsonStore, STORAGE_KEYS } from "./persistence"
 import type { UserProfile } from "./types"
 
@@ -31,18 +31,13 @@ export function updateUser(patch: Partial<UserProfile>): void {
 // (initials on a colored background). Avoids external network requests so the
 // app stays fully local-first. Used as the fallback when the DiceBear generator
 // is not in play (e.g. a sync reseed without a generated profile).
+//
+// Delegates to common's `initialsAvatar(name, "", name)`: for the single-token
+// names passed here (usernames/first-run names have no spaces) common's
+// `initialsOf(name, "")` returns the same first-two-characters-upcased initials
+// the pwa's old local `initials()` produced, so behavior is preserved.
 export function localAvatar(name: string): string {
-  const initialsStr = initials(name)
-
-  let hash = 0
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) >>> 0
-  }
-  const hue = hash % 360
-
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150"><rect width="150" height="150" rx="24" fill="hsl(${hue}, 55%, 45%)"/><text x="50%" y="50%" dy=".35em" text-anchor="middle" fill="#ffffff" font-family="sans-serif" font-size="64" font-weight="600">${initialsStr}</text></svg>`
-
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`
+  return initialsAvatar(name, "", name)
 }
 
 // Synchronous fallback profile. Not used for first-run onboarding (that path

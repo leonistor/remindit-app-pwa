@@ -16,9 +16,9 @@ import rawPlatform from "../../seeds/platform.json"
 import { initialsAvatar } from "./avatar"
 import { hashId } from "./hash"
 
-export { generateTeamHistory } from "./history"
+export { FREQ_TO_DAYS, generateTeamHistory } from "./history"
 export type { GenerateTeamHistoryOptions } from "./history"
-export { hashId }
+export { hashId, initialsAvatar }
 
 export interface SeedUserSpec {
   username: string

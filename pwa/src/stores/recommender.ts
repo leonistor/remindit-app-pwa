@@ -13,19 +13,12 @@ import type {
   RecommendationTier,
 } from "./types"
 import { UNCATEGORIZED_NAME } from "./types"
-
 // CategoryFrequency → expected days between purchases. Used as fallback when an
-// item has too few purchases to estimate its own interval.
-export const FREQ_TO_DAYS: Record<CategoryFrequency, number> = {
-  daily: 1,
-  "every-2-3-days": 2.5,
-  weekly: 7,
-  "every-2-weeks": 14,
-  monthly: 30,
-  "every-3-months": 90,
-  seldom: 180,
-  unknown: 14,
-}
+// item has too few purchases to estimate its own interval. Single source of
+// truth now lives in `@remindit/common/seeds`; re-exported here so existing
+// `@/stores/recommender` imports keep working.
+import { FREQ_TO_DAYS } from "@remindit/common/seeds"
+export { FREQ_TO_DAYS }
 
 const GLOBAL_DEFAULT_INTERVAL = 14
 
