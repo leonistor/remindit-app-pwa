@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@inlang/paraglide-js": "^2.25.0",
+    "@remindit/common": "workspace:*",
     "@tanstack/react-router": "^1.170.32",
     "@tanstack/react-start": "^1.168.49",
     "react": "^19.2.8",
