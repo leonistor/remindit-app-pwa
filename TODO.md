@@ -48,6 +48,16 @@ or console errors. (Planning material — premise research, staged plan, the
 `IgorSzymanski/tanstack-start-paraglide` reference — lives in git history +
 `docs/ROADMAP.md` §7.)
 
+## Shipped: web MVP content pass (2026-09-05, branch `mvp-web`)
+
+Home now shows a subtitle platform-stats line, the README phone-screenshot pair,
+and coming-soon/open-source blurb; `/features` is a marketing walkthrough with
+three committed demo videos; new `/screenshots` page grids all eight committed
+shots. Marketing media lives in committed `web/public/` (the pwa's mp4s are
+generated+gitignored — README §Marketing media). New `web*` keys in
+`common/messages/{en,ro}.json` the same day (de/fr/uk fall back to English);
+old `webFeatureOffline/Privacy` keys removed from all locales.
+
 ## Architecture hardening — shipped 2026-09-05
 
 All eight items closed in one session: BFF contract types wired into pwa +

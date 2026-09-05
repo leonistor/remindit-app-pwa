@@ -32,6 +32,11 @@ in the root [AGENTS.md](../AGENTS.md); the phased rollout plan in
   Read through `process.env` — no module env file.
 - **Minimal BFF use**: only the public `/api/stats` endpoint (SSR server
   function, degrades to `null` counts when the BFF is down — never a 500).
+- **Marketing media is committed** — `web/public/` holds the demo mp4s and
+  screenshots the site references, **committed** even though the pwa's
+  identical sources are generated/gitignored (the site must build from a
+  fresh clone; README §Marketing media tracks source→copy provenance). New
+  page visuals go in `web/public/`; never hotlink the pwa's dev server.
 - `*.svg?raw` / `*.css` ambient declarations live in `src/env.d.ts`.
 
 ## Commands

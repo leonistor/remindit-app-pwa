@@ -73,6 +73,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
             </Link>
             <nav className="nav">
               <Link to="/{-$locale}/features">{m.navFeatures()}</Link>
+              <Link to="/{-$locale}/screenshots">{m.webNavScreenshots()}</Link>
               <Link to="/{-$locale}/download">{m.navGetTheApp()}</Link>
             </nav>
             <LanguageSwitcher />

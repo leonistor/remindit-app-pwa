@@ -9,8 +9,9 @@ module rules: [AGENTS.md](AGENTS.md).
 
 | Route | Content |
 |-------|---------|
-| `/` (or `/ro`, `/de`, `/fr`, `/uk`) | Hero (brand logo + name from common), live platform stats, install CTA |
-| `/features` | Feature cards (catalog, recommendations, offline-first, shared groups) |
+| `/` (or `/ro`, `/de`, `/fr`, `/uk`) | Hero (brand logo + name from common), live platform stats line, phone screenshots, coming-soon + open-source notes |
+| `/features` | Marketing walkthrough with three demo videos (see below) |
+| `/screenshots` | Captioned grid of all committed screenshots (phone + desktop) |
 | `/download` | PWA install CTA — links to `PUBLIC_PWA_URL` with per-platform steps |
 
 Every route lives under an optional `{-$locale}` segment: the site is served
@@ -23,6 +24,23 @@ Each page also emits a `canonical` link + the full `hreflang` alternate set
 (including `x-default` → en) via `src/lib/canonical.ts`. An explicit `/en/*`
 prefix is 301-redirected to the unprefixed base-locale URL (`src/server.ts`).
 An OG **image** is not wired yet — add a static asset when brand art exists.
+
+### Marketing media (committed, not generated)
+
+The pwa demo videos (`pwa/public/demos/*.mp4`) are **generated and gitignored**;
+the web's copies are committed static assets in `web/public/` because the
+marketing site must build from a fresh clone and neither videos nor
+screenshots exist until their website is generated. The screenshots themselves
+start as tracked pwa assets (`pwa/public/screenshot-*`) and are re-copied here:
+
+| Asset | Source | Copies (committed) |
+|-------|--------|--------------------|
+| Demo mp4s | `pwa/public/demos/{03-add-items,04-quick-add,06-edit-catalog}-light.mp4` | `web/public/demos/` — 3 light variants used on `/features` |
+| Screenshots | `pwa/public/screenshot-{mobile,desktop}-*-light.png` (+ `mobile-list-dark`) | `web/public/screenshots/` — 8 (mobile dark pair is byte-identical to `mobile-screenshot-*`) |
+
+`web/public/` is served statically at the site root (`/demos/…`, `/screenshots/…`)
+— no picture pipeline, straight files. Videos use `preload="none"` + a poster +
+"Tap to play" so nothing downloads until a visitor clicks play.
 
 ## Data flow
 
@@ -53,7 +71,7 @@ bun run build:web   # production build → dist/ (client + SSR server)
 
 ## Internationalization
 
-All user-facing copy (nav, hero, features, download) is compiled
+All user-facing copy (nav, hero, features, screenshots, download) is compiled
 from the **shared catalog** in `@remindit/common` (`common/messages/*.json`)
 via Paraglide JS — never hardcoded. `web/scripts/compile-i18n.ts` →
 `web/src/paraglide` (gitignored) with the **`["url", "baseLocale"]` strategy**:

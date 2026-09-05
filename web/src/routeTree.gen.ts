@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}/index'
 import { Route as Char123LocaleChar125DownloadRouteImport } from './routes/{-$locale}/download'
 import { Route as Char123LocaleChar125FeaturesRouteImport } from './routes/{-$locale}/features'
+import { Route as Char123LocaleChar125ScreenshotsRouteImport } from './routes/{-$locale}/screenshots'
 
 const Char123LocaleChar125IndexRoute =
   Char123LocaleChar125IndexRouteImport.update({
@@ -31,38 +32,57 @@ const Char123LocaleChar125FeaturesRoute =
     path: '/{-$locale}/features',
     getParentRoute: () => rootRouteImport,
   } as any)
+const Char123LocaleChar125ScreenshotsRoute =
+  Char123LocaleChar125ScreenshotsRouteImport.update({
+    id: '/{-$locale}/screenshots',
+    path: '/{-$locale}/screenshots',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/{-$locale}/download': typeof Char123LocaleChar125DownloadRoute
   '/{-$locale}/features': typeof Char123LocaleChar125FeaturesRoute
+  '/{-$locale}/screenshots': typeof Char123LocaleChar125ScreenshotsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
 }
 export interface FileRoutesByTo {
   '/{-$locale}/download': typeof Char123LocaleChar125DownloadRoute
   '/{-$locale}/features': typeof Char123LocaleChar125FeaturesRoute
+  '/{-$locale}/screenshots': typeof Char123LocaleChar125ScreenshotsRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/{-$locale}/download': typeof Char123LocaleChar125DownloadRoute
   '/{-$locale}/features': typeof Char123LocaleChar125FeaturesRoute
+  '/{-$locale}/screenshots': typeof Char123LocaleChar125ScreenshotsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/{-$locale}/download' | '/{-$locale}/features' | '/{-$locale}/'
+  fullPaths:
+    | '/{-$locale}/download'
+    | '/{-$locale}/features'
+    | '/{-$locale}/screenshots'
+    | '/{-$locale}/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/{-$locale}/download' | '/{-$locale}/features' | '/{-$locale}'
+  to:
+    | '/{-$locale}/download'
+    | '/{-$locale}/features'
+    | '/{-$locale}/screenshots'
+    | '/{-$locale}'
   id:
     | '__root__'
     | '/{-$locale}/download'
     | '/{-$locale}/features'
+    | '/{-$locale}/screenshots'
     | '/{-$locale}/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   Char123LocaleChar125DownloadRoute: typeof Char123LocaleChar125DownloadRoute
   Char123LocaleChar125FeaturesRoute: typeof Char123LocaleChar125FeaturesRoute
+  Char123LocaleChar125ScreenshotsRoute: typeof Char123LocaleChar125ScreenshotsRoute
   Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
 }
 
@@ -89,12 +109,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125FeaturesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/{-$locale}/screenshots': {
+      id: '/{-$locale}/screenshots'
+      path: '/{-$locale}/screenshots'
+      fullPath: '/{-$locale}/screenshots'
+      preLoaderRoute: typeof Char123LocaleChar125ScreenshotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   Char123LocaleChar125DownloadRoute: Char123LocaleChar125DownloadRoute,
   Char123LocaleChar125FeaturesRoute: Char123LocaleChar125FeaturesRoute,
+  Char123LocaleChar125ScreenshotsRoute: Char123LocaleChar125ScreenshotsRoute,
   Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,
 }
 export const routeTree = rootRouteImport
