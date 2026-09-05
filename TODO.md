@@ -102,7 +102,17 @@ gated by: root `typecheck`, `lint`, `i18n:check`, relevant tests.
 7. Delete the dead cookie-path or document reserved; unify client 401 policy.
 8. Low tier: shared ambient declarations (`*.svg?raw`, one `ImportMeta.env`), `pwa/src/lib/env.ts` config module, `useAdminResource` hook for admin routes, brand-color vars out of `web/src/styles.css`, `NOTIFICATION_TYPES` const, decide response-validate policy (validate all routes or drop ad-hoc parses).
 
-**Done so far:** audit + this write-up (2026-09-05). Nothing implemented yet.
+**Done so far:**
+- Items 1–4 implemented and shipped (2026-09-05): BFF contract types wired into
+  pwa + admin via `@remindit/bff/api` (type-only; `"./api"` now → `contracts.ts`,
+  zod-only — never the server graph); hand-mirrors deleted; `role`/`total`
+  drift fixed; `@remindit/common` + `@remindit/bff` declared in web/admin/pwa;
+  pwa/seed consumes `@remindit/common/seeds` (hash/history/avatar) with
+  `FREQ_TO_DAYS` hoisted into common + a seed-parity test; root lint/check/
+  format now run biome repo-wide (317 files, was pwa-only 207), which surfaced
+  and fixed a `noNonNullAssertion` in `bff/scripts/migrate.ts` and missing
+  `<title>` on the brand SVGs. Commits: `e761083`, `b15c69a`, `e58af06`,
+  `10e3212`.
 
 ## Deferred (by decision — revisit when triggered)
 
