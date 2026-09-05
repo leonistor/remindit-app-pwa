@@ -5,6 +5,7 @@
 // groups/group_members); the public API surface stays /api/groups with the
 // `Group`/`Member` contract keys unchanged.
 import type PocketBase from "pocketbase"
+import { NOTIFICATION_TYPES } from "@remindit/common"
 import type { Group, Member, MemberInviteBody } from "../contracts"
 import { toPublicUser } from "../lib/user"
 import {
@@ -133,11 +134,16 @@ export const groupsService = {
       ])
       const t = team
       const a = actor.record as unknown as Record<string, unknown>
-      await dispatch(body.userId, groupId, "member.added", {
-        teamId: groupId,
-        teamName: t.name as string,
-        actorUsername: a.username as string,
-      })
+      await dispatch(
+        body.userId,
+        groupId,
+        NOTIFICATION_TYPES.memberAdded,
+        {
+          teamId: groupId,
+          teamName: t.name as string,
+          actorUsername: a.username as string,
+        }
+      )
     } catch (error) {
       console.error("[notifications] dispatch failed (member.added):", error)
     }
@@ -172,7 +178,7 @@ export const groupsService = {
       await dispatch(
         selfLeft ? (t.owner as string) : targetUser,
         teamId,
-        selfLeft ? "member.left" : "member.removed",
+        selfLeft ? NOTIFICATION_TYPES.memberLeft : NOTIFICATION_TYPES.memberRemoved,
         {
           teamId,
           teamName: t.name as string,

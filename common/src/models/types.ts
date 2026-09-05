@@ -110,3 +110,19 @@ export interface Recommendation {
 // when another category is deleted so catalog items are never orphaned.
 export const UNCATEGORIZED_ID = "uncategorized"
 export const UNCATEGORIZED_NAME = "Uncategorized"
+
+// ---------------------------------------------------------------------------
+// Notifications (D4 lifecycle events)
+// ---------------------------------------------------------------------------
+
+// Known in-app notification types. Single source of truth shared by the BFF
+// dispatch callers and the pwa UI — a new lifecycle event touches this one
+// const, not string literals scattered across modules.
+export const NOTIFICATION_TYPES = {
+  memberAdded: "member.added",
+  memberLeft: "member.left",
+  memberRemoved: "member.removed",
+} as const
+
+export type NotificationType =
+  (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES]

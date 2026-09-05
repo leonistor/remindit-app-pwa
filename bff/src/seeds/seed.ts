@@ -13,7 +13,7 @@
 // Pure of env/CLI concerns so it is unit/live-testable (`bun:test` against a
 // real PB via `forSuperuser`). The thin CLI lives in `bff/scripts/seed.ts`.
 
-import { UNCATEGORIZED_ID } from "@remindit/common"
+import { NOTIFICATION_TYPES, UNCATEGORIZED_ID } from "@remindit/common"
 import {
   generateTeamHistory,
   hashId,
@@ -207,7 +207,7 @@ export async function seedPlatform(
 
     // Lifecycle notifications (D4) — dispatch is superuser-side, best-effort.
     for (const userId of memberUserIds) {
-      await dispatch(userId, teamId, "member.added", {
+      await dispatch(userId, teamId, NOTIFICATION_TYPES.memberAdded, {
         teamId,
         teamName: team.name,
         actorUsername: team.ownerUsername,

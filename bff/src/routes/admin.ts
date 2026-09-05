@@ -5,7 +5,13 @@
 import { Hono } from "hono"
 import { createMiddleware } from "hono/factory"
 import { z } from "zod"
-import { adminUserCreateBodySchema } from "../contracts"
+import {
+  adminGroupSchema,
+  adminOverviewSchema,
+  adminUserCreateBodySchema,
+  adminUserPageSchema,
+  adminUserSchema,
+} from "../contracts"
 import { validatedJson } from "../lib/validation"
 import { type AppEnv, requireAuth } from "../middleware/auth"
 import { adminService } from "../services/admin"
@@ -28,13 +34,20 @@ const adminListQuerySchema = z.object({
 export const admin = new Hono<AppEnv>()
   .use(requireAuth)
   .use(requireAdmin)
-  .get("/overview", async (c) => c.json(await adminService.overview()))
+  .get("/overview", async (c) =>
+    c.json(adminOverviewSchema.parse(await adminService.overview()))
+  )
   .get("/users", async (c) => {
     const { page, perPage, filter } = adminListQuerySchema.parse(c.req.query())
-    return c.json(await adminService.listUsers(page, perPage, filter))
+    return c.json(
+      adminUserPageSchema.parse(await adminService.listUsers(page, perPage, filter))
+    )
   })
   .post("/users", validatedJson(adminUserCreateBodySchema), async (c) =>
-    c.json(await adminService.createUser(c.req.valid("json")), 201)
+    c.json(
+      adminUserSchema.parse(await adminService.createUser(c.req.valid("json"))),
+      201
+    )
   )
   .delete("/users/:id", async (c) => {
     if (c.req.param("id") === c.get("auth").userId) {
@@ -43,7 +56,10 @@ export const admin = new Hono<AppEnv>()
     await adminService.deleteUser(c.req.param("id"))
     return c.body(null, 204)
   })
-  .get("/groups", async (c) => c.json(await adminService.listGroups()))
+  .get("/groups", async (c) => {
+    const groups = await adminService.listGroups()
+    return c.json(groups.map((group) => adminGroupSchema.parse(group)))
+  })
   .delete("/groups/:id", async (c) => {
     await adminService.deleteGroup(c.req.param("id"))
     return c.body(null, 204)

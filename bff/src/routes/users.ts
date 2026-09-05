@@ -1,5 +1,5 @@
 import { Hono } from "hono"
-import { userLookupQuerySchema } from "../contracts"
+import { userLookupQuerySchema, userPublicSchema } from "../contracts"
 import { validatedQuery } from "../lib/validation"
 import { type AppEnv, requireAuth } from "../middleware/auth"
 import { usersService } from "../services/users"
@@ -8,6 +8,9 @@ import { usersService } from "../services/users"
 // `users` listRule permits any authenticated user to read profiles; the BFF
 // shapes the payload (email masked to "" by contract) and never widens
 // access (D8).
+//
+// Response-validation policy (item 8): every contract-shaped response is
+// `.parse`d through its schema (see routes/groups.ts).
 export const users = new Hono<AppEnv>()
   .use(requireAuth)
   .get("/lookup", validatedQuery(userLookupQuerySchema), async (c) => {
@@ -16,5 +19,5 @@ export const users = new Hono<AppEnv>()
     if (!user) {
       return c.json({ error: "user not found" }, 404)
     }
-    return c.json(user)
+    return c.json(userPublicSchema.parse(user))
   })

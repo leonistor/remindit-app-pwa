@@ -9,12 +9,15 @@
 // because a broken notification feed must never break sync or the UI.
 
 import { atom, computed } from "nanostores"
+import { NOTIFICATION_TYPES, type NotificationType } from "@remindit/common"
 import { bffApi } from "@/lib/bff-api"
 import { $syncSession } from "./sync/session"
 
-// Known type literals per the BFF contract; unknown values are tolerated and
-// render a generic fallback in the UI (the union keeps literal autocomplete).
-export type NotificationType = "member.added" | "member.left" | "member.removed"
+// Known types come from the shared NOTIFICATION_TYPES const (single source of
+// truth with the bff); unknown values are tolerated and render a generic
+// fallback in the UI.
+export { NOTIFICATION_TYPES }
+export type { NotificationType }
 
 export type NotificationPayload = {
   teamId?: string

@@ -21,6 +21,7 @@ import {
   $notifications,
   $unreadCount,
   markRead,
+  NOTIFICATION_TYPES,
   type NotificationItem,
 } from "@/stores"
 import { $syncSession } from "@/stores/sync"
@@ -39,13 +40,13 @@ const formatNotificationDate = (created?: string): string | null => {
 // payload fields fall back to the generic message.
 const messageFor = (item: NotificationItem): string => {
   const { teamName, actorUsername } = item.payload ?? {}
-  if (item.type === "member.added" && actorUsername && teamName) {
+  if (item.type === NOTIFICATION_TYPES.memberAdded && actorUsername && teamName) {
     return m.notificationMemberAdded({ actor: actorUsername, team: teamName })
   }
-  if (item.type === "member.left" && actorUsername && teamName) {
+  if (item.type === NOTIFICATION_TYPES.memberLeft && actorUsername && teamName) {
     return m.notificationMemberLeft({ actor: actorUsername, team: teamName })
   }
-  if (item.type === "member.removed" && teamName) {
+  if (item.type === NOTIFICATION_TYPES.memberRemoved && teamName) {
     return m.notificationMemberRemoved({ team: teamName })
   }
   return m.notificationGeneric()
