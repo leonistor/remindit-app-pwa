@@ -256,8 +256,10 @@ narratives live in git history. Decisions + env format: §2 and §4–6.
 - **Cross-cutting — shared i18n catalog** (`feat/shared-i18n-catalog`):
   catalog relocated to `common/`; pwa + web compile it via Paraglide; drift
   guard covers all locales (en↔ro strict, de/fr/uk ⊆ en). Follow-up (TODO):
-  **web locale routing via a Vite-adapter migration** — the rsbuild adapter has
-  no server-entry seam for `paraglideMiddleware`.
+  **web locale routing** — verified 2026-09-05 that the **Rsbuild adapter
+  supports `src/server.ts`** (entry planner resolves it; `createServerSetup`
+  dispatches SSR to its `default` fetch handler), so `paraglideMiddleware`
+  plugs in without the Vite move previously assumed.
 
 > **Gotchas (tribal knowledge — don't rediscover them):**
 >

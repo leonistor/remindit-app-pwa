@@ -30,47 +30,66 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 - [ ] Item attributes (photo / quantity / price)
 - [ ] Native app
 
-## Next session: web locale routing — Vite-adapter migration
+## Next session: web locale routing — Rsbuild-native (no Vite move)
 
 **Goal:** give `web/` real per-locale URLs (`/ro`, `/de`, `/fr`, `/uk`) so the
 translated catalog can actually be *served* (today it only compiles into the
-bundles). Blocked on a framework swap: **Paraglide's locale routing rides a
-server middleware**, and the current **Rsbuild** adapter has NO user
-server-entry hook — `tanstackStart()` auto-injects `server.setup`
-(`start-plugin-core/dist/esm/rsbuild/plugin.js:132`) and there is no
-`src/server.ts`. The **Vite** adapter requires owning `src/server.ts`, which is
-exactly the seam for `paraglideMiddleware` + the router `rewrite`
-(`deLocalizeUrl`/`localizeUrl`).
+bundles).
 
-**Verified facts** (all confirmed against installed node_modules, 2026-09-05):
-- `@tanstack/react-start` exposes `plugin/vite`; `createStartHandler`/
-  `defaultStreamHandler`/`StartServer` ship via `@tanstack/react-start/server`.
-- `paraglideVitePlugin` exists in `@inlang/paraglide-js` (already a dep).
-- `web/src/paraglide/server.js` is already emitted (no-op under `["baseLocale"]`).
-- Vite `preview` serves SSR via `previewServerPlugin` → **deploy launcher
+**Updated premise (2026-09-05 research) — NO framework swap needed.** The
+earlier note claimed the **Rsbuild** adapter had no `src/server.ts` seam and
+forced a Vite move. Verified against the installed
+`@tanstack/react-start@1.168.49` (start-plugin-core source) that **Rsbuild
+supports the same server-entry seam as Vite**: `resolveStartEntryPlan()`
+resolves a user `src/server.ts` (`resolveEntry({ configuredEntry:
+startConfig.server.entry, defaultEntry: 'server', required: false })`) and the
+rsbuild `server.setup` middleware (`createServerSetup`) dispatches ALL SSR
+traffic — server functions + page navigations — to that bundle's `default`
+fetch handler in dev, preview, and prerender. So `export default
+createStartHandler({ handler: defaultStreamHandler })` is first-class on
+Rsbuild. The "Portable application model" is the TanStack design: *keep the
+routes, change the output* — one authoring surface for Vite and Rsbuild.
+
+**Verified facts** (confirmed against installed node_modules, 2026-09-05):
+- `createStartHandler` / `defaultStreamHandler` / `StartServer` ship via
+  `@tanstack/react-start/server` (re-exports `react-start-server`), and
+  `createStartHandler({ handler })` returns the exact `{ default: fetch }`
+  shape the rsbuild `server-middleware.js` + `post-build.js` consume.
+- The compiler is triggered by the rspack plugin + `scripts/compile-i18n.ts` —
+  no `paraglideVitePlugin` even exists in the dependency this adapter path uses.
+- `web/src/paraglide/server.js` is already emitted (a no-op under
+  `["baseLocale"]`); switching the strategy to include `"url"` turns it into
+  the real `paraglideMiddleware`.
+- `rsbuild`'s preview SSR reads the same server bundle → **deploy launcher
   `infra/bin/start-web.sh` (`bun run preview`) and the bm2 ecosystem stay
   unchanged**.
-- Gotcha: vite inlines only `VITE_*` env by default — must set
-  `envPrefix: ["PUBLIC_"]` or web silently loses `PUBLIC_BFF_URL`/`PUBLIC_PWA_URL`.
+- rsbuild inlines `PUBLIC_*` natively — the Vite `envPrefix` gotcha does NOT
+  apply (nothing to configure).
 
-**Staged plan** (each stage gated: `typecheck` ×6 + lint + `build:web` + live
-smoke of the 4 routes for SSR/hydration):
-1. **Adapter swap, zero behavior change.** Add `vite` + `@vitejs/plugin-react`
-   to web deps, remove `@rsbuild/core`/`@rsbuild/plugin-react`; `vite.config.ts`
-   with `[tanstackStart(), react(), paraglideVitePlugin(OPTIONS)]` + `envPrefix`;
-   new `src/server.ts`, `src/client.tsx`, `src/router.tsx` (routes/`stats.ts`/
-   `__root.tsx` carry over; `routeTree.gen.ts` regens, already biome-excluded).
-   Keep `strategy: ["baseLocale"]` — output identical to today.
-2. **Enable locale routing.** `strategy: ["url", "baseLocale"]` + `urlPatterns`
-   (en unprefixed at `/`, then `/ro`, `/de`, `/fr`, `/uk`), router `rewrite`,
-   `paraglideMiddleware` in `server.ts`, `routeStrategies` excluding `/_serverFn/*`.
+**Staged plan** (each stage gated: `typecheck` + lint + `build:web` + live
+smoke of the 4 routes for SSR/hydration + a prerender check):
+1. **Add the server entry, zero auth/stat behavior change.** New
+   `web/src/server.ts`: `createStartHandler(defaultStreamHandler)`; keep
+   `strategy: ["baseLocale"]`. This exercises the seam in isolation — output
+   must be byte-identical to today (dev, preview, `/_serverFn/*`).
+2. **Enable locale routing.** `strategy: ["url", "baseLocale"]` +
+   `urlPatterns` (en unprefixed at `/`, then `/ro`, `/de`, `/fr`, `/uk`;
+   model on the `IgorSzymanski/tanstack-start-paraglide` template), run
+   `paraglideMiddleware` at the top of the server entry (it strips the prefix,
+   sets the locale + cookie, drives the router `rewrite`), and localize links
+   (`localizeUrl`/`localizeHref` wrapper around TanStack `Link`, or the
+   strategy's built-in URL handling on `setLocale`). Exclude `/_serverFn/*`
+   from the URL strategy so typed server calls aren't parsed as a locale.
 3. **Ship.** Rebuild + `bm2 reload web`; verify prod URLs + canonical/hreflang.
 4. **Flip the languages live.** The de/fr/uk catalogs are **accepted as-is**
    (2026-09-05) — no review gate remains on the languages themselves; flipping
-   them on web is purely this migration.
-**Risks:** React-plugin order (`tanstackStart()` before `react()` on vite —
-mirror the official example); server-fn exclusion; `PUBLIC_*` prefix (highest
-blast radius — assert stats + PWA URL in a smoke); vite is new to this repo.
+   them on web is purely this change.
+**Risks:** `paraglideMiddleware`'s exact request→`{ request, locale, response }`
+round-trip must be adapted to `createStartHandler`'s `RequestHandler` signature
+(confirm the reference template's wiring on the server entry, not `ssr.tsx`);
+`routeStrategies` to keep `/_serverFn/*` + static assets out of the locale
+parser; hydration must agree between the stripped server URL and the
+client-preferred locale on first paint.
 
 ## Architecture hardening — shipped 2026-09-05
 
