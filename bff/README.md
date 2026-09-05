@@ -105,29 +105,11 @@ bun run seed:bff  # PocketBase must be running; refuses NODE_ENV=production
   demo = fresh `pb_data` (delete `bff/pb_data`, `dev:bff` re-downloads/migrates,
   then `seed:bff`).
 
-## Feedback bridge (one-way, Apache Answer)
-
-Registration provisions a matching user in the Answer sidecar (`feedback/`):
-`services/feedback.ts` → `repositories/answer.ts` (admin-API client) creates
-the Answer user with a throwaway password and stores the linkage in the
-hidden `users.feedback_username` field. Non-fatal by design — if Answer is
-down, registration proceeds and the backfill covers the gap:
-
-```sh
-bun run dev:feedback     # Answer must be running
-bun run backfill:feedback  # from repo root — idempotent; links unlinked users
-```
-
-One-way only: no sync back into app state; no login story for bridged users
-yet (TODO.md FB5). Credentials: `ANSWER_INTERNAL_URL`, `ANSWER_ADMIN_NAME`,
-`ANSWER_ADMIN_EMAIL`, `ANSWER_ADMIN_PASSWORD` (root `.env`, D9).
-
 ## Environment (D9)
 
 All from the root `.env` (see root `.env.example`): `PORT`,
 `POCKETBASE_URL`, `POCKETBASE_VERSION`, `POCKETBASE_DATA_DIR`,
-`POCKETBASE_ADMIN_EMAIL`/`POCKETBASE_ADMIN_PASSWORD` (dev-only),
-`ANSWER_INTERNAL_URL`/`ANSWER_ADMIN_*` (feedback bridge). Never create
+`POCKETBASE_ADMIN_EMAIL`/`POCKETBASE_ADMIN_PASSWORD` (dev-only). Never create
 `bff/.env`.
 
 ## Testing

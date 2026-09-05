@@ -9,7 +9,6 @@ declare global {
       MODE?: string
       PUBLIC_BFF_URL?: string
       PUBLIC_PWA_URL?: string
-      PUBLIC_FEEDBACK_URL?: string
       [key: string]: unknown
     }
   }

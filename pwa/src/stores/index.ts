@@ -43,8 +43,6 @@ declare global {
       PUBLIC_DATASET?: string
       // BFF origin — sync RPC + the /pb/* data-plane forwarder (phase 5).
       PUBLIC_BFF_URL?: string
-      // Feedback (Apache Answer) origin — footer link (env-driven, D9).
-      PUBLIC_FEEDBACK_URL?: string
       [key: string]: unknown
     }
   }

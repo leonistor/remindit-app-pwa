@@ -6,8 +6,7 @@ Bun workspace. App code lives in the `pwa/` module (`@remindit/pwa`); shared bra
 [docs/ROADMAP.md](docs/ROADMAP.md) for the approved plan, [TODO.md](TODO.md)
 for active work): `@remindit/bff`
 (PocketBase + Hono), `@remindit/web` (Rsbuild + TanStack Start),
-`@remindit/admin` (Rsbuild + TanStack Start + Mantine), `@remindit/feedback`
-(Apache Answer sidecar). Repo-level config:
+`@remindit/admin` (Rsbuild + TanStack Start + Mantine). Repo-level config:
 `.opencode/`, `opencode.jsonc`, `skills-lock.json`, `.hive/`, `.zed/`,
 `LICENSE.txt`.
 
@@ -17,7 +16,6 @@ Module-specific rules live next to each module — read the one for the module y
 
 - [pwa/AGENTS.md](pwa/AGENTS.md) — app module (commands, Shark UI, docs, testing, lint/typecheck)
 - [common/AGENTS.md](common/AGENTS.md) — shared entities & constants (source-only, typecheck)
-- [feedback/AGENTS.md](feedback/AGENTS.md) — Apache Answer sidecar (setup/start/stop, port 5555)
 
 ## MCP servers (opencode.jsonc)
 

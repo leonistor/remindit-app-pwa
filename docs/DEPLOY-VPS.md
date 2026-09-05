@@ -2,21 +2,19 @@
 
 Production platform for RemindIt. Single VPS, Caddy as the public reverse proxy,
 **bm2** as the Bun-native process supervisor for the whole topology, PocketBase
-and the feedback sidecar backed up locally on a timer.
+backed up locally on a timer.
 
 - Process supervisor: [bm2](https://github.com/Bunsgate/bm2) (Bun-native PM2
   replacement, GPL-3.0). Pinned at `1.1.0`.
 - Reverse proxy: Caddy (auto-TLS via ACME for `*.remindit.me`).
 - Domain: `remindit.me` = PWA (apex); `www` = web, `admin` = admin (basicauth),
-  `api` = bff; `feedback` reserved for the FB phase. PB `:8090` is internal only
-  (D2).
+  `api` = bff. PB `:8090` is internal only (D2).
 
 ```
 remindit.me       → pwa static   (/var/www/remindit, SPA fallback)
 www.remindit.me   → web SSR       (:3200)
 admin.remindit.me → admin SSR     (:3300) + basicauth / IP allowlist
 api.remindit.me   → bff           (:3100) → /api/* + /pb/*
-feedback.remindit.me → Answer     (:5555)  [Apache Answer sidecar, Phase D/D5]
 # pb :8090 internal only, never proxied
 ```
 
@@ -24,12 +22,11 @@ feedback.remindit.me → Answer     (:5555)  [Apache Answer sidecar, Phase D/D5]
 
 | Path | Purpose |
 | --- | --- |
-| `infra/ecosystem.config.ts` | bm2 topology — `pb`, `bff`, `web`, `admin`, `feedback` |
+| `infra/ecosystem.config.ts` | bm2 topology — `pb`, `bff`, `web`, `admin` |
 | `infra/bin/start-*.sh` | per-app launchers (source repo-root `.env`, self-locate repo) |
-| `infra/bin/backup.sh` | runs `feedback/scripts/backup-answer.ts` (best-effort) then `bff/scripts/backup-pb.ts` |
+| `infra/bin/backup.sh` | runs `bff/scripts/backup-pb.ts` (superuser backups) then the off-box rclone copy |
 | `bff/scripts/serve-pb.ts` | spawns the pinned PB binary (loopback) |
 | `bff/scripts/backup-pb.ts` | local `pb_data/` backup via the superuser API |
-| `feedback/scripts/backup-answer.ts` | local `answer-data/` backup (sqlite `VACUUM INTO` snapshot + uploads/config tar) |
 | `infra/Caddyfile` | production site blocks (imported by system Caddy) |
 | `infra/backup.{service,timer}` | systemd units for the backup job (installed as `remindit-backup.*` by the bootstrap) |
 | `infra/bin/bootstrap-prod.sh` | one-time privileged bootstrap: backup timer, Caddy + admin hash, `bm2 save`/`startup` |
@@ -39,7 +36,7 @@ feedback.remindit.me → Answer     (:5555)  [Apache Answer sidecar, Phase D/D5]
 - Linux VPS with Bun installed (`bun --version`), Caddy installed and running.
 - Firewall: allow `80`, `443`, `22`; **block `9615`/`9616`** (bm2 dashboard /
   metrics — never started in prod, but keep them closed).
-- DNS A/AAAA for `remindit.me`, `www`, `admin`, `api` (and `feedback` later) →
+- DNS A/AAAA for `remindit.me`, `www`, `admin`, `api` →
   VPS. Caddy obtains Let's Encrypt certs automatically.
 - Repo: `git init -b main /srv/remindit && git -C /srv/remindit config
   receive.denyCurrentBranch updateInstead`, then from the dev machine
@@ -49,8 +46,8 @@ feedback.remindit.me → Answer     (:5555)  [Apache Answer sidecar, Phase D/D5]
 - Create the **repo-root `.env`** on the VPS (gitignored) with real prod values —
   mirror `.env.example` and set at minimum: `SESSION_COOKIE_SECURE=true`,
   `CORS_ORIGINS` (real origins), `PUBLIC_BFF_URL=https://api.remindit.me`,
-  `PUBLIC_PWA_URL=https://remindit.me`, `POCKETBASE_ADMIN_EMAIL/PASSWORD`,
-  `ANSWER_ADMIN_PASSWORD`. This file is the single env source (D9); the start
+  `PUBLIC_PWA_URL=https://remindit.me`, `POCKETBASE_ADMIN_EMAIL/PASSWORD`.
+  This file is the single env source (D9); the start
   wrappers source it.
 
 ## Install bm2
@@ -70,10 +67,6 @@ bun --env-file=.env run build:admin    # → admin/dist
 bun --env-file=.env run deploy         # → deploy/deploy-*.zip
 sudo mkdir -p /var/www/remindit
 sudo unzip -o deploy/deploy-*.zip -d /var/www/remindit
-# Feedback (Apache Answer): one-time binary download + data-dir/config prep.
-# bm2's feedback process runs `bun run start`, which self-bootstraps the binary
-# and config on first boot, so this is optional ahead of time.
-bun --env-file=.env run setup:feedback
 ```
 
 ## Start the processes
@@ -111,31 +104,23 @@ sudo systemctl enable --now remindit-backup.timer
 # unit runs unprivileged for the same reason):
 /bin/sh "$(pwd)/infra/bin/backup.sh"
 ls bff/pb_data/backups      # remindit-<ts>.zip files
-ls feedback/answer-data/backups   # answer-<ts>.tar.gz files
 ```
 
 Retains the most recent `PB_BACKUP_KEEP` zips (default 10) in
-`bff/pb_data/backups` and the most recent `ANSWER_BACKUP_KEEP` tarballs
-(default 10) in `feedback/answer-data/backups`. Restore PB via the PB dashboard
-(Settings → Backups) or `pocketbase backups restore <name>` against the data
-dir. Restore Answer: stop the feedback process (`bm2 stop feedback`), then
-`tar -xzf <archive> -C <repo>/feedback` — the entries overlay
-`answer-data/db/answer.db` (a consistent `VACUUM INTO` snapshot, safe against
-a live writer), `answer-data/uploads/` and `answer-data/conf/config.yaml` in
-place — then `bm2 start feedback`. The answer half of `backup.sh` is
-best-effort: if it fails the run continues with `pb_data/` (warning on stderr).
+`bff/pb_data/backups`. Restore PB via the PB dashboard (Settings → Backups) or
+`pocketbase backups restore <name>` against the data dir.
 
-**Off-box copy (Scaleway S3, wired 2026-09-04):** after both local backups,
-`backup.sh` mirrors the two dirs to `s3.<SCW_REGION>.scw.cloud/<SCW_BUCKET>`
-(`pb/…` and `answer/…` prefixes) via rclone, configured at runtime from the
+**Off-box copy (Scaleway S3, wired 2026-09-04):** after the local backup,
+`backup.sh` mirrors it to `s3.<SCW_REGION>.scw.cloud/<SCW_BUCKET>` (`pb/…`
+prefix) via rclone, configured at runtime from the
 `SCW_*` vars in the repo-root `.env` — no `rclone.conf`. `rclone copy` never
 deletes remotely and off-box retention is its own 30-day window
 (`rclone delete --min-age 30d`), independent of the local 10-archive keep —
 a local wipe cannot take the off-box copies down with it. The copy is
 best-effort (warning on failure; local archives remain the source of truth)
 and is skipped when `SCW_*` is unset or rclone is missing. Restore from S3:
-`rclone copy s3.<region>.scw.cloud:<bucket>/pb/ bff/pb_data/backups/` (and
-`answer/` likewise), then follow the local restore steps. The PB zips carry
+`rclone copy s3.<region>.scw.cloud:<bucket>/pb/ bff/pb_data/backups/`, then
+follow the local restore steps. The PB zips carry
 PocketBase's own `.attrs` metadata sidecars — keep them together with the zips.
 
 ## Reverse proxy
@@ -155,9 +140,8 @@ password (printed once when it runs). An optional IP allowlist can be
 uncommented in the same block; reload Caddy after changing it.
 
 Verify: `curl -I https://remindit.me`, `https://www.remindit.me`,
-`https://api.remindit.me/api/health` (expect `pb:"up"`),
-`https://feedback.remindit.me` (Answer UI), and that `admin.remindit.me` rejects
-unauthenticated requests.
+`https://api.remindit.me/api/health` (expect `pb:"up"`), and that
+`admin.remindit.me` rejects unauthenticated requests.
 
 ## Deploy / update flow (zero-downtime)
 
@@ -169,13 +153,39 @@ unauthenticated requests.
   views).
 - **web / admin:** rebuild (`bun --env-file=.env run build:web`), then
   `bm2 reload web` (preview serves the new `dist`).
-- **feedback:** no build step (binary + data dir managed by `feedback/scripts`);
-  `bm2 reload feedback` after a config/env change (`feedback start` reuses an
-  already-running instance, so a plain `bm2 start` is also safe).
 - **pwa:** rebuild the zip with the new `PUBLIC_BFF_URL`
   (`https://api.remindit.me`), extract to `/var/www/remindit`, reload Caddy.
   Assets are fingerprinted so the SW-safe release is a drop-in; bump the version
   so existing clients pick up the new service worker.
+
+## Feedback teardown (2026-09-05)
+
+One-time prod removal of the Apache Answer sidecar and all feedback surfaces
+(D13). Run after the repo change lands on the VPS — the ecosystem file and
+Caddy no longer declare feedback:
+
+```sh
+bm2 stop feedback && bm2 delete feedback
+sudo cp infra/Caddyfile /etc/caddy/remindit.caddyfile && sudo caddy reload
+rm -rf /srv/remindit/feedback
+rclone delete "SCW:remindit-backups/answer/" --min-age 0
+```
+
+- `bm2 stop` + `bm2 delete`: the new ecosystem file no longer declares the
+  feedback app, so stop it and remove it from the saved process list (otherwise
+  the saved config would resurrect it on reboot via `bm2 resurrect`).
+- Remove the `feedback.remindit.me` site block: the new `infra/Caddyfile`
+  already drops it — copy + reload as shown.
+- Prune the local sidecar data: the module is no longer in the workspace;
+  `rm -rf /srv/remindit/feedback` also removes its gitignored `answer-data/`.
+- Prune the off-box S3 answer backups (or `rclone purge
+  SCW:remindit-backups/answer/`) after confirming the on-box Answer archives
+  are already gone.
+- Remove the `feedback.remindit.me` DNS A/AAAA record at the provider.
+
+Verify: `bm2 list` shows 4 apps; `curl -I https://feedback.remindit.me` fails
+(NXDOMAIN or no Caddy block routes it); pwa/web builds no longer need
+`PUBLIC_FEEDBACK_URL`.
 
 ## Cutover from remindit.parsedwink.com
 

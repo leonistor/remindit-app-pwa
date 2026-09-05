@@ -1,9 +1,5 @@
 # useful links
 
-## integrations
-
-- feedback: https://answer.apache.org/
-
 ## ideas
 
 - native app w/ tauri/lynx

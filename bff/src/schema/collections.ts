@@ -192,20 +192,6 @@ const users: CollectionDef = {
       pattern: "",
       autogeneratePattern: "",
     },
-    // One-way feedback bridge (phase: feedback): the Answer-side username
-    // provisioned at registration (or backfill). Hidden — internal linkage
-    // written/read by the BFF only, never surfaced to clients.
-    {
-      type: "text",
-      name: "feedback_username",
-      required: false,
-      hidden: true,
-      presentable: false,
-      min: 0,
-      max: 64,
-      pattern: "",
-      autogeneratePattern: "",
-    },
   ],
   indexes: ["CREATE UNIQUE INDEX `idx_users_username` ON `users` (`username`)"],
 }

@@ -78,9 +78,6 @@ blast radius — assert stats + PWA URL in a smoke); vite is new to this repo.
   enum + discriminated payload in contracts, `dedupeKey` + `(user, created)`
   indexes via the idempotent migrate, paginated list (today: plain-text types,
   untyped payload, unpaginated `getFullList`).
-- **Feedback follow-ups** — real SMTP provider (Inbucket is dev-grade; swap
-  via `configure:feedback smtp`), logo upload in the Answer admin (API cap),
-  delete the deployment smoke-test question.
 - **Old host** — optional 301 `remindit.parsedwink.com` → `remindit.me`.
 - **`pbtsdb` re-evaluation** — if TanStack DB ships GA offline persistence.
 

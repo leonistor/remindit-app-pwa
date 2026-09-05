@@ -53,14 +53,6 @@
         "typescript": "^7.0.2",
       },
     },
-    "feedback": {
-      "name": "@remindit/feedback",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@types/bun": "^1.4.0",
-        "typescript": "^7.0.2",
-      },
-    },
     "pwa": {
       "name": "@remindit/pwa",
       "version": "5.2.0",
@@ -528,8 +520,6 @@
     "@remindit/bff": ["@remindit/bff@workspace:bff"],
 
     "@remindit/common": ["@remindit/common@workspace:common"],
-
-    "@remindit/feedback": ["@remindit/feedback@workspace:feedback"],
 
     "@remindit/pwa": ["@remindit/pwa@workspace:pwa"],
 

@@ -12,7 +12,6 @@ import { Link, useNavigate } from "react-router"
 import { DATASETS, DEFAULT_DATASET_ID } from "seed"
 import { AvatarPicker } from "@/components/avatar-picker"
 import { BackButton } from "@/components/back-button"
-import { FeedbackCard } from "@/components/feedback-card"
 import { LanguageChooser } from "@/components/language-chooser"
 import { NotificationsCard } from "@/components/notifications-card"
 import { PaletteChooser } from "@/components/palette-chooser"
@@ -291,8 +290,6 @@ const ProfileView = () => {
       <SharedListCard />
       {/* Notifications (D4) — the activity feed of the sharing above. */}
       <NotificationsCard />
-      {/* Feedback (FB3) — post to the community board + login unlock. */}
-      <FeedbackCard />
 
       <Card className="w-full max-w-xl">
         <CardHeader

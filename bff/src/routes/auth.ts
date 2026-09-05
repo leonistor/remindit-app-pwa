@@ -19,7 +19,7 @@ import { authService } from "../services/auth"
 
 // Rate limit: 20 attempts per 15 minutes per IP (default; AUTH_RATE_LIMIT
 // overrides — see env.ts). Protects against brute-force login and
-// registration amplification (register fans out to the Answer sidecar).
+// registration.
 const authRateLimiter = rateLimiter({
   windowMs: 15 * 60 * 1000,
   limit: env.authRateLimit,

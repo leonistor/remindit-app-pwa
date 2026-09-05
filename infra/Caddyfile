@@ -11,7 +11,6 @@
 #   www.remindit.me  → web SSR  (:3200)
 #   admin.remindit.me → admin SSR (:3300) + basicauth / IP allowlist
 #   api.remindit.me  → bff      (:3100)  → /api/* + /pb/*
-#   feedback.remindit.me → Answer (:5555)  [reserved, enabled with FB phase]
 #
 # PocketBase (:8090) is intentionally NOT proxied (D2) — its admin UI stays on
 # 127.0.0.1:8090/_/. All app processes bind loopback; Caddy is the only public
@@ -48,8 +47,4 @@ admin.remindit.me {
 
 api.remindit.me {
 	reverse_proxy 127.0.0.1:3100
-}
-
-feedback.remindit.me {
-	reverse_proxy 127.0.0.1:5555
 }

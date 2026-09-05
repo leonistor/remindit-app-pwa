@@ -59,8 +59,7 @@ server {
 - Environment is build-time only, from the repo's root `.env` (see root
   AGENTS.md, D9): the production build inlines `PUBLIC_BFF_URL` — required for
   sync/sign-in to reach the backend; without it, sync falls back to a localhost
-  URL that will not work in production — and optionally `PUBLIC_FEEDBACK_URL`
-  (footer feedback link, hidden when unset). The root `.env` reaches the build
+  URL that will not work in production. The root `.env` reaches the build
   via Bun's automatic `.env` loading when running the root scripts (`bun run
   build` also passes `--env-file=../.env` explicitly); `scripts/deploy.sh`
   itself runs a plain `bun run build` and loads no env file, so deploy from the
@@ -73,7 +72,7 @@ server {
 - Build with the prod URLs EXPLICITLY — the root `.env` holds dev values, and
   `scripts/deploy.sh` does not override them:
   `PUBLIC_BFF_URL=https://api.remindit.me PUBLIC_PWA_URL=https://remindit.me
-  PUBLIC_FEEDBACK_URL=https://feedback.remindit.me bun run deploy` (from the
+  bun run deploy` (from the
   repo root), then extract the zip to `/var/www/remindit` behind the Caddy
   `remindit.me` site block.
 - Assets are fingerprinted, so the new service worker + shell are a drop-in; bump

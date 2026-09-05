@@ -50,13 +50,6 @@ export type Notification = {
   group?: string
 }
 
-// Feedback (FB3) — the community-board (Apache Answer) surfaces. `FeedbackTag`
-// and `FeedbackResponse` mirror bff/src/contracts.ts; see the file header for
-// the duplication rationale.
-export type FeedbackTag = "bug" | "feature-request" | "discussion"
-
-export type FeedbackResponse = { questionUrl: string }
-
 export class BffError extends Error {
   readonly status: number
   readonly details: unknown
@@ -207,21 +200,4 @@ export const bffApi = {
       body: JSON.stringify({ read: true }),
       token,
     }),
-
-  // The PWA is the only module that posts feedback for now, so fromModule is
-  // pinned here rather than taken from the caller.
-  submitFeedback: (
-    token: string,
-    body: { subject: string; text: string; tag: FeedbackTag; route?: string }
-  ) =>
-    request<FeedbackResponse>("/api/feedback", {
-      method: "POST",
-      body: JSON.stringify({ ...body, fromModule: "pwa" }),
-      token,
-    }),
-
-  // Triggers the "set your password" email on the Answer side; answers 204
-  // with an empty body, hence request<void>.
-  activateFeedbackLogin: (token: string) =>
-    request<void>("/api/feedback/activate", { method: "POST", token }),
 }

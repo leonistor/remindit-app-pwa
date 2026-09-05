@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=oneshot
 # Runs as leo: bun lives in ~/.bun/bin (not on root's PATH — the root script
-# dies with "bun: not found"), and the backup dirs (bff/pb_data/backups,
-# feedback/answer-data/backups) are leo-owned.
+# dies with "bun: not found"), and the backup dirs (bff/pb_data/backups) are
+# leo-owned.
 User=leo
 Group=leo
 # The wrapper self-locates the repo root and loads its .env via bun --env-file;

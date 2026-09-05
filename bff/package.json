@@ -12,9 +12,7 @@
     "start": "bun src/index.ts",
     "migrate": "bun scripts/migrate.ts",
     "seed": "bun scripts/seed.ts",
-    "backfill:feedback": "bun scripts/backfill-feedback.ts",
-    "configure:feedback": "bun scripts/configure-feedback.ts",
-    "test": "FEEDBACK_BRIDGE=off AUTH_RATE_LIMIT=10000 bun test",
+    "test": "AUTH_RATE_LIMIT=10000 bun test",
     "typecheck": "tsc --noEmit --pretty",
     "lint": "biome lint",
     "check": "biome check --write --unsafe"

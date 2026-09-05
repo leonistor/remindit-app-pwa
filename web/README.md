@@ -46,7 +46,7 @@ bun run build:web   # production build → dist/ (client + SSR server)
 
 ## Internationalization
 
-All user-facing copy (nav, hero, features, download, feedback) is compiled
+All user-facing copy (nav, hero, features, download) is compiled
 from the **shared catalog** in `@remindit/common` (`common/messages/*.json`)
 via Paraglide JS — never hardcoded. `web/scripts/compile-i18n.ts` →
 `web/src/paraglide` (gitignored) with the `["baseLocale"]` strategy: web

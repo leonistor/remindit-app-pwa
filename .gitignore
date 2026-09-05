@@ -21,14 +21,6 @@ pb_data/
 pocketbase
 pocketbase.exe
 
-# Apache Answer (feedback module): data dir, downloaded binary, pid/version
-# trackers — same shape as the PocketBase entries above
-answer-data/
-answer
-answer.exe
-.answer-version
-answer.pid
-
 # Playwright artifacts
 test-results/
 .playwright-mcp/
