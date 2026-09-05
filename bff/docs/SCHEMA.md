@@ -74,20 +74,24 @@ further into `@request.body` relations (body values are ids).
 
 ## Migration algorithm
 
-`scripts/migrate.ts` (root: `bun run migrate:bff`):
+`scripts/migrate.ts` (root: `bun run migrate:bff`) runs the reconcile engine
+in `src/schema/reconcile.ts` (`reconcileSchema`):
 
 1. Probe PB health (start it with `bun run dev:bff` first).
 2. Superuser auth from the root `.env`; if the account doesn't exist,
    provision it via `pocketbase-bin superuser upsert` (same creds).
-3. **Pass A — structure:** create missing collections **without rules** (rules
-   reference collections by name via `@collection.*`, and PB validates them at
-   definition time — everything must exist before any rule is written).
-   Relations resolve `collectionName` → live `collectionId`. View collections
-   are created WITH their `viewQuery` (PB derives and validates the fields
-   from it at save time); view queries select only tables declared earlier in
-   the builders, which is why all views sit after the base/auth collections in
-   `desiredCollections`.
-4. **Pass B — definitions:** per collection, canonicalize-and-compare the
+3. **Pass A — structure:** create missing **non-view** collections **without
+   rules** (rules reference collections by name via `@collection.*`, and PB
+   validates them at definition time — everything must exist before any rule
+   is written). Relations resolve `collectionName` → live `collectionId`.
+4. **Pass B — field drift:** patch existing-collection fields before views are
+   materialized, so view queries (themselves validated by execution) see the
+   up-to-date columns.
+5. **Pass C — views:** create missing view collections **with** their
+   `viewQuery` (PB derives and validates the fields from it at save time); view
+   queries select only tables declared earlier in the builders, which is why
+   all views sit after the base/auth collections in `desiredCollections`.
+6. **Pass D — definitions:** per collection, canonicalize-and-compare the
    managed keys (type, fields, rules, indexes, passwordAuth) against live
    state; patch on drift, skip when unchanged. Server-managed noise is
    stripped on both sides (`id`/`system`/`help`/`primaryKey` keys, system-flag
@@ -96,7 +100,7 @@ further into `@request.body` relations (body values are ids).
    PB-derived (excluded from the diff) and viewQuery is compared
    whitespace-insensitively so reformatting the SQL in the builders stays a
    no-op.
-5. **Idempotency invariant:** running twice ⇒ `unchanged × N` and
+7. **Idempotency invariant:** running twice ⇒ `unchanged × N` and
    `✓ schema in sync` (the phase-2 gate proves it live).
 
 Never deletes anything: removing a collection/field from the builders leaves

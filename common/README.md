@@ -1,8 +1,8 @@
 # @remindit/common
 
 Shared brand constants, domain entities, and the translation catalog used by
-every Remindit module (PWA today; web, future server). Framework-agnostic by
-design: no React, no UI kit, no DOM types.
+every Remindit module (pwa, web, bff). Framework-agnostic by design: no
+React, no UI kit, no DOM types.
 
 ## Translation catalog (i18n)
 
@@ -69,6 +69,6 @@ if they must be reachable from config loaders, behind an asset-free subpath.
 ## Rules
 
 - No build step — `exports` point at TypeScript source (`./src/index.ts`,
-  `./src/models/types.ts`); consumers compile it. Only scripts: `typecheck`,
-  run from the repo root (`bun run typecheck` — covers this module and
-  `pwa/`), and `kickstart:locale`.
+  `./src/models/types.ts`, `./src/brand.ts`, `./src/seeds/index.ts`); consumers
+  compile it. Only scripts: `typecheck`, run from the repo root (`bun run
+  typecheck` — covers this module and `pwa/`), and `kickstart:locale`.

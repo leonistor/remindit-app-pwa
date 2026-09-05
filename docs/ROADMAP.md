@@ -70,7 +70,7 @@ Sync + sharing + notifications, one major release.
 ### [ ] Version 6
 
 - [x] App website — standalone marketing site (`web/`: hero + live stats + features + download pages); live at `https://www.remindit.me` (deployed with the platform, Phase D 2026-09-04). Live PWA: `https://remindit.me`
-- [x] Community of early adopters and feedback capture — Apache Answer sidecar at `https://feedback.remindit.me`, submit API (member + guest), tag-seeded quick links, login-link flow, branding (phase FB); see `pwa/docs/LINKS.md#integrations`
+- [x] Community of early adopters and feedback capture — Apache Answer sidecar (`https://feedback.remindit.me`, submit API, tag-seeded quick links, login-link flow, phase FB); **removed 2026-09-05** after live use (D13) — the Q&A board added more friction than value, no in-app substitute
 - [ ] Basic AI features
 - [ ] Integration with LLMs (MCP, skills)
 
@@ -146,22 +146,26 @@ Sync + sharing + notifications, one major release.
 
 ### Domain model → PocketBase collections
 
-Derived from `common/src/models/types.ts` + D1:
+Derived from `common/src/models/types.ts` + D1 (note: collections are named
+`teams`/`team_members` — `groups`/`group` collide with SQL reserved keywords;
+see `bff/docs/SCHEMA.md` §Rename):
 
 | PB collection | Type | Fields (→ common type) | Notes |
 |---------------|------|------------------------|-------|
-| `users` | auth | + `username`, `firstName`, `lastName`, `avatar` (text: data-URI SVG) | mirrors `UserProfile`; email is PB's auth identity |
-| `groups` | base | `name`, `owner` → users | one group = one shared workspace |
-| `group_members` | base | `group` → groups, `user` → users, `role` (`owner`\|`member`) | join collection; drives all API rules |
-| `categories` | base | `group` → groups, `name`, `frequency` (→ `CATEGORY_FREQUENCIES`), `color` (number, optional) | `uncategorized` sentinel seeded per group |
-| `items` | base | `group`, `name`, `category` → categories | `CatalogItem` |
-| `list_entries` | base | `group`, `item` → items, `checked`, `addedAt` | `ListEntry` |
-| `history_events` | base | `group`, `action` (`add`\|`remove`), `itemId`, `itemName`, `categoryId`, `categoryName`, `timestamp` | `HistoryEvent` (name/category snapshots kept) |
-| `notifications` | base | reserved (D4) | channel decided later |
+| `users` | auth | `username`, `firstName`, `lastName`, `avatar` (text: data-URI SVG), `role` (`user`\|`admin`) | mirrors `UserProfile`; email is PB's auth identity; first admin promoted by `migrate` |
+| `teams` | base | `name`, `owner` → users | one team = one shared workspace |
+| `team_members` | base | `team` → teams, `user` → users, `role` (`owner`\|`member`) | join collection; drives all API rules |
+| `categories` | base | `team`, `localId`, `name`, `frequency` (→ `CATEGORY_FREQUENCIES`), `color` (number, optional) | `uncategorized` sentinel provisioned per team |
+| `items` | base | `team`, `localId`, `name`, `category` → categories | `CatalogItem` |
+| `list_entries` | base | `team`, `localId`, `item` → items, `checked`, `addedAt` | `ListEntry` |
+| `history_events` | base | `team`, `localId`, `action` (`add`\|`remove`), `itemId`, `itemName`, `categoryId`, `categoryName`, `timestamp` | `HistoryEvent` (name/category snapshots kept) |
+| `notifications` | base | `type`, `payload` (json), `read`, `user` → users, `team` → teams (optional) | in-app realtime channel (D4) |
 
-API rules: every data collection is scoped by `group_members` membership
-(`@collection.group_members.group ?= group && @collection.group_members.user ?= auth.id` pattern);
-only `users` create/`groups` create are public-ish. Final rules drafted in
+`localId` + unique `(team, localId)` indexes (categories/items/list_entries/
+history_events) are the phase-5 sync dedupe keys. API rules: every data
+collection is scoped by `team_members` membership
+(`@collection.team_members.team ?= team && @collection.team_members.user ?= auth.id` pattern);
+only `users` create/`teams` create are public-ish. Final rules drafted in
 phase 2 and validated with the MCP `pb_rules_test` tool.
 
 ## 5. Environment convention (D9)
@@ -189,7 +193,7 @@ the root file, and the vars propagate through child processes even when they
 |----------|----------|---------|-------|
 | `PORT` | bff | `3100` | Hono (Bun.serve) port |
 | `POCKETBASE_URL` | bff | `http://127.0.0.1:8090` | internal, never public |
-| `POCKETBASE_VERSION` | bff | `0.29.x` | pin via pocketbase-bin |
+| `POCKETBASE_VERSION` | bff | `0.40.1` | recorded pin — mirrored in `bff/.pocketbase-version` (no code reads the var) |
 | `POCKETBASE_DATA_DIR` | bff | `bff/pb_data` | gitignored |
 | `POCKETBASE_ADMIN_EMAIL` / `POCKETBASE_ADMIN_PASSWORD` | bff (dev, migrations, MCP) | dev creds | superuser; **dev-only**, prod via VPS secrets |
 | `PUBLIC_BFF_URL` | pwa / web / admin | `http://localhost:3100` | client `baseUrl` for PB SDK + `/api` |
@@ -215,87 +219,68 @@ covers the whole repo (verify `biome.json` includes new dirs per phase).
 Env always comes from the root `.env` (D9): the root scripts are the entry
 point for any env-dependent run (`dev:*`, migrations, MCP creds).
 
-## 7. Phases — one feature branch each
+## 7. Phases — shipped (one feature branch each)
 
-### Phase 0 — workspace foundations · `feat/platform-foundations` ✅
-- [x] `docs/ROADMAP.md` (this file) + README/AGENTS pointers
-- [x] Root scripts: `dev` is an alias of `dev:pwa`; env-bearing delegations use `cd <module> && bun --env-file=../.env run <script>` (D9; verified — vars propagate, missing `.env` tolerated). `dev:bff|web|admin|all` land with their modules (nothing to point at yet); `typecheck` composition exists and gains modules as they land
-- [x] Root `.env.example` committed with all planned + existing vars (§5); the **tracked** `pwa/.env.example` was merged into it and removed; local `pwa/.env` migrated to root `.env` (no `.gitignore` change needed — the existing `.env` pattern already ignores it everywhere). Verified end-to-end: Rsbuild inlines `PUBLIC_*` from process.env (marker-value build test)
-- [x] Biome/tsconfig conventions documented (AGENTS.md §Platform conventions)
-- Gate: `bun install && bun run typecheck && bun run lint` green; pwa behavior unchanged (`PUBLIC_DATASET`/`PUBLIC_SEED_HISTORY` still inlined)
+Every phase merged only after its verification gate (`bun run typecheck` root
++ `bun run lint` + module suites + devdoc + live smoke); per-phase gate
+narratives live in git history. Decisions + env format: §2 and §4–6.
 
-### Phase 1 — bff skeleton · `feat/bff-skeleton` ✅
-- [x] `bff/` module: package.json, tsconfig, AGENTS.md, README.md (devdoc); env from the root `.env` (D9) — no module env file
-- [x] Hono app on Bun.serve with **routes → services → repositories layering** (D8): `/api/health` (BFF liveness + PB reachability, PB-down is a reported state); server-side PB client module (`autoCancellation(false)`)
-- [x] `@remindit/bff/api` subpath exporting `AppType` + Zod contracts (`src/contracts.ts`); `@hono/zod-validator` lands in phase 3 with real inputs
-- [x] **Spike: streaming through Hono on Bun** — SSE verified unbuffered (unit test with chunk-count assertion + live curl); `idleTimeout: 255` set for future realtime
-- [x] dev script: PB via `bunx @fadlee/pocketbase-bin serve` (`POCKETBASE_VERSION=0.40.1` pinned; binary + `pb_data/` gitignored), health-wait (120s deadline for first-run download), reuse of an already-running PB, then Hono on `PORT`
-- [x] pocketbase-mcp added to `opencode.jsonc` (disabled by default; wrapper `bff/scripts/pocketbase-mcp.ts` injects superuser creds from the root `.env`)
-- [x] Tests (bun test): health contract round-trip, `hc<AppType>` RPC over live HTTP, SSE buffering detector — 3 pass
-- Gate: typecheck (pwa + common + bff) + lint + tests + live smoke (`/api/health` → `pb:"up"` via real PB, SSE streaming) ✅
-- Note: root `dev:all` runs pwa + bff via `concurrently` (root devDep, per §6)
+- **Phase 0 — workspace foundations** (`feat/platform-foundations`): Bun
+  workspace, root env delegation (D9), committed root `.env.example`. `dev` is
+  an alias of `dev:pwa`; `dev:all` runs modules via `concurrently` (root devDep).
+- **Phase 1 — bff skeleton** (`feat/bff-skeleton`): Hono on Bun.serve,
+  routes → services → repositories (D8), `@remindit/bff/api` subpath, SSE spike
+  (`/api/sse`), PB via `pocketbase-bin`.
+- **Phase 2 — schema & migrations** (`feat/bff-schema`): 8 base/auth
+  collections + rules in `src/schema/collections.ts`, idempotent `migrate`
+  (structure pass, then canonicalized diff/patch — never deletes), live rule
+  matrix 8/8 (`bff/docs/SCHEMA.md`).
+- **Phase 3 — auth & groups API** (`feat/bff-auth-groups`): `/api/auth/*`
+  (dual transport: Bearer + HttpOnly cookie), `/api/groups/*`, notification
+  stubs → D4; live integration suite 13/13 (`bff/docs/API.md`).
+- **Phase 4 — web marketing site** (`feat/web-marketing`): Rsbuild + TanStack
+  Start SSR, brand from `@remindit/common/brand`, minimal BFF use
+  (`GET /api/stats`, degrades to `null` counts when the BFF is down).
+- **Phase 5 — pwa sync** (`feat/pwa-sync`): design in `pwa/docs/SYNC.md`;
+  **hybrid data-plane** = typed RPC for account ops + scoped `/pb/*` forwarder
+  for record CRUD/realtime; journal + three-way/LWW engine in
+  `src/stores/sync/`; `localId` + unique `(team, localId)` indexes. Gate:
+  full `test:pre` + live two-device sync check.
+- **Phase 6 — admin** (`feat/admin`): Rsbuild + TanStack Start + Mantine;
+  `users.role` model + `/api/admin/*` guards (403 before any superuser query);
+  first admin promoted by `migrate`; BFF CORS allowlist (`CORS_ORIGINS`).
+- **Phase 7 — platform deployment + feedback**, deployed 2026-09-04: bm2 +
+  Caddy + hourly local backups + off-box S3 copy (D10/D11); runbook
+  `docs/DEPLOY-VPS.md`; feedback sidecar deployed with the phase, then
+  **removed 2026-09-05 (D13)**.
+- **Cross-cutting — shared i18n catalog** (`feat/shared-i18n-catalog`):
+  catalog relocated to `common/`; pwa + web compile it via Paraglide; drift
+  guard covers all locales (en↔ro strict, de/fr/uk ⊆ en). Follow-up (TODO):
+  **web locale routing via a Vite-adapter migration** — the rsbuild adapter has
+  no server-entry seam for `paraglideMiddleware`.
 
-### Phase 2 — schema & migrations · `feat/bff-schema` ✅
-- [x] `bff/src/schema/`: PB collections JSON builders importing `@remindit/common` (frequencies, sentinels, types) — 8 collections: users, groups, group_members, categories, items, list_entries, history_events, notifications (reserved, D4)
-- [x] `bff/scripts/migrate.ts`: superuser auth from env (auto-provisions via `pocketbase-bin superuser upsert` on first run) → **pass A** create structure without rules (PB validates `@collection.*` rule references at definition time — all collections must exist first) → **pass B** canonicalized per-collection diff → patch. Never deletes; idempotency verified live (second run ⇒ all `unchanged`)
-- [x] API rules per §4 table — **live-verified rule matrix (8/8)** incl. the two uncertain patterns: create rules are evaluated against the hydrated record, and `@request.body.<relation>` resolves for membership scoping (PB 0.40.1). Details + matrix: `bff/docs/SCHEMA.md`
-- [x] Devdoc `bff/docs/SCHEMA.md` (mapping table, rules, migration algorithm, sentinel strategy — sentinel provisioning lands with the phase-3 groups service)
-- [x] Builder integrity tests (`tests/schema.test.ts`: unique names, relation ordering, `CATEGORY_FREQUENCIES`/`HistoryAction` mirroring) + root `migrate:bff` script
-- Gate: migrate on live PB → reconcile 15 changes → re-run ⇒ `✓ schema in sync (8 collections, no changes)`; rules matrix 8/8 ✅; typecheck + lint + 8 bun tests green
-
-### Phase 3 — auth & groups API · `feat/bff-auth-groups` ✅
-- [x] `/api/auth/*` (register, login, logout, me) — PB auth pass-through with **dual transport**: Bearer token (pwa) + HttpOnly SameSite=Lax session cookie (web, `SESSION_COOKIE_SECURE` env for prod); every authenticated request validates **and rotates** the token via PB auth-refresh
-- [x] `/api/groups/*` CRUD + member management — creator becomes owner-member automatically; **all authorization via PB rules on the token-scoped client** (BFF never widens access, D8); Hono RPC + `@hono/zod-validator` for request bodies, Zod response contracts
-- [x] Notification stubs: `GET /api/notifications` + `PATCH :id` (list + mark-read; channel undecided, D4)
-- [x] Devdoc `bff/docs/API.md` (endpoints, auth flows, error shape, live gate results)
-- [x] Tests: unit (401 boundaries, contract rejects, cookie clear) + **live integration suite (10/10 vs PB 0.40.1)** — every response parsed against the published Zod contract; integration tests skip (not fail) when PB is down
-- Gate: typecheck ×3 modules + lint + 25 bun tests green ✅
-- Gotchas recorded: hc per-request headers go in the second `options` arg (hono 4.13); SDK attaches Authorization only when `authStore.isValid`; PB `expand` rides the query string (ignored in create body); failed CREATE rules surface as 400, not 403; `created/updated` autodate fields added to all data collections (phase-5 sync needs them)
-
-### Phase 4 — web marketing site · `feat/web-marketing` ✅
-- [x] `web/`: Rsbuild + `@tanstack/react-start` (`./plugin/rsbuild` adapter — `pluginReact()` chained **after** `tanstackStart()`), SSR with server functions; brand from `@remindit/common/brand` (logo as SVG data-URI `<img>` — no asset pipeline)
-- [x] Pages: `/` (hero + **live stats** + install CTA), `/features` (6 feature cards), `/download` (PWA install steps, `PUBLIC_PWA_URL`); per-route `head()` SEO meta + Open Graph; favicon as inline SVG data URI
-- [x] Minimal BFF use: `GET /api/stats` on the bff (public aggregate counts, superuser-side counting, 60s cache, `cache-control: public, max-age=60`); web server function degrades to `null` counts when the BFF is down — marketing never 500s
-- [x] Devdoc `web/README.md` + `web/AGENTS.md`; root scripts (`dev:web`, `build:web`, `dev:all` = pwa + bff + web concurrently); env `WEB_PORT` (3200), `PUBLIC_PWA_URL`
-- [x] Generated `src/routeTree.gen.ts` committed (typecheck needs it); biome excludes it (generator emits `as any`)
-- Gate: typecheck ×4 modules + lint + build ✅ + **live smoke via `dev:all`**: BFF `{"users":70,"groups":3}` rendered in SSR home (`<strong>70</strong>`), features/download 200, pwa unaffected (3000) ✅
-- Note: web dev server binds IPv6 `[::1]` (rsbuild default) — use `localhost`, not `127.0.0.1`; deployment of the SSR bundle lands with the platform deployment phase
-
-### Phase 5 — pwa sync · `feat/pwa-sync` ✅
-- [x] Design doc first: `pwa/docs/SYNC.md` — identity model (local ids stay; pb records carry `localId` + per-group unique indexes; per-device sync map), **journal + three-way reconciliation** (LWW by PB server-side `updated`), realtime via subscriptions, offline behavior, security notes, deferred scope
-- [x] **Data-plane decision (D2/§9): hybrid** — typed BFF RPC for account ops + scoped authenticated `/pb/*` forwarder (PB SDK client-side, `baseUrl = PUBLIC_BFF_URL + "/pb"`) for record CRUD + realtime; PB rules remain the authorization boundary
-- [x] BFF: `/pb/api/*` forwarder (auth-gated, rotated token forwarded, hop-by-hop stripped, SSE unbuffered) + integration tests (auth gating, rule-scoped CRUD, unique-index dedupe, SSE passthrough)
-- [x] Schema delta: `localId` + unique `(group, localId)` indexes on categories/items/list_entries/history_events
-- [x] pwa sync engine (`src/stores/sync/`): session store, BFF fetch client (types mirrored from the BFF contracts), pure reconcile diff (`reconcile.ts`, unit-tested — journal/three-way/LWW/tombstones/adoption), engine (group bootstrap + sentinel provisioning, reconcile apply, realtime subscriptions, tombstone detection via store snapshots, profile LWW sync)
-- [x] Auth UI: Sync card in Profile (sign in/up/out + status, en+ro i18n); notifications consumer in-app only (D4 channel decision still open — dispatch lands with the channel)
-- Gate: pwa `test:pre` fully green (**272 Rstest** incl. 13 new reconcile tests + 23 dev e2e + 2 prod e2e), bff suite 36 tests, typecheck ×4, lint ✅; **live two-device check**: device A creates a category through the forwarder → member device B sees + patches it → realtime SSE streams ✅
-- Manual two-device scenario (browser tabs, two profiles): documented in SYNC.md §Testing
-
-### Phase 6 — admin · `feat/admin` ✅
-- [x] `admin/`: Rsbuild + TanStack Start + Mantine; login + create-user registration modal (users dashboard), dashboards (overview, users, groups); **client-side auth gating** — Bearer token in `localStorage`, guards are mount effects (`src/lib/auth.ts`), data fetching client-only (`useEffect`)
-- [x] Role model: `users.role` (`user`\|`admin`) + BFF `/api/admin/*` guards (session role checked server-side, 403 before any superuser query); first admin bootstrapped by `migrate` (promotes the `POCKETBASE_ADMIN_EMAIL` user); **BFF CORS allowlist** (`CORS_ORIGINS` via `hono/cors` — frontends live on separate origins, needed by admin today and any browser client in prod)
-- [x] Devdoc `admin/README.md` (+ `admin/AGENTS.md`); root README module table completed
-- Gate: typecheck ×5 modules + lint + build ✅ + **live e2e smoke** (`dev:bff` + `dev:admin`): login → overview renders live counts (122 users / 9 groups), users + groups dashboards live, create-user → 201 + listed, non-admin sign-in client-rejected + `/api/admin/*` 403, sign-out/in clean ✅; bff suite 37 tests green
-- Gotchas recorded: TanStack Start runs `beforeLoad` server-side during SSR where the localStorage token is invisible — a guard there bounces every hard navigation to `/login` and the hydrated router trusts that resolution (stuck); auth guards must be client-side mount effects, and post-login navigation must be `router.navigate` (a full reload re-enters the SSR token-less redirect dance)
-
-### Phase 7 — platform deployment + feedback · deployed 2026-09-04 ✅
-- [x] VPS topology live per D10: bm2 5/5 online (pb, bff, web, admin, feedback), Caddy site blocks with auto-TLS, admin `basic_auth`, reboot persistence via `bm2 save`/`startup`
-- [x] Runbook `docs/DEPLOY-VPS.md` (env plumbing, build/deploy flows, backup/restore, cutover); one-time privileged bootstrap: `infra/bin/bootstrap-prod.sh`
-- [x] Feedback module (Apache Answer sidecar): tags/branding/SMTP configured on prod; submit API (member + guest) live-verified; pwa/web footer links + in-app feedback card (`FeedbackCard`)
-- [x] Backups per D11, verified live (both archive types created by a real service run)
-- [x] Releases: v5.0.0 (sync + sharing + notifications), v5.1.0 (in-app feedback + notifications, sync reliability fixes)
-- Gotchas recorded: bm2 resolves ecosystem `script:` paths against the config dir (use absolute launchers); systemd/sudo strip `~/.bun/bin` from PATH ("bun: not found"); fresh-install schema reconcile must land existing-collection field drift BEFORE creating views (PB's default `users` has no `username` column, and view queries are validated by execution); dotenv files are unsafe to `sh`-source — wrappers load env via `bun --env-file`
-- Gate: all five public hosts verified (health, CORS preflight, admin 401-anon, guest submit round-trip) + release-gate `test:pre` green
-
-### Cross-cutting — shared i18n catalog · `feat/shared-i18n-catalog` ✅
-
-- [x] Catalog relocated `pwa → common` (`common/project.inlang` + `common/messages/`, pathPattern unchanged); `kickstart:locale` moved to `common/scripts/` (`bun run kickstart:locale`)
-- [x] pwa repointed only (`project: "../common/project.inlang"`); no runtime change (typecheck + full suites green)
-- [x] web compiles the catalog (`scripts/compile-i18n.ts`, `strategy: ["baseLocale"]`, rsbuild watch plugin, `typecheck` chains `i18n:compile`); **all web copy migrated** to shared `m.*` keys (en+ro authored; de/fr/uk filled 2026-09-05 via kickstart — reviewed those machine drafts)
-- [x] Drift guard extended to all locales: en↔ro strict parity + de/fr/uk keys⊆en, no-empty, placeholder & variant parity vs en
-- [x] de/fr/uk web draft keys reviewed (2026-09-05: 3 email/device nits fixed); **web stays baseLocale** until drafts ship
-- Gate: root `typecheck` ×6 modules, pwa full suite + 23 e2e, web SSR hydration smoke (all 4 routes, no console errors), lint + prod builds ✅
-- Follow-up (recorded in TODO.md): **web locale routing via a Vite-adapter migration** — the rsbuild adapter has no server-entry seam for `paraglideMiddleware`; vite adds it (plan staged, 2026-09-05)
+> **Gotchas (tribal knowledge — don't rediscover them):**
+>
+> - hc per-request headers go in the second `options` arg (hono 4.13); the PB
+>   SDK attaches `Authorization` only when `authStore.isValid`; `expand` rides
+>   the query string (ignored in create bodies); failed CREATE **rules** surface
+>   as 400, not 403; `created`/`updated` autodate fields are on every data
+>   collection (phase-5 sync needs them).
+> - Create rules are evaluated against the **hydrated record** — `team.owner =
+>   …` works and `@request.body.<relationField>` resolves for membership checks;
+>   don't traverse further into `@request.body` relations (body values are ids).
+> - TanStack Start runs `beforeLoad` **server-side** during SSR, where the
+>   localStorage token is invisible — a guard there bounces every hard
+>   navigation to `/login` (stuck). Auth guards must be client-side mount
+>   effects; post-login navigation must be `router.navigate` (a full reload
+>   re-enters the SSR token-less redirect dance).
+> - web dev binds IPv6 `[::1]` (rsbuild default) — use `localhost`, not
+>   `127.0.0.1`.
+> - bm2 resolves ecosystem `script:` paths against the config dir (use absolute
+>   launchers); systemd/sudo strip `~/.bun/bin` from PATH ("bun: not found");
+>   fresh-install schema reconcile must land existing-collection field drift
+>   BEFORE creating views (view queries are validated by execution); dotenv
+>   files are unsafe to `sh`-source — wrappers load env via `bun --env-file`.
 
 ## 8. Verification gates (every phase)
 
@@ -318,4 +303,4 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - **web/admin design language** — `pwa/DESIGN.md` is PWA-scoped; marketing
   should follow brand constants from `common`, with its own lighter design
   notes.
-- **Deployment automation (RESOLVED, phase D)** — bm2 + Caddy + hourly local backups on the VPS (D10/D11); remaining open item: off-box backup copy.
+- **Deployment automation (RESOLVED, phase D)** — bm2 + Caddy + hourly local backups on the VPS (D10/D11), off-box S3 copy wired 2026-09-04 (see `docs/DEPLOY-VPS.md` §Backups).

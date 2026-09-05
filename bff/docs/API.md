@@ -3,7 +3,7 @@
 Typed Hono RPC surface — frontends consume `hc<AppType>` from
 `@remindit/bff/api` (type-only import). Every request/response below is a Zod
 contract in `src/contracts.ts`; responses are parsed against those schemas in
-`tests/api.integration.test.ts` (live, 10/10 against PB 0.40.1).
+`tests/api.integration.test.ts` (live, 13/13 against PB 0.40.1).
 
 > PB collections are `teams`/`team_members` (renamed); the HTTP surface and contract keys below keep the groups naming for stability.
 
@@ -11,11 +11,12 @@ contract in `src/contracts.ts`; responses are parsed against those schemas in
 
 PB tokens are stateless JWTs; there is no server session store.
 
-- **pwa (native-ish):** store `token` from register/login, send
+- **pwa / admin:** store `token` from register/login, send
   `Authorization: Bearer <token>` on every call.
-- **web/admin (SSR):** register/login also set the `remindit_session`
+- **web (SSR):** register/login also set the `remindit_session`
   HttpOnly SameSite=Lax cookie (`Secure` in prod via `SESSION_COOKIE_SECURE`);
-  requests may rely on the cookie instead of the header.
+  server-side requests rely on the cookie instead of the header (cookie
+  transport is reserved for web SSR auth — browser clients use Bearer).
 
 ### Session lifecycle (near-expiry rotation)
 
@@ -51,7 +52,7 @@ boundary** (D8) — the BFF never widens access.
 | `POST /api/auth/logout` | — | — | `204` + cleared cookie | stateless: clients also discard the stored token |
 | `GET /api/auth/me` | Bearer/cookie | — | `200 user` | garbage/expired token → 401 |
 
-`user` shape (`userPublicSchema`): `{ id, email, username, firstName, lastName, avatar }` — `email` is empty for other users (PB `emailVisibility`).
+`user` shape (`userPublicSchema`): `{ id, email, username, firstName, lastName, avatar, role? }` — `email` is empty for other users (PB `emailVisibility`); `role` (`user`\|`admin`) rides the auth endpoints for client-side gating.
 
 ### Endpoints — groups (shared workspaces, D1)
 
@@ -85,14 +86,29 @@ are the read/mark path only. Types are plain text; payload is untyped json:
 
 | Method & path | Body | Response | Notes |
 |---|---|---|---|
-| `GET /api/notifications` | — | `200 Notification[]` | own only (`user = auth.id`), newest order is caller-side |
+| `GET /api/notifications` | — | `200 Notification[]` | own only (`user = auth.id`), newest-first (`-created` server-side) |
 | `PATCH /api/notifications/:id` | `{ read }` | `200 Notification` | mark-read/unread |
+
+### Endpoints — admin (phase 6)
+
+All require an authenticated session with `users.role = "admin"`; the role
+check is server-side (`requireAdmin`, 403 before any superuser query).
+
+| Method & path | Body | Response | Notes |
+|---|---|---|---|
+| `GET /api/admin/overview` | — | `200 { users, groups, items, listEntries, historyEvents }` | global counters (from the `platform_stats` view; contract key keeps the groups naming) |
+| `GET /api/admin/users` | — | `200 { items, total }` | paginated user table (`page`/`perPage`/`filter` query params) |
+| `POST /api/admin/users` | `{ email, password, passwordConfirm, username, ... }` | `201 { user }` | create-user (the admin registration flow) |
+| `DELETE /api/admin/users/:id` | — | `204` | delete user (cascades memberships) |
+| `GET /api/admin/groups` | — | `200 { items, total }` | paginated group/team table (`team_details` view) |
+| `DELETE /api/admin/groups/:id` | — | `204` | cascade-delete a team |
 
 ### Endpoints — misc
 
 | Method & path | Response | Notes |
 |---|---|---|
 | `GET /api/health` | `200 { ok, service, pb: { status } }` | PB-down is a reported state, not a 5xx |
+| `GET /api/stats` | `200 { users, groups }` | public aggregate counts for the marketing site (superuser-side, 60s-cached, `cache-control: public, max-age=60`) |
 | `GET /api/sse` | SSE stream | phase-1 spike / diagnostics |
 | `ANY /pb/api/*` | PB passthrough | **Data-plane forwarder (phase 5)**: authenticated proxy to the internal PocketBase for the pwa sync engine (PB SDK `baseUrl = PUBLIC_BFF_URL + "/pb"`). Requires a BFF session, forwards the rotated token, streams SSE unbuffered; rules stay the authorization boundary. See [../docs/SYNC.md](../../pwa/docs/SYNC.md) |
 
@@ -112,8 +128,9 @@ default `{ success: false, error: [...] }` shape.
 
 ## Live rule matrix (phase 3 gate)
 
-10/10 integration tests: register→me (Bearer), garbage token 401, wrong
-password 400, duplicate username 400, group create + owner-membership
-auto-provision, owner invite with expanded profile, member sees the group,
-non-member invite 400 (PB create-rule), member cannot remove others (404),
-self-leave 204, owner delete cascades, notification list/mark-read isolation.
+13/13 integration tests (skip when PB is down): register→me (Bearer), garbage
+token 401, wrong password 400, duplicate username 400, group create +
+owner-membership auto-provision, owner invite with expanded profile, member
+sees the group, non-member invite 400 (PB create-rule), member cannot remove
+others (404), self-leave 204, owner delete cascades, notification
+list/mark-read isolation, stats contract.

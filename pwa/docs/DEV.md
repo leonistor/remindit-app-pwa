@@ -30,12 +30,10 @@ Catalog items show recommendation badges (overdue/soon dots) based on the comput
 
 ### Item detail drawer
 
-The Phase 3 placeholder drawer (`DrawerProvider` + `ItemDetailDrawer` + the
-`$itemDetail` selector) was removed on 2026-09-03 — it was never openable
-(`openDrawer` had no callers), so it was dead UI. Phase 3 (item attributes:
-photo, quantity, price) will build item detail on the Shark `Drawer`
-primitive (`bunx shadcn add @shark/drawer` re-adds it) instead of the
-placeholder.
+Removed 2026-09-03 — the placeholder (`DrawerProvider` + `ItemDetailDrawer` +
+`$itemDetail`) was never openable (`openDrawer` had no callers). Phase 3 (item
+attributes: photo, quantity, price) will build item detail on the Shark
+`Drawer` primitive (`bunx shadcn add @shark/drawer` re-adds it) instead.
 
 ### Routes
 
@@ -53,7 +51,7 @@ placeholder.
 
 ### PWA manifest
 
-The installable web manifest is defined in `pwa-manifest.config.ts` (the `WEB_APP_MANIFEST` object), **not** inline in `rsbuild.config.ts`. Brand color for both the manifest and the generated icons lives in that same file as `PWA_THEME_COLOR` / `PWA_BACKGROUND_COLOR` — both default to the **neutral app primary** (`#262626`, background `#ffffff`), reconciled with the neutral UI chrome. `scripts/generate-favicons.ts` imports those same constants when regenerating icons, so the manifest and favicons stay in sync. The master icon SVGs live in `@remindit/common` (`../common/assets/remindit-icon.svg`, `remindit-icon-maskable.svg`) and carry the same `#262626` fill; the served copies in `public/` are rewritten from them on every favicons run (drift-guarded by `tests/brand.test.ts`).
+The installable web manifest is defined in `pwa-manifest.config.ts` (the `WEB_APP_MANIFEST` object), **not** inline in `rsbuild.config.ts`. Brand color for both the manifest and the generated icons comes from `@remindit/common` — `BRAND_COLOR` (`#262626`, the neutral app primary) and `BRAND_BACKGROUND_COLOR` (`#ffffff`), reconciled with the neutral UI chrome. `scripts/generate-favicons.ts` imports the same constants when regenerating icons, so the manifest and favicons stay in sync. The master icon SVGs live in `@remindit/common` (`../common/assets/remindit-icon.svg`, `remindit-icon-maskable.svg`) and carry the same `#262626` fill; the served copies in `public/` are rewritten from them on every favicons run (drift-guarded by `tests/brand.test.ts`).
 
 ### PWA install & update
 
@@ -88,7 +86,7 @@ Components are split between **registry-managed** primitives in `src/components/
 holds `button` (our fork of the Shark button — adds `success`/`info`/`bare` variants; `bare` is a
 transparent base for components that supply their own color via the categorical palette, and does
 **not** force a hover background so palette-colored chips keep their fill), the project-specific
-`item-button`, `toggle-tooltip`, `form-dialog`, and `validated-field`, and `collection.ts` — the
+`item-button`, `form-dialog`, and `validated-field`, and `collection.ts` — the
 sanctioned `@ark-ui/react` re-export seam (feature code still never imports Ark directly; it imports
 Ark's collection helpers from `ui/custom/collection`). **Do not run `shadcn add @shark/button`** — the
 registry HEAD drops those variants and would break the build. Item/category color lives in
@@ -164,8 +162,8 @@ All collections are persisted to `localStorage` with `@nanostores/persistent` (k
 
 | File             | Exposes                                                                                                                                                 |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `types.ts`       | Shared types + `UNCATEGORIZED_ID` / naming constants                                                                                                    |
-| `persistence.ts` | `STORAGE_KEYS` (every `remindit:*` localStorage key) + `jsonStore` (shared `persistentJSON` factory — see [Persistence layer](#persistence-layer))      |
+| `types.ts`       | Re-exports the shared domain types from `@remindit/common/models` + `UNCATEGORIZED_ID` / naming constants |
+| `persistence.ts` | `STORAGE_KEYS` (every data-store `remindit:*` localStorage key) + `jsonStore` (shared `persistentJSON` factory — see [Persistence layer](#persistence-layer))      |
 | `categories.ts`  | `$categories`, `addCategory`, `renameCategory`, `updateCategory`, `getCategory`, `ensureUncategorizedExists`, `assignCategoryColors` / `normalizeCategoryColors` (palette color slots), `normalizeCategoryFrequencies` |
 | `catalog.ts`     | `$catalog`, `addCatalogItem`, `updateCatalogItem`, `renameCatalogItem`, `reassignItemsToCategory`, `getCatalogItem`                                     |
 | `list.ts`        | `$list`, `addToList`, `removeFromList`, `removeFromListByItemId`, `setEntryChecked`, `clearList`, `removeListEntriesForItem`                            |
@@ -173,13 +171,14 @@ All collections are persisted to `localStorage` with `@nanostores/persistent` (k
 | `commands.ts`    | Cross-store flows — `deleteCategoryWithReassign`, `deleteCatalogItemWithCascade`, `createItemAndAddToList`, full factory wipe `wipeAllData` (used by the local-data erase), backup restore `restoreLocalData` (see below) |
 | `user.ts`        | `$user`, `getUser`, `updateUser`, `randomUser` (offline initials fallback via `localAvatar`)                                                            |
 | `notifications.ts` | In-app notifications (D4, server state — never persisted): `$notifications` (newest-first), `$unreadCount`, `refreshNotifications()`, `markRead(id)`; cleared when `$syncSession` goes null. Realtime + connect-time refresh are wired in the sync engine; see [SYNC.md §Notifications](SYNC.md) |
-| `selectors.ts`   | computed `$itemsByCategory`, `$categoryById`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$selectedOrdered`, `$listItemIds`, `$catalogByCategory`, `$catalogByCategoryAll`, `$recommendations`, `$recommendationsByItemId` |
+| `sync/`          | Sync engine (phase 5): `engine.ts` (session wiring, realtime, reconcile triggers), `reconcile.ts` (pure journal/three-way/LWW diff), `session.ts`, `group-actions.ts` (UI → groups API wrappers). Full design in [SYNC.md](SYNC.md) |
+| `selectors.ts`   | computed `$itemsByCategory`, `$categoryById`, `$activeCategoryIds`, `$listCount`, `$checkedCount`, `$catalogView`, `$selectedView`, `$selectedOrdered`, `$listItemIds`, `$catalogByCategory`, `$catalogByCategoryAll`, `$recommendations`, `$recommendationsByItemId`, `$now`, `$recommendedCountByCategoryId` |
 | `recommender.ts` | `computeItemStats`, `getExpectedInterval`, `scoreItem`, `computeRecommendations`, `FREQ_TO_DAYS`                                                        |
 | `ui.ts`          | UI-preference state — `$accordionOpen`, `setAccordionOpen` (persists the available-items panel's accordion open-state) + list sort — `SelectedSort`, `$selectedSort`, `SELECTED_SORT_ORDER`, `cycleSelectedSort` (see [List sort feature](#list-sort-feature)) |
 | `palette.ts`     | Active categorical-palette selection — `$activePaletteId`, `getActivePalette`, `setActivePalette` (persisted to `localStorage` under `remindit:active-palette`) |
 | `onboarding.ts`  | Onboarding/dataset state — `$onboarded`, `$selectedDatasetId`, `isOnboarded`, `setOnboarded`, `getSelectedDatasetId`, `setSelectedDataset`, `resolveSelectedDataset` |
 | `pwa-install.ts` | Install-prompt state — `$canInstall`, `$installed`, `$installDismissed`, `$installLater`, `$manualPlatform`, `$showInstallBanner`, `initPwaInstall`, `installApp`, `dismissInstall`, `dismissLater` |
-| `theme.ts`       | `$theme` (`ThemeMode`: `light \| dark \| system`), `initTheme` (see [Theme store](#theme-store))                                                        |
+| `theme.ts`       | `$theme` (`ThemeMode`: `light \| dark \| system`), `$themeVariant` (subscribes the active theme for e.g. demo-video selection), `initTheme` (see [Theme store](#theme-store))                                                        |
 | `index.ts`       | Barrel exports (no side effects) + the bootstrap API: `initStores()`, `completeOnboarding()`, `setupDevLogging()`                                       |
 
 Import store atoms/actions from the barrel: `import { $list, addToList } from "@/stores"`.
@@ -210,7 +209,7 @@ UI strings are managed with **Paraglide JS v2** (`@inlang/paraglide-js`, compile
 - **Locale resolution:** strategy chain `["localStorage", "preferredLanguage", "baseLocale"]` with `localStorageKey: "remindit:locale"` — persisted user choice first, then browser language, then English. `src/index.tsx` sets `document.documentElement.lang` before first paint (mirrors `initTheme()`).
 - **Language UX:** chosen in onboarding **step 1** and switchable in the **Profile** language card via `LanguageChooser` (`src/components/language-chooser.tsx`, locales listed in `APP_LOCALES` in `src/lib/locale.ts`). Switching persists the choice and performs a **full document reload** (deliberate — all state is persisted; the SW-served shell makes it fast). `localStorage.clear()` in the erase path wipes the choice, so erase re-triggers the language prompt.
 - **Data is not UI:** catalog item names, category names, dataset names, and the `uncategorized` sentinel stay **data** (seeded/user-entered) — never wrapped in messages. Locale native names in `APP_LOCALES` are likewise static.
-- **Drift check:** `tests/i18n-drift.test.ts` (runs in every test suite; focused: `bun run i18n:check`) keeps the locale files in lockstep — every en key must exist in ro (a missing ro key silently falls back to English at runtime), no empty values, `{token}` placeholders must match per key, match variants on both sides. Extra ro-only keys **warn only** (work-in-progress is allowed). Workflow: add the key to `common/messages/en.json` + `common/messages/ro.json` in the same commit with identical `{tokens}`, then let the suite flag anything missed.
+- **Drift check:** `tests/i18n-drift.test.ts` (runs in every test suite; focused: `bun run i18n:check`) keeps the locale files in lockstep — **en↔ro strict parity** (a missing ro key silently falls back to English at runtime), **de/fr/uk keys ⊆ en** (drafts may lag en, but no empty values and no extra keys), `{token}` placeholders must match per key, and match variants must align on every locale (an invented `{token}` in any locale widens the compiled input types for all consumers). Workflow: add the key to `common/messages/en.json` + `common/messages/ro.json` in the same commit with identical `{tokens}`, then let the suite flag anything missed.
 - **Kick-starting a new locale:** `cd common && bun run kickstart:locale -- de,fr,uk translategemma:12b` (needs a running [Ollama](https://ollama.com) with the model pulled) machine-translates every `en.json` key into the new locale(s) and writes `common/messages/{locale}.json` **drafts**. The prompt is tuned for RemindIt (informal "you" — tu form, verbatim `{tokens}`, no invented punctuation, exactly one translation — evaluated 2026-09-04 against the human ro translation; selected over `@inlang/cli`'s free service, which rate-limits at project scale). The script adds the locale to `common/project.inlang/settings.json`, runs merge mode (reruns only fill gaps), strips a trailing "." the source lacks, and reports keys that kept English after repeated failures — review those by hand. Two caveats: drafts need a human pass before they ship, and adding a locale to settings makes paraglide compile it, so the `preferredLanguage` strategy will **auto-serve it** to matching browsers on the next release — gate via `APP_LOCALES`/ship order if the drafts aren't ready.
 - **Adding a language** (e.g. German): add the code to `locales` in `common/project.inlang/settings.json`, create + translate `common/messages/{locale}.json` (or kick-start a draft), add an `APP_LOCALES` entry, run `bun run i18n:compile`.
 
@@ -268,14 +267,14 @@ On first run the app shows **onboarding** instead of seeding. `initStores()` is 
 
 #### Seed datasets
 
-The repo-root `seed/` directory is a tracked, extensible registry of sample catalogs (`seed/index.ts`):
+The `pwa/seed/` directory is a tracked, extensible registry of sample catalogs (`seed/index.ts`):
 
 - `DATASETS: DatasetMeta[]` — each entry is `{ id, name, file }` (stable key, human label, seed-relative filename).
 - `DEFAULT_DATASET_ID` — the starter dataset (`minimal`) onboarding preselects, and the final fallback of the resolution chain (stored choice → `PUBLIC_DATASET` → default).
 - `resolveDatasetId(raw)` — validates a raw dataset id (typically from `PUBLIC_DATASET`) against `DATASETS`, returning it or falling back to `DEFAULT_DATASET_ID` with a warning.
 - `getDataset(id)` — returns `{ rawItems, categories, catalog }` for any registered dataset.
 
-**Add a dataset:** drop its JSON into `seed/` and append a `DatasetMeta` to `DATASETS`. The loader normalizes it automatically (deterministic ids via the same FNV-1a scheme used by the history fixture).
+**Add a dataset:** drop its JSON into `pwa/seed/` and append a `DatasetMeta` to `DATASETS`. The loader normalizes it automatically (deterministic ids via the shared FNV-1a `hashId` scheme from `@remindit/common/seeds`).
 
 **Items without a category:** any row whose `category_name` is empty/whitespace is assigned to the `uncategorized` sentinel (`id: "uncategorized"`) and **no empty-named category is created** — consistent with how `removeCategory` already reassigns orphans to `uncategorized`. Curated `frequency` values live in `FREQUENCY_BY_CATEGORY` (English set only); other datasets fall back to `"unknown"`.
 
@@ -293,7 +292,7 @@ Valid values are the `id`s registered in `DATASETS`: `minimal`, `items_categorie
 
 In addition to the catalog, both seeding paths (`initStores` first-run and `seedFromDataset`) generate a simulated **6-month shopping history** into `$history`, so the recommender has data to surface for new users (`initStores` only does this while history is empty). Always on; disable by setting `PUBLIC_SEED_HISTORY=0` in the repo-root `.env`.
 
-The generator lives in `seed/history.ts` (`generateShoppingHistory`) and is **frequency-aware** and **reproducible** (seeded `mulberry32` PRNG, default seed `42`):
+The generator is `generateShoppingHistory` in `seed/history.ts` — a thin adaptor over the shared simulator in `@remindit/common/seeds` (`generateTeamHistory`) that keeps the pwa API and its default seed `42`. It is **frequency-aware** and **reproducible** (seeded `mulberry32` PRNG):
 
 - **Adds** follow each item's category `frequency` via the same `FREQ_TO_DAYS` map the recommender uses (`recommender.ts`), so a weekly item is repurchased roughly every 7 days, monthly every ~30, etc. Jitter (±20%) plus a per-item phase offset keeps the last-purchase dates spread, yielding a realistic mix of *overdue / soon / frequent* recommendations at `now`. For the shipped datasets this naturally lands at ~1–10 additions per day.
 - **Shopping sessions** happen every 2–3 days. Each session removes most of the items currently on the list (bought), clustered within a 1–3-hour window; **0–3 items are intentionally left over** (still on the list with no trailing `remove` event — the realistic "didn't get to it" outcome).

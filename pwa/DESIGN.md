@@ -110,7 +110,7 @@ Rules: use `cn()` (`src/lib/utils.ts`) + Shark `variant/size` props + semantic t
 ### 6.2 Registry vs custom split (`docs/DEV.md` §Registry vs custom)
 
 - **Registry-managed** (`src/components/ui/*`): regenerate via `bunx shadcn add @shark/<name>`; never hand-edit shape.
-- **Hand-maintained** (`src/components/ui/custom/*`): `button.tsx` (forked Shark button — adds `success/info/bare`; `bare` is the transparent base for palette-colored chips), `item-button.tsx`, `toggle-tooltip.tsx`, `form-dialog.tsx`, `validated-field.tsx`, `collection.ts` (the sanctioned `@ark-ui/react` re-export seam — feature code imports Ark's collection helpers from here, never from Ark directly). **Do not run `shadcn add @shark/button`** — upstream drops the custom variants.
+- **Hand-maintained** (`src/components/ui/custom/*`): `button.tsx` (forked Shark button — adds `success/info/bare`; `bare` is the transparent base for palette-colored chips), `item-button.tsx`, `form-dialog.tsx`, `validated-field.tsx`, `collection.ts` (the sanctioned `@ark-ui/react` re-export seam — feature code imports Ark's collection helpers from here, never from Ark directly). **Do not run `shadcn add @shark/button`** — upstream drops the custom variants.
 
 ### 6.3 Item display (pick the right one)
 

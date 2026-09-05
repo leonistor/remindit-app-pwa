@@ -43,11 +43,6 @@ Catalog item button (applies the categorical palette via `categoryPalette` + a r
 `bare` variant the palette tokens are applied to, and so the retained `success` / `info` variants
 stay available.
 
-### `toggle-tooltip.tsx` — project-custom
-
-Popover-based tooltip wrapper (`ToggleTooltip` / `ToggleTooltipTrigger` / `ToggleTooltipContent` /
-`ToggleTooltipArrow`). **Not** in the `@shark` registry. Builds on the registry `popover` primitive.
-
 ### `form-dialog.tsx` — project-custom
 
 Dialog scaffolding for create/edit flows (`FormDialog`): a Shark `Dialog` wrapper that pairs a body
@@ -91,7 +86,7 @@ Results:
 - **`button.tsx` is the only file with a real structural delta**, and it is a **regression**: the
   registry would delete `success`/`info` (see guardrail above). It lives in `ui/custom/`, not the
   registry path, precisely so it is not clobbered.
-- **`item-button.tsx`, `toggle-tooltip.tsx`, `form-dialog.tsx`, `validated-field.tsx`, and
+- **`item-button.tsx`, `form-dialog.tsx`, `validated-field.tsx`, and
   `collection.ts` are not in the registry** (project-custom) — there is no CLI update path for them.
 
 ### `components.json` caveat
@@ -107,4 +102,4 @@ moved to `custom/`. A future `shadcn add @shark/button` would happily recreate a
 2. For a registry component, apply only the **non-formatting, non-breaking** hunks by hand.
 3. Never pass `--overwrite` without explicit review.
 4. After any edit: `bun run lint` + `bun run build`.
-5. `button`, `item-button`, `toggle-tooltip`, `form-dialog`, `validated-field`, and `collection` are **out of scope** for the CLI — edit them directly.
+5. `button`, `item-button`, `form-dialog`, `validated-field`, and `collection` are **out of scope** for the CLI — edit them directly.

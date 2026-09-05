@@ -44,7 +44,7 @@ Order mirrors what a real user does:
 | 01 | onboarding | Language step (default English) → welcome card (embeds 00) → dice-roll profile (**Jane Doe**), Minimal dataset, Finish | 18s |
 | 02 | install-banner | Mocked `beforeinstallprompt` → banner → "Maybe later" | 4s |
 | 03 | add-items | Snacks accordion → 4 catalog chips onto the list | 8s |
-| 04 | quick-add | Header-`+` dialog: pick existing "Milk", create "apple" → fridge via category pill | 10s |
+| 04 | quick-add | List-panel floating `+` dialog: pick existing "Milk", create "apple" → fridge via category pill | 10s |
 | 05 | theme | Menu → Theme → flip to the opposite theme → back to the variant's base | 8s |
 | 06 | edit-catalog | `/catalog`: add "Honey" → rename → swipe-delete with confirm | 18s |
 | 07 | install | `appinstalled` mock → menu "Install Remindit" → manual instructions dialog | 6s |

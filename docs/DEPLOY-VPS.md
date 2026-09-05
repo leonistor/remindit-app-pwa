@@ -158,34 +158,15 @@ Verify: `curl -I https://remindit.me`, `https://www.remindit.me`,
   Assets are fingerprinted so the SW-safe release is a drop-in; bump the version
   so existing clients pick up the new service worker.
 
-## Feedback teardown (2026-09-05)
+## Feedback teardown — completed 2026-09-05 (D13)
 
-One-time prod removal of the Apache Answer sidecar and all feedback surfaces
-(D13). Run after the repo change lands on the VPS — the ecosystem file and
-Caddy no longer declare feedback:
-
-```sh
-bm2 stop feedback && bm2 delete feedback
-sudo cp infra/Caddyfile /etc/caddy/remindit.caddyfile && sudo caddy reload
-rm -rf /srv/remindit/feedback
-rclone delete "SCW:remindit-backups/answer/" --min-age 0
-```
-
-- `bm2 stop` + `bm2 delete`: the new ecosystem file no longer declares the
-  feedback app, so stop it and remove it from the saved process list (otherwise
-  the saved config would resurrect it on reboot via `bm2 resurrect`).
-- Remove the `feedback.remindit.me` site block: the new `infra/Caddyfile`
-  already drops it — copy + reload as shown.
-- Prune the local sidecar data: the module is no longer in the workspace;
-  `rm -rf /srv/remindit/feedback` also removes its gitignored `answer-data/`.
-- Prune the off-box S3 answer backups (or `rclone purge
-  SCW:remindit-backups/answer/`) after confirming the on-box Answer archives
-  are already gone.
-- Remove the `feedback.remindit.me` DNS A/AAAA record at the provider.
-
-Verify: `bm2 list` shows 4 apps; `curl -I https://feedback.remindit.me` fails
-(NXDOMAIN or no Caddy block routes it); pwa/web builds no longer need
-`PUBLIC_FEEDBACK_URL`.
+The Apache Answer sidecar and all feedback surfaces were removed (after live
+use showed the Q&A board added more friction than value). Prod teardown ran
+that day: `bm2 stop/delete feedback`, the new `infra/Caddyfile` (no feedback
+block) copied + reloaded, `/srv/remindit/feedback` removed, S3 `answer/`
+backups pruned, and the `feedback.remindit.me` DNS record dropped. Verifies:
+`bm2 list` shows 4 apps, `feedback.remindit.me` fails DNS, builds no longer
+need `PUBLIC_FEEDBACK_URL`. Decision record: `docs/ROADMAP.md` D13.
 
 ## Cutover from remindit.parsedwink.com
 
