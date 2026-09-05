@@ -82,10 +82,31 @@ const $syncTombstones = jsonStore<Record<SyncCollection, string[]>>(
 )
 
 // --- PB client (through the /pb/* forwarder — never direct, D2) -------------
+//
+// Constructed lazily, on first real use: importing this module must have zero
+// side effects (the engine's contract in stores/index.ts), so `new
+// PocketBase()` and the afterSend/token-rotation wiring run only once the sync
+// engine is actually exercised (a connect/sign-in/capture path), never at
+// import time. `pbBase` is a plain string — safe at module scope.
 
 const pbBase = `${import.meta.env?.PUBLIC_BFF_URL ?? DEFAULT_BFF_URL}/pb`
-const pb = new PocketBase(pbBase)
-pb.autoCancellation(false)
+let pb: PocketBase | null = null
+let pbWired = false
+const getPb = (): PocketBase => {
+  if (!pb) {
+    pb = new PocketBase(pbBase)
+    pb.autoCancellation(false)
+  }
+  if (!pbWired) {
+    pbWired = true
+    pb.afterSend = (response, data) => {
+      captureRotatedToken(response.headers.get("X-Session-Token"))
+      return data
+    }
+    setRotatedTokenHandler(captureRotatedToken)
+  }
+  return pb
+}
 
 // --- token rotation capture -------------------------------------------------
 
@@ -108,24 +129,13 @@ export function captureRotatedToken(
   patchSessionToken(headerValue)
   // The data-plane client must carry the fresh token on subsequent calls —
   // same record shape the connect path seeds, so the authStore stays valid.
-  pb.authStore.save(headerValue, {
+  getPb().authStore.save(headerValue, {
     id: session.userId,
     email: session.email,
     collectionId: "_pb_users_auth_",
     collectionName: "users",
   } as never)
 }
-
-// Capture wiring (once, at module init): the SDK's afterSend hook sees every
-// data-plane response (realtime SSE bypasses send() but never carries
-// rotation); the injected bff-api handler covers the account-level RPCs.
-// Layering note: bff-api must not import stores, so the direction is
-// stores → lib — the engine injects the session-patching handler.
-pb.afterSend = (response: Response, data: unknown) => {
-  captureRotatedToken(response.headers.get("X-Session-Token"))
-  return data
-}
-setRotatedTokenHandler(captureRotatedToken)
 
 const COLLECTIONS: SyncCollection[] = [
   "categories",
@@ -150,8 +160,9 @@ const remoteList = async (
   collection: SyncCollection,
   groupId: string
 ): Promise<RemoteRecord[]> => {
-  const result = await pb.collection(collection).getFullList({
-    filter: pb.filter("group = {:groupId}", { groupId }),
+  const client = getPb()
+  const result = await client.collection(collection).getFullList({
+    filter: client.filter("group = {:groupId}", { groupId }),
     sort: "created",
   })
   return result as unknown as RemoteRecord[]
@@ -410,6 +421,7 @@ async function reconcileCollection<L>(
   let changed = false
   let adopted = false
   const collection = spec.collection
+  const client = getPb()
 
   for (const action of result.actions) {
     // Cancel an in-flight pass when the session or group is torn down under
@@ -420,7 +432,7 @@ async function reconcileCollection<L>(
     if (!getSession() || $syncGroup.get() !== reconcileSession) return false
     switch (action.kind) {
       case "remoteCreate": {
-        const record = (await pb
+        const record = (await client
           .collection(collection)
           .create(action.payload)) as unknown as RemoteRecord
         maps.map[collection][action.localId] = record.id
@@ -430,7 +442,7 @@ async function reconcileCollection<L>(
         break
       }
       case "remotePatch": {
-        const record = (await pb
+        const record = (await client
           .collection(collection)
           .update(action.pbId, action.payload)) as unknown as RemoteRecord
         maps.journal[collection][record.id] = record.updated ?? ""
@@ -438,7 +450,7 @@ async function reconcileCollection<L>(
         break
       }
       case "remoteDelete": {
-        await pb.collection(collection).delete(action.pbId)
+        await client.collection(collection).delete(action.pbId)
         changed = true
         break
       }
@@ -578,9 +590,10 @@ async function syncProfile(): Promise<void> {
     profileJournalKey
   ]
   const profile = $user.get()
+  const client = getPb()
 
   try {
-    const record = (await pb
+    const record = (await client
       .collection("users")
       .getOne(session.userId)) as unknown as RemoteRecord
     const remoteUpdated = record.updated ?? ""
@@ -608,7 +621,7 @@ async function syncProfile(): Promise<void> {
         })
       } else {
         // Local wins → push the profile up.
-        await pb.collection("users").update(session.userId, {
+        await client.collection("users").update(session.userId, {
           username: profile.username,
           firstName: profile.firstName,
           lastName: profile.lastName,
@@ -716,7 +729,7 @@ async function runConnect(): Promise<void> {
     const me = await bffApi.me(session.token)
     if (sessionGeneration !== gen) return
     setSession({ ...session, email: me.email })
-    pb.authStore.save(session.token, {
+    getPb().authStore.save(session.token, {
       id: session.userId,
       email: me.email,
       collectionId: "_pb_users_auth_",
@@ -756,14 +769,15 @@ async function runConnect(): Promise<void> {
 }
 
 async function subscribeRealtime(groupId: string): Promise<void> {
+  const client = getPb()
   for (const unsubscribe of unsubscribeFns) unsubscribe()
   unsubscribeFns = []
   for (const collection of COLLECTIONS) {
-    await pb.collection(collection).subscribe("*", () => scheduleReconcile(), {
-      filter: pb.filter("group = {:groupId}", { groupId }),
+    await client.collection(collection).subscribe("*", () => scheduleReconcile(), {
+      filter: client.filter("group = {:groupId}", { groupId }),
     })
     unsubscribeFns.push(() => {
-      pb.collection(collection).unsubscribe("*")
+      client.collection(collection).unsubscribe("*")
     })
   }
 }
@@ -782,14 +796,15 @@ async function subscribeRealtime(groupId: string): Promise<void> {
 async function subscribeNotifications(): Promise<void> {
   const session = getSession()
   if (!session) return
+  const client = getPb()
   try {
-    await pb
+    await client
       .collection("notifications")
       .subscribe("*", () => scheduleNotificationRefresh(), {
-        filter: pb.filter("user = {:userId}", { userId: session.userId }),
+        filter: client.filter("user = {:userId}", { userId: session.userId }),
       })
     unsubscribeFns.push(() => {
-      pb.collection("notifications").unsubscribe("*")
+      client.collection("notifications").unsubscribe("*")
     })
   } catch {
     // Non-fatal: the data plane connects regardless.
@@ -934,7 +949,7 @@ export async function signOut(): Promise<void> {
   sessionGeneration++
   $syncGroup.set("")
   clearSyncBuffers()
-  pb.authStore.clear()
+  getPb().authStore.clear()
   setSyncState({ status: "off", groupId: null, lastError: null })
 }
 
