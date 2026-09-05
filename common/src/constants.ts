@@ -12,3 +12,10 @@ export const BRAND_COLOR = "#262626"
 
 /** Brand background white; also the PWA background color. */
 export const BRAND_BACKGROUND_COLOR = "#ffffff"
+
+/**
+ * Marketing site origin (the web module). Used by the PWA's About page to
+ * point back at the website; kept here like name/colors so every module
+ * links to the same canonical domain instead of hardcoding it.
+ */
+export const BRAND_WEBSITE_URL = "https://www.remindit.me"

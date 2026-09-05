@@ -1,5 +1,6 @@
 import { Link } from "react-router"
 import { BackButton } from "@/components/back-button"
+import { BRAND_WEBSITE_URL } from "@remindit/common"
 import { m } from "@/paraglide/messages"
 
 const AboutView = () => (
@@ -114,6 +115,19 @@ const AboutView = () => (
         rel="noreferrer"
       >
         GitHub
+      </a>
+      .
+    </p>
+
+    <p className="text-muted-foreground">
+      {m.aboutWebsitePrefix()}{" "}
+      <a
+        className="text-primary underline underline-offset-4 hover:opacity-90"
+        href={BRAND_WEBSITE_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        www.remindit.me
       </a>
       .
     </p>

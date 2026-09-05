@@ -30,7 +30,14 @@ function Download() {
         <p>{m.webDownloadIntro({ brandName: BRAND_NAME })}</p>
         {pwaUrl && (
           <p>
-            <a className="cta" href={pwaUrl}>
+            {/* Open in a new tab so the marketing site stays open behind the
+                PWA (cross-origin — noopener guards against tabnabbing). */}
+            <a
+              className="cta"
+              href={pwaUrl}
+              target="_blank"
+              rel="noopener"
+            >
               {m.webOpenApp()}
             </a>
           </p>

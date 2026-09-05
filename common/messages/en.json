@@ -342,6 +342,7 @@
   "aboutComingAttributes": "Item attributes (photo, quantity, price) — the remaining piece of Phase 3.",
   "aboutComingNotifications": "Notifications — in-app pings about list activity, so you’ll know when something changes on your shared list.",
   "aboutOpenSourcePrefix": "RemindIt is open source. View the code and follow development on",
+  "aboutWebsitePrefix": "RemindIt on the web — features, screenshots and the install guide at",
   "syncTitle": "Sync & account",
   "syncDescription": "Sign in to sync your lists across devices and share them with your group. Everything keeps working offline.",
   "syncEmailLabel": "Email",

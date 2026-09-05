@@ -342,6 +342,7 @@
   "aboutComingAttributes": "Atribute pentru articole (fotografie, cantitate, preț) — ultimul element din Faza 3.",
   "aboutComingNotifications": "Notificări — anunțuri în aplicație despre activitatea din listă, ca să afli imediat când se schimbă ceva în lista ta partajată.",
   "aboutOpenSourcePrefix": "RemindIt este open source. Vezi codul și urmărește dezvoltarea pe",
+  "aboutWebsitePrefix": "RemindIt pe web — funcțiile, capturile de ecran și ghidul de instalare la",
   "syncTitle": "Sincronizare și cont",
   "syncDescription": "Autentifică-te pentru a-ți sincroniza listele între dispozitive și a le partaja cu grupul tău. Totul funcționează și offline.",
   "syncEmailLabel": "Email",
