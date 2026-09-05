@@ -76,6 +76,32 @@ bun run dev:bff      # PocketBase must be running
 bun run migrate:bff  # from repo root — run twice; second run must be a no-op
 ```
 
+## Platform seed (curated demo data)
+
+One curated dataset (`@remindit/common/seeds`, source `common/seeds/
+platform.json`) powers realistic admin/web/pwa demos: 15 users (2 admins,
+solo shoppers, two families, ad-hoc groups like "Trip to Italy"), 7 teams
+with per-team catalog, current list, simulated 180-day history and
+`member.added` notifications. The `bff` seeder writes it superuser-side,
+**idempotently** (second run creates nothing).
+
+```sh
+bun run seed:bff  # PocketBase must be running; refuses NODE_ENV=production
+```
+
+- Dataset/typed loader live in `common` (shared + testable); write logic in
+  `bff/src/seeds/seed.ts`; thin env-facing CLI in `bff/scripts/seed.ts`.
+- Idempotency keys: users by unique `username`; teams by `owner + name`;
+  content by unique `(team, localId)` where category/item local ids reuse the
+  pwa scheme (`hashId("cat::…")` / `hashId("item::…")`) — a fresh pwa joining
+  a seeded group reconciles with **identical ids**.
+- **Every seed user's password is `remindit-seed`** (dev/demo only). Admin app:
+  `admin@example.com` / `remindit-seed`. Login as any username to demo sync,
+  group switching, invite-by-username and notifications.
+- Runs against the dev/local DB. Prod refuses to seed (env guard). A pristine
+  demo = fresh `pb_data` (delete `bff/pb_data`, `dev:bff` re-downloads/migrates,
+  then `seed:bff`).
+
 ## Feedback bridge (one-way, Apache Answer)
 
 Registration provisions a matching user in the Answer sidecar (`feedback/`):
