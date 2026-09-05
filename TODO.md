@@ -20,8 +20,9 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
   invented/renamed `{tokens}` and fragment keys. Locales are registered in
   `common/project.inlang/settings.json`, so they compile and auto-serve to
   matching browsers (`preferredLanguage` strategy); `APP_LOCALES` in the pwa
-  now offers the full set (en/ro/de/fr/uk). Web still serves `baseLocale`
-  English only — blocked on the URL-routing migration in the next section.
+  now offers the full set (en/ro/de/fr/uk). The **web serves all five
+  locales** via URL routing (de/fr/uk marketing keys fall back to English
+  until their review pass — see the locale-routing note below).
 
 ## Next (V6 + wishlist, roadmap §1)
 

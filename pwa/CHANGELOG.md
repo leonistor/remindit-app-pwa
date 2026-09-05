@@ -2,6 +2,18 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v5.3.0 — 2026-09-05
+
+_The website speaks every language — and shows you the app before you install it._
+
+### ✨ New Features
+
+- **The site in your language**: the marketing site now serves English, Română, Deutsch, Français and Українська with a language switcher in the header — the same page keeps its place as you switch
+- **See the app on the homepage**: phone screenshots of the shopping list (light and dark) plus a one-line live counter — the number of users and groups
+- **Full feature walkthrough**: the Features page now reads as a guided tour with three demo videos (adding items, quick add, organizing the catalog), so the screenshots in the app's Help section work on the site too
+- **Screenshots page**: every app screen — mobile and desktop, list, catalog, profile and history — in one gallery
+- **Better search visibility**: every page now tells search engines about its language versions (canonical + hreflang), and an old `/en` address redirects cleanly to the main one
+
 ## v5.2.0 — 2026-09-05
 
 _Foundation for more languages: every screen now draws from one shared translation catalog, and the website is ready for them too._
