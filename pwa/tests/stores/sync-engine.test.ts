@@ -165,14 +165,17 @@ const bffApi = rs.hoisted(() => {
     // Token-rotation hook (P9): the engine's module init registers its
     // capture through this; stubbed so the mocked module surface matches.
     setRotatedTokenHandler: rs.fn<(handler: (token: string) => void) => void>(),
+    // Session-expiry hook: engine registers its sign-out on 401 through this.
+    setUnauthorizedHandler: rs.fn<(handler: () => void) => void>(),
   }
 })
 
-// The mock replaces the whole module, so both surfaces the engine imports
-// (`bffApi` + the `setRotatedTokenHandler` rotation hook) must be provided.
+// The mock replaces the whole module, so every surface the engine imports
+// (`bffApi` + both injected hooks) must be provided.
 rs.mock("@/lib/bff-api", () => ({
   bffApi,
   setRotatedTokenHandler: bffApi.setRotatedTokenHandler,
+  setUnauthorizedHandler: bffApi.setUnauthorizedHandler,
 }))
 
 // Stubs the auth RPCs for an existing group (no group creation).

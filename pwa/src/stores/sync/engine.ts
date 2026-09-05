@@ -13,7 +13,7 @@
 
 import { atom } from "nanostores"
 import PocketBase from "pocketbase"
-import { bffApi, setRotatedTokenHandler } from "@/lib/bff-api"
+import { bffApi, setRotatedTokenHandler, setUnauthorizedHandler } from "@/lib/bff-api"
 import { DEFAULT_BFF_URL, NOT_SIGNED_IN } from "@/lib/sync-constants"
 import { $catalog } from "../catalog"
 import { $categories } from "../categories"
@@ -104,6 +104,12 @@ const getPb = (): PocketBase => {
       return data
     }
     setRotatedTokenHandler(captureRotatedToken)
+    // Unified client 401 policy (mirrors admin's clear-and-bounce): a 401 from
+    // an account-level RPC means the session is dead — sign out so the user
+    // gets a clean re-auth instead of a lingering broken state.
+    setUnauthorizedHandler(() => {
+      if (getSession()) void signOut()
+    })
   }
   return pb
 }

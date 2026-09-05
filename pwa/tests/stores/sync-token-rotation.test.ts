@@ -156,3 +156,16 @@ describe("session token rotation (X-Session-Token capture)", () => {
     expect(pbState.authSaves).toEqual([])
   })
 })
+
+describe("unified client 401 policy (session-expiry sign-out)", () => {
+  test("a 401 from an account-level RPC signs the engine out", async () => {
+    await withFetch(
+      () => new Response(JSON.stringify({ error: "authentication required" }), { status: 401 }),
+      async () => {
+        await expect(bffApi.me(SESSION.token)).rejects.toThrow()
+      }
+    )
+    // The engine's injected unauthorized handler signed the session out.
+    expect(getSession()).toBeNull()
+  })
+})

@@ -66,6 +66,30 @@ function notifyRotatedToken(res: Response): void {
   if (token && rotatedTokenHandler) rotatedTokenHandler(token)
 }
 
+// --- session-expiry capture -------------------------------------------------
+
+type UnauthorizedHandler = () => void
+
+let unauthorizedHandler: UnauthorizedHandler | null = null
+
+/**
+ * Registers the handler invoked when an authenticated request comes back 401
+ * (session expired/invalidated server-side). The pwa's unified client 401
+ * policy (mirrors the admin's clear-and-bounce): the sync engine injects a
+ * handler that signs out, so a dead session surfaces as a clean re-auth
+ * instead of a lingering broken state. Layering: same stores → lib direction
+ * as the rotated-token handler. Pass `null` to unregister.
+ */
+export function setUnauthorizedHandler(
+  handler: UnauthorizedHandler | null
+): void {
+  unauthorizedHandler = handler
+}
+
+function notifyUnauthorized(res: Response): void {
+  if (res.status === 401 && unauthorizedHandler) unauthorizedHandler()
+}
+
 async function request<T>(
   path: string,
   init: RequestInit & { token?: string }
@@ -91,6 +115,10 @@ async function request<T>(
   // responses, but consuming it unconditionally costs nothing and the
   // engine-side capture no-ops unless the token actually changed.
   notifyRotatedToken(res)
+  // A 401 means the session is dead — let the injected handler decide how to
+  // surface it (pwa: sign out). The request still throws the BffError so the
+  // caller's error path is unchanged.
+  notifyUnauthorized(res)
   if (!res.ok) {
     let message = res.statusText
     let details: unknown

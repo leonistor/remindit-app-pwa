@@ -8,6 +8,12 @@
 // auth-refresh, which validates the signature and rotates the token — the
 // fresh token is then delivered back to the client (X-Session-Token header,
 // cookie re-issue) so stateless sessions outlive the original TTL.
+//
+// Transport note: both Bearer and cookie paths are SHIPPED and tested, but the
+// cookie path currently has NO consumer — pwa + admin authenticate with Bearer
+// only. It is RESERVED for the web module's SSR auth (HttpOnly cookies are the
+// right transport for a server-rendered origin; localStorage/Bearer is not
+// available to the SSR render). Keep both until web auth lands.
 
 import type { Context } from "hono"
 import { getCookie, setCookie } from "hono/cookie"
