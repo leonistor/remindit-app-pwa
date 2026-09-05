@@ -1,8 +1,9 @@
 import { Button, Card, Table, Text, Title } from "@mantine/core"
 import { createFileRoute } from "@tanstack/react-router"
-import { useCallback, useEffect, useState } from "react"
-import { type AdminGroup, api, getToken } from "../lib/api"
+import { useState } from "react"
+import { type AdminGroup, api } from "../lib/api"
 import { useRequireAuth } from "../lib/auth"
+import { adminList, useAdminResource } from "../lib/use-admin-resource"
 
 export const Route = createFileRoute("/groups")({
   component: GroupsPage,
@@ -10,27 +11,16 @@ export const Route = createFileRoute("/groups")({
 
 function GroupsPage() {
   useRequireAuth()
-  const [groups, setGroups] = useState<AdminGroup[]>([])
-  const [error, setError] = useState<string | null>(null)
+  const {
+    data: groups,
+    error,
+    load,
+    setError,
+  } = useAdminResource<AdminGroup[]>(adminList("/api/admin/groups"))
   // In-flight delete row: guards the Delete buttons against double-clicks
   // (a duplicate DELETE 404s into a spurious error message once the group is
   // already gone).
   const [deletingId, setDeletingId] = useState<string | null>(null)
-
-  const load = useCallback(async () => {
-    // The auth gate navigates away when the token is missing — skip the
-    // doomed request (it would 401 and clear a token that isn't there).
-    if (!getToken()) return
-    try {
-      setGroups(await api<AdminGroup[]>("/api/admin/groups"))
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
-    }
-  }, [])
-
-  useEffect(() => {
-    void load()
-  }, [load])
 
   const deleteGroup = async (id: string, name: string) => {
     // Guard before the sync confirm() too: a second invocation must not reach
@@ -44,7 +34,6 @@ function GroupsPage() {
       return
     }
     setDeletingId(id)
-    setError(null)
     try {
       await api(`/api/admin/groups/${id}`, { method: "DELETE" })
       await load()
@@ -79,7 +68,7 @@ function GroupsPage() {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {groups.map((group) => (
+            {groups?.map((group) => (
               <Table.Tr key={group.id}>
                 <Table.Td>{group.name}</Table.Td>
                 <Table.Td>{group.ownerUsername ?? group.owner}</Table.Td>

@@ -13,9 +13,10 @@ import {
   Title,
 } from "@mantine/core"
 import { createFileRoute } from "@tanstack/react-router"
-import { useCallback, useEffect, useState } from "react"
-import { type AdminUser, type AdminUserCreateBody, api, type AdminUserPage, getToken, type UserRole } from "../lib/api"
+import { useState } from "react"
+import { type AdminUserCreateBody, type AdminUserPage, api, type UserRole } from "../lib/api"
 import { useRequireAuth } from "../lib/auth"
+import { adminList, useAdminResource } from "../lib/use-admin-resource"
 
 export const Route = createFileRoute("/users")({
   component: UsersPage,
@@ -23,8 +24,13 @@ export const Route = createFileRoute("/users")({
 
 function UsersPage() {
   useRequireAuth()
-  const [users, setUsers] = useState<AdminUser[]>([])
-  const [error, setError] = useState<string | null>(null)
+  const {
+    data: page,
+    error,
+    load,
+    setError,
+  } = useAdminResource<AdminUserPage>(adminList("/api/admin/users"))
+  const users = page?.items ?? []
   const [creating, setCreating] = useState(false)
   const [busy, setBusy] = useState(false)
   // In-flight delete row: guards the Delete buttons against double-clicks
@@ -38,22 +44,6 @@ function UsersPage() {
     password: "",
     role: "user" as UserRole,
   })
-
-  const load = useCallback(async () => {
-    // The auth gate navigates away when the token is missing — skip the
-    // doomed request (it would 401 and clear a token that isn't there).
-    if (!getToken()) return
-    try {
-      const page = await api<AdminUserPage>("/api/admin/users")
-      setUsers(page.items)
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
-    }
-  }, [])
-
-  useEffect(() => {
-    void load()
-  }, [load])
 
   const createUser = async (event: React.FormEvent) => {
     event.preventDefault()

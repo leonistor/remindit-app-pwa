@@ -1,8 +1,8 @@
 import { Badge, Card, SimpleGrid, Text, Title } from "@mantine/core"
 import { createFileRoute } from "@tanstack/react-router"
-import { useCallback, useEffect, useState } from "react"
-import { type AdminOverview, api, getToken } from "../lib/api"
+import type { AdminOverview } from "../lib/api"
 import { useRequireAuth } from "../lib/auth"
+import { adminList, useAdminResource } from "../lib/use-admin-resource"
 
 export const Route = createFileRoute("/")({
   component: OverviewPage,
@@ -10,26 +10,9 @@ export const Route = createFileRoute("/")({
 
 function OverviewPage() {
   useRequireAuth()
-  const [data, setData] = useState<AdminOverview | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  // Client-side fetch: the SSR pass has no Bearer token, so the overview
-  // counts load after mount — same pattern as the users/groups dashboards.
-  const load = useCallback(async () => {
-    // The auth gate navigates away when the token is missing — skip the
-    // doomed request (it would 401 and clear a token that isn't there).
-    if (!getToken()) return
-    setError(null)
-    try {
-      setData(await api<AdminOverview>("/api/admin/overview"))
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
-    }
-  }, [])
-
-  useEffect(() => {
-    void load()
-  }, [load])
+  const { data, error } = useAdminResource<AdminOverview>(
+    adminList("/api/admin/overview")
+  )
 
   if (error) {
     return (
