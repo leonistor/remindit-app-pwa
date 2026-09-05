@@ -3,24 +3,23 @@ import {
   BRAND_LOGO_SVG,
   BRAND_NAME,
 } from "@remindit/common/brand"
+import { m } from "../paraglide/messages"
 import { getStats } from "../lib/stats"
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title: `${BRAND_NAME} — shopping lists that remind you`,
+        title: `${BRAND_NAME} — ${m.webTagline()}`,
       },
       {
         name: "description",
-        content:
-          "RemindIt is a local-first shopping list app: it learns how often you buy things and reminds you before you run out. Share lists with the people you shop with.",
+        content: m.webMetaDescription(),
       },
-      { property: "og:title", content: `${BRAND_NAME} — shopping lists that remind you` },
+      { property: "og:title", content: `${BRAND_NAME} — ${m.webTagline()}` },
       {
         property: "og:description",
-        content:
-          "Local-first shopping lists with smart reminders and shared groups.",
+        content: m.webOgDescription(),
       },
       { property: "og:type", content: "website" },
     ],
@@ -44,27 +43,29 @@ function Home() {
             width={96}
             height={96}
           />
-          <h1>Shopping lists that remind you</h1>
-          <p>
-            {BRAND_NAME} learns how often you buy things and nudges you before
-            you run out — offline-first, and shareable with the people you
-            shop with.
-          </p>
+          <h1>{m.webHeroTitle()}</h1>
+          <p>{m.webHeroDescription({ brandName: BRAND_NAME })}</p>
           <a className="cta" href="/download">
-            Get the app
+            {m.navGetTheApp()}
           </a>
           <a className="cta secondary" href="/features">
-            See features
+            {m.webCtaSeeFeatures()}
           </a>
 
           <div className="stats">
             <div>
               <strong>{stats.users ?? "—"}</strong>
-              {stats.users === null ? "users" : stats.users === 1 ? "user" : "users"}
+              {stats.users !== null &&
+                (stats.users === 1
+                  ? m.webStatUsersOne({ count: 1 })
+                  : m.webStatUsersOther({ count: stats.users }))}
             </div>
             <div>
               <strong>{stats.groups ?? "—"}</strong>
-              {stats.groups === null ? "groups" : stats.groups === 1 ? "group" : "groups"}
+              {stats.groups !== null &&
+                (stats.groups === 1
+                  ? m.webStatGroupsOne({ count: 1 })
+                  : m.webStatGroupsOther({ count: stats.groups }))}
             </div>
           </div>
         </div>

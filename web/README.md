@@ -44,6 +44,23 @@ bun run dev:all     # pwa + bff + web concurrently
 bun run build:web   # production build → dist/ (client + SSR server)
 ```
 
+## Internationalization
+
+All user-facing copy (nav, hero, features, download, feedback) is compiled
+from the **shared catalog** in `@remindit/common` (`common/messages/*.json`)
+via Paraglide JS — never hardcoded. `web/scripts/compile-i18n.ts` →
+`web/src/paraglide` (gitignored) with the `["baseLocale"]` strategy: web
+renders English server- and client-side, which keeps SSR polish with zero
+hydration-mismatch risk. A user-facing locale strategy (e.g. URL-based
+per-locale routing) is future work.
+
+- `bun run i18n:compile` (chained into `typecheck`; also run by the rsbuild
+  plugin in dev/build, so message edits hot-recompile)
+- `import { m } from "../paraglide/messages"` then `m.key({ param })` —
+  resolve inside render bodies only (no module-scope `m.*` calls)
+- Editing copy: change `common/messages/en.json` + `ro.json` together, never
+  the generated `web/src/paraglide`
+
 ## Deployment
 
 Deployed 2026-09-04 (Phase D): bm2-managed SSR at `:3200` behind Caddy at

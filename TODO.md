@@ -11,15 +11,18 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 ## In flight
 
 - **de/fr/uk translation drafts** — kick-started 2026-09-05 with
-  `bun scripts/kickstart-locale.ts` (local Ollama, translategemma:12b, tuned
-  prompt; see `pwa/docs/DEV.md` §Internationalization). ~40 keys across the
+  `bun run kickstart:locale` in `common/` (local Ollama, translategemma:12b,
+  tuned prompt; see `pwa/docs/DEV.md` §Internationalization). The shared-catalog
+  migration's `web*` keys were filled in the same pass. ~40 keys across the
   three files kept English after safety-net rejections (invented/renamed
-  `{tokens}`, mostly sentence-fragment keys) — listed in the run output and
-  need human review before the locales ship. Shipping caveat: locales in
-  `project.inlang/settings.json` get compiled by paraglide and **auto-served**
-  to matching browsers via the `preferredLanguage` strategy on the next
-  release — decide ship order / `APP_LOCALES` gating if the drafts aren't
-  reviewed by then. The language selector (`APP_LOCALES`) is still en+ro.
+  `{tokens}`, mostly sentence-fragment keys) and the fresh `web*` keys may have
+  leftovers too — listed in the run output and need human review before the
+  locales ship. Shipping caveat: locales in
+  `common/project.inlang/settings.json` get compiled by paraglide and
+  **auto-served** to matching browsers via the `preferredLanguage` strategy on
+  the next release — decide ship order / `APP_LOCALES` gating if the drafts
+  aren't reviewed by then. The language selector (`APP_LOCALES`) is still
+  en+ro; **web stays baseLocale** (English-only) until the drafts are reviewed.
 
 ## Next (V6 + wishlist, roadmap §1)
 
@@ -27,6 +30,46 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 - [ ] LLM/MCP integration
 - [ ] Item attributes (photo / quantity / price)
 - [ ] Native app
+
+## Next session: web locale routing — Vite-adapter migration
+
+**Goal:** give `web/` real per-locale URLs (`/ro`, `/de`, `/fr`, `/uk`) so the
+translated catalog can actually be *served* (today it only compiles into the
+bundles). Blocked on a framework swap: **Paraglide's locale routing rides a
+server middleware**, and the current **Rsbuild** adapter has NO user
+server-entry hook — `tanstackStart()` auto-injects `server.setup`
+(`start-plugin-core/dist/esm/rsbuild/plugin.js:132`) and there is no
+`src/server.ts`. The **Vite** adapter requires owning `src/server.ts`, which is
+exactly the seam for `paraglideMiddleware` + the router `rewrite`
+(`deLocalizeUrl`/`localizeUrl`).
+
+**Verified facts** (all confirmed against installed node_modules, 2026-09-05):
+- `@tanstack/react-start` exposes `plugin/vite`; `createStartHandler`/
+  `defaultStreamHandler`/`StartServer` ship via `@tanstack/react-start/server`.
+- `paraglideVitePlugin` exists in `@inlang/paraglide-js` (already a dep).
+- `web/src/paraglide/server.js` is already emitted (no-op under `["baseLocale"]`).
+- Vite `preview` serves SSR via `previewServerPlugin` → **deploy launcher
+  `infra/bin/start-web.sh` (`bun run preview`) and the bm2 ecosystem stay
+  unchanged**.
+- Gotcha: vite inlines only `VITE_*` env by default — must set
+  `envPrefix: ["PUBLIC_"]` or web silently loses `PUBLIC_BFF_URL`/`PUBLIC_PWA_URL`.
+
+**Staged plan** (each stage gated: `typecheck` ×6 + lint + `build:web` + live
+smoke of the 4 routes for SSR/hydration):
+1. **Adapter swap, zero behavior change.** Add `vite` + `@vitejs/plugin-react`
+   to web deps, remove `@rsbuild/core`/`@rsbuild/plugin-react`; `vite.config.ts`
+   with `[tanstackStart(), react(), paraglideVitePlugin(OPTIONS)]` + `envPrefix`;
+   new `src/server.ts`, `src/client.tsx`, `src/router.tsx` (routes/`stats.ts`/
+   `__root.tsx` carry over; `routeTree.gen.ts` regens, already biome-excluded).
+   Keep `strategy: ["baseLocale"]` — output identical to today.
+2. **Enable locale routing.** `strategy: ["url", "baseLocale"]` + `urlPatterns`
+   (en unprefixed at `/`, then `/ro`, `/de`, `/fr`, `/uk`), router `rewrite`,
+   `paraglideMiddleware` in `server.ts`, `routeStrategies` excluding `/_serverFn/*`.
+3. **Ship.** Rebuild + `bm2 reload web`; verify prod URLs + canonical/hreflang.
+4. **Flip drafts live** (gated on de/fr/uk review) when ready.
+**Risks:** React-plugin order (`tanstackStart()` before `react()` on vite —
+mirror the official example); server-fn exclusion; `PUBLIC_*` prefix (highest
+blast radius — assert stats + PWA URL in a smoke); vite is new to this repo.
 
 ## Deferred (by decision — revisit when triggered)
 

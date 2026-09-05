@@ -5,6 +5,10 @@
  * locale resolution (localStorage → preferredLanguage → baseLocale). No
  * nanostore is needed: switching locales performs a full document reload, so
  * there is no reactive state to keep in sync (all app state is persisted).
+ *
+ * The translation catalog lives in `@remindit/common` (see
+ * `pwa/scripts/compile-i18n.ts`); this module holds what's app-specific: the
+ * locales offered to users.
  */
 
 import type { Locale } from "@/paraglide/runtime"
@@ -19,8 +23,9 @@ export interface AppLocale {
 /**
  * Locales offered by the language pickers (onboarding step 1 + Profile), in
  * display order. Adding a language: register it in
- * `project.inlang/settings.json`, add `messages/{locale}.json`, then add an
- * entry here and run `bun run i18n:compile`.
+ * `common/project.inlang/settings.json`, add `common/messages/{locale}.json`
+ * (or kick-start a draft with `bun run kickstart:locale` in `common/`), then
+ * add an entry here and run `bun run i18n:compile`.
  */
 export const APP_LOCALES: readonly AppLocale[] = [
   { code: "en", nativeName: "English" },

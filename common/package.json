@@ -9,7 +9,8 @@
     "./brand": "./src/brand.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit --pretty"
+    "typecheck": "tsc --noEmit --pretty",
+    "kickstart:locale": "bun scripts/kickstart-locale.ts"
   },
   "devDependencies": {
     "typescript": "^7.0.2"
