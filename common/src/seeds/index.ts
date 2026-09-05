@@ -3,8 +3,10 @@
 // Reads the reviewable JSON (`common/seeds/platform.json`) and normalizes it
 // into store-shaped structures for the bff seeder: validates every cross
 // reference (owner/member usernames, item→category, list→item, frequency
-// values), defaults missing fields, and derives the deterministic avatar +
-// superuser password. Pure + sync so the seeder and tests trivially share it.
+// values), defaults missing fields, and derives the deterministic avatar.
+// The shared demo password is passed in by the caller (sourced from `.env` as
+// `SEED_PASSWORD`, D9) so the committed dataset carries no credential-shaped
+// strings. Pure + sync so the seeder and tests trivially share it.
 //
 // Imported via the `@remindit/common/seeds` subpath (never from the root
 // export) — it is the one common module that knowingly imports JSON.
@@ -91,7 +93,6 @@ interface RawTeam {
   history?: RawHistorySpec
 }
 interface RawPlatform {
-  password: string
   users: RawUser[]
   teams: RawTeam[]
 }
@@ -109,11 +110,15 @@ const DEFAULT_HISTORY: SeedHistorySpec = { days: 180, seed: 1 }
  * Normalize the raw JSON into typed seed structures. Throws on any dangling
  * reference so a bad dataset fails loudly at seed time (and in tests) instead
  * of silently writing half a team.
+ *
+ * @param password the shared demo password assigned to every seeded user —
+ *   caller-supplied (bff reads it from `SEED_PASSWORD`) so the committed
+ *   dataset stays free of credential-shaped strings.
  */
-export function loadPlatformSeed(): SeedPlatform {
+export function loadPlatformSeed(password: string): SeedPlatform {
   const raw = rawPlatform as RawPlatform
-  if (!raw.password || raw.password.length < 8) {
-    FAIL(`dataset password must be ≥8 chars (got "${raw.password}")`)
+  if (!password || password.length < 8) {
+    FAIL(`dataset password must be ≥8 chars (got "${password}")`)
   }
 
   const usernames = new Set<string>()
@@ -130,7 +135,7 @@ export function loadPlatformSeed(): SeedPlatform {
     return {
       username: u.username,
       email: u.email,
-      password: raw.password,
+      password,
       firstName,
       lastName,
       role: u.role === "admin" ? "admin" : "user",
@@ -182,7 +187,7 @@ export function loadPlatformSeed(): SeedPlatform {
     }
   })
 
-  return { password: raw.password, users, teams }
+  return { password, users, teams }
 }
 
 /**

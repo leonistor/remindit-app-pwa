@@ -27,6 +27,14 @@ export const env = {
   pocketbaseAdminEmail: process.env.POCKETBASE_ADMIN_EMAIL,
   pocketbaseAdminPassword: process.env.POCKETBASE_ADMIN_PASSWORD,
   /**
+   * Shared dev/demo password for every platform-seed user (`bun run seed:bff`).
+   * Kept out of the committed dataset (`common/seeds/platform.json`) so the
+   * reviewable JSON carries no credential-shaped strings (gitguardian). The
+   * real value lives in the root .env; this fallback only covers "forgot to
+   * set it" dev runs.
+   */
+  seedPassword: process.env.SEED_PASSWORD ?? "change-me-dev-only",
+  /**
    * Session cookie: `Secure` attribute — enable in production (TLS behind the
    * reverse proxy); dev http://localhost keeps it false.
    */

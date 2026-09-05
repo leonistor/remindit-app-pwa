@@ -95,9 +95,12 @@ bun run seed:bff  # PocketBase must be running; refuses NODE_ENV=production
   content by unique `(team, localId)` where category/item local ids reuse the
   pwa scheme (`hashId("cat::…")` / `hashId("item::…")`) — a fresh pwa joining
   a seeded group reconciles with **identical ids**.
-- **Every seed user's password is `remindit-seed`** (dev/demo only). Admin app:
-  `admin@example.com` / `remindit-seed`. Login as any username to demo sync,
-  group switching, invite-by-username and notifications.
+- **Every seed user shares the same dev/demo password — `SEED_PASSWORD` from
+  the root `.env`** (`bun run seed:bff` reads it; `.env.example` shows a
+  placeholder). The committed dataset carries no password so it stays
+  credential-free for scanners. Admin app: `admin@example.com` / that password.
+  Login as any username to demo sync, group switching, invite-by-username and
+  notifications.
 - Runs against the dev/local DB. Prod refuses to seed (env guard). A pristine
   demo = fresh `pb_data` (delete `bff/pb_data`, `dev:bff` re-downloads/migrates,
   then `seed:bff`).

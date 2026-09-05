@@ -199,7 +199,10 @@ for (const t of teams) {
   }
 }
 
-const out = { password: "remindit-seed", users, teams }
+// The password is intentionally absent from the dataset — it is supplied at
+// seed time from `SEED_PASSWORD` (`bff/src/env.ts`), keeping this reviewable
+// file free of credential-shaped strings.
+const out = { users, teams }
 const file = resolve(import.meta.dir, "..", "seeds", "platform.json")
 writeFileSync(file, `${JSON.stringify(out, null, 2)}\n`)
 console.log(`wrote ${file} (${users.length} users, ${teams.length} teams)`)

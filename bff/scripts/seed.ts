@@ -30,7 +30,7 @@ async function main(): Promise<void> {
     process.exit(1)
   }
 
-  const dataset = loadPlatformSeed()
+  const dataset = loadPlatformSeed(env.seedPassword)
   const pb = await forSuperuser()
   const summary = await seedPlatform(pb, dataset)
 
