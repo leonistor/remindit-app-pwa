@@ -7,18 +7,19 @@
  * pwa and web compile from it into their own gitignored `src/paraglide`. The
  * `project`/`outdir` paths are resolved against the cwd (`web/`).
  *
- * Locale strategy: web is SSR (TanStack Start) and currently ships English
- * only — rendering the baseLocale server- and client-side keeps the polish of
- * typed `m.*` functions with zero hydration-mismatch risk. A user-facing
- * locale strategy (URL-based per-locale routing or the storage chain) is
- * future work; bump this then.
+ * Locale strategy: web is SSR (TanStack Start). URL-based per-locale routing
+ * (en unprefixed at `/`, then `/ro`, `/de`, `/fr`, `/uk`) renders the shared
+ * catalog server-side per request; the optional `{-$locale}` route segment
+ * keeps the prefix in the URL client-side. `src/server.ts` wraps the request
+ * handler with `paraglideMiddleware`, which drives SSR `getLocale()` and
+ * redirects mismatched document requests to the canonical localized URL.
  */
 import type { CompilerOptions } from "@inlang/paraglide-js"
 
 export const WEB_PARAGLIDE_COMPILER_OPTIONS: CompilerOptions = {
   project: "../common/project.inlang",
   outdir: "./src/paraglide",
-  strategy: ["baseLocale"],
+  strategy: ["url", "baseLocale"],
   emitTsDeclarations: true,
 }
 

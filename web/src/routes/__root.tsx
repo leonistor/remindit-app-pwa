@@ -59,7 +59,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       <body>
         <header className="site-header">
           <div className="container">
-            <Link to="/" className="brand">
+            <Link to="/{-$locale}" className="brand">
               <img
                 className="brand-logo"
                 // Brand logo from @remindit/common/brand (see styles note).
@@ -71,8 +71,8 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
               {BRAND_NAME}
             </Link>
             <nav className="nav">
-              <Link to="/features">{m.navFeatures()}</Link>
-              <Link to="/download">{m.navGetTheApp()}</Link>
+              <Link to="/{-$locale}/features">{m.navFeatures()}</Link>
+              <Link to="/{-$locale}/download">{m.navGetTheApp()}</Link>
             </nav>
           </div>
         </header>

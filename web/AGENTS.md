@@ -16,6 +16,13 @@ in the root [AGENTS.md](../AGENTS.md); the phased rollout plan in
   Paraglide catalog (`common/messages/*.json`), consumed via `src/paraglide`
   (compile in `scripts/compile-i18n.ts`, `i18n:compile`, inside render bodies —
   no module-scope `m.*` calls). Never hardcode user-facing English.
+- **Locale routing (URL-based, five locales)** — `strategy: ["url",
+  "baseLocale"]` with en unprefixed at `/` and `/ro`/`/de`/`/fr`/`/uk` prefixed
+  (paraglide's default url pattern). `src/server.ts` wraps the request handler
+  with `paraglideMiddleware` + a request-scoped `AsyncLocalStorage` that drives
+  SSR `getLocale()`; the router matches the optional `{-$locale}` segment so the
+  prefix survives client-side navigation. Keep links on `{-$locale}` routes and
+  add new pages under `src/routes/{-$locale}/`.
 - **Env (D9):** `PUBLIC_BFF_URL` (server-side stats fetch),
   `PUBLIC_PWA_URL` (download CTA), `WEB_PORT` (dev server, default 3200).
   Read through `process.env` — no module env file.

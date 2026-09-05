@@ -30,66 +30,22 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 - [ ] Item attributes (photo / quantity / price)
 - [ ] Native app
 
-## Next session: web locale routing — Rsbuild-native (no Vite move)
+## Shipped: web locale routing — Rsbuild-native (2026-09-05, branch `mvp-web`)
 
-**Goal:** give `web/` real per-locale URLs (`/ro`, `/de`, `/fr`, `/uk`) so the
-translated catalog can actually be *served* (today it only compiles into the
-bundles).
-
-**Updated premise (2026-09-05 research) — NO framework swap needed.** The
-earlier note claimed the **Rsbuild** adapter had no `src/server.ts` seam and
-forced a Vite move. Verified against the installed
-`@tanstack/react-start@1.168.49` (start-plugin-core source) that **Rsbuild
-supports the same server-entry seam as Vite**: `resolveStartEntryPlan()`
-resolves a user `src/server.ts` (`resolveEntry({ configuredEntry:
-startConfig.server.entry, defaultEntry: 'server', required: false })`) and the
-rsbuild `server.setup` middleware (`createServerSetup`) dispatches ALL SSR
-traffic — server functions + page navigations — to that bundle's `default`
-fetch handler in dev, preview, and prerender. So `export default
-createStartHandler({ handler: defaultStreamHandler })` is first-class on
-Rsbuild. The "Portable application model" is the TanStack design: *keep the
-routes, change the output* — one authoring surface for Vite and Rsbuild.
-
-**Verified facts** (confirmed against installed node_modules, 2026-09-05):
-- `createStartHandler` / `defaultStreamHandler` / `StartServer` ship via
-  `@tanstack/react-start/server` (re-exports `react-start-server`), and
-  `createStartHandler({ handler })` returns the exact `{ default: fetch }`
-  shape the rsbuild `server-middleware.js` + `post-build.js` consume.
-- The compiler is triggered by the rspack plugin + `scripts/compile-i18n.ts` —
-  no `paraglideVitePlugin` even exists in the dependency this adapter path uses.
-- `web/src/paraglide/server.js` is already emitted (a no-op under
-  `["baseLocale"]`); switching the strategy to include `"url"` turns it into
-  the real `paraglideMiddleware`.
-- `rsbuild`'s preview SSR reads the same server bundle → **deploy launcher
-  `infra/bin/start-web.sh` (`bun run preview`) and the bm2 ecosystem stay
-  unchanged**.
-- rsbuild inlines `PUBLIC_*` natively — the Vite `envPrefix` gotcha does NOT
-  apply (nothing to configure).
-
-**Staged plan** (each stage gated: `typecheck` + lint + `build:web` + live
-smoke of the 4 routes for SSR/hydration + a prerender check):
-1. **Add the server entry, zero auth/stat behavior change.** New
-   `web/src/server.ts`: `createStartHandler(defaultStreamHandler)`; keep
-   `strategy: ["baseLocale"]`. This exercises the seam in isolation — output
-   must be byte-identical to today (dev, preview, `/_serverFn/*`).
-2. **Enable locale routing.** `strategy: ["url", "baseLocale"]` +
-   `urlPatterns` (en unprefixed at `/`, then `/ro`, `/de`, `/fr`, `/uk`;
-   model on the `IgorSzymanski/tanstack-start-paraglide` template), run
-   `paraglideMiddleware` at the top of the server entry (it strips the prefix,
-   sets the locale + cookie, drives the router `rewrite`), and localize links
-   (`localizeUrl`/`localizeHref` wrapper around TanStack `Link`, or the
-   strategy's built-in URL handling on `setLocale`). Exclude `/_serverFn/*`
-   from the URL strategy so typed server calls aren't parsed as a locale.
-3. **Ship.** Rebuild + `bm2 reload web`; verify prod URLs + canonical/hreflang.
-4. **Flip the languages live.** The de/fr/uk catalogs are **accepted as-is**
-   (2026-09-05) — no review gate remains on the languages themselves; flipping
-   them on web is purely this change.
-**Risks:** `paraglideMiddleware`'s exact request→`{ request, locale, response }`
-round-trip must be adapted to `createStartHandler`'s `RequestHandler` signature
-(confirm the reference template's wiring on the server entry, not `ssr.tsx`);
-`routeStrategies` to keep `/_serverFn/*` + static assets out of the locale
-parser; hydration must agree between the stripped server URL and the
-client-preferred locale on first paint.
+Delivered the URL-based per-locale routing on the **Rsbuild** adapter (no Vite
+move). `web/src/server.ts` wraps the injected-default `createStartHandler`
+with `paraglideMiddleware` + a request-scoped `AsyncLocalStorage` (`getLocale`
+overwritten once, at module scope, to read the store — survives streaming
+SSR); `strategy: ["url", "baseLocale"]` (en unprefixed, /ro//de//fr//uk
+prefixed — Paraglide's **default** url pattern; the earlier custom
+`urlPatterns` catch-all matched `/de` as en, so they were dropped); routes
+moved under the optional `{-$locale}` segment so Links keep the prefix
+client-side. Verified: SSR in all five locales (dev + `bun run preview`),
+client nav keeps the prefix, no hydration errors. Follow-ups on this branch:
+an in-page language switcher (`setLocale`), canonical/hreflang meta, and
+redirecting `/en/*` → `/`. (This replaces the "Next session" plan text; the
+premise research, staged plan, and `IgorSzymanski/tanstack-start-paraglide`
+reference live in git history + `docs/ROADMAP.md` §7.)
 
 ## Architecture hardening — shipped 2026-09-05
 

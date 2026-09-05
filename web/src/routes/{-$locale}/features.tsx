@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { BRAND_NAME } from "@remindit/common/brand"
-import { m } from "../paraglide/messages"
+import { m } from "../../paraglide/messages"
 
-export const Route = createFileRoute("/features")({
+export const Route = createFileRoute("/{-$locale}/features")({
   head: () => ({
     meta: [
       { title: `${m.navFeatures()} — ${BRAND_NAME}` },

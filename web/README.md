@@ -9,9 +9,13 @@ module rules: [AGENTS.md](AGENTS.md).
 
 | Route | Content |
 |-------|---------|
-| `/` | Hero (brand logo + name from common), live platform stats, install CTA |
+| `/` (or `/ro`, `/de`, `/fr`, `/uk`) | Hero (brand logo + name from common), live platform stats, install CTA |
 | `/features` | Feature cards (catalog, recommendations, offline-first, shared groups) |
 | `/download` | PWA install CTA — links to `PUBLIC_PWA_URL` with per-platform steps |
+
+Every route lives under an optional `{-$locale}` segment: the site is served
+in all five locales with **en unprefixed** at `/` and `/ro`/`/de`/`/fr`/`/uk`
+prefixed. See [AGENTS.md](AGENTS.md) §Locale routing.
 
 SEO: per-route `head()` meta (title, description, Open Graph) + favicon as an
 inline SVG data URI rendered from `BRAND_LOGO_SVG` (no asset pipeline needed).
@@ -49,10 +53,14 @@ bun run build:web   # production build → dist/ (client + SSR server)
 All user-facing copy (nav, hero, features, download) is compiled
 from the **shared catalog** in `@remindit/common` (`common/messages/*.json`)
 via Paraglide JS — never hardcoded. `web/scripts/compile-i18n.ts` →
-`web/src/paraglide` (gitignored) with the `["baseLocale"]` strategy: web
-renders English server- and client-side, which keeps SSR polish with zero
-hydration-mismatch risk. A user-facing locale strategy (e.g. URL-based
-per-locale routing) is future work.
+`web/src/paraglide` (gitignored) with the **`["url", "baseLocale"]` strategy**:
+**en unprefixed at `/`, `/ro`/`/de`/`/fr`/`/uk` prefixed**, using Paraglide's
+default url pattern (baseLocale unprefixed). `src/server.ts` wraps the request
+handler with `paraglideMiddleware` and a request-scoped `AsyncLocalStorage`
+(`getLocale()` is overwritten once, at module scope, to read from it) so SSR
+renders the URL's locale — including under streaming — while the router matches
+the optional `{-$locale}` route segment to keep the prefix on client-side
+navigation. Locale fallback for missing keys is English (baseLocale).
 
 - `bun run i18n:compile` (chained into `typecheck`; also run by the rsbuild
   plugin in dev/build, so message edits hot-recompile)

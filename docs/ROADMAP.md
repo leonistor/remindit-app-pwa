@@ -255,11 +255,11 @@ narratives live in git history. Decisions + env format: §2 and §4–6.
   **removed 2026-09-05 (D13)**.
 - **Cross-cutting — shared i18n catalog** (`feat/shared-i18n-catalog`):
   catalog relocated to `common/`; pwa + web compile it via Paraglide; drift
-  guard covers all locales (en↔ro strict, de/fr/uk ⊆ en). Follow-up (TODO):
-  **web locale routing** — verified 2026-09-05 that the **Rsbuild adapter
-  supports `src/server.ts`** (entry planner resolves it; `createServerSetup`
-  dispatches SSR to its `default` fetch handler), so `paraglideMiddleware`
-  plugs in without the Vite move previously assumed.
+  guard covers all locales (en↔ro strict, de/fr/uk ⊆ en). **Web locale
+  routing delivered 2026-09-05 on `mvp-web`** — the Rsbuild adapter supports
+  `src/server.ts` (verified in start-plugin-core source), so
+  `paraglideMiddleware` wraps the request handler with a request-scoped
+  `AsyncLocalStorage` (`strategy: ["url","baseLocale"]`, en unprefixed).
 
 > **Gotchas (tribal knowledge — don't rediscover them):**
 >

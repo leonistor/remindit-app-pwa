@@ -1,12 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router"
-import {
-  BRAND_LOGO_SVG,
-  BRAND_NAME,
-} from "@remindit/common/brand"
-import { m } from "../paraglide/messages"
-import { getStats } from "../lib/stats"
+import { Link, createFileRoute } from "@tanstack/react-router"
+import { BRAND_LOGO_SVG, BRAND_NAME } from "@remindit/common/brand"
+import { m } from "../../paraglide/messages"
+import { getStats } from "../../lib/stats"
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/{-$locale}/")({
   head: () => ({
     meta: [
       {
@@ -45,12 +42,12 @@ function Home() {
           />
           <h1>{m.webHeroTitle()}</h1>
           <p>{m.webHeroDescription({ brandName: BRAND_NAME })}</p>
-          <a className="cta" href="/download">
+          <Link className="cta" to="/{-$locale}/download">
             {m.navGetTheApp()}
-          </a>
-          <a className="cta secondary" href="/features">
+          </Link>
+          <Link className="cta secondary" to="/{-$locale}/features">
             {m.webCtaSeeFeatures()}
-          </a>
+          </Link>
 
           <div className="stats">
             <div>

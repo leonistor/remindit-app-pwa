@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { BRAND_NAME } from "@remindit/common/brand"
-import { m } from "../paraglide/messages"
+import { m } from "../../paraglide/messages"
 
-export const Route = createFileRoute("/download")({
+export const Route = createFileRoute("/{-$locale}/download")({
   head: () => ({
     meta: [
       { title: `${m.navGetTheApp()} — ${BRAND_NAME}` },
