@@ -7,7 +7,11 @@
 // lifecycle literals live where they are dispatched (services/groups.ts).
 import type PocketBase from "pocketbase"
 import type { Notification } from "../contracts"
-import { withSuperuser } from "../repositories/pocketbase"
+import {
+  createNotificationSuperuser,
+  listNotifications,
+  updateNotification,
+} from "../repositories/notifications"
 
 const toNotification = (record: Record<string, unknown>): Notification => ({
   id: record.id as string,
@@ -33,9 +37,7 @@ export const dispatch = async (
   payload: Record<string, unknown>
 ): Promise<void> => {
   try {
-    await withSuperuser((client) =>
-      client.collection("notifications").create({ user, team, type, payload })
-    )
+    await createNotificationSuperuser({ user, team, type, payload })
   } catch (error) {
     console.error(
       `[notifications] dispatch failed (${type} → user ${user}):`,
@@ -47,12 +49,7 @@ export const dispatch = async (
 export const notificationsService = {
   /** Own notifications (PB listRule: user = auth.id). */
   async list(client: PocketBase): Promise<Notification[]> {
-    const result = await client.collection("notifications").getList(1, 500, {
-      sort: "-created",
-    })
-    return result.items.map((record) =>
-      toNotification(record as unknown as Record<string, unknown>)
-    )
+    return (await listNotifications(client)).map(toNotification)
   },
 
   /** Mark-read / unread (PB updateRule: user = auth.id). */
@@ -61,9 +58,6 @@ export const notificationsService = {
     id: string,
     read: boolean
   ): Promise<Notification> {
-    const record = (await client
-      .collection("notifications")
-      .update(id, { read })) as unknown as Record<string, unknown>
-    return toNotification(record)
+    return toNotification(await updateNotification(client, id, read))
   },
 }

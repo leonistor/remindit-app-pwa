@@ -8,6 +8,8 @@
 
 import { UNCATEGORIZED_NAME } from "@remindit/common"
 import type PocketBase from "pocketbase"
+import { createMember } from "../repositories/members"
+import { createTeam, deleteTeam } from "../repositories/teams"
 
 export interface ProvisionedTeam {
   team: Record<string, unknown>
@@ -20,22 +22,16 @@ export async function provisionTeam(
   ownerId: string,
   name: string
 ): Promise<ProvisionedTeam> {
-  const team = (await client.collection("teams").create({
-    name,
-    owner: ownerId,
-  })) as unknown as Record<string, unknown>
+  const team = await createTeam(client, { name, owner: ownerId })
+  const teamId = team.id as string
   try {
-    await client.collection("team_members").create({
-      team: team.id,
-      user: ownerId,
-      role: "owner",
-    })
+    await createMember(client, { team: teamId, user: ownerId, role: "owner" })
   } catch (error) {
     console.error(
-      `[provision] owner-membership create failed for ${team.id}, rolling back team:`,
+      `[provision] owner-membership create failed for ${teamId}, rolling back team:`,
       error
     )
-    await client.collection("teams").delete(team.id as string)
+    await deleteTeam(client, teamId)
     throw new Error("failed to create team ownership — please retry")
   }
   // Sentinel (uncategorized) category — best-effort, the sync layer expects
@@ -45,11 +41,11 @@ export async function provisionTeam(
     sentinel = (await client.collection("categories").create({
       name: UNCATEGORIZED_NAME,
       frequency: "monthly",
-      team: team.id,
+      team: teamId,
     })) as unknown as Record<string, unknown>
   } catch (error) {
     console.error(
-      `[provision] sentinel category create failed for ${team.id}:`,
+      `[provision] sentinel category create failed for ${teamId}:`,
       error
     )
   }

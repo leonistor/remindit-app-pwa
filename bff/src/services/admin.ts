@@ -10,6 +10,7 @@ import type {
   AdminUserCreateBody,
 } from "../contracts"
 import { withSuperuser } from "../repositories/pocketbase"
+import { deleteTeam, listTeamsByOwner } from "../repositories/teams"
 
 const stamps = (record: Record<string, unknown>) => ({
   created: record.created as string | undefined,
@@ -103,9 +104,7 @@ export const adminService = {
 
   async deleteUser(id: string): Promise<void> {
     await withSuperuser(async (admin) => {
-      const ownedTeams = await admin.collection("teams").getFullList({
-        filter: admin.filter("owner = {:userId}", { userId: id }),
-      })
+      const ownedTeams = await listTeamsByOwner(admin, id)
       if (ownedTeams.length > 0) {
         throw new Error(
           `User owns ${ownedTeams.length} team(s). Reassign or delete them first.`
@@ -138,6 +137,6 @@ export const adminService = {
   },
 
   async deleteGroup(id: string): Promise<void> {
-    await withSuperuser((admin) => admin.collection("teams").delete(id))
+    await withSuperuser((admin) => deleteTeam(admin, id))
   },
 }

@@ -7,6 +7,17 @@
 import type PocketBase from "pocketbase"
 import type { Group, Member, MemberInviteBody } from "../contracts"
 import { toPublicUser } from "../lib/user"
+import {
+  createMember,
+  deleteMember,
+  getMember,
+  listTeamMemberDetails,
+} from "../repositories/members"
+import {
+  deleteTeam,
+  getTeam,
+  listTeams,
+} from "../repositories/teams"
 import { dispatch } from "./notifications"
 import { provisionTeam } from "./provision"
 
@@ -21,12 +32,7 @@ const toGroup = (record: Record<string, unknown>): Group => ({
 export const groupsService = {
   /** Groups the caller owns or is a member of (PB rules scope the list). */
   async list(client: PocketBase): Promise<Group[]> {
-    const result = await client.collection("teams").getList(1, 200, {
-      sort: "-created",
-    })
-    return result.items.map((record) =>
-      toGroup(record as unknown as Record<string, unknown>)
-    )
+    return (await listTeams(client)).map(toGroup)
   },
 
   async create(
@@ -39,33 +45,26 @@ export const groupsService = {
   },
 
   async get(client: PocketBase, id: string): Promise<Group> {
-    const record = (await client
-      .collection("teams")
-      .getOne(id)) as unknown as Record<string, unknown>
-    return toGroup(record)
+    return toGroup(await getTeam(client, id))
   },
 
   // Group deletion cascades its data (schema: group-owned fields are
   // cascadeDelete) and is owner-only via the PB rule.
   async remove(client: PocketBase, id: string): Promise<void> {
-    await client.collection("teams").delete(id)
+    await deleteTeam(client, id)
   },
 
   async listMembers(client: PocketBase, teamId: string): Promise<Member[]> {
     // Pre-flight: verify the caller has access to this team (owner or member).
     // Without this, a non-member gets 200 [] instead of a 404 — inconsistent
     // with GET /:id which 404s via the PB viewRule.
-    await client.collection("teams").getOne(teamId)
+    await getTeam(client, teamId)
     // team_member_details view: memberships × public profiles pre-joined —
     // no expand chain, no fallback. The view deliberately omits email
     // (emailVisibility masking doesn't apply to view rows), so the profile
     // is built with an empty email; the UserPublic contract allows it.
-    const result = await client.collection("team_member_details").getFullList({
-      filter: client.filter("team = {:teamId}", { teamId }),
-      sort: "joinedAt",
-    })
-    return result.map((record) => {
-      const r = record as unknown as Record<string, unknown>
+    const rows = await listTeamMemberDetails(client, teamId)
+    return rows.map((r) => {
       const user = toPublicUser(
         {
           id: r.userId,
@@ -92,15 +91,15 @@ export const groupsService = {
     groupId: string,
     body: MemberInviteBody
   ): Promise<Member> {
-    const record = (await client.collection("team_members").create(
+    const record = await createMember(
+      client,
       {
         team: groupId,
         user: body.userId,
         role: body.role,
       },
-      // `expand` must ride the QUERY string — in the body PB ignores it.
-      { query: { expand: "user" } }
-    )) as unknown as Record<string, unknown>
+      { expandUser: true }
+    )
     const expand = record.expand as
       | { user?: Record<string, unknown> }
       | undefined
@@ -129,10 +128,10 @@ export const groupsService = {
     // here never fails the invite.
     try {
       const [team, actor] = await Promise.all([
-        client.collection("teams").getOne(groupId),
+        getTeam(client, groupId),
         client.collection("users").authRefresh(),
       ])
-      const t = team as unknown as Record<string, unknown>
+      const t = team
       const a = actor.record as unknown as Record<string, unknown>
       await dispatch(body.userId, groupId, "member.added", {
         teamId: groupId,
@@ -155,21 +154,19 @@ export const groupsService = {
     // no longer read the team — teams viewRule is owner ∨ member). A denied
     // read 404s like the old blind delete did, so the error surface is
     // unchanged.
-    const membership = (await client
-      .collection("team_members")
-      .getOne(memberId)) as unknown as Record<string, unknown>
+    const membership = await getMember(client, memberId)
     const targetUser = membership.user as string
     const teamId = membership.team as string
     const [team, actor] = await Promise.all([
-      client.collection("teams").getOne(teamId),
+      getTeam(client, teamId),
       client.collection("users").authRefresh(),
     ])
-    await client.collection("team_members").delete(memberId)
+    await deleteMember(client, memberId)
     // Lifecycle notification (D4): a self-leave notifies the OWNER, a
     // removal notifies the REMOVED user. Same best-effort contract as
     // invite() — never fails the removal.
     try {
-      const t = team as unknown as Record<string, unknown>
+      const t = team
       const a = actor.record as unknown as Record<string, unknown>
       const selfLeft = (a.id as string) === targetUser
       await dispatch(
