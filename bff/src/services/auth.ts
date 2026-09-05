@@ -11,7 +11,7 @@ import type {
   UserPublic,
 } from "../contracts"
 import { toPublicUser } from "../lib/user"
-import { pb } from "../repositories/pocketbase"
+import { forToken, pb } from "../repositories/pocketbase"
 import { feedbackService } from "./feedback"
 
 export const authService = {
@@ -37,7 +37,13 @@ export const authService = {
   },
 
   async login(body: LoginBody): Promise<AuthResponse> {
-    const auth = await pb
+    // Auth on a per-call client (never the shared `pb` singleton): the
+    // singleton must stay anonymous so the next register's create still hits
+    // the guest createRule (`@request.auth.id = ""`). Authing it here would
+    // make every later registration 400 "Failed to create record" — the
+    // singleton survived the first login with a now-rejected id.
+    const client = forToken("")
+    const auth = await client
       .collection("users")
       .authWithPassword(body.email, body.password)
     return {

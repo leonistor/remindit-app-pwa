@@ -27,8 +27,8 @@ export type FieldDef = {
   hidden?: boolean
   presentable?: boolean
   /** text */
-  min?: number
-  max?: number
+  min?: number | null
+  max?: number | null
   pattern?: string
   autogeneratePattern?: string
   /** number */
@@ -171,7 +171,12 @@ const users: CollectionDef = {
       type: "select",
       name: "role",
       required: false,
-      hidden: true,
+      // NOT hidden: the admin app gates on role from the login/auth response
+      // and `requireAdmin` reads `record.role` from the owner-scoped record.
+      // PB omits hidden fields even from the record owner's own auth/detail
+      // reads, which would make every admin check see "user" (phase-6 smoke
+      // passed only because the dev DB had drifted to hidden:false).
+      hidden: false,
       presentable: false,
       maxSelect: 1,
       values: ["user", "admin"],
@@ -458,7 +463,10 @@ const listEntries: CollectionDef = {
     {
       type: "bool",
       name: "checked",
-      required: true,
+      // Not required: a list entry starts UNCHECKED (the app's default state),
+      // and PB 0.40 treats `false` on a required bool as "blank" — rejecting
+      // every freshly added item.
+      required: false,
       hidden: false,
       presentable: false,
     },
@@ -468,8 +476,10 @@ const listEntries: CollectionDef = {
       required: true,
       hidden: false,
       presentable: false,
+      // Epoch ms — upper bound must stay unset (PB 0.40 treats `max: 0` as the
+      // literal bound 0, which would reject every real timestamp).
       min: 0,
-      max: 0,
+      max: null,
       onlyInt: true,
     },
     {
@@ -584,8 +594,10 @@ const historyEvents: CollectionDef = {
       required: true,
       hidden: false,
       presentable: false,
+      // Epoch ms — upper bound must stay unset (PB 0.40 treats `max: 0` as the
+      // literal bound 0, which would reject every real timestamp).
       min: 0,
-      max: 0,
+      max: null,
       onlyInt: true,
     },
     {
