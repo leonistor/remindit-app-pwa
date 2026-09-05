@@ -17,6 +17,52 @@ Module-specific rules live next to each module — read the one for the module y
 - [pwa/AGENTS.md](pwa/AGENTS.md) — app module (commands, Shark UI, docs, testing, lint/typecheck)
 - [common/AGENTS.md](common/AGENTS.md) — shared entities & constants (source-only, typecheck)
 
+## Devdocs — locations & update rules
+
+Docs are **claims against the code** — keep them in sync in the same change
+that moves the code. Lost context is cheaper to avoid than to re-derive; the
+2026-09-05 devdocs review found every drift class this section guards against.
+
+**Locations — edit the doc that owns the concern:**
+
+| Doc | Owns | Touch when |
+| --- | --- | --- |
+| `docs/ROADMAP.md` | product versions, decision log (D#), platform phases, env/architecture, risks | a decision, phase, or env convention changes |
+| `TODO.md` | active / in-flight work (not a log of done things) | starting, blocking, or shipping work — **trim shipped sections to a one-line record** |
+| `docs/DEPLOY-VPS.md` | VPS runbook (bm2, Caddy, backups, feedback teardown) | deploy topology / ops commands change |
+| `docs/CADDY-LOCAL.md` | local HTTPS dev topology | local-proxy workflow changes |
+| `pwa/DESIGN.md` | design system **as shipped** | visual tokens / component design change |
+| `pwa/docs/DEV.md` | pwa architecture & state (stores, routes, i18n, testing) | pwa code contracts change |
+| `pwa/docs/SYNC.md` | sync engine design (reconcile, realtime, groups) | sync semantics change |
+| `pwa/docs/DEV-COMPONENTS.md` | Shark UI registry-vs-custom split + upstream update check | custom components / registry findings change |
+| `pwa/docs/DEMOS.md` / `DEPLOY.md` / `LINKS.md` | demo generator gotchas / pwa deploy semantics / bookmarks | scenarios or deploy flow change; prune freely |
+| `<module>/README.md` + `<module>/AGENTS.md` | the module's devdoc + agent rules | any material module change (bff, web, admin, common) |
+
+**Rules for updates & additions:**
+
+1. **Verify before writing.** Check the actual file/export/route/schema before
+   documenting it — never guess, never document aspirational state. If a change
+   is planned but not landed, say so explicitly ("deferred", "TODO") rather than
+   describing it as reality.
+2. **Same commit as the code.** Change docs when the code changes — a contract
+   shape, store export, route, endpoint, component list, or env var. On renames,
+   grep the docs for the old name.
+3. **Enumerated surfaces drift fastest** (route tables, store-module tables,
+   endpoint tables, custom-component sets, env tables) — re-verify these
+   against source when the module changes.
+4. **Decisions land in ROADMAP §2 as a dated `D#` row** + a note on the phase
+   that shipped them. Don't leave the rationale only in a commit message.
+5. **Prune, don't pile on.** Trim shipped plans from `TODO.md` to a one-line
+   record (detail lives in git history); fold superseded runbooks into a
+   pointer. Concise beats exhaustive — implementation detail belongs in code
+   comments.
+6. **Env vars:** adding/renaming one updates the root `.env.example` in the
+   same commit (agreed gate in ROADMAP §8).
+7. **i18n:** edit `common/messages/{en,ro}.json` (the source of truth) — never
+   generated `src/paraglide` output.
+8. **Gate:** docs-only changes skip typecheck/tests but still run `bun run lint`
+   (Biome ignores markdown, so docs edits are lint-neutral by default).
+
 ## MCP servers (opencode.jsonc)
 
 | Server | Purpose | When to use |

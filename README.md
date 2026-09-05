@@ -13,7 +13,8 @@ Bun workspace for the Remindit project.
 | `@remindit/admin`   | admin/   | Admin dashboard (Rsbuild + TanStack Start + Mantine) — see [admin/README.md](admin/README.md) |
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the roadmap (product versions +
-platform decision log) and [TODO.md](TODO.md) for active work.
+platform decision log), [TODO.md](TODO.md) for active work, and
+[AGENTS.md](AGENTS.md) §Devdocs for every other doc and the update rules.
 
 ## Usage
 
