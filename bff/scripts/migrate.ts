@@ -137,9 +137,7 @@ const wireFieldId = (
     []
   ).find((f) => f.name === name)
   const id =
-    live && live.type === field.type
-      ? (live as { id?: string }).id
-      : undefined
+    live && live.type === field.type ? (live as { id?: string }).id : undefined
   return id ? { ...field, id } : field
 }
 
@@ -148,8 +146,9 @@ const wireFieldId = (
 const managedCurrentFields = (current: Record<string, unknown>): unknown =>
   canonicalize(
     (
-      (current.fields as Array<{ name?: string; system?: boolean }> | undefined) ??
-      []
+      (current.fields as
+        | Array<{ name?: string; system?: boolean }>
+        | undefined) ?? []
     ).filter((field) => field.name !== "id" && field.system !== true)
   )
 
@@ -270,8 +269,9 @@ async function main(): Promise<void> {
   // collections that don't exist yet (Pass D writes them), and indexes stay
   // Pass D's business.
   for (const def of desiredCollections) {
-    if (def.type === "view" || !byName.has(def.name)) continue
-    const current = byName.get(def.name)!
+    if (def.type === "view") continue
+    const current = byName.get(def.name)
+    if (!current) continue
     const wireFields = toWireFields(def.fields, nameToId).map((field) =>
       wireFieldId(current, field)
     )
