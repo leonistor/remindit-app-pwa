@@ -6,10 +6,12 @@
   "exports": {
     ".": "./src/index.ts",
     "./models": "./src/models/types.ts",
-    "./brand": "./src/brand.ts"
+    "./brand": "./src/brand.ts",
+    "./seeds": "./src/seeds/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit --pretty",
+    "build:platform-seed": "bun scripts/build-platform-seed.ts",
     "kickstart:locale": "bun scripts/kickstart-locale.ts"
   },
   "devDependencies": {

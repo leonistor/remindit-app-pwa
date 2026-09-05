@@ -4,11 +4,11 @@
 // NOTE: the PB collections are `teams`/`team_members` (renamed from
 // groups/group_members); the public API surface stays /api/groups with the
 // `Group`/`Member` contract keys unchanged.
-import { UNCATEGORIZED_NAME } from "@remindit/common"
 import type PocketBase from "pocketbase"
 import type { Group, Member, MemberInviteBody } from "../contracts"
 import { toPublicUser } from "../lib/user"
 import { dispatch } from "./notifications"
+import { provisionTeam } from "./provision"
 
 const toGroup = (record: Record<string, unknown>): Group => ({
   id: record.id as string,
@@ -34,39 +34,8 @@ export const groupsService = {
     userId: string,
     name: string
   ): Promise<Group> {
-    const group = (await client.collection("teams").create({
-      name,
-      owner: userId,
-    })) as unknown as Record<string, unknown>
-    try {
-      await client.collection("team_members").create({
-        team: group.id,
-        user: userId,
-        role: "owner",
-      })
-    } catch (error) {
-      console.error(
-        `[groups] owner-membership create failed for ${group.id}, rolling back team:`,
-        error
-      )
-      await client.collection("teams").delete(group.id as string)
-      throw new Error("failed to create team ownership — please retry")
-    }
-    // Provision the sentinel (uncategorized) category — the sync layer
-    // expects every team to have one.
-    try {
-      await client.collection("categories").create({
-        name: UNCATEGORIZED_NAME,
-        frequency: "monthly",
-        team: group.id,
-      })
-    } catch (error) {
-      console.error(
-        `[groups] sentinel category create failed for ${group.id}:`,
-        error
-      )
-    }
-    return toGroup(group)
+    const { team } = await provisionTeam(client, userId, name)
+    return toGroup(team)
   },
 
   async get(client: PocketBase, id: string): Promise<Group> {

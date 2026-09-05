@@ -1,0 +1,730 @@
+{
+  "password": "remindit-seed",
+  "users": [
+    {
+      "username": "admin",
+      "email": "admin@example.com",
+      "firstName": "Alex",
+      "lastName": "Maran",
+      "role": "admin"
+    },
+    {
+      "username": "mira",
+      "email": "mira@example.com",
+      "firstName": "Mira",
+      "lastName": "Velche",
+      "role": "admin"
+    },
+    {
+      "username": "anamaria",
+      "email": "anamaria@example.com",
+      "firstName": "Ana-Maria",
+      "lastName": "Popescu"
+    },
+    {
+      "username": "florin",
+      "email": "florin@example.com",
+      "firstName": "Florin",
+      "lastName": "Popescu"
+    },
+    {
+      "username": "teo",
+      "email": "teo@example.com",
+      "firstName": "Teodora",
+      "lastName": "Popescu"
+    },
+    {
+      "username": "sami",
+      "email": "sami@example.com",
+      "firstName": "Samuel",
+      "lastName": "Popescu"
+    },
+    {
+      "username": "ioana",
+      "email": "ioana@example.com",
+      "firstName": "Ioana",
+      "lastName": "Ionescu"
+    },
+    {
+      "username": "costel",
+      "email": "costel@example.com",
+      "firstName": "Costel",
+      "lastName": "Ionescu"
+    },
+    {
+      "username": "ana",
+      "email": "ana@example.com",
+      "firstName": "Ana",
+      "lastName": "Ionescu"
+    },
+    {
+      "username": "catalin",
+      "email": "catalin@example.com",
+      "firstName": "Catalin",
+      "lastName": "Nistor"
+    },
+    {
+      "username": "bogdan",
+      "email": "bogdan@example.com",
+      "firstName": "Bogdan",
+      "lastName": "Stan"
+    },
+    {
+      "username": "diana",
+      "email": "diana@example.com",
+      "firstName": "Diana",
+      "lastName": "Pop"
+    },
+    {
+      "username": "irina",
+      "email": "irina@example.com",
+      "firstName": "Irina",
+      "lastName": "Marin"
+    },
+    {
+      "username": "andrei",
+      "email": "andrei@example.com",
+      "firstName": "Andrei",
+      "lastName": "Vasile"
+    },
+    {
+      "username": "george",
+      "email": "george@example.com",
+      "firstName": "George",
+      "lastName": "Preda"
+    }
+  ],
+  "teams": [
+    {
+      "name": "The Popescu household",
+      "owner": "anamaria",
+      "members": [
+        "florin",
+        "teo",
+        "sami"
+      ],
+      "categories": [
+        {
+          "name": "frigider",
+          "frequency": "weekly"
+        },
+        {
+          "name": "gătit",
+          "frequency": "weekly"
+        },
+        {
+          "name": "cămară",
+          "frequency": "monthly"
+        },
+        {
+          "name": "curățenie",
+          "frequency": "every-3-months"
+        },
+        {
+          "name": "bufet",
+          "frequency": "every-2-weeks"
+        },
+        {
+          "name": "casnice",
+          "frequency": "monthly"
+        }
+      ],
+      "items": [
+        {
+          "name": "Ouă",
+          "category": "frigider"
+        },
+        {
+          "name": "Lapte",
+          "category": "frigider"
+        },
+        {
+          "name": "Iaurt",
+          "category": "frigider"
+        },
+        {
+          "name": "Telemea",
+          "category": "frigider"
+        },
+        {
+          "name": "Roșii",
+          "category": "frigider"
+        },
+        {
+          "name": "Cartofi",
+          "category": "gătit"
+        },
+        {
+          "name": "Pui",
+          "category": "gătit"
+        },
+        {
+          "name": "Ceapă",
+          "category": "gătit"
+        },
+        {
+          "name": "Pâine",
+          "category": "cămară"
+        },
+        {
+          "name": "Orez",
+          "category": "cămară"
+        },
+        {
+          "name": "Ulei",
+          "category": "cămară"
+        },
+        {
+          "name": "Detergent",
+          "category": "curățenie"
+        },
+        {
+          "name": "Cafea",
+          "category": "bufet"
+        },
+        {
+          "name": "Ciocolată",
+          "category": "bufet"
+        },
+        {
+          "name": "Hârtie igienică",
+          "category": "casnice"
+        },
+        {
+          "name": "Săpun de mâini",
+          "category": "casnice"
+        }
+      ],
+      "list": [
+        "Ouă",
+        "Lapte",
+        "Pâine",
+        "Detergent"
+      ],
+      "history": {
+        "days": 180,
+        "seed": 11
+      }
+    },
+    {
+      "name": "The Ionescu family",
+      "owner": "ioana",
+      "members": [
+        "costel",
+        "ana"
+      ],
+      "categories": [
+        {
+          "name": "fridge",
+          "frequency": "weekly"
+        },
+        {
+          "name": "pantry",
+          "frequency": "monthly"
+        },
+        {
+          "name": "cooking",
+          "frequency": "weekly"
+        },
+        {
+          "name": "snacks",
+          "frequency": "every-2-weeks"
+        },
+        {
+          "name": "household",
+          "frequency": "monthly"
+        },
+        {
+          "name": "cleaning",
+          "frequency": "every-3-months"
+        }
+      ],
+      "items": [
+        {
+          "name": "Milk",
+          "category": "fridge"
+        },
+        {
+          "name": "Yogurt",
+          "category": "fridge"
+        },
+        {
+          "name": "Eggs",
+          "category": "fridge"
+        },
+        {
+          "name": "Butter",
+          "category": "fridge"
+        },
+        {
+          "name": "Cheese",
+          "category": "fridge"
+        },
+        {
+          "name": "Rice",
+          "category": "pantry"
+        },
+        {
+          "name": "Pasta",
+          "category": "pantry"
+        },
+        {
+          "name": "Canned tomatoes",
+          "category": "pantry"
+        },
+        {
+          "name": "Bread",
+          "category": "pantry"
+        },
+        {
+          "name": "Olive oil",
+          "category": "cooking"
+        },
+        {
+          "name": "Onions",
+          "category": "cooking"
+        },
+        {
+          "name": "Chicken",
+          "category": "cooking"
+        },
+        {
+          "name": "Chocolate",
+          "category": "snacks"
+        },
+        {
+          "name": "Cereal",
+          "category": "snacks"
+        },
+        {
+          "name": "Toilet paper",
+          "category": "household"
+        },
+        {
+          "name": "Dish soap",
+          "category": "household"
+        },
+        {
+          "name": "Detergent",
+          "category": "cleaning"
+        }
+      ],
+      "list": [
+        "Milk",
+        "Bread",
+        "Cereal"
+      ],
+      "history": {
+        "days": 180,
+        "seed": 23
+      }
+    },
+    {
+      "name": "Trip to Italy",
+      "owner": "catalin",
+      "members": [
+        "bogdan",
+        "diana",
+        "irina",
+        "andrei"
+      ],
+      "categories": [
+        {
+          "name": "trip-snacks",
+          "frequency": "weekly"
+        },
+        {
+          "name": "trip-drinks",
+          "frequency": "weekly"
+        },
+        {
+          "name": "essentials",
+          "frequency": "every-2-3-days"
+        },
+        {
+          "name": "souvenirs",
+          "frequency": "seldom"
+        }
+      ],
+      "items": [
+        {
+          "name": "Chips",
+          "category": "trip-snacks"
+        },
+        {
+          "name": "Pretzels",
+          "category": "trip-snacks"
+        },
+        {
+          "name": "Chocolate",
+          "category": "trip-snacks"
+        },
+        {
+          "name": "Biscuits",
+          "category": "trip-snacks"
+        },
+        {
+          "name": "Still water",
+          "category": "trip-drinks"
+        },
+        {
+          "name": "Sparkling water",
+          "category": "trip-drinks"
+        },
+        {
+          "name": "Juice",
+          "category": "trip-drinks"
+        },
+        {
+          "name": "Beer",
+          "category": "trip-drinks"
+        },
+        {
+          "name": "Sunscreen",
+          "category": "essentials"
+        },
+        {
+          "name": "Power bank",
+          "category": "essentials"
+        },
+        {
+          "name": "Plug adapter",
+          "category": "essentials"
+        },
+        {
+          "name": "Postcards",
+          "category": "souvenirs"
+        }
+      ],
+      "list": [
+        "Chips",
+        "Still water",
+        "Sunscreen"
+      ],
+      "history": {
+        "days": 14,
+        "seed": 31
+      }
+    },
+    {
+      "name": "Weekend at the cabin",
+      "owner": "catalin",
+      "members": [
+        "irina",
+        "andrei"
+      ],
+      "categories": [
+        {
+          "name": "grill",
+          "frequency": "weekly"
+        },
+        {
+          "name": "firewood",
+          "frequency": "every-3-months"
+        },
+        {
+          "name": "cabin-snacks",
+          "frequency": "weekly"
+        },
+        {
+          "name": "cabin-drinks",
+          "frequency": "every-2-weeks"
+        },
+        {
+          "name": "camping",
+          "frequency": "monthly"
+        }
+      ],
+      "items": [
+        {
+          "name": "Charcoal",
+          "category": "grill"
+        },
+        {
+          "name": "Sausages",
+          "category": "grill"
+        },
+        {
+          "name": "Buns",
+          "category": "grill"
+        },
+        {
+          "name": "Logs",
+          "category": "firewood"
+        },
+        {
+          "name": "Firelighters",
+          "category": "firewood"
+        },
+        {
+          "name": "Marshmallows",
+          "category": "cabin-snacks"
+        },
+        {
+          "name": "Chips",
+          "category": "cabin-snacks"
+        },
+        {
+          "name": "Beer",
+          "category": "cabin-drinks"
+        },
+        {
+          "name": "Wine",
+          "category": "cabin-drinks"
+        },
+        {
+          "name": "First-aid kit",
+          "category": "camping"
+        },
+        {
+          "name": "Flashlight",
+          "category": "camping"
+        }
+      ],
+      "list": [
+        "Charcoal",
+        "Sausages",
+        "Beer"
+      ],
+      "history": {
+        "days": 45,
+        "seed": 37
+      }
+    },
+    {
+      "name": "Diana's list",
+      "owner": "diana",
+      "members": [],
+      "categories": [
+        {
+          "name": "instant-food",
+          "frequency": "weekly"
+        },
+        {
+          "name": "fridge",
+          "frequency": "weekly"
+        },
+        {
+          "name": "study",
+          "frequency": "every-2-weeks"
+        },
+        {
+          "name": "pantry",
+          "frequency": "monthly"
+        }
+      ],
+      "items": [
+        {
+          "name": "Instant ramen",
+          "category": "instant-food"
+        },
+        {
+          "name": "Instant noodles",
+          "category": "instant-food"
+        },
+        {
+          "name": "Frozen pizza",
+          "category": "instant-food"
+        },
+        {
+          "name": "Milk",
+          "category": "fridge"
+        },
+        {
+          "name": "Yogurt",
+          "category": "fridge"
+        },
+        {
+          "name": "Cheddar",
+          "category": "fridge"
+        },
+        {
+          "name": "Coffee",
+          "category": "study"
+        },
+        {
+          "name": "Energy drink",
+          "category": "study"
+        },
+        {
+          "name": "Notebooks",
+          "category": "study"
+        },
+        {
+          "name": "Bread",
+          "category": "pantry"
+        },
+        {
+          "name": "Pasta",
+          "category": "pantry"
+        }
+      ],
+      "list": [
+        "Instant ramen",
+        "Coffee"
+      ],
+      "history": {
+        "days": 120,
+        "seed": 41
+      }
+    },
+    {
+      "name": "Bogdan's list",
+      "owner": "bogdan",
+      "members": [],
+      "categories": [
+        {
+          "name": "gym",
+          "frequency": "every-2-3-days"
+        },
+        {
+          "name": "fridge",
+          "frequency": "weekly"
+        },
+        {
+          "name": "pantry",
+          "frequency": "monthly"
+        },
+        {
+          "name": "snacks",
+          "frequency": "every-2-weeks"
+        }
+      ],
+      "items": [
+        {
+          "name": "Protein bars",
+          "category": "gym"
+        },
+        {
+          "name": "Oatmeal",
+          "category": "gym"
+        },
+        {
+          "name": "Bananas",
+          "category": "gym"
+        },
+        {
+          "name": "Peanut butter",
+          "category": "gym"
+        },
+        {
+          "name": "Milk",
+          "category": "fridge"
+        },
+        {
+          "name": "Eggs",
+          "category": "fridge"
+        },
+        {
+          "name": "Greek yogurt",
+          "category": "fridge"
+        },
+        {
+          "name": "Rice",
+          "category": "pantry"
+        },
+        {
+          "name": "Pasta",
+          "category": "pantry"
+        },
+        {
+          "name": "Bread",
+          "category": "pantry"
+        },
+        {
+          "name": "Mixed nuts",
+          "category": "snacks"
+        },
+        {
+          "name": "Dark chocolate",
+          "category": "snacks"
+        }
+      ],
+      "list": [
+        "Protein bars",
+        "Bananas"
+      ],
+      "history": {
+        "days": 180,
+        "seed": 43
+      }
+    },
+    {
+      "name": "George's list",
+      "owner": "george",
+      "members": [],
+      "categories": [
+        {
+          "name": "daily",
+          "frequency": "every-2-3-days"
+        },
+        {
+          "name": "tea",
+          "frequency": "monthly"
+        },
+        {
+          "name": "household",
+          "frequency": "monthly"
+        },
+        {
+          "name": "seldom",
+          "frequency": "every-3-months"
+        }
+      ],
+      "items": [
+        {
+          "name": "Bread",
+          "category": "daily"
+        },
+        {
+          "name": "Milk",
+          "category": "daily"
+        },
+        {
+          "name": "Eggs",
+          "category": "daily"
+        },
+        {
+          "name": "Butter",
+          "category": "daily"
+        },
+        {
+          "name": "Black tea",
+          "category": "tea"
+        },
+        {
+          "name": "Honey",
+          "category": "tea"
+        },
+        {
+          "name": "Sugar",
+          "category": "tea"
+        },
+        {
+          "name": "Laundry soap",
+          "category": "household"
+        },
+        {
+          "name": "Dish soap",
+          "category": "household"
+        },
+        {
+          "name": "Light bulbs",
+          "category": "seldom"
+        },
+        {
+          "name": "Broom",
+          "category": "seldom"
+        }
+      ],
+      "list": [
+        "Bread",
+        "Honey"
+      ],
+      "history": {
+        "days": 180,
+        "seed": 47
+      }
+    }
+  ]
+}
