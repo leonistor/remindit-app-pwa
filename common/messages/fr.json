@@ -459,7 +459,7 @@
   "webFeedbackNotConfigured": "Les commentaires ne sont pas encore configurés pour cette version.",
   "webFeedbackIntro": "Dis-nous ce qui fonctionne et ce qui ne fonctionne pas — pas besoin de créer un compte. Laisse-nous ton adresse e-mail et l'équipe pourra te recontacter.",
   "webFeedbackEmailLabel": "Adresse e-mail (facultatif)",
-  "webFeedbackEmailPlaceholder": "you@example.com",
+  "webFeedbackEmailPlaceholder": "toi@example.com",
   "webFeedbackTextPlaceholder": "Qu'est-ce qui s'est passé et qu'est-ce que tu attendais ?",
   "webFeedbackValidationError": "Le sujet doit faire au moins 6 caractères et tu dois fournir des détails.",
   "webFeedbackInvalidFields": "Vérifie les champs et réessaie.",

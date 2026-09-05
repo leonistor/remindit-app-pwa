@@ -459,7 +459,7 @@
   "webFeedbackNotConfigured": "Зворотний зв'язок для цієї версії ще не налаштований.",
   "webFeedbackIntro": "Розкажи нам, що працює добре, а що ні — для цього не потрібна реєстрація. Залиш свою електронну адресу, і наша команда зв'яжеться з тобою.",
   "webFeedbackEmailLabel": "Електронна пошта для зв'язку (необов'язково)",
-  "webFeedbackEmailPlaceholder": "you@example.com",
+  "webFeedbackEmailPlaceholder": "ty@example.com",
   "webFeedbackTextPlaceholder": "Що сталося, і чого ти очікував?",
   "webFeedbackValidationError": "Тема повинна містити щонайменше 6 символів, а також обов'язково потрібно вказати деталі.",
   "webFeedbackInvalidFields": "Будь ласка, перевір заповнені поля та спробуй ще раз.",

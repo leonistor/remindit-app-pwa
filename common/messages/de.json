@@ -459,7 +459,7 @@
   "webFeedbackNotConfigured": "Das Feedback ist für diese Version noch nicht eingerichtet.",
   "webFeedbackIntro": "Erzähl uns, was gut funktioniert und was nicht – dafür brauchst du keinen Account. Hinterlass eine E-Mail-Adresse, dann kann sich das Team bei dir melden.",
   "webFeedbackEmailLabel": "E-Mail-Adresse für Kontakt (optional)",
-  "webFeedbackEmailPlaceholder": "you@example.com",
+  "webFeedbackEmailPlaceholder": "du@example.com",
   "webFeedbackTextPlaceholder": "Was ist passiert und was hast du erwartet?",
   "webFeedbackValidationError": "Der Betreff muss mindestens 6 Zeichen lang sein und du musst Details angeben.",
   "webFeedbackInvalidFields": "Bitte überprüfe die Felder und versuche es erneut.",
