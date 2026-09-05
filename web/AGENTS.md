@@ -12,6 +12,10 @@ in the root [AGENTS.md](../AGENTS.md); the phased rollout plan in
   **generated** — never edit it (biome excludes it).
 - **Brand from `@remindit/common/brand`** — name, colors, and the logo SVG
   (raw string via `?raw`); never hardcode brand values or copy assets here.
+- **Copy from `@remindit/common` messages** — UI strings come from the shared
+  Paraglide catalog (`common/messages/*.json`), consumed via `src/paraglide`
+  (compile in `scripts/compile-i18n.ts`, `i18n:compile`, inside render bodies —
+  no module-scope `m.*` calls). Never hardcode user-facing English.
 - **Env (D9):** `PUBLIC_BFF_URL` (server-side stats fetch),
   `PUBLIC_PWA_URL` (download CTA), `WEB_PORT` (dev server, default 3200).
   Read through `process.env` — no module env file.
@@ -24,6 +28,8 @@ in the root [AGENTS.md](../AGENTS.md); the phased rollout plan in
 - `bun run dev` — rsbuild dev server (SSR + HMR), port 3200
 - `bun run build` — production build (client + SSR server bundle)
 - `bun run preview` — preview the production build
+- `bun run i18n:compile` — compile the shared catalog → `src/paraglide`
+  (chained into `typecheck`; also run by the rsbuild plugin in dev/build)
 - `bun run typecheck` — `tsc --noEmit --pretty` (needs `routeTree.gen.ts` —
   run a dev/build once on a fresh clone)
 - `bun run lint` / `bun run check` — Biome (repo-wide config)

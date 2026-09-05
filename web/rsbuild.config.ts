@@ -1,11 +1,20 @@
 import { defineConfig } from "@rsbuild/core"
 import { pluginReact } from "@rsbuild/plugin-react"
 import { tanstackStart } from "@tanstack/react-start/plugin/rsbuild"
+import { paraglideRspackPlugin } from "@inlang/paraglide-js"
+import { WEB_PARAGLIDE_COMPILER_OPTIONS } from "./scripts/compile-i18n"
 
 export default defineConfig({
   // D9: env comes from the root .env (injected via `bun --env-file=../.env`
   // by the root scripts). Dev port defaults to 3200 so pwa (3000) and the
   // BFF (3100) can run side by side.
+  tools: {
+    rspack: {
+      // Compiles common/messages/*.json into src/paraglide (watched in dev),
+      // mirroring pwa — shared catalog, per-module output.
+      plugins: [paraglideRspackPlugin(WEB_PARAGLIDE_COMPILER_OPTIONS)],
+    },
+  },
   server: {
     port: Number(process.env.WEB_PORT) || 3200,
     // Bind IPv4 loopback explicitly: the default "localhost" resolves to

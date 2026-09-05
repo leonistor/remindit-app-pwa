@@ -3,6 +3,10 @@
  * programmatic compile (`bun scripts/compile-i18n.ts`, used by typecheck/tests
  * which run outside the bundler) and the Rspack plugin in `rsbuild.config.ts`.
  *
+ * The inlang project (catalog + settings) lives in `@remindit/common` — both
+ * pwa and web compile from it into their own gitignored `src/paraglide`. The
+ * `project`/`outdir` paths are resolved against the cwd (`pwa/`).
+ *
  * Locale strategy (first match wins):
  *   localStorage       → persisted user choice (onboarding step 1 / Profile)
  *   preferredLanguage  → browser auto-detect before any choice (ro browsers → ro)
@@ -11,7 +15,7 @@
 import type { CompilerOptions } from "@inlang/paraglide-js"
 
 export const PARAGLIDE_COMPILER_OPTIONS: CompilerOptions = {
-  project: "./project.inlang",
+  project: "../common/project.inlang",
   outdir: "./src/paraglide",
   strategy: ["localStorage", "preferredLanguage", "baseLocale"],
   localStorageKey: "remindit:locale",

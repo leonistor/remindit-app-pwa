@@ -97,6 +97,7 @@ Sync + sharing + notifications, one major release.
 | D9 | Environment | **One `.env` + one committed `.env.example`, both at the repo root** — all modules consume from there; no per-module env files | Single place to configure; no drift between modules; secrets live in one gitignored file (prod secrets come from the VPS environment, never from the repo) |
 | D10 | Deployment | **bm2 (Bun-native PM2, pinned 1.1.0) + Caddy** on the single VPS (D3) — one ecosystem file (`infra/ecosystem.config.ts`: pb, bff, web, admin, feedback; all loopback, health-checked, log-rotated), Caddy as the only public surface (`remindit.me` = pwa static, `www` = web, `admin` = admin behind `basic_auth`, `api` = bff, `feedback` = Answer; PB `:8090` never proxied). Deploy = `git push vps main` (worktree repo at `/srv/remindit`); one-time privileged setup = `infra/bin/bootstrap-prod.sh` | All-Bun supervision with health checks, log rotation, zero-downtime reload, reboot persistence; admin origin gated at the proxy (decided 2026-09-04, phase D) |
 | D11 | Backups | **Hourly local snapshots** via `remindit-backup.timer`: PB via its superuser backup API (`PB_BACKUP_KEEP`), Answer's `answer-data/` via sqlite `VACUUM INTO` (page-consistent against a live writer; Bun 1.4.1 has no `db.backup()`) + uploads/config tar (`ANSWER_BACKUP_KEEP`); the answer half is best-effort and can never block the PB backup. **Off-box copy to Scaleway S3 via rclone** (wired 2026-09-04, same day): env-based remote from `SCW_*` in the root `.env` (no rclone.conf), bucket `remindit-backups` in `nl-ams` (lowest TLS latency from the VPS), `rclone copy` per run + independent 30-day off-box retention (`--min-age`) so a local wipe can't take the copies down | Consistent-while-running snapshots without downtime; off-box copy survives local disasters (decided 2026-09-04, phase D) |
+| D12 | i18n source of truth | **Shared Paraglide catalog in `@remindit/common`** — `common/project.inlang` + `common/messages/*.json` are the single source of UI strings. `pwa` (`strategy: ["localStorage","preferredLanguage","baseLocale"]`, language pickers) and `web` (`strategy: ["baseLocale"]`, English-only, SSR-safe) each **compile** the shared catalog into their own gitignored `src/paraglide` — the catalog is never imported directly. `kickstart:locale` (Ollama) drives the draft locales de/fr/uk; the drift guard enforces en↔ro key parity + placeholder/variant parity for **every** locale (an invented `{token}` in any locale widens the compiled input types for all consumers). **URL-based per-locale web routing deferred** — web copy left English-only until the drafts are human-reviewed | One catalog and one translation workflow for every module; web leaves hardcoded English; per-consumer compile preserves Paraglide tree-shaking/types with **no build step in common** (source-only) (decided 2026-09-05) |
 
 ## 3. Architecture
 
@@ -287,6 +288,15 @@ point for any env-dependent run (`dev:*`, migrations, MCP creds).
 - [x] Releases: v5.0.0 (sync + sharing + notifications), v5.1.0 (in-app feedback + notifications, sync reliability fixes)
 - Gotchas recorded: bm2 resolves ecosystem `script:` paths against the config dir (use absolute launchers); systemd/sudo strip `~/.bun/bin` from PATH ("bun: not found"); fresh-install schema reconcile must land existing-collection field drift BEFORE creating views (PB's default `users` has no `username` column, and view queries are validated by execution); dotenv files are unsafe to `sh`-source — wrappers load env via `bun --env-file`
 - Gate: all five public hosts verified (health, CORS preflight, admin 401-anon, guest submit round-trip) + release-gate `test:pre` green
+
+### Cross-cutting — shared i18n catalog · `feat/shared-i18n-catalog`
+
+- [ ] Catalog relocated `pwa → common` (`common/project.inlang` + `common/messages/`, pathPattern unchanged); `kickstart:locale` moved to `common/scripts/` (`bun run kickstart:locale`)
+- [ ] pwa repointed only (`project: "../common/project.inlang"`); no runtime change (typecheck + full suites green)
+- [ ] web compiles the catalog (`scripts/compile-i18n.ts`, `strategy: ["baseLocale"]`, rsbuild watch plugin, `typecheck` chains `i18n:compile`); **all web copy migrated** to shared `m.*` keys (en+ro authored; de/fr/uk filled 2026-09-05 via kickstart — review those machine drafts)
+- [ ] Drift guard extended to all locales: en↔ro strict parity + de/fr/uk keys⊆en, no-empty, placeholder & variant parity vs en
+- [ ] de/fr/uk web draft keys flagged for human review (TODO.md); **web stays baseLocale** until drafts ship
+- Gate: root `typecheck` ×6 modules, pwa full suite + 23 e2e, web SSR hydration smoke (all 4 routes, no console errors), lint + prod builds ✅
 
 ## 8. Verification gates (every phase)
 

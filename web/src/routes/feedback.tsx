@@ -1,14 +1,15 @@
 import { BRAND_NAME } from "@remindit/common/brand"
 import { createFileRoute } from "@tanstack/react-router"
 import { type FormEvent, useState } from "react"
+import { m } from "../paraglide/messages"
 
 export const Route = createFileRoute("/feedback")({
   head: () => ({
     meta: [
-      { title: `Send feedback — ${BRAND_NAME}` },
+      { title: `${m.feedbackSendButton()} — ${BRAND_NAME}` },
       {
         name: "description",
-        content: `Send ${BRAND_NAME} feedback — report a bug, request a feature, or start a discussion.`,
+        content: m.webFeedbackMetaDescription({ brandName: BRAND_NAME }),
       },
     ],
   }),
@@ -16,12 +17,6 @@ export const Route = createFileRoute("/feedback")({
 })
 
 type FeedbackTag = "bug" | "feature-request" | "discussion"
-
-const TAGS: ReadonlyArray<{ value: FeedbackTag; label: string }> = [
-  { value: "bug", label: "Bug" },
-  { value: "feature-request", label: "Feature request" },
-  { value: "discussion", label: "Discussion" },
-]
 
 function Feedback() {
   // The form posts to the BFF's public guest endpoint. Env-driven (D9) like
@@ -36,14 +31,23 @@ function Feedback() {
           <FeedbackForm bffUrl={bffUrl} />
         ) : (
           <>
-            <h2>Send feedback</h2>
-            <p>Feedback isn’t configured for this deployment yet.</p>
+            <h2>{m.feedbackSendButton()}</h2>
+            <p>{m.webFeedbackNotConfigured()}</p>
           </>
         )}
       </section>
     </main>
   )
 }
+
+const TAGS = [
+  { value: "bug", label: () => m.feedbackTagBug() },
+  { value: "feature-request", label: () => m.feedbackTagFeatureRequest() },
+  { value: "discussion", label: () => m.feedbackTagDiscussion() },
+] as const satisfies ReadonlyArray<{
+  value: FeedbackTag
+  label: () => string
+}>
 
 function FeedbackForm({ bffUrl }: Readonly<{ bffUrl: string }>) {
   const [subject, setSubject] = useState("")
@@ -62,9 +66,7 @@ function FeedbackForm({ bffUrl }: Readonly<{ bffUrl: string }>) {
     // Client-side mirror of the BFF's subject/text constraints — native
     // minLength/required already block submission, this is belt-and-braces.
     if (trimmedSubject.length < 6 || trimmedDetails.length === 0) {
-      setError(
-        "Subject must be at least 6 characters, and details are required."
-      )
+      setError(m.webFeedbackValidationError())
       return
     }
     setError(null)
@@ -83,19 +85,15 @@ function FeedbackForm({ bffUrl }: Readonly<{ bffUrl: string }>) {
       // 400 = BFF validation; 502/503 = Answer board down/unavailable. Both
       // are the "board is having a moment" family for a guest form.
       if (res.status === 400) {
-        setError("Please check the fields and try again.")
+        setError(m.webFeedbackInvalidFields())
         return
       }
       if (res.status === 502 || res.status === 503) {
-        setError(
-          "The feedback board is temporarily unavailable — please try again later."
-        )
+        setError(m.webFeedbackUnavailable())
         return
       }
       if (!res.ok) {
-        setError(
-          "Something went wrong sending your feedback — please try again later."
-        )
+        setError(m.webFeedbackGenericError())
         return
       }
       const data = (await res.json()) as { questionUrl?: unknown }
@@ -103,9 +101,7 @@ function FeedbackForm({ bffUrl }: Readonly<{ bffUrl: string }>) {
         typeof data.questionUrl === "string" ? data.questionUrl : null
       )
     } catch {
-      setError(
-        "Something went wrong sending your feedback — please try again later."
-      )
+      setError(m.webFeedbackGenericError())
     } finally {
       setSubmitting(false)
     }
@@ -114,8 +110,8 @@ function FeedbackForm({ bffUrl }: Readonly<{ bffUrl: string }>) {
   if (questionUrl) {
     return (
       <>
-        <h2>Thanks for your feedback</h2>
-        <p>Your question is live on the feedback board.</p>
+        <h2>{m.webFeedbackThanksTitle()}</h2>
+        <p>{m.webFeedbackThanksBody()}</p>
         <p>
           <a
             className="cta"
@@ -123,7 +119,7 @@ function FeedbackForm({ bffUrl }: Readonly<{ bffUrl: string }>) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            View your question
+            {m.webFeedbackViewQuestion()}
           </a>
         </p>
       </>
@@ -132,14 +128,11 @@ function FeedbackForm({ bffUrl }: Readonly<{ bffUrl: string }>) {
 
   return (
     <>
-      <h2>Send feedback</h2>
-      <p>
-        Tell us what’s working and what isn’t — no account needed. Leave a
-        contact email and the team can follow up.
-      </p>
+      <h2>{m.feedbackSendButton()}</h2>
+      <p>{m.webFeedbackIntro()}</p>
       <form className="form" onSubmit={onSubmit}>
         <div className="field">
-          <label htmlFor="feedback-subject">Subject</label>
+          <label htmlFor="feedback-subject">{m.feedbackSubjectLabel()}</label>
           <input
             id="feedback-subject"
             type="text"
@@ -150,18 +143,18 @@ function FeedbackForm({ bffUrl }: Readonly<{ bffUrl: string }>) {
           />
         </div>
         <div className="field">
-          <label htmlFor="feedback-details">Details</label>
+          <label htmlFor="feedback-details">{m.feedbackTextLabel()}</label>
           <textarea
             id="feedback-details"
             required
             minLength={6}
             value={details}
             onChange={(event) => setDetails(event.target.value)}
-            placeholder="What happened, and what did you expect?"
+            placeholder={m.webFeedbackTextPlaceholder()}
           />
         </div>
         <div className="field">
-          <label htmlFor="feedback-tag">Type</label>
+          <label htmlFor="feedback-tag">{m.feedbackTagLabel()}</label>
           <select
             id="feedback-tag"
             value={tag}
@@ -169,19 +162,19 @@ function FeedbackForm({ bffUrl }: Readonly<{ bffUrl: string }>) {
           >
             {TAGS.map((option) => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {option.label()}
               </option>
             ))}
           </select>
         </div>
         <div className="field">
-          <label htmlFor="feedback-email">Contact email (optional)</label>
+          <label htmlFor="feedback-email">{m.webFeedbackEmailLabel()}</label>
           <input
             id="feedback-email"
             type="email"
             value={contactEmail}
             onChange={(event) => setContactEmail(event.target.value)}
-            placeholder="you@example.com"
+            placeholder={m.webFeedbackEmailPlaceholder()}
           />
         </div>
         {error && (
@@ -190,7 +183,7 @@ function FeedbackForm({ bffUrl }: Readonly<{ bffUrl: string }>) {
           </p>
         )}
         <button className="cta" type="submit" disabled={submitting}>
-          {submitting ? "Sending…" : "Send feedback"}
+          {submitting ? m.webFeedbackSending() : m.feedbackSendButton()}
         </button>
       </form>
     </>

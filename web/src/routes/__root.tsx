@@ -12,6 +12,8 @@ import {
   BRAND_LOGO_SVG,
   BRAND_NAME,
 } from "@remindit/common/brand"
+import { m } from "../paraglide/messages"
+import { getLocale } from "../paraglide/runtime"
 import "../styles.css"
 
 // Inline SVG data URI — works in SSR markup with no extra asset pipeline.
@@ -48,7 +50,9 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
     // Background/theme colors come from the brand constants (single source
     // of truth, @remindit/common) — kept in sync via inline vars.
-    <html lang="en" style={{ background: BRAND_BACKGROUND_COLOR }}>
+    // The locale is rendered from the Paraglide runtime (always the baseLocale
+    // under web's `["baseLocale"]` strategy — SSR-safe).
+    <html lang={getLocale()} style={{ background: BRAND_BACKGROUND_COLOR }}>
       <head>
         <HeadContent />
       </head>
@@ -67,17 +71,17 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
               {BRAND_NAME}
             </Link>
             <nav className="nav">
-              <Link to="/features">Features</Link>
-              <Link to="/download">Get the app</Link>
+              <Link to="/features">{m.navFeatures()}</Link>
+              <Link to="/download">{m.navGetTheApp()}</Link>
             </nav>
           </div>
         </header>
         {children}
         <footer className="site-footer">
           <div className="container">
-            {BRAND_NAME} — shopping lists that remind you.
+            {BRAND_NAME} — {m.webTagline()}.
             {" · "}
-            <Link to="/feedback">Send feedback</Link>
+            <Link to="/feedback">{m.feedbackSendButton()}</Link>
             {feedbackUrl && (
               <>
                 {" · "}
@@ -86,7 +90,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Feedback
+                  {m.feedbackTitle()}
                 </a>
                 {" · "}
                 <a
@@ -94,7 +98,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Report a bug
+                  {m.footerFeedbackBug()}
                 </a>
                 {" · "}
                 <a
@@ -102,7 +106,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Request a feature
+                  {m.footerFeedbackFeatureRequest()}
                 </a>
                 {" · "}
                 <a
@@ -110,7 +114,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Discuss
+                  {m.footerFeedbackDiscussion()}
                 </a>
               </>
             )}

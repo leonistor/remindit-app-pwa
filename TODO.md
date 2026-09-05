@@ -11,15 +11,18 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 ## In flight
 
 - **de/fr/uk translation drafts** — kick-started 2026-09-05 with
-  `bun scripts/kickstart-locale.ts` (local Ollama, translategemma:12b, tuned
-  prompt; see `pwa/docs/DEV.md` §Internationalization). ~40 keys across the
+  `bun run kickstart:locale` in `common/` (local Ollama, translategemma:12b,
+  tuned prompt; see `pwa/docs/DEV.md` §Internationalization). The shared-catalog
+  migration's `web*` keys were filled in the same pass. ~40 keys across the
   three files kept English after safety-net rejections (invented/renamed
-  `{tokens}`, mostly sentence-fragment keys) — listed in the run output and
-  need human review before the locales ship. Shipping caveat: locales in
-  `project.inlang/settings.json` get compiled by paraglide and **auto-served**
-  to matching browsers via the `preferredLanguage` strategy on the next
-  release — decide ship order / `APP_LOCALES` gating if the drafts aren't
-  reviewed by then. The language selector (`APP_LOCALES`) is still en+ro.
+  `{tokens}`, mostly sentence-fragment keys) and the fresh `web*` keys may have
+  leftovers too — listed in the run output and need human review before the
+  locales ship. Shipping caveat: locales in
+  `common/project.inlang/settings.json` get compiled by paraglide and
+  **auto-served** to matching browsers via the `preferredLanguage` strategy on
+  the next release — decide ship order / `APP_LOCALES` gating if the drafts
+  aren't reviewed by then. The language selector (`APP_LOCALES`) is still
+  en+ro; **web stays baseLocale** (English-only) until the drafts are reviewed.
 
 ## Next (V6 + wishlist, roadmap §1)
 

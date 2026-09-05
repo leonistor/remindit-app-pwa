@@ -1,54 +1,56 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { BRAND_NAME } from "@remindit/common/brand"
+import { m } from "../paraglide/messages"
 
 export const Route = createFileRoute("/features")({
   head: () => ({
     meta: [
-      { title: `Features — ${BRAND_NAME}` },
+      { title: `${m.navFeatures()} — ${BRAND_NAME}` },
       {
         name: "description",
-        content:
-          "Smart catalog with buy-frequency recommendations, offline-first lists, and shared shopping groups.",
+        content: m.webFeaturesMetaDescription(),
       },
     ],
   }),
   component: Features,
 })
 
-const FEATURES = [
-  {
-    title: "Smart catalog",
-    body: "Every item remembers how often you buy it — daily staples and monthly staples behave differently.",
-  },
-  {
-    title: "Recommendations before you run out",
-    body: "The recommender surfaces overdue and soon-due items so the list fills itself.",
-  },
-  {
-    title: "Offline-first",
-    body: "The whole app works without a network: catalog, list, and history live on your device.",
-  },
-  {
-    title: "Shared groups",
-    body: "Create a group, invite the people you shop with, and everyone sees the same lists in real time.",
-  },
-  {
-    title: "History that teaches",
-    body: "Every add and remove feeds the recommender — the longer you use it, the smarter it gets.",
-  },
-  {
-    title: "Private by design",
-    body: "Your data syncs only within your groups. No feeds, no tracking, no ads.",
-  },
-]
-
 function Features() {
+  // Resolved inside the render body (repo rule — no module-scope m.* calls:
+  // a message call at import time would freeze the string to the initial locale).
+  const features = [
+    {
+      title: m.webFeatureCatalogTitle(),
+      body: m.webFeatureCatalogBody(),
+    },
+    {
+      title: m.webFeatureRecommendationsTitle(),
+      body: m.webFeatureRecommendationsBody(),
+    },
+    {
+      title: m.webFeatureOfflineTitle(),
+      body: m.webFeatureOfflineBody(),
+    },
+    {
+      title: m.webFeatureGroupsTitle(),
+      body: m.webFeatureGroupsBody(),
+    },
+    {
+      title: m.webFeatureHistoryTitle(),
+      body: m.webFeatureHistoryBody(),
+    },
+    {
+      title: m.webFeaturePrivacyTitle(),
+      body: m.webFeaturePrivacyBody(),
+    },
+  ]
+
   return (
     <main className="container">
       <section className="section">
-        <h2>What’s inside</h2>
+        <h2>{m.webFeaturesSectionTitle()}</h2>
         <div className="cards">
-          {FEATURES.map((feature) => (
+          {features.map((feature) => (
             <div className="card" key={feature.title}>
               <h3>{feature.title}</h3>
               <p>{feature.body}</p>

@@ -4,14 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "i18n:compile": "bun scripts/compile-i18n.ts",
     "dev": "rsbuild dev",
     "build": "rsbuild build",
     "preview": "rsbuild preview",
-    "typecheck": "tsc --noEmit --pretty",
+    "typecheck": "bun run i18n:compile && tsc --noEmit --pretty",
     "lint": "biome lint",
     "check": "biome check --write --unsafe"
   },
   "dependencies": {
+    "@inlang/paraglide-js": "^2.25.0",
     "@tanstack/react-router": "^1.170.32",
     "@tanstack/react-start": "^1.168.49",
     "react": "^19.2.8",

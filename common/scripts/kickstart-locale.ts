@@ -1,10 +1,13 @@
 /**
  * Kick-start translations for new locales with a local Ollama model
  * (default: translategemma:12b, evaluated 2026-09-04 against the human ro
- * translation — see docs/DEV.md §Internationalization).
+ * translation — see pwa/docs/DEV.md §Internationalization).
  *
- * Usage: bun scripts/kickstart-locale.ts <locale,locale,...> [model]
- *   e.g. bun scripts/kickstart-locale.ts de,fr,uk translategemma:12b
+ * The shared catalog lives in this module (`common/messages` + the inlang
+ * project in `common/project.inlang`) — pwa and web both compile from it.
+ *
+ * Usage: bun run kickstart:locale -- <locale,locale,...> [model]
+ *   e.g. bun run kickstart:locale -- de,fr,uk translategemma:12b
  *
  * What it does per target locale:
  *   - adds the locale to project.inlang/settings.json (so paraglide compiles it)
@@ -29,7 +32,7 @@ const settingsPath = join(moduleDir, "project.inlang", "settings.json")
 const [localesArg, model = "translategemma:12b"] = process.argv.slice(2)
 if (!localesArg) {
   console.error(
-    "usage: bun scripts/kickstart-locale.ts <locale,locale,...> [model]"
+    "usage: bun run kickstart:locale -- <locale,locale,...> [model]"
   )
   process.exit(1)
 }

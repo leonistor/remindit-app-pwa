@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { BRAND_NAME } from "@remindit/common/brand"
+import { m } from "../paraglide/messages"
 
 export const Route = createFileRoute("/download")({
   head: () => ({
     meta: [
-      { title: `Get the app — ${BRAND_NAME}` },
+      { title: `${m.navGetTheApp()} — ${BRAND_NAME}` },
       {
         name: "description",
-        content: `Install the ${BRAND_NAME} PWA on your phone or desktop — no app store required.`,
+        content: m.webDownloadMetaDescription({ brandName: BRAND_NAME }),
       },
     ],
   }),
@@ -23,36 +24,32 @@ function Download() {
   return (
     <main className="container">
       <section className="section">
-        <h2>Get {BRAND_NAME}</h2>
-        <p>
-          {BRAND_NAME} is a PWA — it installs straight from the browser, no app
-          store needed, and updates itself.
-        </p>
+        <h2>{m.webDownloadTitle({ brandName: BRAND_NAME })}</h2>
+        <p>{m.webDownloadIntro({ brandName: BRAND_NAME })}</p>
         {pwaUrl && (
           <p>
             <a className="cta" href={pwaUrl}>
-              Open the app
+              {m.webOpenApp()}
             </a>
           </p>
         )}
         <ol className="steps">
           <li>
-            {pwaUrl ? (
-              <>
-                Open <strong>{pwaUrl}</strong> on your phone or desktop.
-              </>
-            ) : (
-              <>Open the app URL you received on your phone or desktop.</>
-            )}
+            {pwaUrl
+              ? m.webDownloadStep1WithUrl({ url: pwaUrl })
+              : m.webDownloadStep1NoUrl()}
           </li>
           <li>
-            <strong>iPhone / iPad:</strong> Share → <em>Add to Home Screen</em>.
+            <strong>{m.webDownloadStep2Device()}</strong>{" "}
+            {m.webDownloadStep2Action()}
           </li>
           <li>
-            <strong>Android:</strong> menu → <em>Add to Home screen</em>.
+            <strong>{m.webDownloadStep3Device()}</strong>{" "}
+            {m.webDownloadStep3Action()}
           </li>
           <li>
-            <strong>Desktop:</strong> install icon in the address bar.
+            <strong>{m.webDownloadStep4Device()}</strong>{" "}
+            {m.webDownloadStep4Action()}
           </li>
         </ol>
       </section>
