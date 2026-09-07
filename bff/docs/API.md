@@ -107,7 +107,7 @@ check is server-side (`requireAdmin`, 403 before any superuser query).
 
 | Method & path | Response | Notes |
 |---|---|---|
-| `GET /api/health` | `200 { ok, service, pb: { status } }` | PB-down is a reported state, not a 5xx |
+| `GET /api/health` | `200 { ok, service, ts, uptime, version, checks: { pb } }` | shared `@remindit/common/health` report — always 200 while the BFF is alive; PB-down is a reported check (`ok:false`), not a 5xx |
 | `GET /api/stats` | `200 { users, groups }` | public aggregate counts for the marketing site (superuser-side, 60s-cached, `cache-control: public, max-age=60`) |
 | `GET /api/sse` | SSE stream | phase-1 spike / diagnostics |
 | `ANY /pb/api/*` | PB passthrough | **Data-plane forwarder (phase 5)**: authenticated proxy to the internal PocketBase for the pwa sync engine (PB SDK `baseUrl = PUBLIC_BFF_URL + "/pb"`). Requires a BFF session, forwards the rotated token, streams SSE unbuffered; rules stay the authorization boundary. See [../docs/SYNC.md](../../pwa/docs/SYNC.md) |

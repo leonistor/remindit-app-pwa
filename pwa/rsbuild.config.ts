@@ -1,4 +1,5 @@
 import { paraglideRspackPlugin } from "@inlang/paraglide-js"
+import { healthMiddleware } from "@remindit/common/health"
 import { defineConfig } from "@rsbuild/core"
 import { pluginReact } from "@rsbuild/plugin-react"
 import { pluginTailwindcss } from "@rsbuild/plugin-tailwindcss"
@@ -47,6 +48,12 @@ export default defineConfig({
     // (http://localhost:3000) stay allowed by the default 'auto' policy.
     // Single source of truth for both this allowlist and the startup QR codes.
     allowedHosts: CADDY_HOSTS.map(({ host }) => host),
+    // Health check for the dev/preview server only (production serves the pwa
+    // as a Caddy-served static bundle — no process to probe). Runs before the
+    // built-in middlewares, so /health never hits the SPA fallback.
+    setup: [({ server }) => {
+      server.middlewares.use(healthMiddleware("remindit-pwa", { version: pkg.version }))
+    }],
     printUrls({ urls }) {
       for (const url of urls) {
         console.log(`  ➜  ${url}`)

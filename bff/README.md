@@ -45,7 +45,7 @@ rule matrix: [docs/API.md](docs/API.md).
 | `GET /api/admin/*` | role-guarded (`users.role = "admin"`, 403 otherwise): overview counts, user/group management, create-user, delete-group |
 | `ANY /pb/api/*` | authenticated PB data-plane forwarder (pwa sync — SSE-capable) |
 | `GET /api/stats` | public aggregate counts (superuser-side, 60s-cached) for the marketing site |
-| `GET /api/health` | BFF liveness + PocketBase reachability (`pb.status: "up" \| "down"`; PB down is a reported state, not a 5xx) |
+| `GET /api/health` | shared health report (200 always; `checks.pb: "up"\|"down"` — a down PB is a reported check, not a 5xx) |
 | `GET /api/sse` | SSE spike/diagnostic — emits 3 `ping` events 150ms apart |
 
 ## Dev flow

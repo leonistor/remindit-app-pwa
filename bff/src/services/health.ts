@@ -1,18 +1,16 @@
-import type { HealthResponse } from "../contracts"
+import type { HealthStatus } from "@remindit/common/health"
 import { pb } from "../repositories/pocketbase"
 
 export const healthService = {
-  // Liveness of the BFF itself + reachability of the internal PocketBase.
-  // Never throws: PB being down is a reported state ("pb: down"), not a
-  // crash — the BFF must boot (and answer) even while PB is starting up.
-  async check(): Promise<HealthResponse> {
-    let pbStatus: HealthResponse["pb"] = { status: "down" }
+  // PocketBase reachability probe for the shared health endpoint. Never
+  // throws: PB being down is a reported state ("down"), not a crash — the
+  // BFF must boot (and answer) even while PB is starting up.
+  async pb(): Promise<HealthStatus> {
     try {
       const res = await pb.health.check()
-      if (res.code === 200) pbStatus = { status: "up" }
+      return res.code === 200 ? "up" : "down"
     } catch {
-      // PB unreachable — reported as "down"
+      return "down"
     }
-    return { ok: true, service: "remindit-bff", pb: pbStatus }
   },
 }

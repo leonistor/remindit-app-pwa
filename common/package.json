@@ -7,14 +7,21 @@
     ".": "./src/index.ts",
     "./models": "./src/models/types.ts",
     "./brand": "./src/brand.ts",
-    "./seeds": "./src/seeds/index.ts"
+    "./seeds": "./src/seeds/index.ts",
+    "./health": "./src/health/index.ts",
+    "./health/hono": "./src/health/hono.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit --pretty",
+    "test": "bun test tests",
     "build:platform-seed": "bun scripts/build-platform-seed.ts",
     "kickstart:locale": "bun scripts/kickstart-locale.ts"
   },
+  "dependencies": {
+    "hono": "^4.13.5"
+  },
   "devDependencies": {
+    "@types/node": "^26.4.1",
     "typescript": "^7.0.2"
   }
 }

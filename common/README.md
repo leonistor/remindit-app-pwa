@@ -67,6 +67,25 @@ New brand assets of any type belong in `assets/`, imported with the same
 pattern (add an ambient declaration for the extension/query if needed) — and,
 if they must be reachable from config loaders, behind an asset-free subpath.
 
+## Health (`@remindit/common/health`)
+
+Server-side carve-out: shared health-report helpers for every module's
+`GET /health` (bff at `/api/health`, web/admin/pwa-dev at `/health`). See
+[ARCHITECTURE.md](../docs/ARCHITECTURE.md) §Health endpoints.
+
+- Import via the `@remindit/common/health` subpath — **not** the root export
+  (kept hono-free): `healthReport` / `healthResponse` / `healthFetchHandler` /
+  `healthMiddleware`. The hono route factory lives separately at
+  `@remindit/common/health/hono` so hono never enters client bundles.
+- Types: `HealthReport = { ok, service, ts, uptime, version?, checks }` where
+  `checks` maps dependency names to `"up" | "down"`. HTTP is always 200 while
+  the process is alive; a down dependency reads as `ok: false` (monitoring
+  alerts on the body; process supervisors only probe reachability).
+- Consumers with only DOM libs (web/admin) typecheck fine without node types:
+  `report.ts` avoids the `process` global (uptime = module-load age).
+- The bff's PocketBase probe feeds in as a check (`services/health.ts`); probes
+  that throw are folded to `"down"` and never surface as a 500.
+
 ## Rules
 
 - No build step — `exports` point at TypeScript source (`./src/index.ts`,

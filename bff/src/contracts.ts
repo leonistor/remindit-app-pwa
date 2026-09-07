@@ -187,12 +187,17 @@ export const statsSchema = z.object({
 export type Stats = z.infer<typeof statsSchema>
 
 // --- health ------------------------------------------------------------------
+// The report shape is the shared @remindit/common/health contract; the schema
+// below pins the bff's dependencies (`checks.pb`) for clients + tests.
 
 export const healthResponseSchema = z.object({
-  ok: z.literal(true),
+  ok: z.boolean(),
   service: z.literal("remindit-bff"),
-  pb: z.object({
-    status: z.enum(["up", "down"]),
+  ts: z.string(),
+  uptime: z.number().int().nonnegative(),
+  version: z.string(),
+  checks: z.object({
+    pb: z.enum(["up", "down"]),
   }),
 })
 export type HealthResponse = z.infer<typeof healthResponseSchema>

@@ -42,6 +42,32 @@ lives in [ROADMAP.md](ROADMAP.md), the decision log in
 - The ops layer (Caddy site blocks, bm2 supervision, backup timer, admin
   basicauth, exposure guardrails) is owned by [DEPLOY-VPS.md](DEPLOY-VPS.md).
 
+## Health endpoints
+
+Every server module exposes a **`GET /health`** (the bff at `/api/health`),
+built on the shared [@remindit/common/health](../common/src/health) helpers:
+
+| Module | URL | Scope |
+|---|------|-------|
+| bff | `/api/health` | prod + dev (Hono route) |
+| web | `/health` | prod + dev (TanStack fetch-handler short-circuit) |
+| admin | `/health` | prod + dev (TanStack fetch-handler short-circuit) |
+| pwa | `/health` | **dev/preview only** — production serves a static bundle by Caddy (no process to probe; the pwa in prod is covered by the Caddy-mediated origin check) |
+
+Contract (see `common/src/health/types.ts`):
+
+```json
+{ "ok": true, "service": "remindit-bff", "ts": "<iso>", "uptime": 12,
+  "version": "0.1.0", "checks": { "pb": "up" } }
+```
+
+Semantics: **always HTTP 200 while the process is alive**; dependency health
+(`ok` + `checks.*`) is carried in the body. bm2 probes reachability only, so a
+down dependency (e.g. PB) must **not** read as a dead process and force a
+restart — monitoring tools alert on the body instead. The bff's PB probe lives
+in `bff/src/services/health.ts`; future modules add dependencies as extra
+checks (probe failures fold to `"down"` and never throw).
+
 ## Workspace layout
 
 The module table (module → path → stack → purpose) is owned by the root

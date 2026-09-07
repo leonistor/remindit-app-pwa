@@ -52,13 +52,17 @@
     "common": {
       "name": "@remindit/common",
       "version": "0.1.0",
+      "dependencies": {
+        "hono": "^4.13.5",
+      },
       "devDependencies": {
+        "@types/node": "^26.4.1",
         "typescript": "^7.0.2",
       },
     },
     "pwa": {
       "name": "@remindit/pwa",
-      "version": "5.2.0",
+      "version": "5.3.0",
       "dependencies": {
         "@ark-ui/react": "^5.39.0",
         "@dicebear/core": "^10.7.0",
