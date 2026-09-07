@@ -2,6 +2,19 @@
 
 All notable changes to Remindit will be documented in this file.
 
+## v5.4.0 — 2026-09-07
+
+_A quieter release — mostly housekeeping behind the scenes, plus a couple of website rough edges fixed._
+
+### 🔧 Improvements
+
+- **One health check, everywhere**: the app, the server and the admin now report their health through a single shared definition, so a quick status check tells you what's actually running and responding
+
+### 🐛 Fixes
+
+- **A real robots.txt**: the website now tells search engines which pages to index instead of shipping an empty placeholder
+- **Phone screens in the right shape**: the site's phone mockups now match the app's actual aspect ratio
+
 ## v5.3.0 — 2026-09-05
 
 _The website speaks every language — and shows you the app before you install it._

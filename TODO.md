@@ -32,6 +32,7 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 - [ ] LLM/MCP integration
 - [ ] Item attributes (photo / quantity / price)
 - [ ] Native app
+- [ ] **Site ↔ app cross-link** (shipped 2026-09-07 as a minimal link on the About page + site Download page; extend later — e.g. deeper site↔app routing, download CTA placement, or a shared "about the app" section)
 
 ## Shipped: web locale routing — Rsbuild-native (2026-09-05, branch `mvp-web`)
 
