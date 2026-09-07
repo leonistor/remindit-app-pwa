@@ -43,7 +43,11 @@ try {
     .sort()
     .reverse()
   for (const f of files.slice(keep)) {
-    rmSync(resolve(backupsDir, f))
+    const archive = resolve(backupsDir, f)
+    rmSync(archive)
+    // Prune PocketBase's .attrs sidecar alongside its zip so a pruned archive's
+    // metadata can't linger locally or in the off-box mirror.
+    rmSync(`${archive}.attrs`, { force: true })
     console.log(`[backup] pruned ${f}`)
   }
 } catch (e) {
