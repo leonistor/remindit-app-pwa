@@ -2,7 +2,7 @@
 
 Marketing website: **Rsbuild + TanStack Start** (official `./plugin/rsbuild`
 adapter — SSR, streaming, server functions) with brand constants from
-`@remindit/common`. Phase plan: [docs/ROADMAP.md](../docs/ROADMAP.md);
+`@remindit/common`. Platform rollout: [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md);
 module rules: [AGENTS.md](AGENTS.md).
 
 ## Pages

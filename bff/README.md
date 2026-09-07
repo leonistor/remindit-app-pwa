@@ -1,8 +1,9 @@
 # @remindit/bff
 
 Backend-for-frontend: **PocketBase** (data, auth, realtime — internal only) +
-**Hono** on **Bun.serve** (the single public API surface). Phase plan and
-decision log: [docs/ROADMAP.md](../docs/ROADMAP.md); module rules:
+**Hono** on **Bun.serve** (the single public API surface). Platform rollout:
+[docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md); decision log:
+[docs/DECISIONS.md](../docs/DECISIONS.md); module rules:
 [AGENTS.md](AGENTS.md).
 
 ## Architecture

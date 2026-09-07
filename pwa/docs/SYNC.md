@@ -1,7 +1,7 @@
 # PWA sync design (phase 5)
 
 How the local-first PWA syncs with the BFF/PocketBase backend. Read with
-[docs/ROADMAP.md](../../docs/ROADMAP.md) (decisions D1/D2/D8) and
+[DECISIONS.md](../../docs/DECISIONS.md) (decisions D1/D2/D8) and
 [bff/docs/SCHEMA.md](../../bff/docs/SCHEMA.md) (collections + rules).
 
 ## Goals
@@ -93,7 +93,7 @@ idempotent, so self-echoes are harmless.
 ## Notifications (D4 — decided 2026-09-03)
 
 Channel: **in-app realtime** (Web Push deferred, email rejected — see the D4
-row in [docs/ROADMAP.md](../../docs/ROADMAP.md)).
+row in [docs/DECISIONS.md](../../docs/DECISIONS.md)).
 
 - **Dispatch (BFF-side, best-effort):** the groups service writes
   `notifications` rows superuser-side (createRule is self-only) on membership

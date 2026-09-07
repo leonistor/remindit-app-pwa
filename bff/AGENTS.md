@@ -2,7 +2,7 @@
 
 Module rules for the `bff/` workspace (`@remindit/bff`). Repo-wide rules live
 in the root [AGENTS.md](../AGENTS.md); the roadmap in
-[docs/ROADMAP.md](../docs/ROADMAP.md) (this module: platform phases 1–3 plus
+[docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) (this module: platform phases 1–3 plus
 the sync/admin slices in phases 5–6).
 
 ## Rules
@@ -39,4 +39,4 @@ Run from the repo root: `bun run dev:bff`, `bun run test:bff`, or combined
 ## Docs
 
 - [README.md](README.md) — devdoc (architecture, endpoints, dev flow)
-- [docs/ROADMAP.md](../docs/ROADMAP.md) — approved plan + decision log
+- [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) — rollout history + conventions, [docs/DECISIONS.md](../docs/DECISIONS.md) — decision log

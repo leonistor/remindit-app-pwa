@@ -2,7 +2,7 @@
 
 Module rules for the `admin/` workspace (`@remindit/admin`). Repo-wide rules
 live in the root [AGENTS.md](../AGENTS.md); the phased rollout plan in
-[docs/ROADMAP.md](../docs/ROADMAP.md) (this module: phase 6).
+[docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) (this module: phase 6).
 
 ## Rules
 
@@ -37,4 +37,4 @@ combined `bun run dev:all` (pwa + bff + web + admin).
 ## Docs
 
 - [README.md](README.md) — devdoc (pages, auth model, deployment notes)
-- [docs/ROADMAP.md](../docs/ROADMAP.md) — approved plan + decision log
+- [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) — rollout history + conventions, [docs/DECISIONS.md](../docs/DECISIONS.md) — decision log

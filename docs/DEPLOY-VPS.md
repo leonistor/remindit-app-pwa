@@ -166,7 +166,7 @@ that day: `bm2 stop/delete feedback`, the new `infra/Caddyfile` (no feedback
 block) copied + reloaded, `/srv/remindit/feedback` removed, S3 `answer/`
 backups pruned, and the `feedback.remindit.me` DNS record dropped. Verifies:
 `bm2 list` shows 4 apps, `feedback.remindit.me` fails DNS, builds no longer
-need `PUBLIC_FEEDBACK_URL`. Decision record: `docs/ROADMAP.md` D13.
+need `PUBLIC_FEEDBACK_URL`. Decision record: `docs/DECISIONS.md` D13.
 
 ## Cutover from remindit.parsedwink.com
 

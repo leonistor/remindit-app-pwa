@@ -2,7 +2,7 @@
 
 Module rules for the `web/` workspace (`@remindit/web`). Repo-wide rules live
 in the root [AGENTS.md](../AGENTS.md); the phased rollout plan in
-[docs/ROADMAP.md](../docs/ROADMAP.md) (this module: phase 4).
+[docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) (this module: phase 4).
 
 ## Rules
 
@@ -56,4 +56,4 @@ Run from the repo root: `bun run dev:web`, `bun run build:web`, or combined
 ## Docs
 
 - [README.md](README.md) — devdoc (pages, data flow, deployment notes)
-- [docs/ROADMAP.md](../docs/ROADMAP.md) — approved plan + decision log
+- [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) — rollout history + conventions, [docs/DECISIONS.md](../docs/DECISIONS.md) — decision log

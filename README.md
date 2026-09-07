@@ -12,8 +12,10 @@ Bun workspace for the Remindit project.
 | `@remindit/web`     | web/     | Marketing site (Rsbuild + TanStack Start) — see [web/README.md](web/README.md)  |
 | `@remindit/admin`   | admin/   | Admin dashboard (Rsbuild + TanStack Start + Mantine) — see [admin/README.md](admin/README.md) |
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for the roadmap (product versions +
-platform decision log), [TODO.md](TODO.md) for active work, and
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the product roadmap,
+[docs/DECISIONS.md](docs/DECISIONS.md) for the decision log,
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for platform conventions,
+[TODO.md](TODO.md) for active work, and
 [AGENTS.md](AGENTS.md) §Devdocs for every other doc and the update rules.
 
 ## Usage
@@ -31,7 +33,7 @@ bun run test    # pwa test suite
 Environment: **one repo-root `.env`** for all modules — copy `.env.example`
 (gitignored `.env` holds local values; prod secrets come from the VPS). Root
 `dev:*`/`build` scripts inject it via `bun --env-file=../.env` (see
-[docs/ROADMAP.md §5](docs/ROADMAP.md)).
+[docs/ARCHITECTURE.md §Environment convention](docs/ARCHITECTURE.md)).
 
 See [AGENTS.md](AGENTS.md) for the development guide and [pwa/DESIGN.md](pwa/DESIGN.md)
 for the design system.

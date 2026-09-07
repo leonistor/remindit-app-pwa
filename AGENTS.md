@@ -3,8 +3,8 @@
 ## Repo layout
 
 Bun workspace. App code lives in the `pwa/` module (`@remindit/pwa`); shared brand constants and domain entities live in `common/` (`@remindit/common`). Root `package.json` scripts delegate into the modules (`bun run <script>` works from the repo root). Platform modules (phased rollout, one feature branch each — see
-[docs/ROADMAP.md](docs/ROADMAP.md) for the approved plan, [TODO.md](TODO.md)
-for active work): `@remindit/bff`
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the rollout history,
+[TODO.md](TODO.md) for active work): `@remindit/bff`
 (PocketBase + Hono), `@remindit/web` (Rsbuild + TanStack Start),
 `@remindit/admin` (Rsbuild + TanStack Start + Mantine). Repo-level config:
 `.opencode/`, `opencode.jsonc`, `skills-lock.json`, `.hive/`, `.zed/`,
@@ -27,7 +27,9 @@ that moves the code. Lost context is cheaper to avoid than to re-derive; the
 
 | Doc | Owns | Touch when |
 | --- | --- | --- |
-| `docs/ROADMAP.md` | product versions, decision log (D#), platform phases, env/architecture, risks | a decision, phase, or env convention changes |
+| `docs/ROADMAP.md` | product versions (V1–V6+, wishlist) + product status | a product version ships or its scope changes |
+| `docs/DECISIONS.md` | decision log (dated `D#` rows) | a decision is made — land it here, not just in a commit message |
+| `docs/ARCHITECTURE.md` | platform architecture — topology, domain→collections, env convention (D9), rollout history, gates, open risks, gotchas | the platform's architecture or a convention changes |
 | `TODO.md` | active / in-flight work (not a log of done things) | starting, blocking, or shipping work — **trim shipped sections to a one-line record** |
 | `docs/DEPLOY-VPS.md` | VPS runbook (bm2, Caddy, backups, feedback teardown) | deploy topology / ops commands change |
 | `docs/CADDY-LOCAL.md` | local HTTPS dev topology | local-proxy workflow changes |
@@ -50,14 +52,15 @@ that moves the code. Lost context is cheaper to avoid than to re-derive; the
 3. **Enumerated surfaces drift fastest** (route tables, store-module tables,
    endpoint tables, custom-component sets, env tables) — re-verify these
    against source when the module changes.
-4. **Decisions land in ROADMAP §2 as a dated `D#` row** + a note on the phase
-   that shipped them. Don't leave the rationale only in a commit message.
+4. **Decisions land in `docs/DECISIONS.md` as a dated `D#` row** + a note on
+   the phase that shipped them. Don't leave the rationale only in a commit
+   message.
 5. **Prune, don't pile on.** Trim shipped plans from `TODO.md` to a one-line
    record (detail lives in git history); fold superseded runbooks into a
    pointer. Concise beats exhaustive — implementation detail belongs in code
    comments.
 6. **Env vars:** adding/renaming one updates the root `.env.example` in the
-   same commit (agreed gate in ROADMAP §8).
+   same commit (agreed gate in `docs/ARCHITECTURE.md` §Verification gates).
 7. **i18n:** edit `common/messages/{en,ro}.json` (the source of truth) — never
    generated `src/paraglide` output.
 8. **Gate:** docs-only changes skip typecheck/tests but still run `bun run lint`
@@ -110,7 +113,7 @@ Gotcha: `npx skills add <pkg>@<skill> -y` installs into `.agents/skills/` (the C
 
 ## Platform conventions (adding modules)
 
-New modules (`bff`, `web`, `admin` — phased rollout in [docs/ROADMAP.md](docs/ROADMAP.md)):
+New modules (`bff`, `web`, `admin` — phased rollout in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)):
 
 - Bun workspace package named `@remindit/<module>`, `"type": "module"`, own
   `dev/build/test/typecheck/lint` scripts, plus module `AGENTS.md` +

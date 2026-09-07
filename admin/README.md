@@ -1,8 +1,9 @@
 # @remindit/admin
 
 Admin dashboard: **Rsbuild + TanStack Start** (same stack as `web/`) with
-**Mantine** components and brand constants from `@remindit/common`. Phase
-plan: [docs/ROADMAP.md](../docs/ROADMAP.md); module rules: [AGENTS.md](AGENTS.md).
+**Mantine** components and brand constants from `@remindit/common`. Platform
+rollout: [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md); module rules:
+[AGENTS.md](AGENTS.md).
 
 ## Pages
 

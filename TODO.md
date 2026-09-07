@@ -1,12 +1,14 @@
 # TODO — active work
 
-The working backlog. Product versions and the decision log live in
-[docs/ROADMAP.md](docs/ROADMAP.md); the VPS runbook in
+The working backlog. Product versions live in
+[docs/ROADMAP.md](docs/ROADMAP.md), the decision log in
+[docs/DECISIONS.md](docs/DECISIONS.md); the VPS runbook in
 [docs/DEPLOY-VPS.md](docs/DEPLOY-VPS.md). Completed planning material (phases H
 hardening, P polish, F product, D deployment, FB feedback, the v5 audit docs)
 was disposed 2026-09-04 after shipping — the detail lives in git history
 (`TODO.md` before this rewrite, `docs/V5-IMPLEMENTATION.md`,
-`docs/v5-review.md`) and in ROADMAP §7's phase notes.
+`docs/v5-review.md`) and in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+§Rollout history.
 
 ## In flight
 
@@ -47,7 +49,7 @@ via `web/src/lib/canonical.ts`, and a 301 `/en/*` → `/` rewrite in
 client nav keeps the prefix, switcher navigates locale-to-locale, no hydration
 or console errors. (Planning material — premise research, staged plan, the
 `IgorSzymanski/tanstack-start-paraglide` reference — lives in git history +
-`docs/ROADMAP.md` §7.)
+`docs/ARCHITECTURE.md` §Rollout history.)
 
 ## Shipped: web MVP content pass (2026-09-05, branch `mvp-web`)
 

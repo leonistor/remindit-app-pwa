@@ -78,7 +78,7 @@ BFF's error mapper with `{ error, details? }`.
 
 ### Endpoints — notifications (D4 — in-app realtime)
 
-Channel decided 2026-09-03 (Web Push deferred, email rejected — ROADMAP D4).
+Channel decided 2026-09-03 (Web Push deferred, email rejected — DECISIONS.md D4).
 The rows are **written by the groups service** (best-effort, superuser-side —
 the createRule is self-only) on membership lifecycle events; these endpoints
 are the read/mark path only. Types are plain text; payload is untyped json:

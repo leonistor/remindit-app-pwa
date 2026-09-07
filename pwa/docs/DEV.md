@@ -296,7 +296,8 @@ The `pwa/seed/` directory is a tracked, extensible registry of sample catalogs (
 
 #### Selecting the seeded dataset
 
-The catalog is seeded from the **persisted dataset choice** (`remindit:selected-dataset`, set during onboarding or reset & reseed). `PUBLIC_DATASET` is only the **fallback** for when no choice is persisted (fresh installs). It is a **public** variable (Rsbuild exposes any `PUBLIC_`-prefixed var to client code via `import.meta.env`) defined in the **single repo-root `.env`** (one env file for all modules — see `docs/ROADMAP.md` §5). Copy `.env.example` to `.env` and set:
+The catalog is seeded from the **persisted dataset choice** (`remindit:selected-dataset`, set during onboarding or reset & reseed). `PUBLIC_DATASET` is only the **fallback** for when no choice is persisted (fresh installs). It is a **public** variable (Rsbuild exposes any `PUBLIC_`-prefixed var to client code via `import.meta.env`) defined in the **single repo-root `.env`** (one env file for all modules — see
+`docs/ARCHITECTURE.md` §Environment convention). Copy `.env.example` to `.env` and set:
 
 ```sh
 PUBLIC_DATASET=rick_morty

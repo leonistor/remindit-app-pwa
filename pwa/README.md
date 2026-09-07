@@ -4,7 +4,8 @@
 
 This project is a Progressive Web App (PWA) to manage a personal shopping list.
 
-- [ROADMAP.md](../docs/ROADMAP.md) roadmap (product versions + platform phases)
+- [ROADMAP.md](../docs/ROADMAP.md) product roadmap (versions + wishlist)
+- [DECISIONS.md](../docs/DECISIONS.md) decision log
 
 | Light | Dark |
 | --- | --- |
