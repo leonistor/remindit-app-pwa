@@ -22,6 +22,8 @@
     "migrate:bff": "cd bff && bun --env-file=../.env run migrate",
     "seed:bff": "cd bff && bun --env-file=../.env run seed",
     "test:bff": "cd bff && AUTH_RATE_LIMIT=10000 bun --env-file=../.env test",
+    "ai-smoke": "cd bff && bun --env-file=../.env run scripts/ai-smoke.ts",
+    "model:eval": "cd bff && bun --env-file=../.env run scripts/model-eval.ts",
     "demos": "cd pwa && bun run demos",
     "format": "bunx biome format --write",
     "generate:palettes": "cd pwa && bun run generate:palettes",

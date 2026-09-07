@@ -53,4 +53,22 @@ export const env = {
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean),
+  /**
+   * AI support chat — which provider serves the assistant and which model it
+   * runs (phase 1: `ollama` for local dev on pop-os.lan, or `openrouter` with
+   * the dedicated key). Defaults cover a dev run against local ollama, so the
+   * assistant works with zero config; switch to openrouter to compare models
+   * via the ai-smoke script. See src/services/ai.ts.
+   */
+  aiProvider: process.env.AI_PROVIDER ?? "ollama",
+  /** Model id string passed to the chosen provider (not the router). */
+  aiModel: process.env.AI_MODEL ?? "",
+  /** Ollama — OpenAI-compatible endpoint on the local LAN host. */
+  ollamaBaseUrl: process.env.OLLAMA_BASE_URL ?? "http://pop-os.lan:11434",
+  /** Selected in the 2026-09-07 eval (qwen2.5:7b — grounded, fast, no invention). */
+  ollamaModel: process.env.OLLAMA_MODEL ?? "qwen2.5:7b",
+  /** OpenRouter — dedicated RemindIt key (never committed; D9). */
+  openRouterKey: process.env.OPENROUTER_REMINDIT_KEY,
+  /** Selected in the 2026-09-07 eval (minimax-m3:free — best remote answers). */
+  openRouterModel: process.env.OPENROUTER_MODEL ?? "minimax/minimax-m3:free",
 }

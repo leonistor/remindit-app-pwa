@@ -18,6 +18,7 @@ import OnboardingView from "./views/onboarding"
 // Secondary routes are code-split so the main shopping view (the LCP) ships
 // without their bundles. The home route stays eager on purpose.
 const AboutView = lazy(() => import("@/views/about"))
+const AssistantView = lazy(() => import("@/views/assistant"))
 const CatalogView = lazy(() => import("@/views/catalog"))
 const ChangelogView = lazy(() => import("@/views/changelog"))
 const HelpView = lazy(() => import("@/views/help"))
@@ -81,6 +82,7 @@ export const router = createBrowserRouter([
       { path: "/profile", element: <ProfileView /> },
       { path: "/share", element: <ShareView /> },
       { path: "/about", element: <AboutView /> },
+      { path: "/assistant", element: <AssistantView /> },
       { path: "/changelog", element: <ChangelogView /> },
       { path: "/help", element: <HelpView /> },
     ],

@@ -47,6 +47,7 @@ rule matrix: [docs/API.md](docs/API.md).
 | `GET /api/stats` | public aggregate counts (superuser-side, 60s-cached) for the marketing site |
 | `GET /api/health` | shared health report (200 always; `checks.pb: "up"\|"down"` — a down PB is a reported check, not a 5xx) |
 | `GET /api/sse` | SSE spike/diagnostic — emits 3 `ping` events 150ms apart |
+| `POST /api/ai/chat` | AI support chat (phase 1): streams a VoltAgent support-assistant reply (grounded on `bff/content/support-en.md`) as a UIMessageStreamResponse for the pwa's Assistant UI |
 
 ## Dev flow
 
@@ -115,6 +116,13 @@ All from the root `.env` (see root `.env.example`): `PORT`,
 `SEED_PASSWORD`, `SESSION_COOKIE_SECURE`, `CORS_ORIGINS`,
 `AUTH_RATE_LIMIT`. Never create `bff/.env`.
 
+AI env (phase 1 — see `bff/src/services/ai.ts` + the `model:eval` script):
+`AI_PROVIDER` (`ollama` dev default | `openrouter`), `AI_MODEL` (optional
+override), `OLLAMA_BASE_URL` (`http://pop-os.lan:11434`),
+`OLLAMA_MODEL` (`qwen2.5:7b`, chosen 2026-09-07),
+`OPENROUTER_REMINDIT_KEY` (no default), `OPENROUTER_MODEL`
+(`minimax/minimax-m3:free`, chosen 2026-09-07).
+
 ## Testing
 
 `bun test` (from `bff/` or root `bun run test:bff`):
@@ -127,6 +135,34 @@ All from the root `.env` (see root `.env.example`): `PORT`,
 - `tests/api.integration.test.ts` — live auth/groups flows, responses parsed against the Zod contracts (skips when PB is down)
 - `tests/pb-forwarder.integration.test.ts` — forwarder auth gating, rule-scoped CRUD, unique-index dedupe, SSE passthrough
 - `tests/admin.integration.test.ts` — admin role guards + user/group management (live)
+
+## AI smoke test
+
+`bun run ai-smoke` (repo root) asks a fixed set of hypothetical support
+questions to each configured model and prints the answers side by side, so the
+local Ollama model can be compared against OpenRouter on the real grounding
+content (`content/support-en.md`). Set `AI_PROVIDER=ollama|openrouter` to run
+a single provider (default: both, skipping whichever isn't configured).
+Requires the root `.env` (D9); no BFF server needed.
+
+## Model evaluation (`bun run model:eval`)
+
+For the model-selection pass — compares a **list** of candidate support-assistant
+models (any number, local + remote) on the full question battery, with timing:
+
+```bash
+bun run model:eval                                        # default sets
+bun run model:eval --ollama "gemma3:4b,qwen3:8b"          # override local list
+bun run model:eval --openrouter "minimax/minimax-m3:free" # override remote list
+bun run model:eval --only openrouter                      # one provider
+# or via env: OLLAMA_EVAL_MODELS=... OPENROUTER_EVAL_MODELS=... EVAL_ONLY=...
+```
+
+Defaults (selected 2026-09-07): ollama `qwen2.5:7b,llama3.1:8b,
+granite3.3:8b`; openrouter `minimax/minimax-m3:free,
+nvidia/nemotron-3-ultra-550b-a55b:free, dots-studio/dots-3-note-preview:free`.
+(`inkling:free` and the older `nemotron-3-super:free` were dropped — agentic-only
+/ Invalid-JSON through this harness.) Implementation: `bff/scripts/model-eval.ts`.
 
 ## pocketbase-mcp (agent ops)
 

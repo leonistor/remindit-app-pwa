@@ -68,6 +68,38 @@ restart — monitoring tools alert on the body instead. The bff's PB probe lives
 in `bff/src/services/health.ts`; future modules add dependencies as extra
 checks (probe failures fold to `"down"` and never throw).
 
+## AI support chat (phase 1, VoltAgent)
+
+The in-app support assistant is an **embedded VoltAgent agent** served by the
+bff's `POST /api/ai/chat` (route `bff/src/routes/ai.ts`). VoltAgent sits on the
+Vercel AI SDK; the route calls `agent.streamText(...).toUIMessageStreamResponse()`
+so the pwa's [Assistant UI](https://www.assistant-ui.com) consumes it directly
+(`AssistantChatTransport` + `useChatRuntime`), with **no separate server** —
+the bff's existing Hono `AppType` stays the only server surface (D2/D8).
+
+- **Agent** (`bff/src/services/ai.ts`): a single support agent grounded on the
+  English knowledge base `bff/content/support-en.md` (kept in sync with the
+  Help/About pages + changelog at release time). English-only this phase;
+  language-by-profile is a roadmap item.
+- **Models** (`env`-selected, D9): `AI_PROVIDER=ollama` (dev default; OpenAI
+  compatible `http://pop-os.lan:11434`, model `qwen2.5:7b`) or
+  `AI_PROVIDER=openrouter` (dedicated `OPENROUTER_REMINDIT_KEY`, model
+  `minimax/minimax-m3:free`). Both are wired through `@ai-sdk/openai-compatible`
+  (the maintained provider that emits the model interface VoltAgent 2.10
+  accepts today). Models chosen by the **2026-09-07 eval** (`bun run model:eval`):
+  `qwen2.5:7b` won local (grounded, fast, no invention on the 1080's 10GB VRAM),
+  `minimax/minimax-m3:free` won remote (best grounded answers). `inkling:free`
+  and `nemotron-3-super:free` were dropped (agentic-only / Invalid-JSON).
+- **UI** (`pwa/src/views/assistant.tsx`): a Shark-styled Assistant UI thread,
+  lazy-loaded at `/assistant` (menu → Assistant) so the assistant stack never
+  touches the main-list LCP. Chat route is public like `/api/stats`.
+- **Smoke test** (`bun run ai-smoke` → `bff/scripts/ai-smoke.ts`): asks a fixed
+  set of support questions to each configured model for comparison; no server
+  needed.
+- Phase 2+ (feedback capture, app "commands", MCP/skills to other systems,
+  web/admin surfaces, per-profile language) is roadmap — see
+  [docs/ROADMAP.md](ROADMAP.md).
+
 ## Workspace layout
 
 The module table (module → path → stack → purpose) is owned by the root

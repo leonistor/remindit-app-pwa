@@ -12,7 +12,16 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 
 ## In flight
 
-- none — all open lanes live in the sections below.
+- **AI support chat phase 1** (branch `feat/ai-support-chat`, 2026-09-07) — embedded
+  VoltAgent support assistant in the pwa `/assistant` (English-only, grounded on
+  `bff/content/support-en.md`) + model eval (`bun run model:eval`). **Models chosen
+  2026-09-07** via eval on the real KB: local `qwen2.5:7b` (best grounded/fast on the
+  1080's 10GB VRAM) and remote `minimax/minimax-m3:free` (best remote answers) —
+  set in `.env` + `bff/src/env.ts` defaults. Dropped: `inkling:free`,
+  `nemotron-3-super:free` (agentic-only / Invalid-JSON); `gemma4:12b`/qwen3 (thinking
+  overhead). **Under evaluation** — if quality is acceptable, merge and continue with
+  phase 2 (feedback capture, app commands, language-by-profile, MCP/skills); otherwise
+  discard the branch. Roadmap: [`docs/ROADMAP.md`](docs/ROADMAP.md) §Version 6.
 
 ## Shipped since the 2026-09-04 rewrite
 

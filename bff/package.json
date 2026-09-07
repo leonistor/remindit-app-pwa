@@ -18,8 +18,11 @@
     "check": "biome check --write --unsafe"
   },
   "dependencies": {
+    "@ai-sdk/openai-compatible": "^2.0.13",
     "@hono/zod-validator": "^0.9.1",
     "@remindit/common": "workspace:*",
+    "@voltagent/core": "2.10.0",
+    "ai": "^6.0.0",
     "hono": "^4.13.5",
     "hono-rate-limiter": "^0.5.3",
     "pocketbase": "^0.28.0",

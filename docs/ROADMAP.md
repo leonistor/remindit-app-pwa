@@ -63,8 +63,9 @@ Sync + sharing + notifications, one major release.
 
 - [x] App website — standalone marketing site (`web/`: hero + live stats + features + download + screenshots pages); live at `https://www.remindit.me` (deployed with the platform, Phase D 2026-09-04; localized URL routing + pre-MVP content pass in v5.3.0). Live PWA: `https://remindit.me`
 - [x] Community of early adopters and feedback capture — Apache Answer sidecar (`https://feedback.remindit.me`, submit API, tag-seeded quick links, login-link flow, phase FB); **removed 2026-09-05** after live use (D13) — the Q&A board added more friction than value, no in-app substitute
-- [ ] Basic AI features
-- [ ] Integration with LLMs (MCP, skills)
+- [x] **AI support chat (phase 1, 2026-09-07, branch `feat/ai-support-chat`)** — embedded VoltAgent support assistant in the pwa (`/assistant`), grounded on `bff/content/support-en.md`, English-only, with a model eval harness (`bun run model:eval`). Models chosen by eval: local `qwen2.5:7b`, remote `minimax/minimax-m3:free`. Shipped under evaluation — discarded or folded to a later phase based on model quality.
+- [ ] Basic AI features — **phase 2+**: feedback capture (bugs/feature requests) via chat; app "commands" (show list, recommendations, `add "mustard"`); conversation language from user profile; persistent multi-thread memory
+- [ ] Integration with LLMs (MCP, skills) — **phase 2+**: MCP server / skills to interact with other systems (e.g. "put my shopping list in calendar"); used across pwa/web/admin
 
 ## Wishlist
 

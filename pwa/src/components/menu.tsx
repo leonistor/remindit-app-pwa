@@ -5,6 +5,7 @@ import {
   Info,
   List,
   Question,
+  Robot,
   Rows,
   ShareNetwork,
   User,
@@ -41,6 +42,7 @@ const navLinks = [
   { to: "/share", label: () => m.menuShare(), icon: ShareNetwork },
   { to: "/about", label: () => m.menuAbout(), icon: Info },
   { to: "/help", label: () => m.menuHelp(), icon: Question },
+  { to: "/assistant", label: () => m.menuAssistant(), icon: Robot },
 ]
 
 const ProfileAvatarLink = () => {

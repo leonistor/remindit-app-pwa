@@ -201,3 +201,18 @@ export const healthResponseSchema = z.object({
   }),
 })
 export type HealthResponse = z.infer<typeof healthResponseSchema>
+
+// --- ai support chat --------------------------------------------------------
+// The pwa sends the conversation so far (assistant-ui-compatible message
+// objects) plus a stable thread id; the route streams back the assistant's
+// reply. The client's `id` (Assistant Chat transport) is the thread id; a
+// server-set `conversationId` overrides it. `locale` is accepted (phase 2+;
+// ignored this phase — the assistant answers in English only).
+
+export const aiChatBodySchema = z.object({
+  messages: z.array(z.unknown()),
+  id: z.string().optional(),
+  conversationId: z.string().optional(),
+  locale: z.string().optional(),
+})
+export type AIChatBody = z.infer<typeof aiChatBodySchema>

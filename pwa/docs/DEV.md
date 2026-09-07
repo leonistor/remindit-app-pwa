@@ -45,6 +45,7 @@ attributes: photo, quantity, price) will build item detail on the Shark
 | `/profile` | ProfileView | User profile (avatar editing, backup import), catalog link, palette, reset & reseed |
 | `/share` | ShareView | Share the pending shopping list as a PNG image |
 | `/about` | AboutView | About the app |
+| `/assistant` | AssistantView | AI support chat (phase 1 — Assistant UI against the bff's `/api/ai/chat`; see `ARCHITECTURE.md` §AI support chat) |
 | `/changelog` | ChangelogView | Version history (linked from the footer version) |
 | `/help` | HelpView | Usage help |
 | `/onboarding` | OnboardingView | First-run language + profile + dataset setup (no menu chrome) |
@@ -77,6 +78,8 @@ Registry config lives in `components.json` (style `base-nova`, Phosphor icons, `
 - Build feature UI from the existing `src/components/ui/*` Shark primitives — do **not** reach for raw `@ark-ui/react` in feature components. If a primitive is missing, add it via the CLI (or wrap Ark UI in `src/components/ui` following the existing pattern) instead of importing Ark directly.
 - Use `cn()` from `@/lib/utils` and Shark's built-in `variant` / `size` props and semantic tokens (`bg-primary`, `text-muted-foreground`, `border-input`). Avoid ad-hoc `dark:` palette pairs and `space-x/y-*`.
 - The registry docs/examples are the source of truth for each component's API and composition — check them before assuming an Ark/Radix/shadcn API.
+
+**Assistant UI (`@assistant-ui/react`) is an exception to the "no raw Ark UI" rule**: the AI chat thread (`views/assistant.tsx`) composes Assistant UI's primitives directly (Thread, Message, Composer) because Shark has no chat primitives and Assistant UI's styling is applied via our own `bg-*` Tailwind tokens in the view. Keep it isolated to that view (lazy-loaded), and keep raw `@ark-ui/react` imports out of feature code as usual.
 
 #### Registry vs. custom components
 
