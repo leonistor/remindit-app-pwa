@@ -69,6 +69,11 @@ export const env = {
   ollamaModel: process.env.OLLAMA_MODEL ?? "qwen2.5:7b",
   /** OpenRouter — dedicated RemindIt key (never committed; D9). */
   openRouterKey: process.env.OPENROUTER_REMINDIT_KEY,
-  /** Selected in the 2026-09-07 eval (minimax-m3:free — best remote answers). */
-  openRouterModel: process.env.OPENROUTER_MODEL ?? "minimax/minimax-m3:free",
+  /**
+   * Remote default. minimax-m3:free won the 2026-09-07 eval but the provider
+   * retired it 2026-09-08 (paid-only); the sparse nemotron-3-super-120b-a12b:free
+   * variant was re-verified live (grounding + tool-calling) and replaced it.
+   */
+  openRouterModel: process.env.OPENROUTER_MODEL ??
+    "nvidia/nemotron-3-super-120b-a12b:free",
 }

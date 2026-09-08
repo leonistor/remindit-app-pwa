@@ -122,7 +122,9 @@ AI env (see `bff/src/services/ai.ts` + the `model:eval` script):
 override), `OLLAMA_BASE_URL` (`http://pop-os.lan:11434`),
 `OLLAMA_MODEL` (`qwen2.5:7b`, chosen 2026-09-07),
 `OPENROUTER_REMINDIT_KEY` (no default), `OPENROUTER_MODEL`
-(`minimax/minimax-m3:free`, chosen 2026-09-07).
+(`nvidia/nemotron-3-super-120b-a12b:free` — minimax-m3:free won the 2026-09-07
+eval but was retired by the provider 2026-09-08; the sparse nemotron variant
+was re-verified live with tool-calling + grounding).
 
 ## Testing
 
@@ -154,16 +156,17 @@ models (any number, local + remote) on the full question battery, with timing:
 ```bash
 bun run model:eval                                        # default sets
 bun run model:eval --ollama "gemma3:4b,qwen3:8b"          # override local list
-bun run model:eval --openrouter "minimax/minimax-m3:free" # override remote list
+bun run model:eval --openrouter "nvidia/nemotron-3-super-120b-a12b:free" # override remote list
 bun run model:eval --only openrouter                      # one provider
 # or via env: OLLAMA_EVAL_MODELS=... OPENROUTER_EVAL_MODELS=... EVAL_ONLY=...
 ```
 
-Defaults (selected 2026-09-07): ollama `qwen2.5:7b,llama3.1:8b,
-granite3.3:8b`; openrouter `minimax/minimax-m3:free,
+Defaults: ollama `qwen2.5:7b,llama3.1:8b,granite3.3:8b`; openrouter
+`nvidia/nemotron-3-super-120b-a12b:free,
 nvidia/nemotron-3-ultra-550b-a55b:free, dots-studio/dots-3-note-preview:free`.
 (`inkling:free` and the older `nemotron-3-super:free` were dropped — agentic-only
-/ Invalid-JSON through this harness.) Implementation: `bff/scripts/model-eval.ts`.
+/ Invalid-JSON through this harness; `minimax/minimax-m3:free` retired 2026-09-08.)
+Implementation: `bff/scripts/model-eval.ts`.
 
 ## pocketbase-mcp (agent ops)
 

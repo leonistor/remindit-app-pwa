@@ -9,7 +9,7 @@
 // Usage:
 //   bun run model:eval                               # default model sets
 //   --ollama "gemma3:4b,qwen3:8b"                    # override ollama list
-//   --openrouter "minimax/minimax-m3:free,thinkingmachines/inkling:free"
+//   --openrouter "nvidia/nemotron-3-super-120b-a12b:free,thinkingmachines/inkling:free"
 //   --only ollama  | --only openrouter               # test one provider
 //
 // Default model sets are intentionally the candidates under evaluation —
@@ -19,15 +19,18 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible"
 import { Agent, type LanguageModel } from "@voltagent/core"
 
 // Default model sets — the 2026-09-07 eval settled on qwen2.5:7b (local) and
-// minimax/minimax-m3:free (remote); inkling and nemotron-3-super failed at the
-// harness level (agentic-only / Invalid JSON) and were dropped. Change these
-// here or pass overrides as the selection evolves.
+// minimax/minimax-m3:free (remote); inkling and the older nemotron-3-super:free
+// failed at the harness level (agentic-only / Invalid JSON) and were dropped.
+// minimax-m3:free was retired by the provider 2026-09-08 (paid-only); the
+// sparse nemotron-3-super-120b-a12b:free variant was re-verified live with
+// tool-calling + grounding and became the remote default. Change these here
+// or pass overrides as the selection evolves.
 
 const OLLAMA_DEFAULT =
   process.env.OLLAMA_EVAL_MODELS ?? "qwen2.5:7b,llama3.1:8b,granite3.3:8b"
 const OPENROUTER_DEFAULT =
   process.env.OPENROUTER_EVAL_MODELS ??
-  "minimax/minimax-m3:free,nvidia/nemotron-3-ultra-550b-a55b:free,dots-studio/dots-3-note-preview:free"
+  "nvidia/nemotron-3-super-120b-a12b:free,nvidia/nemotron-3-ultra-550b-a55b:free,dots-studio/dots-3-note-preview:free"
 
 const QUESTIONS: Array<{ q: string; expects: string }> = [
   {

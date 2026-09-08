@@ -86,12 +86,16 @@ the bff's existing Hono `AppType` stays the only server surface (D2/D8).
 - **Models** (`env`-selected, D9): `AI_PROVIDER=ollama` (dev default; OpenAI
   compatible `http://pop-os.lan:11434`, model `qwen2.5:7b`) or
   `AI_PROVIDER=openrouter` (dedicated `OPENROUTER_REMINDIT_KEY`, model
-  `minimax/minimax-m3:free`). Both are wired through `@ai-sdk/openai-compatible`
-  (the maintained provider that emits the model interface VoltAgent 2.10
-  accepts today). Models chosen by the **2026-09-07 eval** (`bun run model:eval`):
-  `qwen2.5:7b` won local (grounded, fast, no invention on the 1080's 10GB VRAM),
-  `minimax/minimax-m3:free` won remote (best grounded answers). `inkling:free`
-  and `nemotron-3-super:free` were dropped (agentic-only / Invalid-JSON).
+  `nvidia/nemotron-3-super-120b-a12b:free`). Both are wired through
+  `@ai-sdk/openai-compatible` (the maintained provider that emits the model
+  interface VoltAgent 2.10 accepts today). Models chosen by the **2026-09-07
+  eval** (`bun run model:eval`): `qwen2.5:7b` won local (grounded, fast, no
+  invention on the 1080's 10GB VRAM), `minimax/minimax-m3:free` won remote
+  (best grounded answers). `inkling:free` and `nemotron-3-super:free` were
+  dropped (agentic-only / Invalid-JSON). minimax-m3:free was **retired by the
+  provider 2026-09-08** (paid-only); the sparse `nemotron-3-super-120b-a12b:free`
+  variant was re-verified live (grounded answers, `add`-style tool-calling with
+  valid JSON args, no invention) and replaced it as the remote default.
 - **UI** (`pwa/src/views/assistant.tsx`): a Shark-styled Assistant UI thread,
   lazy-loaded at `/assistant` (menu → Assistant) so the assistant stack never
   touches the main-list LCP. Chat route is **optional-auth** — authed users get

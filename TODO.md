@@ -17,8 +17,10 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 ## Shipped since the 2026-09-04 rewrite
 
 - **AI support chat (phase 1, merged 2026-09-08)** — embedded VoltAgent support
-  assistant (`/assistant`, models qwen2.5:7b local / minimax-m3:free remote, chosen
-  by the 2026-09-07 eval) merged to `main` and kept. Phase 2 shipped same day:
+  assistant (`/assistant`, models qwen2.5:7b local / minimax-m3:free remote,
+  chosen by the 2026-09-07 eval; remote default switched 2026-09-08 to
+  `nvidia/nemotron-3-super-120b-a12b:free` after the provider retired
+  minimax-m3:free — paid-only) merged to `main` and kept. Phase 2 shipped same day:
   **feedback capture** (write-only `feedback` collection + optional-auth
   `POST /api/feedback`, dedicated composer in the assistant view — restores the
   in-app feedback channel removed in D13), **language-by-profile** (assistant
