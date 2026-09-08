@@ -9,6 +9,9 @@
 import { env } from "./env"
 import type {
   AuthResponse,
+  Feedback,
+  FeedbackKind,
+  FeedbackSubmitBody,
   Group,
   Member,
   MemberRole,
@@ -18,6 +21,9 @@ import type {
 
 export type {
   AuthResponse,
+  Feedback,
+  FeedbackKind,
+  FeedbackSubmitBody,
   Group,
   Member,
   MemberRole,
@@ -203,6 +209,13 @@ export const bffApi = {
     request<void>(`/api/notifications/${encodeURIComponent(id)}`, {
       method: "PATCH",
       body: JSON.stringify({ read: true }),
+      token,
+    }),
+
+  submitFeedback: (body: FeedbackSubmitBody, token?: string) =>
+    request<Feedback>("/api/feedback", {
+      method: "POST",
+      body: JSON.stringify(body),
       token,
     }),
 }

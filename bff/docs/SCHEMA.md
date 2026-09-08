@@ -18,6 +18,7 @@ collections in the PB Admin UI; inspect via pocketbase-mcp instead
 | `list_entries` | `ListEntry` | `checked`*, `addedAt`* (epoch ms), `item`* → items†, `team`* → teams† | |
 | `history_events` | `HistoryEvent` | `action`* (`add`\|`remove`), `itemId`*, `itemName`*, `categoryId`*, `categoryName`*, `timestamp`*, `team`* → teams† | append-only (`update`/`delete` = nobody); itemId/categoryId are **text snapshots**, not relations — history survives renames/deletions |
 | `notifications` | — (reserved, D4) | `type`*, `payload` (json), `read`, `user`* → users†, `team` → teams (optional) | channel undecided; schema reserved |
+| `feedback` | — (new, phase 2) | `kind`* (`bug`\|`feature`), `message`* (1..4000), `locale` (≤16), `user` → users (optional) | write-only from the app: created via `POST /api/feedback`; list/view/update/delete = superuser-only (null); createRule admits anon or a row attributed to the caller |
 
 \* required · † `cascadeDelete: true` (deleting a team cascades its data;
 user deletion cascades memberships/notifications)
@@ -44,6 +45,7 @@ only). Baseline (phase 2), all verified live (see "Rule matrix" below):
 | `categories` / `items` / `list_entries` | team owner ∨ member | team owner ∨ member (team from `@request.body`) | team owner ∨ member | team owner ∨ member |
 | `history_events` | team owner ∨ member | team owner ∨ member | nobody (append-only) | nobody |
 | `notifications` | self | self | self | self |
+| `feedback` | nobody (superuser only) | anon ∨ `user` = self | nobody | nobody |
 
 The shared fragment for member-scoped collections:
 

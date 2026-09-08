@@ -16,7 +16,7 @@ export const ai = new Hono().post("/chat", async (c) => {
     return c.json({ error: "no messages provided" }, 400)
   }
 
-  const agent = await getSupportAgent()
+  const agent = await getSupportAgent(body.locale)
   const conversationId = body.conversationId ?? body.id ?? "default-thread"
   const lastMessage = messages[messages.length - 1]
 

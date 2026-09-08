@@ -47,7 +47,8 @@ rule matrix: [docs/API.md](docs/API.md).
 | `GET /api/stats` | public aggregate counts (superuser-side, 60s-cached) for the marketing site |
 | `GET /api/health` | shared health report (200 always; `checks.pb: "up"\|"down"` — a down PB is a reported check, not a 5xx) |
 | `GET /api/sse` | SSE spike/diagnostic — emits 3 `ping` events 150ms apart |
-| `POST /api/ai/chat` | AI support chat (phase 1): streams a VoltAgent support-assistant reply (grounded on `bff/content/support-en.md`) as a UIMessageStreamResponse for the pwa's Assistant UI |
+| `POST /api/ai/chat` | AI support chat: streams a VoltAgent support-assistant reply (grounded on `bff/content/support-en.md`, answers in the user's app locale) as a UIMessageStreamResponse for the pwa's Assistant UI |
+| `POST /api/feedback` | write-only bug/feature capture from the assistant (phase 2, optional-auth): anonymous or attributed to the signed-in user — `user` is set server-side from the token, never the body; no read surface yet (superuser-side reads later) |
 
 ## Dev flow
 
@@ -116,7 +117,7 @@ All from the root `.env` (see root `.env.example`): `PORT`,
 `SEED_PASSWORD`, `SESSION_COOKIE_SECURE`, `CORS_ORIGINS`,
 `AUTH_RATE_LIMIT`. Never create `bff/.env`.
 
-AI env (phase 1 — see `bff/src/services/ai.ts` + the `model:eval` script):
+AI env (see `bff/src/services/ai.ts` + the `model:eval` script):
 `AI_PROVIDER` (`ollama` dev default | `openrouter`), `AI_MODEL` (optional
 override), `OLLAMA_BASE_URL` (`http://pop-os.lan:11434`),
 `OLLAMA_MODEL` (`qwen2.5:7b`, chosen 2026-09-07),

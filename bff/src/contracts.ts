@@ -206,8 +206,8 @@ export type HealthResponse = z.infer<typeof healthResponseSchema>
 // The pwa sends the conversation so far (assistant-ui-compatible message
 // objects) plus a stable thread id; the route streams back the assistant's
 // reply. The client's `id` (Assistant Chat transport) is the thread id; a
-// server-set `conversationId` overrides it. `locale` is accepted (phase 2+;
-// ignored this phase — the assistant answers in English only).
+// server-set `conversationId` overrides it. `locale` is the user's app
+// language — the assistant answers in it (language-by-profile).
 
 export const aiChatBodySchema = z.object({
   messages: z.array(z.unknown()),
@@ -216,3 +216,29 @@ export const aiChatBodySchema = z.object({
   locale: z.string().optional(),
 })
 export type AIChatBody = z.infer<typeof aiChatBodySchema>
+
+// --- feedback (phase 2 — in-app bug/feature capture via the assistant) -------
+// `user` is never read from the body: the route attributes it server-side from
+// the validated token when one is present (optional auth), so a client can't
+// forge attribution.
+
+export const feedbackKindSchema = z.enum(["bug", "feature"])
+export type FeedbackKind = z.infer<typeof feedbackKindSchema>
+
+export const feedbackSubmitBodySchema = z.object({
+  kind: feedbackKindSchema,
+  message: z.string().min(1).max(2000),
+  locale: z.string().max(16).optional(),
+})
+export type FeedbackSubmitBody = z.infer<typeof feedbackSubmitBodySchema>
+
+export const feedbackSchema = z
+  .object({
+    id: z.string(),
+    kind: feedbackKindSchema,
+    message: z.string(),
+    locale: z.string().optional(),
+    user: z.string().optional(),
+  })
+  .merge(recordStamps)
+export type Feedback = z.infer<typeof feedbackSchema>

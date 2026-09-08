@@ -2,9 +2,12 @@
 // about the app, grounded on bff/content/support-en.md.
 //
 // Uses Assistant UI (the AI SDK runtime) against the BFF's /api/ai/chat route,
-// which streams a VoltAgent response back. English-only this phase (locale
-// selection per profile is a roadmap item). The whole view is lazy-loaded from
-// the router so the assistant stack never touches the main list LCP.
+// which streams a VoltAgent response back. The assistant answers in the user's
+// app locale (language-by-profile) — the locale rides the chat request body.
+// A feedback composer below the thread posts bug/feature reports to the BFF's
+// /api/feedback endpoint, attributed to the signed-in user when present. The
+// whole view is lazy-loaded from the router so the assistant stack never
+// touches the main list LCP.
 
 import {
   AssistantRuntimeProvider,
@@ -22,23 +25,27 @@ import {
   MarkdownTextPrimitive,
   unstable_memoizeMarkdownComponents as memoizeMarkdownComponents,
 } from "@assistant-ui/react-markdown"
-import { type FC, memo } from "react"
+import { type FC, memo, useState } from "react"
 import remarkGfm from "remark-gfm"
 import { BackButton } from "@/components/back-button"
 import { env } from "@/lib/env"
+import { bffApi, type FeedbackKind } from "@/lib/bff-api"
+import { getActiveLocale } from "@/lib/locale"
 import { m } from "@/paraglide/messages"
+import { getSession } from "@/stores/sync/session"
 
 const SUGGESTED_ACTIONS = [
-  "How do I share my shopping list?",
-  "Is RemindIt usable offline?",
-  "How do I change the color palette?",
-  "What do the red and amber pips mean?",
+  m.assistantSuggestionShare,
+  m.assistantSuggestionOffline,
+  m.assistantSuggestionPalette,
+  m.assistantSuggestionPips,
 ]
 
 const AssistantView = () => {
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
       api: `${env.bffUrl}/api/ai/chat`,
+      body: { locale: getActiveLocale() },
     }),
   })
 
@@ -55,6 +62,8 @@ const AssistantView = () => {
           <ChatThread />
         </div>
       </AssistantRuntimeProvider>
+
+      <FeedbackComposer />
     </div>
   )
 }
@@ -77,16 +86,19 @@ const ThreadWelcome: FC = () => (
   <div className="mx-auto flex flex-grow flex-col items-center justify-center gap-4 py-8">
     <p className="font-semibold text-lg">{m.assistantGreeting()}</p>
     <div className="grid w-full max-w-md gap-2">
-      {SUGGESTED_ACTIONS.map((prompt) => (
-        <ThreadPrimitive.Suggestion key={prompt} prompt={prompt} send asChild>
-          <button
-            type="button"
-            className="rounded-xl border px-4 py-2.5 text-left text-muted-foreground text-sm hover:bg-accent"
-          >
-            {prompt}
-          </button>
-        </ThreadPrimitive.Suggestion>
-      ))}
+      {SUGGESTED_ACTIONS.map((label) => {
+        const prompt = label()
+        return (
+          <ThreadPrimitive.Suggestion key={prompt} prompt={prompt} send asChild>
+            <button
+              type="button"
+              className="rounded-xl border px-4 py-2.5 text-left text-muted-foreground text-sm hover:bg-accent"
+            >
+              {prompt}
+            </button>
+          </ThreadPrimitive.Suggestion>
+        )
+      })}
     </div>
   </div>
 )
@@ -119,6 +131,86 @@ const Composer: FC = () => (
     </ComposerPrimitive.Root>
   </div>
 )
+
+const FeedbackComposer: FC = () => {
+  const [kind, setKind] = useState<FeedbackKind>("bug")
+  const [message, setMessage] = useState("")
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
+    "idle"
+  )
+
+  const submit = async () => {
+    const trimmed = message.trim()
+    if (!trimmed || status === "sending") return
+    setStatus("sending")
+    try {
+      const token = getSession()?.token
+      await bffApi.submitFeedback(
+        { kind, message: trimmed, locale: getActiveLocale() },
+        token,
+      )
+      setMessage("")
+      setStatus("sent")
+    } catch {
+      setStatus("error")
+    }
+  }
+
+  const kinds: { value: FeedbackKind; label: string }[] = [
+    { value: "bug", label: m.assistantFeedbackKindBug() },
+    { value: "feature", label: m.assistantFeedbackKindFeature() },
+  ]
+
+  return (
+    <div className="flex flex-col gap-3 rounded-3xl border bg-background p-4 shadow-xs">
+      <h2 className="font-semibold text-sm">{m.assistantFeedbackTitle()}</h2>
+      <div className="flex rounded-xl bg-muted p-1">
+        {kinds.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={kind === value}
+            onClick={() => setKind(value)}
+            className={`flex-1 rounded-lg px-3 py-1.5 text-sm transition-colors ${
+              kind === value
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <textarea
+        value={message}
+        onChange={(event) => setMessage(event.target.value)}
+        placeholder={m.assistantFeedbackPlaceholder()}
+        aria-label={m.assistantFeedbackPlaceholder()}
+        rows={3}
+        className="max-h-40 min-h-20 w-full resize-none rounded-xl border bg-background px-3 py-2 text-sm outline-none"
+      />
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-destructive text-sm" aria-live="polite">
+          {status === "error" ? m.assistantFeedbackError() : ""}
+        </p>
+        {status === "sent" ? (
+          <p className="ml-auto text-muted-foreground text-sm" aria-live="polite">
+            {m.assistantFeedbackSent()}
+          </p>
+        ) : (
+          <button
+            type="button"
+            disabled={!message.trim() || status === "sending"}
+            onClick={() => void submit()}
+            className="rounded-full px-4 py-1.5 text-sm disabled:opacity-50"
+          >
+            {m.assistantFeedbackSubmit()}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const UserMessage: FC = () => (
   <MessagePrimitive.Root asChild>

@@ -61,7 +61,7 @@ const QUESTIONS: Array<{ q: string; expects: string }> = [
 ]
 
 const supportContent = await Bun.file(
-  import.meta.dir + "/../content/support-en.md"
+  `${import.meta.dir}/../content/support-en.md`
 ).text()
 
 const instructions = `You are the RemindIt support assistant. Answer using ONLY the support knowledge base below. Be concise and grounded — never invent features. Respond in English.
@@ -109,7 +109,7 @@ function buildAgent(model: LanguageModel): Agent {
 function ollamaModel(id: string): LanguageModel {
   return createOpenAICompatible({
     name: "ollama",
-    baseURL: (process.env.OLLAMA_BASE_URL ?? "http://pop-os.lan:11434") + "/v1",
+    baseURL: `${process.env.OLLAMA_BASE_URL ?? "http://pop-os.lan:11434"}/v1`,
     apiKey: "ollama", // Ollama accepts any non-empty key.
   })(id)
 }

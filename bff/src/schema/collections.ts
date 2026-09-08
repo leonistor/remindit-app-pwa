@@ -85,6 +85,7 @@ export const COLLECTION_NAMES = {
   items: "items",
   listEntries: "list_entries",
   historyEvents: "history_events",
+  feedback: "feedback",
   notifications: "notifications",
   teamMemberDetails: "team_member_details",
   teamDetails: "team_details",
@@ -690,6 +691,70 @@ const notifications: CollectionDef = {
   ],
 }
 
+// feedback ------------------------------------------------------------------
+// Write-only bug/feature capture (phase 2): the pwa's assistant submits
+// reports through POST /api/feedback. Attribution to a signed-in user is
+// OPTIONAL — the createRule admits an anonymous caller
+// (`@request.auth.id = ""`) OR a row whose `user` equals the caller. The
+// route sets `user` server-side from the validated token, never from the
+// body, so a client cannot forge attribution. There is no read surface yet:
+// list/view/update/delete are superuser-only (null) — the admin reads them
+// later, superuser-side.
+const feedback: CollectionDef = {
+  name: COLLECTION_NAMES.feedback,
+  type: "base",
+  listRule: null,
+  viewRule: null,
+  createRule: '@request.auth.id = "" || user = @request.auth.id',
+  updateRule: null,
+  deleteRule: null,
+  fields: [
+    {
+      type: "select",
+      name: "kind",
+      required: true,
+      hidden: false,
+      presentable: true,
+      maxSelect: 1,
+      values: ["bug", "feature"],
+    },
+    {
+      type: "text",
+      name: "message",
+      required: true,
+      hidden: false,
+      presentable: true,
+      min: 1,
+      max: 4000,
+      pattern: "",
+      autogeneratePattern: "",
+    },
+    {
+      type: "text",
+      name: "locale",
+      required: false,
+      hidden: false,
+      presentable: false,
+      min: 0,
+      max: 16,
+      pattern: "",
+      autogeneratePattern: "",
+    },
+    {
+      type: "relation",
+      name: "user",
+      required: false,
+      hidden: false,
+      presentable: false,
+      collectionName: "users",
+      cascadeDelete: false,
+      minSelect: 0,
+      maxSelect: 1,
+    },
+    ...stamps(),
+  ],
+}
+
 // ---------------------------------------------------------------------------
 // View collections — read-only, PB-computed from SQL:
 // - the SELECT runs directly against the SQLite tables (base-collection rules
@@ -858,6 +923,7 @@ export const desiredCollections: CollectionDef[] = [
   listEntries,
   historyEvents,
   notifications,
+  feedback,
   teamMemberDetails,
   teamDetails,
   platformStats,

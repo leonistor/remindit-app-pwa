@@ -122,7 +122,32 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
   if (!token) {
     return c.json({ error: "authentication required" }, 401)
   }
+  await authenticate(c, next, token, bearer !== undefined)
+})
 
+/**
+ * Optional-auth variant (phase 2 feedback): validates + rotates the token when
+ * one is present (same fast path and rotation delivery as `requireAuth`), but
+ * lets anonymous callers through — the route then decides how to use the
+ * absent `c.get("auth")`. Never 401s on its own.
+ */
+export const optionalAuth = createMiddleware<AppEnv>(async (c, next) => {
+  const bearer = bearerToken(c)
+  const token = bearer ?? getCookie(c, SESSION_COOKIE)
+  if (!token) {
+    await next()
+    return
+  }
+  await authenticate(c, next, token, bearer !== undefined)
+})
+
+/** Shared core of both auth middlewares — validate, set `auth`, deliver rotation. */
+const authenticate = async (
+  c: Context<AppEnv>,
+  next: () => Promise<void>,
+  token: string,
+  isBearer: boolean
+): Promise<void> => {
   const claims = decodeJwtPayload(token)
   const claimedId = claims && claimsUserId(claims)
 
@@ -165,7 +190,7 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
   // forwarder's raw Response returns (headers prepared before next() would
   // be dropped for those).
   c.header("X-Session-Token", refreshed.token)
-  if (bearer === undefined) {
+  if (!isBearer) {
     setSessionCookie(c, refreshed.token)
   }
-})
+}

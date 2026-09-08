@@ -68,7 +68,7 @@ restart — monitoring tools alert on the body instead. The bff's PB probe lives
 in `bff/src/services/health.ts`; future modules add dependencies as extra
 checks (probe failures fold to `"down"` and never throw).
 
-## AI support chat (phase 1, VoltAgent)
+## AI support chat (VoltAgent)
 
 The in-app support assistant is an **embedded VoltAgent agent** served by the
 bff's `POST /api/ai/chat` (route `bff/src/routes/ai.ts`). VoltAgent sits on the
@@ -77,10 +77,12 @@ so the pwa's [Assistant UI](https://www.assistant-ui.com) consumes it directly
 (`AssistantChatTransport` + `useChatRuntime`), with **no separate server** —
 the bff's existing Hono `AppType` stays the only server surface (D2/D8).
 
-- **Agent** (`bff/src/services/ai.ts`): a single support agent grounded on the
-  English knowledge base `bff/content/support-en.md` (kept in sync with the
-  Help/About pages + changelog at release time). English-only this phase;
-  language-by-profile is a roadmap item.
+- **Agent** (`bff/src/services/ai.ts`): a support agent grounded on the English
+  knowledge base `bff/content/support-en.md` (kept in sync with the Help/About
+  pages + changelog at release time). **Language-by-profile** (phase 2): one
+  agent per locale is cached (bounded map, 5 locales max) and answers in the
+  user's app language — grounding stays the English doc; only the answer
+  language follows the locale.
 - **Models** (`env`-selected, D9): `AI_PROVIDER=ollama` (dev default; OpenAI
   compatible `http://pop-os.lan:11434`, model `qwen2.5:7b`) or
   `AI_PROVIDER=openrouter` (dedicated `OPENROUTER_REMINDIT_KEY`, model
@@ -92,12 +94,20 @@ the bff's existing Hono `AppType` stays the only server surface (D2/D8).
   and `nemotron-3-super:free` were dropped (agentic-only / Invalid-JSON).
 - **UI** (`pwa/src/views/assistant.tsx`): a Shark-styled Assistant UI thread,
   lazy-loaded at `/assistant` (menu → Assistant) so the assistant stack never
-  touches the main-list LCP. Chat route is public like `/api/stats`.
+  touches the main-list LCP. Chat route is public like `/api/stats`. Below the
+  thread, a **feedback composer** posts bug/feature reports to
+  `POST /api/feedback` (phase 2).
+- **Feedback** (`feedback` collection + `POST /api/feedback`, route
+  `bff/src/routes/feedback.ts`): write-only capture via **optional auth** —
+  anonymous rows un-attributed, Bearer rows attributed to the token's claimed
+  user (set server-side, never read from the body); the collection's
+  list/view/update/delete rules are superuser-only. Restores the in-app
+  feedback channel removed in D13.
 - **Smoke test** (`bun run ai-smoke` → `bff/scripts/ai-smoke.ts`): asks a fixed
   set of support questions to each configured model for comparison; no server
   needed.
-- Phase 2+ (feedback capture, app "commands", MCP/skills to other systems,
-  web/admin surfaces, per-profile language) is roadmap — see
+- Open phase 2+ (app "commands", MCP/skills to other systems, web/admin
+  surfaces, persistent multi-thread memory) is roadmap — see
   [docs/ROADMAP.md](ROADMAP.md).
 
 ## Workspace layout

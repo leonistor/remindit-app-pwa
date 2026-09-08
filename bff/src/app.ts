@@ -1,11 +1,13 @@
 import { Hono } from "hono"
 import { cors } from "hono/cors"
+import { HTTPException } from "hono/http-exception"
 import { env } from "./env"
 import { pbErrorResponse } from "./lib/pb-error"
 import { type AppEnv, requireAuth } from "./middleware/auth"
 import { admin } from "./routes/admin"
 import { ai } from "./routes/ai"
 import { auth } from "./routes/auth"
+import { feedback } from "./routes/feedback"
 import { groups } from "./routes/groups"
 import { health } from "./routes/health"
 import { notifications } from "./routes/notifications"
@@ -21,6 +23,11 @@ import { users } from "./routes/users"
 export const app = new Hono<AppEnv>()
   // PB errors bubble out of services and are shaped here, once (D8).
   .onError((error, c) => {
+    // HTTPException (e.g. Hono's zValidator rejecting a malformed/absent
+    // body) carries its own response — surface it as-is instead of 500.
+    if (error instanceof HTTPException) {
+      return error.getResponse()
+    }
     const mapped = pbErrorResponse(error)
     if (mapped) {
       return c.json(mapped.body, mapped.status as never)
@@ -49,6 +56,7 @@ export const app = new Hono<AppEnv>()
   .route("/api/health", health)
   .route("/api/auth", auth)
   .route("/api/ai", ai)
+  .route("/api/feedback", feedback)
   .route("/api/groups", groups)
   .route("/api/users", users)
   .route("/api/notifications", notifications)

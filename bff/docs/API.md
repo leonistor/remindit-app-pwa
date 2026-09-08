@@ -109,6 +109,7 @@ check is server-side (`requireAdmin`, 403 before any superuser query).
 |---|---|---|
 | `GET /api/health` | `200 { ok, service, ts, uptime, version, checks: { pb } }` | shared `@remindit/common/health` report — always 200 while the BFF is alive; PB-down is a reported check (`ok:false`), not a 5xx |
 | `GET /api/stats` | `200 { users, groups }` | public aggregate counts for the marketing site (superuser-side, 60s-cached, `cache-control: public, max-age=60`) |
+| `POST /api/feedback` | `201 Feedback` | **write-only** bug/feature capture (phase 2, optional-auth): anonymous rows un-attributed, Bearer rows attributed to the token's claimed user — `user` is set server-side, never read from the body; collection list/view/update/delete are superuser-only (no read surface) |
 | `GET /api/sse` | SSE stream | phase-1 spike / diagnostics |
 | `ANY /pb/api/*` | PB passthrough | **Data-plane forwarder (phase 5)**: authenticated proxy to the internal PocketBase for the pwa sync engine (PB SDK `baseUrl = PUBLIC_BFF_URL + "/pb"`). Requires a BFF session, forwards the rotated token, streams SSE unbuffered; rules stay the authorization boundary. See [../docs/SYNC.md](../../pwa/docs/SYNC.md) |
 

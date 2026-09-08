@@ -45,7 +45,7 @@ attributes: photo, quantity, price) will build item detail on the Shark
 | `/profile` | ProfileView | User profile (avatar editing, backup import), catalog link, palette, reset & reseed |
 | `/share` | ShareView | Share the pending shopping list as a PNG image |
 | `/about` | AboutView | About the app |
-| `/assistant` | AssistantView | AI support chat (phase 1 — Assistant UI against the bff's `/api/ai/chat`; see `ARCHITECTURE.md` §AI support chat) |
+| `/assistant` | AssistantView | AI support chat (Assistant UI against the bff's `/api/ai/chat` — language-by-profile + a feedback composer; see `ARCHITECTURE.md` §AI support chat) |
 | `/changelog` | ChangelogView | Version history (linked from the footer version) |
 | `/help` | HelpView | Usage help |
 | `/onboarding` | OnboardingView | First-run language + profile + dataset setup (no menu chrome) |
