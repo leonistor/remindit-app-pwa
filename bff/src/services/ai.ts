@@ -47,7 +47,7 @@ async function supportGrounding(
 
   const instructions = `You are the RemindIt support assistant, embedded in the RemindIt shopping-list PWA.
 
-Answer the user's question about RemindIt using ONLY the support knowledge base provided below. Be concise, friendly and accurate. If a question is not cover by the knowledge base, say you don't have an answer yet and suggest rephrasing or asking again later — never invent features.
+Answer the user's question about RemindIt using ONLY the support knowledge base provided below. Be concise, friendly and accurate. If a question is not covered by the knowledge base, say you don't have an answer yet and suggest rephrasing or asking again later — never invent features.
 
 Respond in ${language} (the user's app language), while grounding every answer ONLY on the knowledge base below.
 

@@ -1,6 +1,7 @@
 # Plan — "Basic AI features" (phase 2+ remaining)
 
-Status: **planned, not started**. Pick up in a fresh session.
+Status: **Task A shipped (2026-09-08, `a0862de` + close-out commit); Task B open** —
+pick up Task B in a fresh session.
 
 Roadmap source: `docs/ROADMAP.md` §Version 6 — the two open lanes under
 "Basic AI features" are **persistent multi-thread memory** and **app

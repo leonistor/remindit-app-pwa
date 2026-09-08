@@ -39,13 +39,22 @@ const ALLOW = [...FORWARDED_METHODS].join(", ")
 // Collections the PWA sync engine may access through the forwarder.
 // Everything else is rejected — this is the primary defense against
 // privilege escalation; PB rules are per-collection and easy to miss.
-// Derived from the schema's collection-name constants (single source of
-// truth) so the allowlist can never drift from `src/schema/collections.ts`;
-// `_pb_users_auth_` is PB's internal auth-users collection marker, not a
-// schema collection, and is required for the SDK's own auth calls through
+// Derived from `COLLECTION_NAMES` (single source of truth) minus the
+// non-sync collections, so a schema rename can't drift from the allowlist
+// while the D2 guard stays tight: `users` (identity — the sync engine must
+// never read it), `feedback` / `conversations` (server-owned, BFF-internal),
+// `platform_stats` (superuser-only; the pwa reads stats via /api/stats).
+const NON_FORWARDED = new Set([
+  "users",
+  "feedback",
+  "conversations",
+  "platform_stats",
+])
+// `_pb_users_auth_` is PB's internal auth-users collection marker (not a
+// schema collection) and is required for the SDK's own auth calls through
 // the forwarder.
 const SYNC_COLLECTIONS = new Set<string>([
-  ...Object.values(COLLECTION_NAMES),
+  ...Object.values(COLLECTION_NAMES).filter((n) => !NON_FORWARDED.has(n)),
   "_pb_users_auth_",
 ])
 

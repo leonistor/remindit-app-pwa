@@ -94,9 +94,17 @@ the bff's existing Hono `AppType` stays the only server surface (D2/D8).
   and `nemotron-3-super:free` were dropped (agentic-only / Invalid-JSON).
 - **UI** (`pwa/src/views/assistant.tsx`): a Shark-styled Assistant UI thread,
   lazy-loaded at `/assistant` (menu → Assistant) so the assistant stack never
-  touches the main-list LCP. Chat route is public like `/api/stats`. Below the
+  touches the main-list LCP. Chat route is **optional-auth** — authed users get
+  persistent memory, anonymous falls back to in-memory (D15). Below the
   thread, a **feedback composer** posts bug/feature reports to
   `POST /api/feedback` (phase 2).
+- **Memory (D15, Task A)** — `conversations` collection + VoltAgent
+  StorageAdapter (`bff/src/lib/voltagent-pocketbase-storage.ts`, repo
+  `bff/src/repositories/conversations.ts`): one row per user × thread, messages
+  stored as a JSON blob, written only by the BFF. `POST /api/ai/chat` runs
+  `optionalAuth`; the route keys memory by `userId`/`conversationId` (the pwa's
+  thread `id`). The BFF creates a fresh agent per request so Memory is
+  user-scoped (per-request PB client via `forToken`).
 - **Feedback** (`feedback` collection + `POST /api/feedback`, route
   `bff/src/routes/feedback.ts`): write-only capture via **optional auth** —
   anonymous rows un-attributed, Bearer rows attributed to the token's claimed
@@ -131,6 +139,8 @@ see `bff/docs/SCHEMA.md` §Rename):
 | `list_entries` | base | `team`, `localId`, `item` → items, `checked`, `addedAt` | `ListEntry` |
 | `history_events` | base | `team`, `localId`, `action` (`add`\|`remove`), `itemId`, `itemName`, `categoryId`, `categoryName`, `timestamp` | `HistoryEvent` (name/category snapshots kept) |
 | `notifications` | base | `type`, `payload` (json), `read`, `user` → users, `team` → teams (optional) | in-app realtime channel (D4) |
+| `feedback` | base | `kind` (`bug`\|`feature`), `message`, `locale`, `user` → users (optional) | write-only AI-feedback capture (phase 2; superuser-side reads only) |
+| `conversations` | base | `user` → users, `threadId`, `messages` (json blob), `locale` | persistent single-thread AI memory (D15, Task A); written only by the BFF |
 
 `localId` + unique `(team, localId)` indexes (categories/items/list_entries/
 history_events) are the phase-5 sync dedupe keys. API rules: every data

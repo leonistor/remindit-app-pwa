@@ -37,10 +37,16 @@ export const listConversationsByUser = async (
   userId: string,
   opts?: { limit?: number; offset?: number; sort?: string }
 ): Promise<Record<string, unknown>[]> => {
-  const result = await col(client).getList(opts?.limit ?? 50, opts?.offset ?? 1, {
-    filter: client.filter("user = {:userId}", { userId }),
-    sort: opts?.sort ?? "-updated",
-  })
+  // PB's getList signature is (page, perPage) — `offset` here is a page
+  // number; clamp to >= 1 so the adapter's default offset 0 means "page 1".
+  const result = await col(client).getList(
+    Math.max(1, opts?.offset ?? 1),
+    opts?.limit ?? 50,
+    {
+      filter: client.filter("user = {:userId}", { userId }),
+      sort: opts?.sort ?? "-updated",
+    }
+  )
   return result.items
 }
 

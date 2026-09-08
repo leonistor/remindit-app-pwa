@@ -47,7 +47,7 @@ rule matrix: [docs/API.md](docs/API.md).
 | `GET /api/stats` | public aggregate counts (superuser-side, 60s-cached) for the marketing site |
 | `GET /api/health` | shared health report (200 always; `checks.pb: "up"\|"down"` — a down PB is a reported check, not a 5xx) |
 | `GET /api/sse` | SSE spike/diagnostic — emits 3 `ping` events 150ms apart |
-| `POST /api/ai/chat` | AI support chat: streams a VoltAgent support-assistant reply (grounded on `bff/content/support-en.md`, answers in the user's app locale) as a UIMessageStreamResponse for the pwa's Assistant UI |
+| `POST /api/ai/chat` | AI support chat (**optional-auth**, D15): streams a VoltAgent support-assistant reply (grounded on `bff/content/support-en.md`, answers in the user's app locale) as a UIMessageStreamResponse for the pwa's Assistant UI. Authed users get **persistent single-thread memory** (server-owned `conversations` collection via VoltAgent's StorageAdapter, keyed by `userId`/`conversationId` — the client's thread `id`); anonymous callers fall back to in-memory |
 | `POST /api/feedback` | write-only bug/feature capture from the assistant (phase 2, optional-auth): anonymous or attributed to the signed-in user — `user` is set server-side from the token, never the body; no read surface yet (superuser-side reads later) |
 
 ## Dev flow

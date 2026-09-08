@@ -21,11 +21,13 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
   by the 2026-09-07 eval) merged to `main` and kept. Phase 2 shipped same day:
   **feedback capture** (write-only `feedback` collection + optional-auth
   `POST /api/feedback`, dedicated composer in the assistant view — restores the
-  in-app feedback channel removed in D13) and **language-by-profile** (assistant
-  answers in the user's app locale, per-locale agent cache). Open phase 2+ lanes:
-  app "commands" (needs auth + tool-calling + a write path), persistent
-  multi-thread memory, MCP/skills integration. Roadmap:
-  [`docs/ROADMAP.md`](docs/ROADMAP.md) §Version 6.
+  in-app feedback channel removed in D13), **language-by-profile** (assistant
+  answers in the user's app locale, per-locale agent cache), and **persistent
+  single-thread memory** (D15 — `conversations` collection + VoltAgent
+  StorageAdapter; authed users PB-backed, anonymous in-memory). Open phase 2+
+  lane: app "commands" (D15: client-executed tools, read-only + `add` slice — a
+  BFF context route + tool defs + pwa tool-call interception), MCP/skills
+  integration. Roadmap: [`docs/ROADMAP.md`](docs/ROADMAP.md) §Version 6.
 
 - **de/fr/uk translation drafts** — completed 2026-09-05, accepted **as-is**
   (no review pass): kick-started via `bun run kickstart:locale` (translat
@@ -39,7 +41,7 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 
 ## Next (V6 + wishlist, roadmap §1)
 
-- [ ] Basic AI features
+- [ ] Basic AI features — commands slice only: **app "commands"** (D15: list/recommend/add, client-executed tools — BFF context route + tool defs + pwa tool-call interception; single-thread memory shipped)
 - [ ] LLM/MCP integration
 - [ ] Item attributes (photo / quantity / price)
 - [ ] Native app
