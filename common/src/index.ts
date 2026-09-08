@@ -4,3 +4,4 @@
 
 export * from "./constants"
 export * from "./models/types"
+export * from "./recommender"

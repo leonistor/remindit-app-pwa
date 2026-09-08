@@ -44,20 +44,48 @@ and only the last message is sent (`bff/src/services/ai.ts` single-shot).
 Tools run **client-side**; read-only tools need **server access** to the
 user's data, so we add a context endpoint.
 
+### Design wrinkles (resolved 2026-09-08)
+
+Two blockers found while scoping Task B; both are settled:
+
+1. **Where `computeRecommendations` lives.** It was pwa-only
+   (`pwa/src/stores/recommender.ts`), but the plan assumed the BFF reuses it.
+   **Resolution:** hoisted the pure engine to `@remindit/common` (all domain
+   types already live in `common/src/models/types.ts`) — `common/src/recommender.ts`,
+   exported via the `@remindit/common/recommender` subpath and the root export;
+   `pwa/src/stores/recommender.ts` is now a re-export shim (imports unchanged).
+   The BFF imports `computeRecommendations` from `@remindit/common/recommender`.
+2. **The tool-result loop.** How the executed `add` result flows back into the
+   streaming model so it can finish the turn. **Resolution:** VoltAgent's
+   native client-side tool support — no custom loop. A tool is client-side when
+   it has **no server `execute` handler** (`@voltagent/core` `Tool.isClientSide()`
+   returns true for it); the BFF streams the `tool-call` part in the
+   `UIMessageStreamResponse`, the pwa fulfils it (Assistant UI runtime's
+   client-tool path — the installed `@assistant-ui/ai-sdk` explicitly supports
+   "tools without an `execute` … left for the client to fulfill"), and the
+   result is fed back via the AI SDK's tool-result API so VoltAgent resumes.
+   So `list`/`recommend` get server `execute` handlers; `add` is declared
+   **without** one and is client-fulfilled.
+
+### Steps
+
 1. **BFF context route** — authed `GET /api/ai/context` (`requireAuth`)
    returns the user's current list + catalog categories + recommendations
-   (reuse `computeRecommendations`). New request/response types in
-   `bff/src/contracts.ts`.
+   (reuse `computeRecommendations` from `@remindit/common/recommender`). New
+   request/response types in `bff/src/contracts.ts`.
 2. **BFF agent tools** — attach `tools` (Vercel AI SDK `Tool` shapes) to the
-   support agent. `list`/`recommend` are server-executable and read from the
-   authed context; `add` is marked **client-side / no-server-execute**
-   (VoltAgent's `BaseToolManager` distinguishes these) so the BFF streams a
-   tool-call part the pwa fulfils locally.
+   support agent. `list`/`recommend` are server-executable (an `execute`
+   handler that reads the authed context) and read from the authed context;
+   `add` is declared **without** a server `execute` (→ VoltAgent marks it
+   client-side) so the BFF streams a tool-call part the pwa fulfils locally.
 3. **pwa tool execution** — the assistant view (`pwa/src/views/assistant.tsx`)
-   intercepts streamed `tool-call` parts (Assistant UI runtime) and executes:
+   intercepts streamed `tool-call` parts (Assistant UI runtime's client-tool
+   handler) and executes:
    - read: `$list`, `$catalog`, `$categories`
    - write: `createItemAndAddToList(name, categoryId)`
      (`pwa/src/stores/commands.ts:52`)
+   then feeds the executed result back to the runtime so the model can finish
+   the turn.
 4. **Client types** — mirror context/tool types in `pwa/src/lib/bff-api.ts`.
 5. **i18n** — new user-facing labels in `common/messages/{en,ro}.json`
    (never generated `src/paraglide`).

@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./models": "./src/models/types.ts",
+    "./recommender": "./src/recommender.ts",
     "./brand": "./src/brand.ts",
     "./seeds": "./src/seeds/index.ts",
     "./health": "./src/health/index.ts",
