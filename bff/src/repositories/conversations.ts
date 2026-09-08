@@ -32,6 +32,26 @@ export const findConversationByThread = async (
   }
 }
 
+/**
+ * Find a conversation by its threadId alone (the client's stable thread id).
+ * The `conversations` listRule scopes reads to the authed user, so PB returns
+ * only the caller's own row even though the unique index is (user, threadId) —
+ * this is the lookup the StorageAdapter uses for `getConversation(threadId)`
+ * (VoltAgent's conversation manager passes ids without a userId).
+ */
+export const findConversationByThreadId = async (
+  client: PocketBase,
+  threadId: string
+): Promise<Record<string, unknown> | null> => {
+  try {
+    return await col(client).getFirstListItem(
+      client.filter("threadId = {:threadId}", { threadId })
+    )
+  } catch {
+    return null
+  }
+}
+
 export const listConversationsByUser = async (
   client: PocketBase,
   userId: string,

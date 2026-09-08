@@ -8,6 +8,7 @@
 
 import { env } from "./env"
 import type {
+  AIContext,
   AuthResponse,
   Feedback,
   FeedbackKind,
@@ -20,6 +21,7 @@ import type {
 } from "@remindit/bff/api"
 
 export type {
+  AIContext,
   AuthResponse,
   Feedback,
   FeedbackKind,
@@ -216,6 +218,13 @@ export const bffApi = {
     request<Feedback>("/api/feedback", {
       method: "POST",
       body: JSON.stringify(body),
+      token,
+    }),
+  // Task B: the signed-in user's AI context for their active team (list +
+  // catalog + categories + recommendations) — the contract behind the
+  // server-executed `list`/`recommend` commands.
+  fetchAIContext: (teamId: string, token: string) =>
+    request<AIContext>(`/api/ai/context?teamId=${encodeURIComponent(teamId)}`, {
       token,
     }),
 }

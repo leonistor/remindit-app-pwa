@@ -132,17 +132,18 @@ describe("PocketBaseStorageAdapter (stubbed PB)", () => {
       title: "Support thread",
       metadata: {},
     })
-    expect(conv.id).toBe("conv-1")
+    // VoltAgent's conversation id IS the threadId (the client's stable id).
+    expect(conv.id).toBe("t1")
     expect(store.rows[0].user).toBe("u-alice")
     expect(store.rows[0].threadId).toBe("t1")
   })
 
-  test("getConversation returns the mapped conversation; a miss → null", async () => {
+  test("getConversation resolves by threadId; a miss → null", async () => {
     store.reset()
     await memory.addMessage(userMsg("m1", "hi"), "u-alice", "t1")
-    const found = await memory.getConversation(store.rows[0].id as string)
+    const found = await memory.getConversation("t1")
     expect(found?.userId).toBe("u-alice")
-    expect(found?.id).toBe(store.rows[0].id)
+    expect(found?.id).toBe("t1")
     expect(await memory.getConversation("missing")).toBeNull()
   })
 
@@ -152,10 +153,7 @@ describe("PocketBaseStorageAdapter (stubbed PB)", () => {
     await memory.addMessage(userMsg("m2", "b"), "u-alice", "t2")
     await memory.addMessage(userMsg("m3", "c"), "u-bob", "b1")
     const convs = await memory.getConversationsByUserId("u-alice")
-    expect(convs.map((c) => c.id)).toEqual([
-      store.rows[1].id,
-      store.rows[0].id,
-    ])
+    expect(convs.map((c) => c.id)).toEqual(["t2", "t1"])
     expect(
       await memory.countConversations({ userId: "u-alice" })
     ).toBe(2)
@@ -164,8 +162,7 @@ describe("PocketBaseStorageAdapter (stubbed PB)", () => {
   test("updateConversation patches the title", async () => {
     store.reset()
     await memory.addMessage(userMsg("m1", "a"), "u-alice", "t1")
-    const id = store.rows[0].id as string
-    const updated = await memory.updateConversation(id, { title: "Renamed" })
+    const updated = await memory.updateConversation("t1", { title: "Renamed" })
     expect(updated.title).toBe("Renamed")
     expect(store.rows[0].title).toBe("Renamed")
   })
@@ -173,7 +170,7 @@ describe("PocketBaseStorageAdapter (stubbed PB)", () => {
   test("deleteConversation removes the row", async () => {
     store.reset()
     await memory.addMessage(userMsg("m1", "a"), "u-alice", "t1")
-    await memory.deleteConversation(store.rows[0].id as string)
+    await memory.deleteConversation("t1")
     expect(store.rows).toHaveLength(0)
   })
 

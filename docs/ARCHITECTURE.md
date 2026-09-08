@@ -99,16 +99,32 @@ the bff's existing Hono `AppType` stays the only server surface (D2/D8).
 - **UI** (`pwa/src/views/assistant.tsx`): a Shark-styled Assistant UI thread,
   lazy-loaded at `/assistant` (menu → Assistant) so the assistant stack never
   touches the main-list LCP. Chat route is **optional-auth** — authed users get
-  persistent memory, anonymous falls back to in-memory (D15). Below the
-  thread, a **feedback composer** posts bug/feature reports to
-  `POST /api/feedback` (phase 2).
+  persistent memory, anonymous falls back to in-memory (D15). The pwa transport
+  rides the session (Bearer header) and the active team id (per-request
+  resolvables) so commands are enabled for signed-in users. Below the thread, a
+  **feedback composer** posts bug/feature reports to `POST /api/feedback`
+  (phase 2).
 - **Memory (D15, Task A)** — `conversations` collection + VoltAgent
   StorageAdapter (`bff/src/lib/voltagent-pocketbase-storage.ts`, repo
   `bff/src/repositories/conversations.ts`): one row per user × thread, messages
   stored as a JSON blob, written only by the BFF. `POST /api/ai/chat` runs
   `optionalAuth`; the route keys memory by `userId`/`conversationId` (the pwa's
   thread `id`). The BFF creates a fresh agent per request so Memory is
-  user-scoped (per-request PB client via `forToken`).
+  user-scoped (per-request PB client via `forToken`). VoltAgent's conversation
+  id IS the threadId (the adapter resolves `getConversation` by the `threadId`
+  field, not the PB record id) — this is what makes memory idempotent across
+  turns.
+- **Commands (D15, Task B)** — app commands via tools on the support agent
+  (enabled when an authed request carries the pwa's active `teamId`):
+  `list_items` / `recommend_items` are **server-executed** — their handlers
+  fetch the user's team context (`bff/src/services/ai-context.ts`,
+  `bff/src/repositories/context.ts`) and run the shared
+  `@remindit/common/recommender`; `add_item` has a server `execute` returning a
+  **canned confirmation** (no BFF write path — D15) while the REAL write is
+  client-executed: the pwa's `useChatRuntime({ onToolCall })` observes the tool
+  call and runs `createItemAndAddToList` against the local stores (journal →
+  LWW → sync). `GET /api/ai/context?teamId=` (authed) exposes the same context
+  to the client.
 - **Feedback** (`feedback` collection + `POST /api/feedback`, route
   `bff/src/routes/feedback.ts`): write-only capture via **optional auth** —
   anonymous rows un-attributed, Bearer rows attributed to the token's claimed

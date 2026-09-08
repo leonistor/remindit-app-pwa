@@ -69,6 +69,16 @@ const setSyncState = (patch: Partial<SyncState>): void => {
 // --- persisted sync state ---------------------------------------------------
 
 const $syncGroup = jsonStore<string>(STORAGE_KEYS.syncGroup, "")
+
+/**
+ * The active group (the user's current list), used e.g. by the assistant view
+ * to scope the AI app-commands (Task B) to the right team. Empty when signed
+ * out or before the first reconcile.
+ */
+export function getActiveGroupId(): string {
+  return $syncGroup.get()
+}
+
 const $syncMap = jsonStore<Record<SyncCollection, SyncMap>>(
   STORAGE_KEYS.syncMap,
   { categories: {}, items: {}, list_entries: {}, history_events: {} }
@@ -97,6 +107,24 @@ const getPb = (): PocketBase => {
   if (!pb) {
     pb = new PocketBase(pbBase)
     pb.autoCancellation(false)
+    // The PB JS SDK sends `Authorization: <token>` (bare), but the BFF's auth
+    // middleware only accepts `Bearer <token>` (bffApi's request helper adds
+    // the prefix itself). Prefix it here so the data-plane forwarder
+    // authenticates — without this every /pb/* call 401s and sync never runs.
+    pb.beforeSend = async (url, options) => {
+      const auth =
+        options.headers?.Authorization ?? options.headers?.authorization
+      if (auth && !auth.startsWith("Bearer ") && !auth.startsWith("bearer ")) {
+        return {
+          url,
+          options: {
+            ...options,
+            headers: { ...options.headers, Authorization: `Bearer ${auth}` },
+          },
+        }
+      }
+      return { url, options }
+    }
   }
   if (!pbWired) {
     pbWired = true
@@ -169,7 +197,9 @@ const remoteList = async (
 ): Promise<RemoteRecord[]> => {
   const client = getPb()
   const result = await client.collection(collection).getFullList({
-    filter: client.filter("group = {:groupId}", { groupId }),
+    // `team` is the schema field (the groups→teams rename, ce8d922) — the
+    // old `group` filter 400s/breaks sync.
+    filter: client.filter("team = {:groupId}", { groupId }),
     sort: "created",
   })
   return result as unknown as RemoteRecord[]
@@ -410,7 +440,7 @@ async function reconcileCollection<L>(
     toPayload: (local) => ({
       ...spec.toPayload(local, maps),
       localId: (local as { id: string }).id,
-      group: groupId,
+      team: groupId,
     }),
     matches: (local, remote) => spec.matches(local, remote, maps),
     createOnly: spec.createOnly,
@@ -781,7 +811,7 @@ async function subscribeRealtime(groupId: string): Promise<void> {
   unsubscribeFns = []
   for (const collection of COLLECTIONS) {
     await client.collection(collection).subscribe("*", () => scheduleReconcile(), {
-      filter: client.filter("group = {:groupId}", { groupId }),
+      filter: client.filter("team = {:groupId}", { groupId }),
     })
     unsubscribeFns.push(() => {
       client.collection(collection).unsubscribe("*")

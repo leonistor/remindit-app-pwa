@@ -1,7 +1,8 @@
 # Plan — "Basic AI features" (phase 2+ remaining)
 
-Status: **Task A shipped (2026-09-08, `a0862de` + close-out commit); Task B open** —
-pick up Task B in a fresh session.
+Status: **Task A shipped (`a0862de` + close-out commit); Task B shipped 2026-09-08**
+(app commands — see below). Roadmap's "Basic AI features" lane is now fully
+done; the remaining open lane is `LLM/MCP (skills)` (out of scope here).
 
 Roadmap source: `docs/ROADMAP.md` §Version 6 — the two open lanes under
 "Basic AI features" are **persistent multi-thread memory** and **app
@@ -56,16 +57,17 @@ Two blockers found while scoping Task B; both are settled:
    `pwa/src/stores/recommender.ts` is now a re-export shim (imports unchanged).
    The BFF imports `computeRecommendations` from `@remindit/common/recommender`.
 2. **The tool-result loop.** How the executed `add` result flows back into the
-   streaming model so it can finish the turn. **Resolution:** VoltAgent's
-   native client-side tool support — no custom loop. A tool is client-side when
-   it has **no server `execute` handler** (`@voltagent/core` `Tool.isClientSide()`
-   returns true for it); the BFF streams the `tool-call` part in the
-   `UIMessageStreamResponse`, the pwa fulfils it (Assistant UI runtime's
-   client-tool path — the installed `@assistant-ui/ai-sdk` explicitly supports
-   "tools without an `execute` … left for the client to fulfill"), and the
-   result is fed back via the AI SDK's tool-result API so VoltAgent resumes.
-   So `list`/`recommend` get server `execute` handlers; `add` is declared
-   **without** one and is client-fulfilled.
+   streaming model so it can finish the turn. **Resolution (refined on
+   implementation):** VoltAgent's streamText input validation rejects the AI
+   SDK's `tool`-role result message a client re-sends, so a pure client-side
+   tool can't complete its turn across POSTs in this stack. `add_item`
+   therefore gets a server `execute` that returns only a **canned
+   confirmation** (single POST, the model finishes normally) while the REAL
+   write stays client-executed: the pwa's `onToolCall` observes the tool call
+   and runs `createItemAndAddToList` against the local stores (journal → LWW →
+   sync). The BFF confirmation is narrative; the pwa is the source of truth,
+   and there is still NO BFF/schema write path. `list_items`/`recommend_items`
+   are server-executed (they read the authed team context).
 
 ### Steps
 
@@ -95,6 +97,20 @@ Two blockers found while scoping Task B; both are settled:
 - Full write set (remove/clear).
 - LLM/MCP integration (`ROADMAP.md:69` — "put my list in a calendar").
 - Multi-thread chat-history UI.
+
+## Ship notes (2026-09-08)
+
+- **Sync-blocking fixes surfaced while verifying Task B** (pre-existing, shipped
+  in the Task B commit): the pwa sync engine still used the pre-rename `group`
+  field (filters + write payloads) → `team`; the PB SDK sends the bare token but
+  the BFF forwarder requires `Bearer` (fixed in the pwa's `getPb().beforeSend`);
+  and the shared history simulator emitted fractional remove-event timestamps
+  that PB's `onlyInt` rejects (floored). Without these, signed-in sync (and
+  therefore the client-executed `add` round-trip) could not run.
+- **Open follow-up:** `/pb/api/realtime` (SSE) 401s through the forwarder — a
+  browser `EventSource` can't send the `Bearer` header. Polling reconcile works;
+  live push from other devices is degraded until SSE auth through the forwarder
+  is decided.
 
 ## Verification
 

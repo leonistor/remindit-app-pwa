@@ -214,7 +214,7 @@ describe("sync engine (stubbed clients)", () => {
         localId: "t1-item",
         updated: T1,
         name: "Milk",
-        group: "g1",
+        team: "g1",
       },
     ]
 
@@ -366,14 +366,14 @@ describe("sync engine (stubbed clients)", () => {
     await reconcileAll()
     expect(
       pbState.calls.creates.some(
-        (c) => c.collection === "items" && c.payload.group === "g1"
+        (c) => c.collection === "items" && c.payload.team === "g1"
       )
     ).toBe(true)
 
     // The stubbed getFullList ignores group filters, so emulate the server
     // side: g1's records are gone from view, g2 exposes a shared item.
     pbState.remote.items = [
-      { id: "pb-i2", localId: "t2-item", updated: T1, name: "Tea", group: "g2" },
+      { id: "pb-i2", localId: "t2-item", updated: T1, name: "Tea", team: "g2" },
     ]
 
     await switchGroup("g2")
@@ -387,7 +387,7 @@ describe("sync engine (stubbed clients)", () => {
       pbState.calls.creates.some(
         (c) =>
           c.collection === "items" &&
-          c.payload.group === "g2" &&
+          c.payload.team === "g2" &&
           c.payload.localId === "t1-item"
       )
     ).toBe(true)
@@ -434,7 +434,7 @@ describe("sync engine (stubbed clients)", () => {
     bffApi.listGroups.mockImplementation(async () => [
       { id: "g2", name: "Shared" },
     ])
-    pbState.remote.items = pbState.remote.items.filter((r) => r.group === "g2")
+    pbState.remote.items = pbState.remote.items.filter((r) => r.team === "g2")
 
     await recoverActiveGroup()
 
@@ -444,7 +444,7 @@ describe("sync engine (stubbed clients)", () => {
       pbState.calls.creates.some(
         (c) =>
           c.collection === "items" &&
-          c.payload.group === "g2" &&
+          c.payload.team === "g2" &&
           c.payload.localId === "t1-item"
       )
     ).toBe(true)

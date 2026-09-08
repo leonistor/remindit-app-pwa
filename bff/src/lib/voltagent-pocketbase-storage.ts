@@ -11,27 +11,28 @@
 // same conversation would race — acceptable for a 1:1 user:thread model.
 
 import type {
-  StorageAdapter,
   Conversation,
   ConversationQueryOptions,
+  ConversationStepRecord,
   CreateConversationInput,
+  GetConversationStepsOptions,
   GetMessagesOptions,
   OperationContext,
-  WorkingMemoryScope,
-  ConversationStepRecord,
-  GetConversationStepsOptions,
-  WorkflowStateEntry,
+  StorageAdapter,
   WorkflowRunQuery,
+  WorkflowStateEntry,
+  WorkingMemoryScope,
 } from "@voltagent/core"
 import type { UIMessage } from "ai"
 import type PocketBase from "pocketbase"
 import {
-  findConversationByThread,
-  listConversationsByUser,
   countConversationsByUser,
   createConversation,
-  updateConversation,
   deleteConversation,
+  findConversationByThread,
+  findConversationByThreadId,
+  listConversationsByUser,
+  updateConversation,
 } from "../repositories/conversations"
 
 /** VoltAgent's conversation type (subset we store). */
@@ -79,15 +80,14 @@ export class PocketBaseStorageAdapter implements StorageAdapter {
     const conv = await this.findConv(userId, conversationId)
     if (!conv) return []
 
-    let messages = ((conv.messages as UIMessage<{ createdAt: Date }>[]) ?? []) as UIMessage<{
+    let messages = ((conv.messages as UIMessage<{ createdAt: Date }>[]) ??
+      []) as UIMessage<{
       createdAt: Date
     }>[]
 
     // Apply options filtering (limit, roles).
     if (options?.roles?.length) {
-      messages = messages.filter((m) =>
-        options?.roles?.includes(m.role)
-      )
+      messages = messages.filter((m) => options?.roles?.includes(m.role))
     }
     if (options?.limit) {
       messages = messages.slice(-options.limit)
@@ -132,14 +132,21 @@ export class PocketBaseStorageAdapter implements StorageAdapter {
 
   // ── conversations ─────────────────────────────────────────────────────────
 
-  async createConversation(input: CreateConversationInput): Promise<StoredConversation> {
+  async createConversation(
+    input: CreateConversationInput
+  ): Promise<StoredConversation> {
+    // VoltAgent's conversation id IS the threadId (the client's stable thread
+    // id) — it is what every later getConversation/update/delete receives, so
+    // the stored row keeps the PB record id internal and exposes the threadId
+    // as the conversation id. This is what makes `ensureConversationExists`
+    // idempotent across turns (Task A fix surfaced by real usage).
     const record = await createConversation(this.client, {
       user: input.userId,
       threadId: input.id,
       messages: [],
     })
     return {
-      id: record.id as string,
+      id: input.id,
       resourceId: input.resourceId,
       userId: input.userId,
       title: input.title,
@@ -150,21 +157,18 @@ export class PocketBaseStorageAdapter implements StorageAdapter {
   }
 
   async getConversation(id: string): Promise<StoredConversation | null> {
-    try {
-      const record = await this.client
-        .collection("conversations")
-        .getOne(id)
-      return {
-        id: record.id,
-        resourceId: "",
-        userId: record.user as string,
-        title: (record.title as string) ?? "",
-        metadata: {},
-        createdAt: record.created as string,
-        updatedAt: record.updated as string,
-      }
-    } catch {
-      return null
+    // `id` is the threadId (see createConversation) — resolve by the
+    // `threadId` field, not the PB record id.
+    const record = await findConversationByThreadId(this.client, id)
+    if (!record) return null
+    return {
+      id,
+      resourceId: "",
+      userId: record.user as string,
+      title: (record.title as string) ?? "",
+      metadata: {},
+      createdAt: record.created as string,
+      updatedAt: record.updated as string,
     }
   }
 
@@ -191,7 +195,7 @@ export class PocketBaseStorageAdapter implements StorageAdapter {
             : "-updated",
     })
     return records.map((r) => ({
-      id: r.id as string,
+      id: r.threadId as string,
       resourceId: "",
       userId,
       title: (r.title as string) ?? "",
@@ -220,9 +224,14 @@ export class PocketBaseStorageAdapter implements StorageAdapter {
   ): Promise<StoredConversation> {
     const patch: { title?: string; messages?: unknown } = {}
     if (updates.title !== undefined) patch.title = updates.title
-    const record = await updateConversation(this.client, id, patch)
+    // `id` is the threadId — resolve the PB record before updating.
+    const record = await updateConversation(
+      this.client,
+      (await this.requireRecord(id)).id as string,
+      patch
+    )
     return {
-      id: record.id as string,
+      id,
       resourceId: (record.resourceId as string) ?? "",
       userId: (record.user as string) ?? "",
       title: (record.title as string) ?? "",
@@ -233,7 +242,19 @@ export class PocketBaseStorageAdapter implements StorageAdapter {
   }
 
   async deleteConversation(id: string): Promise<void> {
-    await deleteConversation(this.client, id)
+    const record = await findConversationByThreadId(this.client, id)
+    if (record) await deleteConversation(this.client, record.id as string)
+  }
+
+  /** Resolve a threadId to its PB record, or throw (conversation missing). */
+  private async requireRecord(
+    threadId: string
+  ): Promise<Record<string, unknown>> {
+    const record = await findConversationByThreadId(this.client, threadId)
+    if (!record) {
+      throw new Error(`conversation not found: ${threadId}`)
+    }
+    return record
   }
 
   // ── working memory (stub — not used by the support agent) ─────────────────
@@ -258,10 +279,7 @@ export class PocketBaseStorageAdapter implements StorageAdapter {
     scope: WorkingMemoryScope
   }): Promise<void> {
     if (!params.conversationId) return
-    const conv = await this.findConv(
-      params.userId ?? "",
-      params.conversationId
-    )
+    const conv = await this.findConv(params.userId ?? "", params.conversationId)
     if (!conv) return
     const wm = (conv.workingMemory as Record<string, string>) ?? {}
     wm[params.scope] = params.content

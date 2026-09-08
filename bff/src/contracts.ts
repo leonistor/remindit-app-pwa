@@ -214,8 +214,64 @@ export const aiChatBodySchema = z.object({
   id: z.string().optional(),
   conversationId: z.string().optional(),
   locale: z.string().optional(),
+  // Task B: the pwa's active team id — present only when the user is signed
+  // in; enables the app-command tools (list/recommend/add). Without it the
+  // agent stays a plain support assistant.
+  teamId: z.string().optional(),
 })
 export type AIChatBody = z.infer<typeof aiChatBodySchema>
+
+// --- AI context (Task B, app commands) -------------------------------------
+// The authed user's team context for the server-executed `list`/`recommend`
+// tools and the GET /api/ai/context endpoint. Recommendation tiers mirror
+// @remindit/common (`RecommendationTier`); frequencies are the common slugs.
+
+export const aiContextSchema = z.object({
+  team: z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+  categories: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      frequency: z.string(),
+    })
+  ),
+  catalog: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      categoryId: z.string(),
+    })
+  ),
+  list: z.array(
+    z.object({
+      itemId: z.string(),
+      itemName: z.string(),
+      categoryId: z.string(),
+      categoryName: z.string(),
+      checked: z.boolean(),
+      addedAt: z.number(),
+    })
+  ),
+  recommendations: z.array(
+    z.object({
+      itemId: z.string(),
+      itemName: z.string(),
+      categoryId: z.string(),
+      categoryName: z.string(),
+      tier: z.enum(["overdue", "soon", "frequent"]),
+      score: z.number(),
+    })
+  ),
+})
+export type AIContext = z.infer<typeof aiContextSchema>
+
+export const aiContextQuerySchema = z.object({
+  teamId: z.string().min(1),
+})
+export type AIContextQuery = z.infer<typeof aiContextQuerySchema>
 
 // --- feedback (phase 2 — in-app bug/feature capture via the assistant) -------
 // `user` is never read from the body: the route attributes it server-side from

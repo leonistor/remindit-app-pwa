@@ -26,10 +26,12 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
   in-app feedback channel removed in D13), **language-by-profile** (assistant
   answers in the user's app locale, per-locale agent cache), and **persistent
   single-thread memory** (D15 — `conversations` collection + VoltAgent
-  StorageAdapter; authed users PB-backed, anonymous in-memory). Open phase 2+
-  lane: app "commands" (D15: client-executed tools, read-only + `add` slice — a
-  BFF context route + tool defs + pwa tool-call interception), MCP/skills
-  integration. Roadmap: [`docs/ROADMAP.md`](docs/ROADMAP.md) §Version 6.
+  StorageAdapter; authed users PB-backed, anonymous in-memory), and **app
+  commands** (D15, Task B — `GET /api/ai/context`, server-executed
+  `list`/`recommend` tools, client-executed `add` with a server confirmation;
+  the recommendation engine hoisted to `@remindit/common/recommender`). Open
+  phase 2+ lane: full write set (remove/clear), MCP/skills integration.
+  Roadmap: [`docs/ROADMAP.md`](docs/ROADMAP.md) §Version 6.
 
 - **de/fr/uk translation drafts** — completed 2026-09-05, accepted **as-is**
   (no review pass): kick-started via `bun run kickstart:locale` (translat
@@ -43,7 +45,6 @@ was disposed 2026-09-04 after shipping — the detail lives in git history
 
 ## Next (V6 + wishlist, roadmap §1)
 
-- [ ] Basic AI features — commands slice only: **app "commands"** (D15: list/recommend/add, client-executed tools — BFF context route + tool defs + pwa tool-call interception; single-thread memory shipped)
 - [ ] LLM/MCP integration
 - [ ] Item attributes (photo / quantity / price)
 - [ ] Native app

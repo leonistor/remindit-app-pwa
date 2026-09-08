@@ -32,7 +32,11 @@ import { env } from "@/lib/env"
 import { bffApi, type FeedbackKind } from "@/lib/bff-api"
 import { getActiveLocale } from "@/lib/locale"
 import { m } from "@/paraglide/messages"
+import { createItemAndAddToList } from "@/stores/commands"
+import { $categories } from "@/stores/categories"
+import { getActiveGroupId } from "@/stores/sync/engine"
 import { getSession } from "@/stores/sync/session"
+import { UNCATEGORIZED_ID } from "@/stores/types"
 
 const SUGGESTED_ACTIONS = [
   m.assistantSuggestionShare,
@@ -41,12 +45,56 @@ const SUGGESTED_ACTIONS = [
   m.assistantSuggestionPips,
 ]
 
+// Task B (app commands, D15): resolve the category the model named (by name,
+// case-insensitive) to a local category id; unknown names fall back to the
+// uncategorized sentinel so the add always lands.
+const resolveCategoryId = (name?: unknown): string => {
+  if (typeof name !== "string" || !name.trim()) return UNCATEGORIZED_ID
+  const wanted = name.trim().toLowerCase()
+  const match = $categories.get().find(
+    (c) => c.name.toLowerCase() === wanted
+  )
+  return match?.id ?? UNCATEGORIZED_ID
+}
+
 const AssistantView = () => {
-  const runtime = useChatRuntime({
-    transport: new AssistantChatTransport({
-      api: `${env.bffUrl}/api/ai/chat`,
-      body: { locale: getActiveLocale() },
+  // The chat request rides the signed-in session when present: the Bearer
+  // token (so Task A memory is per-user) and the active team id (so the
+  // command tools are enabled). Both are read per-request via resolvables —
+  // signing in/out or switching the active list mid-view is honored.
+  const transport = new AssistantChatTransport({
+    api: `${env.bffUrl}/api/ai/chat`,
+    headers: () => {
+      const token = getSession()?.token
+      return token ? { authorization: `Bearer ${token}` } : {}
+    },
+    body: () => ({
+      locale: getActiveLocale(),
+      ...(getSession() ? { teamId: getActiveGroupId() } : {}),
     }),
+  })
+
+  // Client-executed command tools (D15): the BFF streams the `add_item` tool
+  // call and confirms it server-side (no BFF write path); here the REAL write
+  // runs against the local stores (journal → LWW → sync). Deliberately returns
+  // nothing — the server already completed the tool's turn, so no result is
+  // fed back (returning one would re-send the turn).
+  const onToolCall = async ({ toolCall }: {
+    toolCall: { toolName: string; args?: Record<string, unknown>; input?: unknown }
+  }): Promise<void> => {
+    if (toolCall.toolName !== "add_item") return
+    const args =
+      (toolCall.args ?? (typeof toolCall.input === "object" && toolCall.input
+        ? toolCall.input
+        : {})) as { name?: unknown; category?: unknown }
+    const name = typeof args.name === "string" ? args.name.trim() : ""
+    if (!name) return
+    createItemAndAddToList(name, resolveCategoryId(args.category))
+  }
+
+  const runtime = useChatRuntime({
+    transport,
+    onToolCall,
   })
 
   return (

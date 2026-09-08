@@ -130,7 +130,11 @@ export function generateTeamHistory(
           itemName: item.name,
           categoryId: item.categoryId,
           categoryName: nameByCategory.get(item.categoryId) ?? "",
-          timestamp: Math.min(cursor, now),
+          // Floor the accumulated cursor: it accumulates fractional jitter and
+          // PB's history_events.timestamp is `onlyInt` — a float here would
+          // make the synced record fail validation (400) and block the whole
+          // reconcile batch (surfaced when the sync engine started working).
+          timestamp: Math.floor(Math.min(cursor, now)),
         })
         cart.delete(item.id)
       }

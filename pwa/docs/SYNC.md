@@ -79,10 +79,22 @@ PB realtime event (debounced), app foreground/online events, 60s interval.
 
 ## Realtime
 
-One PB SDK subscription per collection (`subscribe("*", { filter: group })`)
+One PB SDK subscription per collection (`subscribe("*", { filter: team })`)
 via the forwarder (SSE streams through it — phase-1 spike verified the
 transport). Events trigger a debounced reconcile; the reconcile itself is
 idempotent, so self-echoes are harmless.
+
+> **2026-09-08 (Task B verification) — sync fixes shipped in the commands
+> commit:** (1) the engine still filtered/stamped the pre-rename `group`
+> field — now `team` everywhere (filters, write payloads, realtime
+> subscriptions); (2) the PB JS SDK sends `Authorization: <bare token>` but
+> the BFF forwarder requires `Bearer` — `getPb()` now Bearer-prefixes via
+> `beforeSend`; (3) the shared history simulator emitted fractional
+> remove-event timestamps that PB's `onlyInt` rejects — floored in
+> `common/src/seeds/history.ts`. **Open:** `/pb/api/realtime` (SSE) still 401s
+> through the forwarder — a browser `EventSource` can't send the `Bearer`
+> header, so live push from other devices is degraded (polling reconcile
+> still works); a decision on SSE auth through the forwarder is pending.
 
 ## Profile sync
 
