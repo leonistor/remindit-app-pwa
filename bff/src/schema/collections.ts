@@ -86,6 +86,7 @@ export const COLLECTION_NAMES = {
   listEntries: "list_entries",
   historyEvents: "history_events",
   feedback: "feedback",
+  conversations: "conversations",
   notifications: "notifications",
   teamMemberDetails: "team_member_details",
   teamDetails: "team_details",
@@ -755,6 +756,70 @@ const feedback: CollectionDef = {
   ],
 }
 
+// conversations -------------------------------------------------------------
+// Persistent single-thread AI memory (Task A, phase 2): one row per
+// authenticated user × thread. The BFF writes/updates the message blob
+// server-side via VoltAgent's StorageAdapter; the pwa never touches this
+// collection directly. Anonymous users get in-memory-only storage (no row).
+const conversations: CollectionDef = {
+  name: COLLECTION_NAMES.conversations,
+  type: "base",
+  listRule: "user = @request.auth.id",
+  viewRule: "user = @request.auth.id",
+  createRule: "user = @request.auth.id",
+  updateRule: "user = @request.auth.id",
+  deleteRule: "user = @request.auth.id",
+  fields: [
+    {
+      type: "relation",
+      name: "user",
+      required: true,
+      hidden: false,
+      presentable: false,
+      collectionName: "users",
+      cascadeDelete: true,
+      minSelect: 1,
+      maxSelect: 1,
+    },
+    {
+      type: "text",
+      name: "threadId",
+      required: true,
+      hidden: false,
+      presentable: false,
+      min: 1,
+      max: 128,
+      pattern: "",
+      autogeneratePattern: "",
+    },
+    {
+      type: "json",
+      name: "messages",
+      required: false,
+      hidden: false,
+      presentable: false,
+      // VoltAgent message history blob — generous upper bound for a single
+      // support thread (each message is ~1-4 KB of JSON).
+      maxSize: 4_000_000,
+    },
+    {
+      type: "text",
+      name: "locale",
+      required: false,
+      hidden: false,
+      presentable: false,
+      min: 0,
+      max: 16,
+      pattern: "",
+      autogeneratePattern: "",
+    },
+    ...stamps(),
+  ],
+  indexes: [
+    "CREATE UNIQUE INDEX `idx_conversations_user_thread` ON `conversations` (`user`, `threadId`)",
+  ],
+}
+
 // ---------------------------------------------------------------------------
 // View collections — read-only, PB-computed from SQL:
 // - the SELECT runs directly against the SQLite tables (base-collection rules
@@ -924,6 +989,7 @@ export const desiredCollections: CollectionDef[] = [
   historyEvents,
   notifications,
   feedback,
+  conversations,
   teamMemberDetails,
   teamDetails,
   platformStats,

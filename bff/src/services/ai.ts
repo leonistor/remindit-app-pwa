@@ -1,6 +1,6 @@
-// AI support-chat service (phase 1).
+// AI support-chat service (phase 1 + Task A persistence).
 //
-// Builds the VoltAgent support agent from the configured provider/model (env,
+// Builds VoltAgent support agents from the configured provider/model (env,
 // D9). Two providers are supported — Ollama on the local LAN host (dev default)
 // and OpenRouter with the dedicated RemindIt key — and the active one is picked
 // via `AI_PROVIDER`. The agent is grounded on the English support doc
@@ -10,14 +10,17 @@
 // VoltAgent sits on the AI SDK: the route just calls `agent.streamText(...).toUIMessageStreamResponse()`
 // so the gateway to the pwa's Assistant UI is a single Hono POST /api/ai/chat.
 //
-// The assistant answers in the user's app locale (language-by-profile): one
-// agent per locale is cached (a small, bounded map — 5 locales max). Memory is
-// stateless per-conversation (in-memory memory keyed by
-// userId/conversationId); persistent memory remains a roadmap item — see
-// docs/ROADMAP.md.
+// Task A (phase 2): authenticated users get persistent memory — a
+// PocketBacked StorageAdapter stores the conversation in the `conversations`
+// collection. Anonymous callers fall back to in-memory-only storage.
+//
+// Agents are NOT cached — each request creates its own Agent so the Memory
+// instance can be user-scoped (PocketBase client is per-request via forToken).
 
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible"
-import { Agent } from "@voltagent/core"
+import { Agent, Memory } from "@voltagent/core"
+import type PocketBase from "pocketbase"
+import { PocketBaseStorageAdapter } from "../lib/voltagent-pocketbase-storage"
 import { env } from "../env"
 
 // Locale code → spoken language for the answer directive. Anything unlisted
@@ -29,8 +32,6 @@ const LOCALE_LANGUAGE: Record<string, string> = {
   fr: "French",
   uk: "Ukrainian",
 }
-
-const supportAgents = new Map<string, Agent>()
 
 /** The support knowledge base, loaded once per agent build. */
 async function supportGrounding(
@@ -46,7 +47,7 @@ async function supportGrounding(
 
   const instructions = `You are the RemindIt support assistant, embedded in the RemindIt shopping-list PWA.
 
-Answer the user's question about RemindIt using ONLY the support knowledge base provided below. Be concise, friendly and accurate. If a question is not covered by the knowledge base, say you don't have an answer yet and suggest rephrasing or asking again later — never invent features.
+Answer the user's question about RemindIt using ONLY the support knowledge base provided below. Be concise, friendly and accurate. If a question is not cover by the knowledge base, say you don't have an answer yet and suggest rephrasing or asking again later — never invent features.
 
 Respond in ${language} (the user's app language), while grounding every answer ONLY on the knowledge base below.
 
@@ -58,13 +59,24 @@ ${content}
   return { instructions }
 }
 
-/** The support agent for a locale, built lazily so env is read when first used. */
-export async function getSupportAgent(locale = "en"): Promise<Agent> {
-  const cached = supportAgents.get(locale)
-  if (cached) return cached
-
+/**
+ * Create a support agent for a request. Each call creates a fresh Agent so the
+ * Memory instance can be user-scoped: authenticated users get a PocketBacked
+ * StorageAdapter (persistent), anonymous callers get the default in-memory
+ * adapter (ephemeral).
+ */
+export async function createSupportAgent(
+  locale: string,
+  auth?: { client: PocketBase }
+): Promise<Agent> {
   const { instructions } = await supportGrounding(locale)
   const { model, modelId } = resolveModel()
+
+  // Authenticated: PB-backed Memory (persists across server restarts).
+  // Anonymous: default InMemoryStorageAdapter (lost on restart).
+  const memory = auth
+    ? new Memory({ storage: new PocketBaseStorageAdapter(auth.client) })
+    : undefined
 
   const agent = new Agent({
     name: "remindit-support",
@@ -72,14 +84,13 @@ export async function getSupportAgent(locale = "en"): Promise<Agent> {
       "Answer RemindIt support and help questions from the knowledge base",
     model,
     instructions,
+    memory,
     maxOutputTokens: 2048,
     temperature: 0.3,
   })
 
-  supportAgents.set(locale, agent)
-
   console.log(
-    `[ai] support agent ready (locale=${locale}, provider=${env.aiProvider}, model=${modelId})`
+    `[ai] support agent created (locale=${locale}, provider=${env.aiProvider}, model=${modelId}, memory=${auth ? "pb" : "in-memory"})`
   )
   return agent
 }
